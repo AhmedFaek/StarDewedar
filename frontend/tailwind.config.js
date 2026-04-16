@@ -11,40 +11,72 @@ export default {
                 primary: {
                     DEFAULT: "#000e24",
                     container: "#00234b",
-                    light: "#1a3a5c"
+                    light: "#1a3a5c",
+                    fixed: "#d6e3ff",
+                    fixedDim: "#adc7f8"
+                },
+                onPrimary: {
+                    DEFAULT: "#ffffff",
+                    container: "#718bb9",
+                    fixed: "#001b3d",
+                    fixedVariant: "#2c4771"
                 },
                 // Tertiary - Electric Yellow (The Spark)
                 tertiary: {
                     DEFAULT: "#6a5f00",
                     fixed: "#f9e454",
-                    fixedDim: "#e8d82f"
+                    fixedDim: "#dcc839",
+                    container: "#bfac1b"
                 },
                 onTertiary: {
+                    DEFAULT: "#ffffff",
                     fixed: "#201c00",
-                    fixedVariant: "#5d5200"
+                    fixedVariant: "#504700",
+                    container: "#484000"
                 },
                 // Secondary - Steel
                 secondary: {
                     DEFAULT: "#5d5e61",
-                    container: "#e1e2e6",
-                    containerHigh: "#f5f5f9"
+                    container: "#e2e2e5",
+                    containerHigh: "#f5f5f9",
+                    fixed: "#e2e2e5",
+                    fixedDim: "#c6c6c9"
                 },
-                onSecondary: "#ffffff",
+                onSecondary: {
+                    DEFAULT: "#ffffff",
+                    fixed: "#1a1c1e",
+                    fixedVariant: "#454749",
+                    container: "#636467"
+                },
+                // Error
+                error: "#ba1a1a",
+                onError: "#ffffff",
+                errorContainer: "#ffdad6",
+                onErrorContainer: "#93000a",
 
                 // Surface Hierarchy
+                background: "#f7f9fc",
+                onBackground: "#191c1e",
                 surface: "#f7f9fc",
+                onSurface: "#191c1e",
+                surfaceVariant: "#e0e3e6",
+                onSurfaceVariant: "#43474e",
                 surfaceContainerLowest: "#ffffff",
                 surfaceContainerLow: "#f2f4f7",
+                surfaceContainer: "#eceef1",
                 surfaceContainerMid: "#ededf1",
-                surfaceContainerHigh: "#e8e8ec",
-                surfaceContainerHighest: "#e2e2e6",
-                surfaceVariant: "#c4c6d0",
-                onSurface: "#1a1a1e",
-                onSurfaceVariant: "#48484f",
+                surfaceContainerHigh: "#e6e8eb",
+                surfaceContainerHighest: "#e0e3e6",
+                surfaceBright: "#f7f9fc",
+                surfaceDim: "#d8dadd",
+                inverseSurface: "#2d3133",
+                inverseOnSurface: "#eff1f4",
 
                 // Outline
-                outline: "#79747e",
-                outlineVariant: "#c4c6d0"
+                outline: "#74777f",
+                outlineVariant: "#c4c6d0",
+                surfaceTint: "#455f8a",
+                inversePrimary: "#adc7f8"
             },
             borderRadius: {
                 none: "0px"
@@ -73,7 +105,10 @@ export default {
             },
             fontFamily: {
                 "space-grotesk": ["Space Grotesk", "sans-serif"],
-                "inter": ["Inter", "sans-serif"]
+                "inter": ["Inter", "sans-serif"],
+                "headline": ["Space Grotesk", "sans-serif"],
+                "body": ["Inter", "sans-serif"],
+                "label": ["Inter", "sans-serif"]
             },
             letterSpacing: {
                 tighter: "-0.02em",
