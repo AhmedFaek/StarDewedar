@@ -6,7 +6,13 @@ export default function CTABanner() {
           Partner with the Experts. Request a Quote Today.
         </h2>
 
-        <button className="bg-primary text-white px-12 py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary/90 transition-all text-sm shrink-0">
+        <button 
+          onClick={() => {
+            window.history.pushState({}, '', '/request-quote')
+            window.dispatchEvent(new PopStateEvent('popstate'))
+          }}
+          className="bg-primary text-white px-12 py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary/90 transition-all text-sm shrink-0"
+        >
           Contact Technical Sales
         </button>
       </div>

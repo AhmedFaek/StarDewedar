@@ -27,7 +27,13 @@ export default function HeroSection() {
           </p>
 
           <div className="flex flex-wrap gap-4">
-            <button className="bg-tertiary-fixed text-on-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white transition-all text-sm">
+            <button 
+              onClick={() => {
+                window.history.pushState({}, '', '/request-quote')
+                window.dispatchEvent(new PopStateEvent('popstate'))
+              }}
+              className="bg-tertiary-fixed text-on-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white transition-all text-sm"
+            >
               Request a Quote
             </button>
             <button className="border border-white/30 text-white px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white hover:text-primary transition-all text-sm backdrop-blur-sm">
