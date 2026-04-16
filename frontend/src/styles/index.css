@@ -1,0 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base Layer - Typography defaults */
+@layer base {
+  html {
+    @apply font-inter text-onSurface;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-space-grotesk tracking-tighter;
+  }
+
+  body {
+    @apply bg-surface;
+  }
+}
+
+/* Component Layer - Reusable patterns */
+@layer components {
+  /* Button Variants */
+  .btn-primary {
+    @apply px-8 py-4 bg-primary text-surfaceContainerLowest rounded-none font-inter font-semibold transition-all hover:bg-primary-light;
+  }
+
+  .btn-secondary {
+    @apply px-8 py-4 bg-transparent border-2 border-primary text-primary rounded-none font-inter font-semibold transition-all hover:bg-surfaceContainerLow;
+  }
+
+  .btn-tertiary {
+    @apply px-8 py-4 bg-tertiary-fixed text-on-tertiary-fixed rounded-none font-inter font-semibold transition-colors hover:bg-tertiary-fixedDim;
+  }
+
+  /* Card */
+  .card {
+    @apply bg-surfaceContainerLowest p-8 space-y-4 rounded-none;
+  }
+
+  /* Input */
+  .input-field {
+    @apply w-full bg-surfaceContainerLow border-b-2 border-outline px-4 py-3 font-inter text-onSurface focus:border-tertiary-fixed focus:outline-none transition-colors;
+  }
+}
+
+/* Utilities */
+@layer utilities {
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-frosted;
+  }
+
+  .gradient-voltage {
+    @apply bg-gradient-to-r from-primary to-primary-container;
+  }
+
+  .typography-display-lg {
+    @apply text-display-lg font-space-grotesk font-bold tracking-tighter;
+  }
+
+  .typography-headline-lg {
+    @apply text-headline-lg font-space-grotesk font-bold tracking-tighter;
+  }
+
+  .typography-body {
+    @apply text-body-lg font-inter;
+  }
+
+  .no-border-radius {
+    @apply rounded-none;
+  }
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out;
+  }
+}
