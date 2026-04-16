@@ -1,0 +1,185 @@
+# ============================================
+# DEPENDENCIES & PACKAGE MANAGERS
+# ============================================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+bun.lockb
+
+# ============================================
+# ENVIRONMENT VARIABLES (SECURITY CRITICAL)
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.production.local
+
+# ============================================
+# IDE & EDITOR
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.iml
+.history/
+*.iws
+.netrwhist
+*~
+
+# ============================================
+# BUILD & OUTPUT DIRECTORIES
+# ============================================
+dist/
+build/
+.next/
+out/
+.parcel-cache
+.cache/
+temp/
+tmp/
+*.tsbuildinfo
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+log/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+*.log
+
+# ============================================
+# DATABASE & PRISMA
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+prisma/migrations/
+.prisma/
+
+# ============================================
+# FILE STORAGE & UPLOADS
+# ============================================
+uploads/
+public/uploads/
+temp_uploads/
+public/temp/
+
+# ============================================
+# TESTING
+# ============================================
+coverage/
+.nyc_output/
+.mocha_output/
+.jest/
+dist/test/
+
+# ============================================
+# RUNTIME & PROCESS
+# ============================================
+.pid
+.seed
+*.pid.lock
+pids/
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================
+# API KEYS & CREDENTIALS
+# ============================================
+.pem
+.key
+*.pem
+*.key
+.credentials
+.aws/
+
+# ============================================
+# VSCODE EXTENSIONS
+# ============================================
+extensions-release/
+.vscode-test/
+.vscode-profile*
+vscode-test/
+
+# ============================================
+# LOCAL DEVELOPMENT
+# ============================================
+.local/
+.env.development
+dev/
+.devcontainer/
+
+# ============================================
+# MISC
+# ============================================
+.eslintcache
+.stylelintcache
+*.bak
+*.swp
+.zip
+.rar
+.tar.gz
+dist-*
+.uncommitted
+.editorconfig
+.prettierignore
+# Temporary files
+*$
+*%
+*~
+*.tmp
+
+# ============================================
+# NODE PRODUCTION BUILD ARTIFACTS
+# ============================================
+npm_modules/
+yarn_modules/
+pnpm_modules/
+
+# ============================================
+# CERTIFICATES & SSL (if any)
+# ============================================
+*.crt
+*.cert
+*.key
+*.p7b
+*.pfx
+
+# ============================================
+# DEBUG
+# ============================================
+.debug
+debug.log
+trace.log
+
+# ============================================
+# DOCKER
+# ============================================
+.dockerignore
+docker-compose.override.yml
