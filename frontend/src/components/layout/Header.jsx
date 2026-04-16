@@ -2,28 +2,29 @@ import { useState, useEffect } from 'react'
 
 export default function Header() {
   const [activeLink, setActiveLink] = useState('Products')
-  const [isQuotePage, setIsQuotePage] = useState(false)
+  const [currentPage, setCurrentPage] = useState('') // Tracks 'quote' or 'visit'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = ['Products', 'Projects', 'About', 'Contact']
 
   useEffect(() => {
-    // Check if we're on the request quote page
-    const isOnQuotePage = window.location.pathname.includes('/request-quote')
-    setIsQuotePage(isOnQuotePage)
+    const path = window.location.pathname
+    if (path.includes('/request-quote')) setCurrentPage('quote')
+    else if (path.includes('/request-visit')) setCurrentPage('visit')
+    else setCurrentPage('')
   }, [])
 
-  const handleQuoteClick = () => {
-    setActiveLink(null) // Remove underline from nav links
-    setIsQuotePage(true)
+  const navigateTo = (path, pageType) => {
+    setActiveLink(null)
+    setCurrentPage(pageType)
     setMobileMenuOpen(false)
-    window.history.pushState({}, '', '/request-quote')
+    window.history.pushState({}, '', path)
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
   const handleLogoClick = () => {
-    setActiveLink('Products') // Reset to default
-    setIsQuotePage(false)
+    setActiveLink('Products')
+    setCurrentPage('')
     setMobileMenuOpen(false)
     window.history.pushState({}, '', '/')
     window.dispatchEvent(new PopStateEvent('popstate'))
@@ -31,7 +32,7 @@ export default function Header() {
 
   const handleNavClick = (link) => {
     setActiveLink(link)
-    setIsQuotePage(false)
+    setCurrentPage('')
     setMobileMenuOpen(false)
   }
 
@@ -52,7 +53,7 @@ export default function Header() {
             href={`#${link.toLowerCase()}`}
             onClick={() => handleNavClick(link)}
             className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${
-              activeLink === link && !isQuotePage
+              activeLink === link && !currentPage
                 ? 'text-slate-950 border-b-2 border-yellow-400'
                 : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
             }`}
@@ -61,6 +62,31 @@ export default function Header() {
           </a>
         ))}
       </nav>
+
+      {/* CTA Buttons - Desktop */}
+      <div className="hidden sm:flex items-center gap-2">
+        <button 
+          onClick={() => navigateTo('/request-visit', 'visit')}
+          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border ${
+            currentPage === 'visit'
+              ? 'bg-slate-900 text-white'
+              : 'border-slate-300 text-slate-900 hover:bg-slate-100'
+          }`}
+        >
+          Request a Visit
+        </button>
+        
+        <button 
+          onClick={() => navigateTo('/request-quote', 'quote')}
+          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border border-transparent ${
+            currentPage === 'quote'
+              ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
+              : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
+          }`}
+        >
+          Request a Quote
+        </button>
+      </div>
 
       {/* Mobile Menu Button */}
       <button
@@ -73,17 +99,6 @@ export default function Header() {
         </span>
       </button>
 
-      <button 
-        onClick={handleQuoteClick}
-        className={`hidden sm:block font-headline font-bold uppercase text-xs px-4 sm:px-6 py-2 sm:py-3 tracking-widest transition-all border border-transparent ${
-          isQuotePage
-            ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
-            : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white'
-        }`}
-      >
-        Request a Quote
-      </button>
-
       {/* Mobile Menu Overlay */}
       {mobileMenuOpen && (
         <div className="absolute top-full left-0 right-0 bg-slate-50 shadow-lg md:hidden border-b border-slate-200">
@@ -94,24 +109,33 @@ export default function Header() {
                 href={`#${link.toLowerCase()}`}
                 onClick={() => handleNavClick(link)}
                 className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${
-                  activeLink === link && !isQuotePage
-                    ? 'text-slate-950 text-yellow-500'
+                  activeLink === link && !currentPage
+                    ? 'text-yellow-500'
                     : 'text-slate-600 hover:text-slate-950'
                 }`}
               >
                 {link}
               </a>
             ))}
-            <button
-              onClick={handleQuoteClick}
-              className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${
-                isQuotePage
-                  ? 'bg-tertiary text-white'
-                  : 'bg-tertiary-fixed text-on-tertiary-fixed'
-              }`}
-            >
-              Request a Quote
-            </button>
+            
+            <div className="pt-2 flex flex-col gap-2">
+              <button
+                onClick={() => navigateTo('/request-visit', 'visit')}
+                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${
+                  currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
+                }`}
+              >
+                Request a Visit
+              </button>
+              <button
+                onClick={() => navigateTo('/request-quote', 'quote')}
+                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${
+                  currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
+                }`}
+              >
+                Request a Quote
+              </button>
+            </div>
           </div>
         </div>
       )}
