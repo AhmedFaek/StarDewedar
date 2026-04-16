@@ -1,22 +1,35 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Header() {
   const [activeLink, setActiveLink] = useState('Products')
+  const [isQuotePage, setIsQuotePage] = useState(false)
 
   const navLinks = ['Products', 'Projects', 'About', 'Contact']
 
+  useEffect(() => {
+    // Check if we're on the request quote page
+    const isOnQuotePage = window.location.pathname.includes('/request-quote')
+    setIsQuotePage(isOnQuotePage)
+  }, [])
+
   const handleQuoteClick = () => {
+    setActiveLink(null) // Remove underline from nav links
+    setIsQuotePage(true)
     window.history.pushState({}, '', '/request-quote')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
+  const handleLogoClick = () => {
+    setActiveLink('Products') // Reset to default
+    setIsQuotePage(false)
+    window.history.pushState({}, '', '/')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
   return (
     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
       <button 
-        onClick={() => {
-          window.history.pushState({}, '', '/')
-          window.dispatchEvent(new PopStateEvent('popstate'))
-        }}
+        onClick={handleLogoClick}
         className="text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline hover:opacity-70 transition-opacity"
       >
         Star Dewedar
@@ -27,9 +40,12 @@ export default function Header() {
           <a
             key={link}
             href={`#${link.toLowerCase()}`}
-            onClick={() => setActiveLink(link)}
+            onClick={() => {
+              setActiveLink(link)
+              setIsQuotePage(false)
+            }}
             className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${
-              activeLink === link
+              activeLink === link && !isQuotePage
                 ? 'text-slate-950 border-b-2 border-yellow-400'
                 : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
             }`}
@@ -41,7 +57,11 @@ export default function Header() {
 
       <button 
         onClick={handleQuoteClick}
-        className="bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase text-xs px-6 py-3 tracking-widest hover:bg-white transition-all border border-transparent"
+        className={`font-headline font-bold uppercase text-xs px-6 py-3 tracking-widest transition-all border border-transparent ${
+          isQuotePage
+            ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
+            : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white'
+        }`}
       >
         Request a Quote
       </button>
