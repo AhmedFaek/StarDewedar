@@ -5,11 +5,22 @@ export default function Header() {
 
   const navLinks = ['Products', 'Projects', 'About', 'Contact']
 
+  const handleQuoteClick = () => {
+    window.history.pushState({}, '', '/request-quote')
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
   return (
     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
-      <div className="text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline">
+      <button 
+        onClick={() => {
+          window.history.pushState({}, '', '/')
+          window.dispatchEvent(new PopStateEvent('popstate'))
+        }}
+        className="text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline hover:opacity-70 transition-opacity"
+      >
         Star Dewedar
-      </div>
+      </button>
 
       <nav className="hidden md:flex space-x-8">
         {navLinks.map((link) => (
@@ -28,7 +39,10 @@ export default function Header() {
         ))}
       </nav>
 
-      <button className="bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase text-xs px-6 py-3 tracking-widest hover:bg-white transition-all border border-transparent">
+      <button 
+        onClick={handleQuoteClick}
+        className="bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase text-xs px-6 py-3 tracking-widest hover:bg-white transition-all border border-transparent"
+      >
         Request a Quote
       </button>
     </header>
