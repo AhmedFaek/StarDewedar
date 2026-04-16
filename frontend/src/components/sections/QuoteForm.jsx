@@ -98,18 +98,18 @@ export default function QuoteForm({ productId = null }) {
   }
 
   return (
-    <section className="lg:col-span-8 bg-surface-container-lowest p-8 md:p-16">
+    <section className="lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
       <div className="max-w-2xl">
-        <header className="mb-12">
-          <h2 className="text-3xl font-headline font-bold tracking-tight text-primary">
+        <header className="mb-8 sm:mb-10 md:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-headline font-bold tracking-tight text-primary">
             Project Specification Form
           </h2>
-          <div className="h-1 w-20 bg-tertiary-fixed mt-4"></div>
+          <div className="h-1 w-20 bg-tertiary-fixed mt-3 sm:mt-4"></div>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
           {/* First & Last Name */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <InputField
               label="First Name"
               name="first_name"
@@ -129,7 +129,7 @@ export default function QuoteForm({ productId = null }) {
           </div>
 
           {/* Phone & Email */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
             <InputField
               label="Phone"
               name="phone"
@@ -208,11 +208,11 @@ export default function QuoteForm({ productId = null }) {
           )}
 
           {/* Submit Button */}
-          <div className="pt-6">
+          <div className="pt-4 sm:pt-6">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full md:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-sm px-12 py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? 'Submitting...' : 'Submit Request'}
               <Icon icon="arrow_forward" className="transition-transform group-hover:translate-x-1" />

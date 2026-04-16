@@ -37,33 +37,33 @@ const products = [
 
 export default function ProductCardsGrid() {
   return (
-    <section className="bg-surface-container-low py-24">
-      <div className="container mx-auto px-8">
+    <section className="bg-surface-container-low py-16 md:py-24">
+      <div className="container mx-auto px-4 sm:px-8">
         {/* Header */}
-        <div className="flex justify-between items-end mb-16">
+        <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-12 md:mb-16 gap-6 sm:gap-8">
           <div>
-            <h2 className="font-headline text-4xl font-bold tracking-tighter text-primary uppercase">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold tracking-tighter text-primary uppercase">
               Engineered Products
             </h2>
             <p className="text-outline mt-2 uppercase text-xs tracking-widest font-label">
               Precision components for heavy infrastructure
             </p>
           </div>
-          <a className="hidden md:flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
+          <a className="flex md:flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
             View Catalog{' '}
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </a>
         </div>
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
           {products.map((product) => (
             <div
               key={product.id}
               className={`${product.bgColor} group cursor-pointer overflow-hidden flex flex-col transition-transform hover:scale-105`}
             >
               {/* Image Container */}
-              <div className="h-80 overflow-hidden">
+              <div className="h-48 sm:h-64 md:h-80 overflow-hidden">
                 <img
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   src={product.image}
@@ -73,15 +73,15 @@ export default function ProductCardsGrid() {
 
               {/* Content Container */}
               <div
-                className={`p-8 flex-grow ${product.gradient ? 'voltage-gradient' : ''} ${product.textColor}`}
+                className={`p-5 sm:p-6 md:p-8 flex-grow ${product.gradient ? 'voltage-gradient' : ''} ${product.textColor}`}
               >
-                <span className="text-[10px] font-label font-bold uppercase tracking-[0.2em] block mb-4 opacity-75">
+                <span className="text-[9px] sm:text-[10px] font-label font-bold uppercase tracking-[0.2em] block mb-3 sm:mb-4 opacity-75">
                   {product.category}
                 </span>
 
-                <h3 className="font-headline text-2xl font-bold mb-4">{product.title}</h3>
+                <h3 className="font-headline text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">{product.title}</h3>
 
-                <p className={`mb-8 ${product.textColor === 'text-white' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
+                <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${product.textColor === 'text-white' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
                   {product.description}
                 </p>
 
@@ -90,7 +90,7 @@ export default function ProductCardsGrid() {
                   {product.tags.map((tag) => (
                     <span
                       key={tag}
-                      className={`px-3 py-1 text-[10px] font-bold tracking-widest uppercase ${
+                      className={`px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase ${
                         product.gradient
                           ? 'bg-primary-container text-on-primary-container'
                           : 'bg-secondary-container text-on-surface'

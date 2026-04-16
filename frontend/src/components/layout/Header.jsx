@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 export default function Header() {
   const [activeLink, setActiveLink] = useState('Products')
   const [isQuotePage, setIsQuotePage] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const navLinks = ['Products', 'Projects', 'About', 'Contact']
 
@@ -15,6 +16,7 @@ export default function Header() {
   const handleQuoteClick = () => {
     setActiveLink(null) // Remove underline from nav links
     setIsQuotePage(true)
+    setMobileMenuOpen(false)
     window.history.pushState({}, '', '/request-quote')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
@@ -22,28 +24,33 @@ export default function Header() {
   const handleLogoClick = () => {
     setActiveLink('Products') // Reset to default
     setIsQuotePage(false)
+    setMobileMenuOpen(false)
     window.history.pushState({}, '', '/')
     window.dispatchEvent(new PopStateEvent('popstate'))
   }
 
+  const handleNavClick = (link) => {
+    setActiveLink(link)
+    setIsQuotePage(false)
+    setMobileMenuOpen(false)
+  }
+
   return (
-    <header className="fixed top-0 left-0 w-full flex justify-between items-center px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
+    <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
       <button 
         onClick={handleLogoClick}
-        className="text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline hover:opacity-70 transition-opacity"
+        className="text-xl sm:text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline hover:opacity-70 transition-opacity"
       >
         Star Dewedar
       </button>
 
+      {/* Desktop Navigation */}
       <nav className="hidden md:flex space-x-8">
         {navLinks.map((link) => (
           <a
             key={link}
             href={`#${link.toLowerCase()}`}
-            onClick={() => {
-              setActiveLink(link)
-              setIsQuotePage(false)
-            }}
+            onClick={() => handleNavClick(link)}
             className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${
               activeLink === link && !isQuotePage
                 ? 'text-slate-950 border-b-2 border-yellow-400'
@@ -55,9 +62,20 @@ export default function Header() {
         ))}
       </nav>
 
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        className="md:hidden text-slate-950 hover:opacity-70 transition-opacity"
+        aria-label="Toggle menu"
+      >
+        <span className="material-symbols-outlined text-2xl">
+          {mobileMenuOpen ? 'close' : 'menu'}
+        </span>
+      </button>
+
       <button 
         onClick={handleQuoteClick}
-        className={`font-headline font-bold uppercase text-xs px-6 py-3 tracking-widest transition-all border border-transparent ${
+        className={`hidden sm:block font-headline font-bold uppercase text-xs px-4 sm:px-6 py-2 sm:py-3 tracking-widest transition-all border border-transparent ${
           isQuotePage
             ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
             : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white'
@@ -65,6 +83,38 @@ export default function Header() {
       >
         Request a Quote
       </button>
+
+      {/* Mobile Menu Overlay */}
+      {mobileMenuOpen && (
+        <div className="absolute top-full left-0 right-0 bg-slate-50 shadow-lg md:hidden border-b border-slate-200">
+          <div className="px-4 py-4 space-y-3">
+            {navLinks.map((link) => (
+              <a
+                key={link}
+                href={`#${link.toLowerCase()}`}
+                onClick={() => handleNavClick(link)}
+                className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${
+                  activeLink === link && !isQuotePage
+                    ? 'text-slate-950 text-yellow-500'
+                    : 'text-slate-600 hover:text-slate-950'
+                }`}
+              >
+                {link}
+              </a>
+            ))}
+            <button
+              onClick={handleQuoteClick}
+              className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${
+                isQuotePage
+                  ? 'bg-tertiary text-white'
+                  : 'bg-tertiary-fixed text-on-tertiary-fixed'
+              }`}
+            >
+              Request a Quote
+            </button>
+          </div>
+        </div>
+      )}
     </header>
   )
 }

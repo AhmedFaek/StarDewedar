@@ -7,10 +7,10 @@ export default function Footer() {
   }
 
   return (
-    <footer className="w-full px-12 py-16 grid grid-cols-1 md:grid-cols-4 gap-12 bg-slate-950 text-white">
+    <footer className="w-full px-4 sm:px-8 py-12 sm:py-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12 bg-slate-950 text-white">
       {/* Brand Section */}
-      <div className="md:col-span-1">
-        <div className="text-xl font-bold tracking-widest text-white uppercase font-headline mb-6">
+      <div className="sm:col-span-2 lg:col-span-1">
+        <div className="text-lg sm:text-xl font-bold tracking-widest text-white uppercase font-headline mb-4 sm:mb-6">
           Star Dewedar
         </div>
         <p className="text-slate-400 font-body text-sm leading-relaxed">
@@ -20,10 +20,10 @@ export default function Footer() {
 
       {/* Explore Links */}
       <div>
-        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-6">
+        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-4 sm:mb-6">
           Explore
         </h5>
-        <ul className="space-y-4">
+        <ul className="space-y-3 sm:space-y-4">
           {footerLinks.Explore.map((link) => (
             <li key={link}>
               <a
@@ -39,10 +39,10 @@ export default function Footer() {
 
       {/* Compliance Links */}
       <div>
-        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-6">
+        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-4 sm:mb-6">
           Compliance
         </h5>
-        <ul className="space-y-4">
+        <ul className="space-y-3 sm:space-y-4">
           {footerLinks.Compliance.map((link) => (
             <li key={link}>
               <a
@@ -58,16 +58,16 @@ export default function Footer() {
 
       {/* Contact */}
       <div>
-        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-6">
+        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-4 sm:mb-6">
           Contact
         </h5>
-        <p className="text-slate-400 text-sm font-body mb-4">Headquarters: Zurich, CH</p>
+        <p className="text-slate-400 text-sm font-body mb-3 sm:mb-4">Headquarters: Zurich, CH</p>
         <p className="text-yellow-400 text-sm font-body font-bold">sales@voltarchitect.com</p>
       </div>
 
       {/* Bottom Bar */}
-      <div className="md:col-span-4 border-t border-white/5 pt-12 flex flex-col md:flex-row justify-between items-center gap-6">
-        <p className="text-slate-400 text-sm font-body">
+      <div className="sm:col-span-2 lg:col-span-4 border-t border-white/5 pt-8 sm:pt-12 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
+        <p className="text-slate-400 text-xs sm:text-sm font-body text-center md:text-left">
           © 2024 Industrial Precision Manufacturing. Engineered for Power.
         </p>
         <div className="flex gap-6">

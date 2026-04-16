@@ -33,18 +33,18 @@ const projects = [
 
 export default function ProjectShowcase() {
   return (
-    <section className="bg-surface py-24">
-      <div className="container mx-auto px-8">
-        <h2 className="font-headline text-5xl md:text-7xl font-bold tracking-tighter text-primary mb-16 uppercase">
+    <section className="bg-surface py-16 md:py-24">
+      <div className="container mx-auto px-4 sm:px-8">
+        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-primary mb-12 md:mb-16 uppercase">
           Project <br />
           Portfolios
         </h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4 h-[800px]">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 md:h-[800px]">
           {projects.map((project) => (
             <div
               key={project.id}
-              className={`${project.colSpan} relative group overflow-hidden`}
+              className={`${project.colSpan} relative group overflow-hidden h-64 sm:h-80 md:h-auto`}
             >
               <img
                 className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
@@ -59,13 +59,13 @@ export default function ProjectShowcase() {
 
               {/* Text Overlay - Always visible for featured, on hover for non-featured */}
               <div
-                className={`absolute bottom-0 left-0 w-full p-10 bg-gradient-to-t from-primary/90 to-transparent transition-all ${
+                className={`absolute bottom-0 left-0 w-full p-6 sm:p-8 md:p-10 bg-gradient-to-t from-primary/90 to-transparent transition-all ${
                   project.featured
                     ? 'opacity-100'
                     : 'opacity-0 group-hover:opacity-100'
                 }`}
               >
-                <h4 className="font-headline text-2xl md:text-3xl font-bold text-white mb-2">
+                <h4 className="font-headline text-lg sm:text-2xl md:text-3xl font-bold text-white mb-2">
                   {project.title}
                 </h4>
                 <p className="text-tertiary-fixed font-label uppercase text-xs tracking-widest">
