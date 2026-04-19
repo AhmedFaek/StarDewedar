@@ -2,6 +2,7 @@ require('dotenv').config()
 
 const requiredEnv = [
     'PORT',
+    'DATABASE_URL',
 ]
 
 // Validate required variables
@@ -13,4 +14,5 @@ requiredEnv.forEach((key) => {
 
 module.exports = {
     port: process.env.PORT,
+    databaseUrl: process.env.DATABASE_URL,
 }

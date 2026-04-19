@@ -183,3 +183,5 @@ trace.log
 # ============================================
 .dockerignore
 docker-compose.override.yml
+
+/src/generated/prisma
