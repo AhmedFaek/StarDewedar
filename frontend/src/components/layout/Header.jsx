@@ -11,6 +11,7 @@ export default function Header() {
     const path = window.location.pathname
     if (path.includes('/request-quote')) setCurrentPage('quote')
     else if (path.includes('/request-visit')) setCurrentPage('visit')
+    else if (path.includes('/products')) setActiveLink('Products')
     else setCurrentPage('')
   }, [])
 
@@ -31,6 +32,10 @@ export default function Header() {
   }
 
   const handleNavClick = (link) => {
+    if (link === 'Products') {
+      window.history.pushState({}, '', '/products')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    }
     setActiveLink(link)
     setCurrentPage('')
     setMobileMenuOpen(false)

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
+import Products from './pages/Products'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 
@@ -14,6 +15,8 @@ export default function App() {
         setCurrentPage('request-quote')
       } else if (path.includes('request-visit')) {
         setCurrentPage('request-visit')
+      } else if (path.includes('products')) {
+        setCurrentPage('products')
       } else {
         setCurrentPage('home')
       }
@@ -32,11 +35,14 @@ export default function App() {
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
+    } else if (page === 'products') {
+      window.history.pushState({}, '', '/products')
+      setCurrentPage('products')
     } else {
       window.history.pushState({}, '', '/')
       setCurrentPage('home')
     }
   }
 
-  return currentPage === 'request-quote' ? <RequestQuote /> : currentPage === 'request-visit' ? <RequestVisit /> : <Home />
+  return currentPage === 'products' ? <Products /> : currentPage === 'request-quote' ? <RequestQuote /> : currentPage === 'request-visit' ? <RequestVisit /> : <Home />
 }
