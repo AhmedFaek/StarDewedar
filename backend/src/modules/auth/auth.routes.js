@@ -1,14 +1,14 @@
-const express = require('express')
-const controller = require('./auth.controller.js')
-const validate = require('../../middleware/validation.middleware.js')
-const auth = require('../../middleware/auth.middleware.js')
-const { requireRole } = require('../../middleware/roles.middleware.js')
-const {
+import express from 'express'
+import * as controller from './auth.controller.js'
+import validate from '../../middleware/validation.middleware.js'
+import auth from '../../middleware/auth.middleware.js'
+import { requireRole } from '../../middleware/roles.middleware.js'
+import {
     createUserSchema,
     loginSchema,
     refreshSchema,
-} = require('./auth.validation.js')
-const { ROLES } = require('../../utils/constants.js')
+} from './auth.validation.js'
+import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 
@@ -27,4 +27,4 @@ router.post(
     controller.createUser
 )
 
-module.exports = router
+export default router

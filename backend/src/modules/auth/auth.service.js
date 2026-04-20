@@ -1,7 +1,7 @@
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const userRepo = require('../users/user.repository')
-const env = require('../../config/env')
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
+import * as userRepo from '../users/user.repository.js'
+import env from '../../config/env.js'
 
 /* Generate Tokens */
 const generateTokens = (user) => {
@@ -21,7 +21,7 @@ const generateTokens = (user) => {
 }
 
 /* Create User (ADMIN ONLY) */
-const createUser = async (data) => {
+export const createUser = async (data) => {
     const existing = await userRepo.findUserByEmail(data.email)
 
     if (existing) {
@@ -37,7 +37,7 @@ const createUser = async (data) => {
 }
 
 /* Login */
-const login = async (email, password) => {
+export const login = async (email, password) => {
     const user = await userRepo.findUserByEmail(email)
 
     if (!user) throw new Error('Invalid credentials')
@@ -50,7 +50,7 @@ const login = async (email, password) => {
 }
 
 /* Refresh Token */
-const refreshToken = (refreshToken) => {
+export const refreshToken = (refreshToken) => {
     try {
         const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret)
 
@@ -65,5 +65,3 @@ const refreshToken = (refreshToken) => {
         throw new Error('Invalid refresh token')
     }
 }
-
-module.exports = { createUser, login, refreshToken }

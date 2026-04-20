@@ -1,25 +1,19 @@
-const prisma = require('../../utils/prisma');
+import prisma from '../../utils/prisma.js';
 
-const findUserByEmail = (email) => {
+export const findUserByEmail = (email) => {
     return prisma.user.findUnique({
         where: { email },
     })
 }
 
-const findUserById = (id) => {
+export const findUserById = (id) => {
     return prisma.user.findUnique({
         where: { id },
     })
 }
 
-const createUser = (data) => {
+export const createUser = (data) => {
     return prisma.user.create({
         data,
     })
 }
-
-module.exports = {
-    findUserByEmail,
-    findUserById,
-    createUser,
-};

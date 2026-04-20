@@ -1,6 +1,6 @@
-const service = require('./auth.service')
+import * as service from './auth.service.js'
 
-const createUser = async (req, res, next) => {
+export const createUser = async (req, res, next) => {
     try {
         const user = await service.createUser(req.body)
         res.status(201).json(user)
@@ -9,7 +9,7 @@ const createUser = async (req, res, next) => {
     }
 }
 
-const login = async (req, res, next) => {
+export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body
         const tokens = await service.login(email, password)
@@ -19,7 +19,7 @@ const login = async (req, res, next) => {
     }
 }
 
-const refresh = async (req, res, next) => {
+export const refresh = async (req, res, next) => {
     try {
         const { refreshToken } = req.body
         const data = service.refreshToken(refreshToken)
@@ -28,5 +28,3 @@ const refresh = async (req, res, next) => {
         next(err)
     }
 }
-
-module.exports = { createUser, login, refresh }

@@ -1,5 +1,5 @@
-const { z } = require('zod')
-const { ROLES } = require('../../utils/constants')
+import { z } from 'zod'
+import { ROLES } from '../../utils/constants.js'
 
 const createUserSchema = z.object({
     name: z.string().min(2),
@@ -22,4 +22,4 @@ const refreshSchema = z.object({
     refreshToken: z.string(),
 })
 
-module.exports = { createUserSchema, loginSchema, refreshSchema }
+export { createUserSchema, loginSchema, refreshSchema }

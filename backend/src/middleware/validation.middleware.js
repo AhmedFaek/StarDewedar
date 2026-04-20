@@ -1,4 +1,4 @@
-module.exports = (schema) => (req, res, next) => {
+export default (schema) => (req, res, next) => {
     try {
         req.body = schema.parse(req.body)
         next()
