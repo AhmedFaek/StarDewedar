@@ -39,8 +39,8 @@ export default function Projects() {
       description: 'High-frequency power modulation system for aerospace turbine testing facilities.',
       image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBy0OVJuuxfxFwdSMMUKSPeX2Yy5ZpGrbum_knmd29M_z7nF4szW-plCVfmfjvJqf7tcx0ucauR2Iqo7Cfhh8JjeRB5AMazNzJjDDQ49SQpswKjW9U8AxeWua61haUTUUOCejJ2-a8qcwvCC1EUNht4Th9zJhYiwpiXEhrDDdGL_jRhfS8hiNkDK9CsZw5phK9N9amby_Of4piIV5czxCCCvFVJBQ_PLL3U81QdC5aeHPogePsAttBAq8n_CS97bOOetl7VNSkZAkuq',
       specs: {
-        client: 'Pepsi',
-        budget: '15M EGP',
+        client: 'PepsiCo',
+        budget: '15000000',
       },
     },
     {
@@ -217,18 +217,53 @@ export default function Projects() {
                   </p>
                   {filteredProjects[1].specs && (
                     <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-outline-variant/30 flex gap-4 sm:gap-6">
-                      <div className="flex flex-col">
-                        <span className="text-[10px] uppercase font-headline font-bold text-outline">Client</span>
-                        <span className="text-primary font-headline font-bold text-sm">
-                          {filteredProjects[1].specs.client}
+                        <div className="flex flex-col border-l border-outline-variant/20 pl-4 sm:pl-6">
+
+                        {/* Label */}
+                        <span className="text-[10px] uppercase font-headline font-bold tracking-[0.2em] text-outline mb-3">
+                            Client
                         </span>
-                      </div>
-                      <div className="flex flex-col border-l border-outline-variant/30 pl-4 sm:pl-6">
-                        <span className="text-[10px] uppercase font-headline font-bold text-outline">Budget</span>
-                        <span className="text-primary font-headline font-bold text-sm">
-                          {filteredProjects[1].specs.budget}
+
+                        {/* Plate */}
+                        <div className="relative bg-surface-container-lowest px-4 py-3">
+
+                            {/* Ghost Border */}
+                            <div className="absolute inset-0 border border-outline-variant/15 pointer-events-none"></div>
+
+                            {/* Content */}
+                            <span className="text-primary font-headline font-bold text-base sm:text-lg tracking-tight">
+                            {filteredProjects[1].specs.client}
+                            </span>
+                        </div>
+                        </div>
+                        <div className="flex flex-col border-l border-outline-variant/20 pl-4 sm:pl-6 flex-1">
+                        
+                        {/* Label */}
+                        <span className="text-[10px] uppercase font-headline font-bold tracking-[0.2em] text-outline mb-3">
+                            Project Budget
                         </span>
-                      </div>
+
+                        {/* Plate Container */}
+                        <div className="relative bg-surface-container-lowest px-5 py-4">
+
+                            {/* Ghost Border */}
+                            <div className="absolute inset-0 border border-outline-variant/15 pointer-events-none"></div>
+
+                            {/* Content */}
+                            <div className="flex items-end gap-3">
+
+                            {/* Value */}
+                            <span className="text-primary font-headline font-black text-2xl sm:text-3xl tracking-tight">
+                                {new Intl.NumberFormat('en-EG', {
+                                    style: 'currency',
+                                    currency: 'EGP',
+                                    maximumFractionDigits: 0,
+                                    }).format(filteredProjects[1].specs.budget)}
+                            </span>
+
+                            </div>
+                        </div>
+                        </div>
                     </div>
                   )}
                 </div>
