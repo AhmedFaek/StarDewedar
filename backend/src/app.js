@@ -1,6 +1,7 @@
-const express = require('express')
-const cors = require('cors')
-const authRoutes = require('./modules/auth/auth.routes.js')
+import express from 'express'
+import cors from 'cors'
+import authRoutes from './modules/auth/auth.routes.js'
+import categoryRoutes from './modules/categories/category.routes.js'
 
 const app = express()
 
@@ -10,10 +11,11 @@ app.use(express.json())
 
 // Routes
 app.use('/api/auth', authRoutes)
+app.use('/api/categories', categoryRoutes)
 
 // Test route
 app.get('/', (req, res) => {
     res.send('API is running...')
 })
 
-module.exports = app
+export default app

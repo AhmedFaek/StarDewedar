@@ -1,4 +1,4 @@
-const requireRole = (...roles) => (req, res, next) => {
+export const requireRole = (...roles) => (req, res, next) => {
     if (!req.user) {
         return res.status(401).json({ message: 'Unauthorized' })
     }
@@ -9,5 +9,3 @@ const requireRole = (...roles) => (req, res, next) => {
 
     next()
 }
-
-module.exports = { requireRole }

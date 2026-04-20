@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken')
-const env = require('../config/env')
+import jwt from 'jsonwebtoken'
+import env from '../config/env.js'
 
-module.exports = (req, res, next) => {
+export default (req, res, next) => {
     try {
         const token = req.headers.authorization?.split(' ')[1]
 

@@ -1,4 +1,6 @@
-require('dotenv').config()
+import dotenv from 'dotenv'
+
+dotenv.config()
 
 const requiredEnv = [
     'PORT',
@@ -14,7 +16,7 @@ requiredEnv.forEach((key) => {
     }
 })
 
-module.exports = {
+export default {
     port: process.env.PORT,
     databaseUrl: process.env.DATABASE_URL,
     jwtSecret: process.env.JWT_SECRET,

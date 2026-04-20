@@ -1,7 +1,7 @@
-const { PrismaClient } = require('@prisma/client');
-const { PrismaPg } = require('@prisma/adapter-pg');
-const { Pool } = require('pg');
-const env = require('../config/env');
+import { PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+import { Pool } from 'pg';
+import env from '../config/env.js';
 
 // Create a connection pool for PostgreSQL
 const pool = new Pool({
@@ -21,4 +21,4 @@ const prisma =
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
-module.exports = prisma;
+export default prisma;
