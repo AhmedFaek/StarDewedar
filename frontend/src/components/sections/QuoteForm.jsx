@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Icon from '../shared/Icon'
 import InputField from '../forms/InputField'
 import TextAreaField from '../forms/TextAreaField'
@@ -6,12 +6,27 @@ import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 
 export default function QuoteForm({ productId = null }) {
+  // Product mapping between detail page IDs and full product names
+  const productMapping = {
+    'ax-90': 'AX-Series Distribution Hub',
+    'lum-tx500': 'Titan High-Bay Luminaire',
+    'cmp-k12': 'Kinetix Contactors',
+    'swg-mod-3': 'Modular Switchgear M3',
+    'sen-pf-40': 'Precision Flow Sensor',
+    'brk-ap-100': 'Armor-Plate Breaker',
+  }
+
+  // Get the mapped product name, or empty string if not found
+  const getMappedProductId = (id) => {
+    return productMapping[id] || ''
+  }
+
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',
     phone: '',
     email: '',
-    product_id: productId || '',
+    product_id: getMappedProductId(productId) || '',
     custom_product_name: '',
     details: '',
     file_url: null,
@@ -21,13 +36,27 @@ export default function QuoteForm({ productId = null }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
 
-  // Dummy product options - replace with actual API call
+  // Product options with actual product names
   const productOptions = [
-    { value: 'electrical-panels', label: 'Electrical Panels' },
-    { value: 'industrial-lighting', label: 'Industrial Lighting' },
-    { value: 'sub-components', label: 'Sub-Components' },
+    { value: 'AX-Series Distribution Hub', label: 'AX-Series Distribution Hub' },
+    { value: 'Titan High-Bay Luminaire', label: 'Titan High-Bay Luminaire' },
+    { value: 'Kinetix Contactors', label: 'Kinetix Contactors' },
+    { value: 'Modular Switchgear M3', label: 'Modular Switchgear M3' },
+    { value: 'Precision Flow Sensor', label: 'Precision Flow Sensor' },
+    { value: 'Armor-Plate Breaker', label: 'Armor-Plate Breaker' },
     { value: 'custom', label: 'Custom Product' },
   ]
+
+  // Update product_id when productId prop changes
+  useEffect(() => {
+    const mappedId = getMappedProductId(productId)
+    if (mappedId) {
+      setFormData((prev) => ({
+        ...prev,
+        product_id: mappedId,
+      }))
+    }
+  }, [productId])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target

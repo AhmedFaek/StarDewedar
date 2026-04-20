@@ -176,7 +176,13 @@ export default function ProductDetail() {
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-4">
-              <button className="w-full bg-primary text-white py-6 text-sm font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:brightness-110 transition-all shadow-xl shadow-primary/20">
+              <button 
+                onClick={() => {
+                  window.history.pushState({}, '', `/request-quote?product_id=${product.id}`)
+                  window.dispatchEvent(new PopStateEvent('popstate'))
+                }}
+                className="w-full bg-primary text-white py-6 text-sm font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:brightness-110 transition-all shadow-xl shadow-primary/20"
+              >
                 Request a Technical Quote
                 <span className="material-symbols-outlined">arrow_forward</span>
               </button>
