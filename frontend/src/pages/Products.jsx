@@ -15,6 +15,7 @@ export default function Products() {
   const products = [
     {
       id: 1,
+      detailId: 'ax-90',
       name: 'AX-Series Distribution Hub',
       category: 'Electrical Panels',
       price: 4250.00,
@@ -24,6 +25,7 @@ export default function Products() {
     },
     {
       id: 2,
+      detailId: 'lum-tx500',
       name: 'Titan High-Bay Luminaire',
       category: 'Lighting',
       price: 850.00,
@@ -33,6 +35,7 @@ export default function Products() {
     },
     {
       id: 3,
+      detailId: 'cmp-k12',
       name: 'Kinetix Contactors',
       category: 'Components',
       price: 125.00,
@@ -42,6 +45,7 @@ export default function Products() {
     },
     {
       id: 4,
+      detailId: 'swg-mod-3',
       name: 'Modular Switchgear M3',
       category: 'Electrical Panels',
       price: 12800.00,
@@ -51,6 +55,7 @@ export default function Products() {
     },
     {
       id: 5,
+      detailId: 'sen-pf-40',
       name: 'Precision Flow Sensor',
       category: 'Components',
       price: 340.00,
@@ -60,6 +65,7 @@ export default function Products() {
     },
     {
       id: 6,
+      detailId: 'brk-ap-100',
       name: 'Armor-Plate Breaker',
       category: 'Components',
       price: 1150.00,
@@ -218,7 +224,10 @@ export default function Products() {
                             maximumFractionDigits: 2 
                         })}
                       </span>
-                      <button className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors">
+                      <button 
+                        onClick={() => window.navigateTo('product-detail', product.detailId)}
+                        className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors"
+                      >
                         View Details
                         <span className="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">
                           arrow_forward

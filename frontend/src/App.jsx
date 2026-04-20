@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import Products from './pages/Products'
+import ProductDetail from './pages/ProductDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 
@@ -15,6 +16,8 @@ export default function App() {
         setCurrentPage('request-quote')
       } else if (path.includes('request-visit')) {
         setCurrentPage('request-visit')
+      } else if (path.includes('product-detail')) {
+        setCurrentPage('product-detail')
       } else if (path.includes('products')) {
         setCurrentPage('products')
       } else {
@@ -28,13 +31,17 @@ export default function App() {
   }, [])
 
   // Simple navigation helper
-  window.navigateTo = (page) => {
+  window.navigateTo = (page, productId) => {
     if (page === 'request-quote') {
       window.history.pushState({}, '', '/request-quote')
       setCurrentPage('request-quote')
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
+    } else if (page === 'product-detail') {
+      const query = productId ? `?id=${productId}` : ''
+      window.history.pushState({}, '', `/product-detail${query}`)
+      setCurrentPage('product-detail')
     } else if (page === 'products') {
       window.history.pushState({}, '', '/products')
       setCurrentPage('products')
@@ -44,5 +51,15 @@ export default function App() {
     }
   }
 
-  return currentPage === 'products' ? <Products /> : currentPage === 'request-quote' ? <RequestQuote /> : currentPage === 'request-visit' ? <RequestVisit /> : <Home />
+  return currentPage === 'product-detail' ? (
+    <ProductDetail />
+  ) : currentPage === 'products' ? (
+    <Products />
+  ) : currentPage === 'request-quote' ? (
+    <RequestQuote />
+  ) : currentPage === 'request-visit' ? (
+    <RequestVisit />
+  ) : (
+    <Home />
+  )
 }
