@@ -44,6 +44,11 @@
   .input-field {
     @apply w-full bg-surfaceContainerLow border-b-2 border-outline px-4 py-3 font-inter text-onSurface focus:border-tertiary-fixed focus:outline-none transition-colors;
   }
+
+  /* Gradients */
+  .voltage-gradient {
+    @apply bg-gradient-to-br from-primary to-primary-container;
+  }
 }
 
 /* Material Symbols */

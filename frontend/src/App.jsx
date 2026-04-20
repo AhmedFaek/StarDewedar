@@ -4,6 +4,7 @@ import Products from './pages/Products'
 import ProductDetail from './pages/ProductDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
+import Contact from './pages/Contact'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -16,6 +17,8 @@ export default function App() {
         setCurrentPage('request-quote')
       } else if (path.includes('request-visit')) {
         setCurrentPage('request-visit')
+      } else if (path.includes('contact')) {
+        setCurrentPage('contact')
       } else if (path.includes('product-detail')) {
         setCurrentPage('product-detail')
       } else if (path.includes('products')) {
@@ -59,6 +62,8 @@ export default function App() {
     <RequestQuote />
   ) : currentPage === 'request-visit' ? (
     <RequestVisit />
+  ) : currentPage === 'contact' ? (
+    <Contact />
   ) : (
     <Home />
   )
