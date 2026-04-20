@@ -36,7 +36,11 @@ export default function HeroSection() {
             >
               Request a Quote
             </button>
-            <button className="border border-white/30 text-white px-6 sm:px-8 py-4 sm:py-5 font-headline font-bold uppercase tracking-widest hover:bg-white hover:text-primary transition-all text-xs sm:text-sm backdrop-blur-sm">
+            <button onClick={() => {
+                window.history.pushState({}, '', '/projects')
+                window.dispatchEvent(new PopStateEvent('popstate'))
+              }}
+              className="border border-white/30 text-white px-6 sm:px-8 py-4 sm:py-5 font-headline font-bold uppercase tracking-widest hover:bg-white hover:text-primary transition-all text-xs sm:text-sm backdrop-blur-sm">
               View Projects
             </button>
           </div>
