@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import Products from './pages/Products'
+import Projects from './pages/Projects'
 import ProductDetail from './pages/ProductDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
@@ -19,6 +20,8 @@ export default function App() {
         setCurrentPage('request-visit')
       } else if (path.includes('contact')) {
         setCurrentPage('contact')
+      } else if (path.includes('projects')) {
+        setCurrentPage('projects')
       } else if (path.includes('product-detail')) {
         setCurrentPage('product-detail')
       } else if (path.includes('products')) {
@@ -41,6 +44,9 @@ export default function App() {
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
+    } else if (page === 'projects') {
+      window.history.pushState({}, '', '/projects')
+      setCurrentPage('projects')
     } else if (page === 'product-detail') {
       const query = productId ? `?id=${productId}` : ''
       window.history.pushState({}, '', `/product-detail${query}`)
@@ -56,6 +62,8 @@ export default function App() {
 
   return currentPage === 'product-detail' ? (
     <ProductDetail />
+  ) : currentPage === 'projects' ? (
+    <Projects />
   ) : currentPage === 'products' ? (
     <Products />
   ) : currentPage === 'request-quote' ? (
