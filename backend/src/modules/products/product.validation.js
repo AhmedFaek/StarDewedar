@@ -5,4 +5,5 @@ export const createProductSchema = z.object({
     description: z.string().optional(),
     price: z.string().optional(),
     category_id: z.string(),
+    specifications: z.string().optional(),
 })

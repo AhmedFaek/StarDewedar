@@ -2,6 +2,16 @@ import * as service from './product.service.js'
 
 export const createProduct = async (req, res, next) => {
     try {
+        // Parse specifications if provided
+        if (req.body.specifications) {
+            try {
+                req.body.specifications = JSON.parse(req.body.specifications)
+            } catch (err) {
+                console.error('Failed to parse specifications:', err.message)
+                // Keep as string if JSON parse fails
+            }
+        }
+
         const product = await service.createProduct(req.body, req.files)
         res.status(201).json(product)
     } catch (err) {

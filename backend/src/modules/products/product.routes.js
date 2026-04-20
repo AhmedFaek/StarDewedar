@@ -17,7 +17,7 @@ const router = express.Router()
 router.post(
     '/',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER),
+   requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
     upload.fields([
         { name: 'images', maxCount: 5 },
         { name: 'catalog', maxCount: 1 },
