@@ -88,7 +88,7 @@ export default function Projects() {
         <section className="px-4 sm:px-8 md:px-16 mb-24">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-0 border-l-4 border-primary">
             {/* Left Content */}
-            <div className="md:col-span-8 bg-surface-container-low p-8 sm:p-12 lg:p-24 flex flex-col justify-center">
+            <div className="md:col-span-8 bg-[#f2f4f7] p-8 sm:p-12 lg:p-24 flex flex-col justify-center">
             <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-6">
                 STAR DEWEDAR PROJECTS
             </span>
