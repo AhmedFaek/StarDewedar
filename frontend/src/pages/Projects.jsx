@@ -1,9 +1,24 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 
 export default function Projects() {
   const [activeFilter, setActiveFilter] = useState('all')
+  const [currentServiceIndex, setCurrentServiceIndex] = useState(0)
+
+  const services = [
+    'ELECTRICAL PANELS',
+    'LIGHTING SYSTEMS',
+    'INDUSTRIAL INSTALLATIONS',
+    'POWER DISTRIBUTION',
+  ]
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentServiceIndex((prev) => (prev + 1) % services.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   const projects = [
     {
@@ -75,14 +90,17 @@ export default function Projects() {
             {/* Left Content */}
             <div className="md:col-span-8 bg-surface-container-low p-8 sm:p-12 lg:p-24 flex flex-col justify-center">
             <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-6">
-                Star Dewedar Portfolio 2026
+                STAR DEWEDAR PROJECTS
             </span>
             <h1 className="text-primary font-headline text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8">
-                POWERING<br />PROGRESS.
+                ENGINEERING<br />POWER.
             </h1>
-            <p className="text-on-surface-variant max-w-xl text-lg leading-relaxed font-body">
-                Explore the Star Dewedar legacy. A showcase of critical power distribution and installation projects across Egypt's most demanding industrial and commercial sectors.
-            </p>
+                <p className="text-on-surface-variant max-w-xl text-lg leading-relaxed font-body">
+                From industrial facilities to commercial infrastructures, Star Dewedar delivers
+                high-performance electrical solutions. Our projects include low-voltage panels,
+                power distribution systems, and advanced lighting installations — engineered
+                for reliability, safety, and long-term operation.
+                </p>
             </div>
 
             {/* Right Image Area */}
@@ -95,8 +113,10 @@ export default function Projects() {
             <div className="absolute inset-0 flex items-center justify-center p-8 sm:p-12">
                 <div className="border-2 border-white/20 p-6 sm:p-8 w-full h-full flex items-end">
                 <div>
-                    <p className="text-tertiary-fixed font-label text-[10px] tracking-[0.3em] uppercase mb-2">Primary Systems</p>
-                    <span className="text-white font-headline text-3xl sm:text-4xl font-bold">01. DISTRIBUTION</span>
+                    <p className="text-tertiary-fixed font-label text-[10px] tracking-[0.3em] uppercase mb-2">CORE SERVICES</p>
+                    <span className="text-white font-headline text-3xl sm:text-4xl font-bold transition-all duration-500">
+                      {String(currentServiceIndex + 1).padStart(2, '0')}. {services[currentServiceIndex]}
+                    </span>
                 </div>
                 </div>
             </div>
