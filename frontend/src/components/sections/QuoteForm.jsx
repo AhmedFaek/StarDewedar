@@ -113,7 +113,7 @@ export default function QuoteForm({ productId = null }) {
             <InputField
               label="First Name"
               name="first_name"
-              placeholder="ALEXANDER"
+              placeholder="AHMED"
               value={formData.first_name}
               onChange={handleInputChange}
               required
@@ -121,7 +121,7 @@ export default function QuoteForm({ productId = null }) {
             <InputField
               label="Last Name"
               name="last_name"
-              placeholder="VANCE"
+              placeholder="KHALED"
               value={formData.last_name}
               onChange={handleInputChange}
               required
@@ -134,7 +134,7 @@ export default function QuoteForm({ productId = null }) {
               label="Phone"
               name="phone"
               type="tel"
-              placeholder="+1 (555) 000-0000"
+              placeholder="(+20) 01234567890"
               value={formData.phone}
               onChange={handleInputChange}
               required
@@ -143,7 +143,7 @@ export default function QuoteForm({ productId = null }) {
               label="Work Email Address"
               name="email"
               type="email"
-              placeholder="A.VANCE@CORPORATE.COM"
+              placeholder="A.KHALED@GMAIL.COM"
               value={formData.email}
               onChange={handleInputChange}
               required

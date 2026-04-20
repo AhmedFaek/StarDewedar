@@ -14,7 +14,7 @@ export default function Footer() {
           Star Dewedar
         </div>
         <p className="text-slate-400 font-body text-sm leading-relaxed">
-          Leaders in heavy-duty industrial electrical infrastructure and modular power solutions.
+          Star Dewidar Company is one of the leading companies in the field of supplying and installing low-voltage electrical equipment. The company is managed by highly efficient, trained engineers and technicians.
         </p>
       </div>
 
@@ -68,7 +68,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="sm:col-span-2 lg:col-span-4 border-t border-white/5 pt-8 sm:pt-12 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
         <p className="text-slate-400 text-xs sm:text-sm font-body text-center md:text-left">
-          © 2024 Industrial Precision Manufacturing. Engineered for Power.
+          © 2026 Industrial Precision Manufacturing. Engineered for Power.
         </p>
         <div className="flex gap-6">
           <a className="text-slate-400 hover:text-yellow-400 transition-all" href="#">
