@@ -79,13 +79,18 @@ model Project {
   description String
   category_id String?
   client_name String?
+  
+  // New Fields
+  budget      Decimal? @db.Decimal(12, 2)
+  start_date  DateTime?
+  end_date    DateTime?
+  
   created_at  DateTime @default(now())
   updated_at  DateTime @updatedAt
 
-  category Category?      @relation(fields: [category_id], references: [id])
-  images   ProjectImage[]
+  category    Category?      @relation(fields: [category_id], references: [id])
+  images      ProjectImage[]
 }
-
 model ProjectImage {
   id         String   @id @default(uuid())
   project_id String
