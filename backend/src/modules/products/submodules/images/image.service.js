@@ -1,21 +1,28 @@
-import cloudinary from '../../../config/storage.js'
+import cloudinary from '../../../../config/storage.js'
 import * as repo from './image.repository.js'
 
-export const uploadImages = async (productId, files) => {
-    const uploads = files.map(async (file) => {
-        const result = await cloudinary.uploader.upload_stream(
+const uploadToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
             { resource_type: 'image' },
-            async (error, result) => {
-                if (error) throw error
-
-                await repo.createImage({
-                    product_id: productId,
-                    image_url: result.secure_url,
-                })
+            (error, result) => {
+                if (error) return reject(error)
+                resolve(result)
             }
         )
 
-        uploads.end(file.buffer)
+        stream.end(file.buffer) // ✅ correct place
+    })
+}
+
+export const uploadImages = async (productId, files) => {
+    const uploads = files.map(async (file) => {
+        const result = await uploadToCloudinary(file)
+
+        return repo.createImage({
+            product_id: productId,
+            image_url: result.secure_url,
+        })
     })
 
     await Promise.all(uploads)
