@@ -3,6 +3,7 @@ import Home from './pages/Home'
 import Products from './pages/Products'
 import Projects from './pages/Projects'
 import ProductDetail from './pages/ProductDetail'
+import ProjectDetail from './pages/ProjectDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 import Contact from './pages/Contact'
@@ -20,6 +21,8 @@ export default function App() {
         setCurrentPage('request-visit')
       } else if (path.includes('contact')) {
         setCurrentPage('contact')
+      } else if (path.includes('project-detail')) {
+        setCurrentPage('project-detail')
       } else if (path.includes('projects')) {
         setCurrentPage('projects')
       } else if (path.includes('product-detail')) {
@@ -47,6 +50,10 @@ export default function App() {
     } else if (page === 'projects') {
       window.history.pushState({}, '', '/projects')
       setCurrentPage('projects')
+    } else if (page === 'project-detail') {
+      const query = productId ? `?id=${productId}` : ''
+      window.history.pushState({}, '', `/project-detail${query}`)
+      setCurrentPage('project-detail')
     } else if (page === 'product-detail') {
       const query = productId ? `?id=${productId}` : ''
       window.history.pushState({}, '', `/product-detail${query}`)
@@ -62,6 +69,8 @@ export default function App() {
 
   return currentPage === 'product-detail' ? (
     <ProductDetail />
+  ) : currentPage === 'project-detail' ? (
+    <ProjectDetail />
   ) : currentPage === 'projects' ? (
     <Projects />
   ) : currentPage === 'products' ? (

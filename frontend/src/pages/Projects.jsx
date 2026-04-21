@@ -13,6 +13,11 @@ export default function Projects() {
     'POWER DISTRIBUTION',
   ]
 
+  const navigateToProject = (projectId) => {
+    window.history.pushState({}, '', `/project-detail?id=${projectId}`)
+    window.dispatchEvent(new PopStateEvent('popstate'))
+  }
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentServiceIndex((prev) => (prev + 1) % services.length)
@@ -158,7 +163,10 @@ export default function Projects() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8">
             {/* Project 1: Large Featured */}
             {filteredProjects[0] && (
-              <div className="lg:col-span-8 group cursor-pointer">
+              <div 
+                className="lg:col-span-8 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[0].id)}
+              >
                 <div className="relative overflow-hidden bg-slate-200 aspect-[16/9]">
                   <img
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
@@ -197,7 +205,10 @@ export default function Projects() {
 
             {/* Project 2: Small Box */}
             {filteredProjects[1] && (
-              <div className="lg:col-span-4 group cursor-pointer">
+              <div 
+                className="lg:col-span-4 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[1].id)}
+              >
                 <div className="bg-surface-container p-6 sm:p-8 h-full flex flex-col">
                   <div className="relative overflow-hidden aspect-square mb-6 sm:mb-8">
                     <img
@@ -272,7 +283,10 @@ export default function Projects() {
 
             {/* Project 3: Tall */}
             {filteredProjects[2] && (
-              <div className="lg:col-span-4 group cursor-pointer">
+              <div 
+                className="lg:col-span-4 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[2].id)}
+              >
                 <div className="relative overflow-hidden bg-primary aspect-[4/5]">
                   <img
                     className="w-full h-full object-cover opacity-80 grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-1000"
@@ -293,7 +307,10 @@ export default function Projects() {
 
             {/* Project 4: Split */}
             {filteredProjects[3] && (
-              <div className="lg:col-span-8 group cursor-pointer">
+              <div 
+                className="lg:col-span-8 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[3].id)}
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 h-full gap-0">
                   <div className="bg-surface-container-high p-6 sm:p-12 flex flex-col justify-center">
                     <span className="text-tertiary font-label text-xs font-bold tracking-widest uppercase mb-3 sm:mb-4">
@@ -323,7 +340,10 @@ export default function Projects() {
 
             {/* Project 5: Half */}
             {filteredProjects[4] && (
-              <div className="lg:col-span-6 group cursor-pointer">
+              <div 
+                className="lg:col-span-6 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[4].id)}
+              >
                 <div className="relative overflow-hidden aspect-video">
                   <img
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
@@ -348,7 +368,10 @@ export default function Projects() {
 
             {/* Project 6: Half */}
             {filteredProjects[5] && (
-              <div className="lg:col-span-6 group cursor-pointer">
+              <div 
+                className="lg:col-span-6 group cursor-pointer"
+                onClick={() => navigateToProject(filteredProjects[5].id)}
+              >
                 <div className="relative overflow-hidden aspect-video">
                   <img
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700"
