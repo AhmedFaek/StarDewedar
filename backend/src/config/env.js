@@ -10,7 +10,8 @@ const requiredEnv = [
     'CLOUDINARY_NAME',
     'CLOUDINARY_KEY',
     'CLOUDINARY_SECRET',
-    'RESEND_API_KEY',
+    'GMAIL_EMAIL',
+    'GMAIL_PASSWORD',
 ]
 
 // Validate required variables
@@ -28,5 +29,6 @@ export default {
     cloudinaryName: process.env.CLOUDINARY_NAME,
     cloudinaryKey: process.env.CLOUDINARY_KEY,
     cloudinarySecret: process.env.CLOUDINARY_SECRET,
-    resendApiKey: process.env.RESEND_API_KEY,
+    gmailEmail: process.env.GMAIL_EMAIL,
+    gmailPassword: process.env.GMAIL_PASSWORD,
 }

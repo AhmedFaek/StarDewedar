@@ -1,16 +1,22 @@
 import * as repo from './contact.repository.js'
 import env from '../../config/env.js'
 
-import { Resend } from 'resend'
+import nodemailer from 'nodemailer'
 
-const resend = new Resend(env.resendApiKey)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: env.gmailEmail,
+        pass: env.gmailPassword,
+    },
+})
 
 export const sendContactEmail = async (data) => {
     try {
-        const response = await resend.emails.send({
-            from: 'Star Dewedar <onboarding@resend.dev>', 
+        const mailOptions = {
+            from: `"Star Dewedar System" <stardewedar.system@gmail.com>`,
             to: 'info@stardewedar.com',
-            reply_to: data.email, 
+            replyTo: data.email,
             subject: 'New Contact Message',
             html: `
         <h2>New Contact Message</h2>
@@ -25,12 +31,14 @@ export const sendContactEmail = async (data) => {
         <p><strong>Message:</strong></p>
         <p>${data.message}</p>
       `,
-        })
+        }
+
+        const response = await transporter.sendMail(mailOptions)
         console.log('Email sent:', response)
 
         return response
     } catch (error) {
-        console.error('Resend Email Error:', error)
+        console.error('Gmail Email Error:', error)
         throw error
     }
 }
