@@ -4,6 +4,7 @@ import authRoutes from './modules/auth/auth.routes.js'
 import categoryRoutes from './modules/categories/category.routes.js'
 import productRoutes from './modules/products/product.routes.js'
 import projectRoutes from './modules/projects/project.routes.js'
+import contactRoutes from './modules/contactMessages/contact.routes.js'
 
 const app = express()
 
@@ -16,6 +17,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/categories', categoryRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/projects', projectRoutes)
+app.use('/api/contact', contactRoutes)
 
 // Test route
 app.get('/', (req, res) => {
