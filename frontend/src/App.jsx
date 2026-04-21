@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Home from './pages/Home'
 import Products from './pages/Products'
 import Projects from './pages/Projects'
+import About from './pages/About'
 import ProductDetail from './pages/ProductDetail'
 import ProjectDetail from './pages/ProjectDetail'
 import RequestQuote from './pages/RequestQuote'
@@ -21,6 +22,8 @@ export default function App() {
         setCurrentPage('request-visit')
       } else if (path.includes('contact')) {
         setCurrentPage('contact')
+      } else if (path.includes('about')) {
+        setCurrentPage('about')
       } else if (path.includes('project-detail')) {
         setCurrentPage('project-detail')
       } else if (path.includes('projects')) {
@@ -47,6 +50,9 @@ export default function App() {
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
+    } else if (page === 'about') {
+      window.history.pushState({}, '', '/about')
+      setCurrentPage('about')
     } else if (page === 'projects') {
       window.history.pushState({}, '', '/projects')
       setCurrentPage('projects')
@@ -61,6 +67,9 @@ export default function App() {
     } else if (page === 'products') {
       window.history.pushState({}, '', '/products')
       setCurrentPage('products')
+    } else if (page === 'contact') {
+      window.history.pushState({}, '', '/contact')
+      setCurrentPage('contact')
     } else {
       window.history.pushState({}, '', '/')
       setCurrentPage('home')
@@ -75,6 +84,8 @@ export default function App() {
     <Projects />
   ) : currentPage === 'products' ? (
     <Products />
+  ) : currentPage === 'about' ? (
+    <About />
   ) : currentPage === 'request-quote' ? (
     <RequestQuote />
   ) : currentPage === 'request-visit' ? (

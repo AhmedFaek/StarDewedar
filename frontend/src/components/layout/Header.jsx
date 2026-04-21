@@ -12,6 +12,7 @@ export default function Header() {
     if (path.includes('/request-quote')) setCurrentPage('quote')
     else if (path.includes('/request-visit')) setCurrentPage('visit')
     else if (path.includes('/projects')) setActiveLink('Projects')
+    else if (path.includes('/about')) setActiveLink('About')
     else if (path.includes('/contact')) setActiveLink('Contact')
     else if (path.includes('/products')) setActiveLink('Products')
     else setCurrentPage('')
@@ -39,6 +40,9 @@ export default function Header() {
       window.dispatchEvent(new PopStateEvent('popstate'))
     } else if (link === 'Projects') {
       window.history.pushState({}, '', '/projects')
+      window.dispatchEvent(new PopStateEvent('popstate'))
+    } else if (link === 'About') {
+      window.history.pushState({}, '', '/about')
       window.dispatchEvent(new PopStateEvent('popstate'))
     } else if (link === 'Contact') {
       window.history.pushState({}, '', '/contact')
