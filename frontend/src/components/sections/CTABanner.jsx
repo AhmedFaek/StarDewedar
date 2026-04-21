@@ -8,12 +8,12 @@ export default function CTABanner() {
 
         <button 
           onClick={() => {
-            window.history.pushState({}, '', '/request-quote')
+            window.history.pushState({}, '', '/contact')
             window.dispatchEvent(new PopStateEvent('popstate'))
           }}
           className="bg-primary text-white px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary/90 transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
         >
-          Contact Technical Sales
+          Contact Us
         </button>
       </div>
 
