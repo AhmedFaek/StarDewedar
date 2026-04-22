@@ -72,29 +72,23 @@ export const products = [
     {
         id: 1,
         name: 'High Voltage Transformer',
-        sku: 'HVT-2400-A1',
         category: 'Transformers',
         price: 12500,
         stock: 24,
-        status: 'In Stock'
     },
     {
         id: 2,
         name: 'Circuit Breaker Type-C',
-        sku: 'CB-200-C',
         category: 'Breakers',
         price: 450,
         stock: 156,
-        status: 'In Stock'
     },
     {
         id: 3,
         name: 'Power Distribution Panel',
-        sku: 'PDP-1200-X',
         category: 'Panels',
         price: 8900,
         stock: 8,
-        status: 'Low Stock'
     }
 ]
 
@@ -103,27 +97,24 @@ export const projects = [
         id: 1,
         name: 'Industrial Grid Modernization',
         client: 'National Power Authority',
-        status: 'On-Track',
-        progress: 65,
-        dueDate: '2024-08-15',
+        endDate: '2024-08-15',
+        startDate: '2024-05-01',
         budget: 500000
     },
     {
         id: 2,
         name: 'Factory Electrification Project',
         client: 'Global Manufacturing Inc',
-        status: 'On-Track',
-        progress: 45,
-        dueDate: '2024-09-30',
+        endDate: '2024-09-30',
+        startDate: '2024-05-01',
         budget: 350000
     },
     {
         id: 3,
         name: 'Smart Grid Implementation',
         client: 'Urban Development Corp',
-        status: 'At Risk',
-        progress: 30,
-        dueDate: '2024-07-20',
+        endDate: '2024-07-20',
+        startDate: '2024-05-01',
         budget: 750000
     }
 ]
