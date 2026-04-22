@@ -18,6 +18,9 @@ router.post('/login', validate(loginSchema), controller.login)
 //  REFRESH
 router.post('/refresh', validate(refreshSchema), controller.refresh)
 
+//  LOGOUT
+router.post('/logout', auth, controller.logout)
+
 //  CREATE USER (ONLY CO-FOUNDER)
 router.post(
     '/create-user',

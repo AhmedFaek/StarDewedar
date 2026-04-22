@@ -1,7 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 export const Sidebar = () => {
   const location = useLocation()
+  const navigate = useNavigate()
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'dashboard', path: '/' },
@@ -13,9 +14,13 @@ export const Sidebar = () => {
     { id: 'messages', label: 'Contact Messages', icon: 'chat', path: '/messages' },
   ]
 
-  const bottomItems = [
-    { id: 'logout', label: 'Log Out', icon: 'logout', path: '/logout' },
-  ]
+  const handleLogout = () => {
+    // Clear tokens from localStorage
+    localStorage.removeItem('accessToken')
+    localStorage.removeItem('refreshToken')
+    // Redirect to login
+    navigate('/login')
+  }
 
   const isActive = (path) => location.pathname === path
 
@@ -51,20 +56,13 @@ export const Sidebar = () => {
 
       {/* Bottom Navigation */}
       <div className="mt-auto pb-8 space-y-1">
-        {bottomItems.map((item) => (
-          <Link
-            key={item.id}
-            to={item.path}
-            className={`px-6 py-4 flex items-center gap-3 font-headline uppercase tracking-widest text-xs font-bold transition-smooth ${
-              isActive(item.path)
-                ? 'text-tertiary-fixed bg-primary-container border-r-4 border-tertiary-fixed'
-                : 'text-slate-400 hover:text-white hover:bg-primary-container'
-            }`}
-          >
-            <span className="material-symbols-outlined text-lg">{item.icon}</span>
-            {item.label}
-          </Link>
-        ))}
+        <button
+          onClick={handleLogout}
+          className="w-full px-6 py-4 flex items-center gap-3 font-headline uppercase tracking-widest text-xs font-bold transition-smooth text-slate-400 hover:text-white hover:bg-primary-container"
+        >
+          <span className="material-symbols-outlined text-lg">logout</span>
+          Log Out
+        </button>
       </div>
     </aside>
   )

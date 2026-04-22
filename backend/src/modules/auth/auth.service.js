@@ -65,3 +65,12 @@ export const refreshToken = (refreshToken) => {
         throw new Error('Invalid refresh token')
     }
 }
+
+/* Logout */
+export const logout = async (userId) => {
+    // In a real application, you would:
+    // 1. Invalidate the refresh token in the database
+    // 2. Add the token to a blacklist
+    // For now, we just acknowledge the logout
+    return { message: 'Logged out successfully' }
+}

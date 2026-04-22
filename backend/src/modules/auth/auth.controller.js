@@ -28,3 +28,13 @@ export const refresh = async (req, res, next) => {
         next(err)
     }
 }
+
+export const logout = async (req, res, next) => {
+    try {
+        const { userId } = req.user // From auth middleware
+        const result = await service.logout(userId)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}
