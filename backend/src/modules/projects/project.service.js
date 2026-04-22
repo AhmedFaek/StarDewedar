@@ -23,7 +23,15 @@ export const getProjects = () => repo.findAll()
 export const getProjectById = (id) => repo.findById(id)
 
 export const updateProject = (id, data) => {
-    return repo.update(id, data)
+    const { images, ...rest } = data // ✅ strip images out, it's not a scalar field
+
+    return repo.update(id, {
+        ...rest,
+        budget: rest.budget ? parseFloat(rest.budget) : null,
+        start_date: rest.start_date ? new Date(rest.start_date).toISOString() : null, // ✅ "2026-04-17" → full ISO
+        end_date: rest.end_date ? new Date(rest.end_date).toISOString() : null,
+        category_id: rest.category_id || null,
+    })
 }
 
 export const deleteProject = (id) => {

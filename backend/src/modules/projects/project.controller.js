@@ -1,14 +1,18 @@
 import * as service from './project.service.js'
 
-export const createProject = async (req, res, next) => {
+export const createProject = async (req, res) => {
     try {
-        const project = await service.createProject(req.body, req.files)
-        res.status(201).json(project)
+        const data = req.body
+        const files = req.files
+
+        const project = await service.createProject(data, files)
+
+        return res.status(201).json(project)
     } catch (err) {
-        next(err)
+        console.error(err)
+        return res.status(500).json({ message: 'Server error' })
     }
 }
-
 export const getProjects = async (req, res, next) => {
     try {
         const projects = await service.getProjects()

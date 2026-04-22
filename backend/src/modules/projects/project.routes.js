@@ -16,8 +16,8 @@ router.post(
     '/',
     auth,
     requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
-    upload.array('images'),
-    validate(createProjectSchema),
+    upload.array('images'),        // ✅ multer parses multipart body first
+    validate(createProjectSchema), // ✅ now req.body is populated
     controller.createProject
 )
 
