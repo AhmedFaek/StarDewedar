@@ -4,6 +4,8 @@ import Dashboard from './pages/Dashboard'
 import Categories from './pages/Categories'
 import Products from './pages/Products'
 import Projects from './pages/Projects'
+import QuoteRequests from './pages/quoteRequests'
+import VisitRequests from './pages/visitRequests'
 
 export default function App() {
   return (
@@ -14,6 +16,8 @@ export default function App() {
           <Route path="/categories" element={<Categories />} />
           <Route path="/products" element={<Products />} />
           <Route path="/projects" element={<Projects />} />
+          <Route path="/quote-requests" element={<QuoteRequests />} />
+          <Route path="/visits" element={<VisitRequests />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>
