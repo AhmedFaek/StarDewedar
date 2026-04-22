@@ -19,7 +19,6 @@ export const dashboardStats = [
         value: '18',
         icon: 'request_quote',
         variant: 'tertiary',
-        badge: true
     },
     {
         label: 'New Visit Requests',
