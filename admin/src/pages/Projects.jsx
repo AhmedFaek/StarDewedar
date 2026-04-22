@@ -53,7 +53,7 @@ export default function Projects() {
   }
 
   const openAddModal = () => {
-    setSelectedProject({ title: '', description: '', client_name: '', budget: '', start_date: '', end_date: '', location: '', category_id: '', images: [] })
+    setSelectedProject({ title_en: '', title_ar: '', description_en: '', description_ar: '', client_name: '', budget: '', start_date: '', end_date: '', location_en: '', location_ar: '', category_id: '', images: [] })
     setSelectedImageCount(0)
     setIsModalOpen(true)
   }
@@ -130,9 +130,10 @@ export default function Projects() {
                       PRJ-{String(project.id).slice(0, 5).toUpperCase()}
                     </td>
                     <td className="px-8 py-6">
-                      <span className="block font-bold text-primary uppercase">{project.title}</span>
-                      <span className="text-xs text-secondary uppercase">{project.client_name}</span>
-                      <div className="text-[11px] text-tertiary uppercase mt-1">{project.location}</div>
+                      <span className="block font-bold text-primary uppercase">{project.title_en}</span>
+                      <span className="block text-sm text-secondary">{project.title_ar}</span>
+                      <span className="text-sm text-secondary uppercase mt-1 block">{project.client_name}</span>
+                      <div className="text-[13px] text-tertiary uppercase mt-1">{project.location_en}</div>
                     </td>
                     <td className="px-8 py-6">
                       <div className="text-sm text-primary">{formatDate(project.start_date)}</div>
@@ -175,30 +176,41 @@ export default function Projects() {
 
               <div className="p-8 space-y-6">
                 <div className="grid grid-cols-2 gap-6">
-                  <div className="col-span-2">
-                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.title_label')}</label>
-                    <input name="title" className="w-full border border-surface-variant px-4 py-3 uppercase font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title} required />
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Title (EN)</label>
+                    <input name="title_en" className="w-full border border-surface-variant px-4 py-3 uppercase font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_en} required />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">العنوان (AR)</label>
+                    <input name="title_ar" className="w-full border border-surface-variant px-4 py-3 font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_ar} required />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.client_label')}</label>
                     <input name="client_name" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.client_name} />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.location_label')}</label>
-                    <input name="location" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location} />
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Category</label>
+                    <select name="category_id" className="w-full border border-surface-variant px-4 py-3 bg-surface-container-low" defaultValue={selectedProject?.category_id}>
+                      <option value="">{t('projects.modal.category_placeholder')}</option>
+                      {categories.map(cat => (
+                        <option key={cat.id} value={cat.id}>{cat.name_ar} ({cat.type})</option>
+                      ))}
+                    </select>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-6">
                   <div>
-                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.category_label')}</label>
-                    <select name="category_id" className="w-full border border-surface-variant px-4 py-3 bg-surface-container-low" defaultValue={selectedProject?.category_id}>
-                      <option value="">{t('projects.modal.category_placeholder')}</option>
-                      {categories.map(cat => (
-                        <option key={cat.id} value={cat.id}>{cat.name} ({cat.type})</option>
-                      ))}
-                    </select>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Location (EN)</label>
+                    <input name="location_en" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_en} />
                   </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">الموقع (AR)</label>
+                    <input name="location_ar" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_ar} />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.budget_label')}</label>
                     <input name="budget" type="number" className="w-full border border-surface-variant px-4 py-3 font-mono bg-surface-container-low" defaultValue={selectedProject?.budget} />
@@ -236,9 +248,15 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.description_label')}</label>
-                  <textarea name="description" rows="4" className="w-full border border-surface-variant px-4 py-3 text-sm bg-surface-container-low" defaultValue={selectedProject?.description} placeholder={t('projects.modal.description_placeholder')} />
+                <div className="grid grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Description (EN)</label>
+                    <textarea name="description_en" rows="4" className="w-full border border-surface-variant px-4 py-3 text-sm bg-surface-container-low" defaultValue={selectedProject?.description_en} placeholder="Project description in English" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">الوصف (AR)</label>
+                    <textarea name="description_ar" rows="4" className="w-full border border-surface-variant px-4 py-3 text-sm bg-surface-container-low" defaultValue={selectedProject?.description_ar} placeholder="وصف المشروع بالعربية" />
+                  </div>
                 </div>
               </div>
 

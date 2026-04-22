@@ -14,7 +14,7 @@ export default function Categories() {
   const [success, setSuccess] = useState(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState(null)
-  const [formData, setFormData] = useState({ name: '', type: 'product' })
+  const [formData, setFormData] = useState({ name_en: '', name_ar: '', type: 'product' })
   const [isSaving, setIsSaving] = useState(false)
 
   useEffect(() => { fetchCategories() }, [])
@@ -39,13 +39,13 @@ export default function Categories() {
 
   const openAddModal = () => {
     setSelectedCategory(null)
-    setFormData({ name: '', type: 'product' })
+    setFormData({ name_en: '', name_ar: '', type: 'product' })
     setIsModalOpen(true)
   }
 
   const openEditModal = (category) => {
     setSelectedCategory(category)
-    setFormData({ name: category.name, type: category.type.toLowerCase() })
+    setFormData({ name_en: category.name_en || '', name_ar: category.name_ar || '', type: category.type.toLowerCase() })
     setIsModalOpen(true)
   }
 
@@ -117,7 +117,7 @@ export default function Categories() {
                 {displayedData.length > 0 ? displayedData.map((item) => (
                   <tr key={item.id} className="group hover:bg-surface-container-low transition-colors">
                     <td className="px-8 py-6 text-xs font-mono text-slate-400">#{String(item.id).slice(0, 6).padStart(3, '0')}</td>
-                    <td className="px-8 py-6"><span className="block font-bold text-primary font-headline tracking-tight uppercase">{item.name}</span></td>
+                    <td className="px-8 py-6"><span className="block font-bold text-primary font-headline tracking-tight uppercase">{item.name_en}</span><span className="block text-xs text-secondary font-medium">{item.name_ar}</span></td>
                     <td className="px-8 py-6">
                       <Badge className={item.type?.toLowerCase() === 'product' ? 'bg-primary text-[#124170]' : 'bg-amber-500 text-white'}>
                         {item.type?.toLowerCase() === 'product' ? t('categories.modal.type_product') : t('categories.modal.type_project')}
@@ -158,11 +158,17 @@ export default function Categories() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-secondary hover:text-primary transition-colors"><span className="material-symbols-outlined">close</span></button>
               </div>
               <div className="p-8 space-y-6">
-                <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('categories.modal.name_label')}</label>
-                  <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder={t('categories.modal.name_placeholder')} required disabled={isSaving} />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Name (EN)</label>
+                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase" value={formData.name_en} onChange={(e) => setFormData({ ...formData, name_en: e.target.value })} placeholder="Enter category name in English" required disabled={isSaving} />
+                  </div>
+                  <div>
+                    <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">الاسم (AR)</label>
+                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} placeholder="أدخل اسم الفئة بالعربية" required disabled={isSaving} />
+                  </div>
                 </div>
-                <div>
+                <div className="col-span-2">
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('categories.modal.type_label')}</label>
                   <select value={formData.type} onChange={(e) => setFormData({ ...formData, type: e.target.value })} className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase" disabled={isSaving}>
                     <option value="product">{t('categories.modal.type_product')}</option>
