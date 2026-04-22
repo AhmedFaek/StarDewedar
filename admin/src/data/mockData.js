@@ -121,41 +121,63 @@ export const projects = [
 
 export const quoteRequests = [
     {
-        id: 1,
-        type: 'Quote',
-        subject: 'HV Transformer Maintenance - Grid X9',
-        requester: 'Global Power Solutions',
-        date: '2024-05-24',
-        status: 'Pending Action'
+        id: '550e8400-e29b-41d4-a716-446655440000',
+        first_name: 'John',
+        last_name: 'Doe',
+        phone: '+1-555-010-9988',
+        email: 'j.doe@globalpower.com',
+        product_id: 'prod-101',
+        details: 'Urgent maintenance quote for HV Transformer - Grid X9. Need breakdown of labor costs.',
+        custom_product_name: null,
+        file_url: 'https://storage.sys/docs/x9-specs.pdf',
+        status: 'new',
+        created_at: '2024-05-24T10:00:00Z'
     },
     {
-        id: 2,
-        type: 'Quote',
-        subject: 'Bulk Supply: Type-C Circuit Breakers',
-        requester: 'Advanced Dynamics',
-        date: '2024-05-23',
-        status: 'Sent to Client'
+        id: '671f9511-f30c-52e5-b827-557766551111',
+        first_name: 'Sarah',
+        last_name: 'Jenkins',
+        phone: '+1-555-022-3344',
+        email: 's.jenkins@adv-dynamics.net',
+        product_id: null,
+        details: 'Custom bulk supply request for Type-C Circuit Breakers with reinforced casing.',
+        custom_product_name: 'Type-C Circuit Breaker (Reinforced)',
+        file_url: null,
+        status: 'contacted',
+        created_at: '2024-05-23T14:30:00Z'
     }
-]
+];
 
 export const visitRequests = [
     {
-        id: 1,
-        type: 'Visit',
-        subject: 'Site Survey: New Industrial Complex',
-        requester: 'Urban Infra Corp',
-        date: '2024-05-23',
-        status: 'Under Review'
+        id: '772g0622-g41d-63f6-c938-668877662222',
+        factory_name: 'Urban Infra Corp - Site A',
+        factory_activity: 'New Industrial Complex Construction',
+        name: 'Michael Chen',
+        phone_number: '+1-555-888-0000',
+        whatsapp_number: '+15558880000',
+        email: 'm.chen@urbaninfra.org',
+        address: '404 Industrial Way, North Sector',
+        preferred_date: '2024-06-15',
+        details: 'Site survey needed to assess power grid connectivity for the new phase.',
+        status: 'new',
+        created_at: '2024-05-23T09:15:00Z'
     },
     {
-        id: 2,
-        type: 'Visit',
-        subject: 'Compliance Audit - Facility B',
-        requester: 'National Regulatory Body',
-        date: '2024-05-22',
-        status: 'Action Required'
+        id: '883h1733-h52e-74g7-d049-779988773333',
+        factory_name: 'NRB Facility B',
+        factory_activity: 'Regulatory Compliance Audit',
+        name: 'Elena Rodriguez',
+        phone_number: '+1-555-111-2222',
+        whatsapp_number: '+15551112222',
+        email: 'e.rodriguez@nrb.gov',
+        address: '10 Government Plaza, Central District',
+        preferred_date: '2024-06-10',
+        details: 'Annual safety and compliance audit. Require access to all transformer rooms.',
+        status: 'contacted',
+        created_at: '2024-05-22T11:45:00Z'
     }
-]
+];
 
 export const categories = [
     {
