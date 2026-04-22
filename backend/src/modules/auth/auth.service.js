@@ -6,7 +6,7 @@ import env from '../../config/env.js'
 /* Generate Tokens */
 const generateTokens = (user) => {
     const accessToken = jwt.sign(
-        { userId: user.id, role: user.role },
+        { userId: user.id, role: user.role, name: user.name },
         env.jwtSecret,
         { expiresIn: '15m' }
     )
