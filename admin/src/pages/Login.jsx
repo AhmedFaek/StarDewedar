@@ -1,23 +1,51 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom' // Import useNavigate
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components'
+import { API_BASE_URL, HTTP_STATUS } from '../utils/constants'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const navigate = useNavigate() // Initialize navigation
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+  const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    // For now: bypass actual API check
-    console.log("Authenticating:", email)
+    setError('')
+    setLoading(true)
 
-    // 1. Set a dummy token so ProtectedRoute thinks we are logged in
-    localStorage.setItem('adminToken', 'mock_token_123')
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      })
 
-    // 2. Redirect to the dashboard
-    navigate('/')
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.message || 'Login failed. Please check your credentials.')
+      }
+
+      const tokens = await response.json()
+
+      // Store tokens in localStorage
+      localStorage.setItem('accessToken', tokens.accessToken)
+      localStorage.setItem('refreshToken', tokens.refreshToken)
+
+      // Redirect to dashboard
+      navigate('/')
+    } catch (err) {
+      setError(err.message || 'An error occurred during login. Please try again.')
+      console.error('Login error:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -36,6 +64,13 @@ export default function LoginPage() {
 
         {/* Form Block */}
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
+          {/* Error Message */}
+          {error && (
+            <div className="bg-error-container border border-error p-3 rounded">
+              <p className="text-on-error-container text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           <div>
             <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">
               Access Email
@@ -43,7 +78,8 @@ export default function LoginPage() {
             <input 
               type="email" 
               required
-              className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-primary uppercase text-sm"
+              disabled={loading}
+              className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-primary uppercase text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@system.com"
@@ -57,7 +93,8 @@ export default function LoginPage() {
             <input 
               type="password" 
               required
-              className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-mono focus:outline-none focus:border-primary"
+              disabled={loading}
+              className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-mono focus:outline-none focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -67,9 +104,10 @@ export default function LoginPage() {
           <Button 
             type="submit" 
             variant="tertiary" 
-            className="w-full py-4 text-sm font-black tracking-[0.2em]"
+            disabled={loading}
+            className="w-full py-4 text-sm font-black tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            LOGIN
+            {loading ? 'LOGGING IN...' : 'LOGIN'}
           </Button>
 
         </form>
