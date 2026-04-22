@@ -50,12 +50,18 @@ export const login = async (email, password) => {
 }
 
 /* Refresh Token */
-export const refreshToken = (refreshToken) => {
+// auth.service.js - fixed
+export const refreshToken = async (refreshToken) => {
     try {
         const decoded = jwt.verify(refreshToken, env.jwtRefreshSecret)
 
+        // ✅ Fetch the user so we have role and name for the new token
+        const user = await userRepo.findUserById(decoded.userId)
+
+        if (!user) throw new Error('User not found')
+
         const accessToken = jwt.sign(
-            { userId: decoded.userId },
+            { userId: user.id, role: user.role, name: user.name },
             env.jwtSecret,
             { expiresIn: '15m' }
         )
