@@ -165,3 +165,42 @@ export const visitRequests = [
         status: 'Action Required'
     }
 ]
+
+export const categories = [
+    {
+        id: 'c0e2a1b4-5781-4f1e',
+        name: 'Transformer Assemblies',
+        type: 'Product',
+        createdDate: '2023-10-12 09:42'
+    },
+    {
+        id: 'f47ac10b-58cc-4372',
+        name: 'Substation Grid Renewal',
+        type: 'Project',
+        createdDate: '2023-11-04 14:20'
+    },
+    {
+        id: 'd12f3b9a-7e11-49a2',
+        name: 'Smart Metering Modules',
+        type: 'Product',
+        createdDate: '2023-12-01 08:15'
+    },
+    {
+        id: 'a98b7c6d-3e4f-4a1b',
+        name: 'Voltage Regulation Phase II',
+        type: 'Project',
+        createdDate: '2024-01-14 16:55'
+    },
+    {
+        id: 'b7f9e2c1-4a3d-5b6e',
+        name: 'Distribution Network Infrastructure',
+        type: 'Product',
+        createdDate: '2024-02-08 11:30'
+    },
+    {
+        id: 'e5d8a1c2-9f7e-3g4h',
+        name: 'Industrial Automation Solutions',
+        type: 'Product',
+        createdDate: '2024-02-20 13:45'
+    }
+]

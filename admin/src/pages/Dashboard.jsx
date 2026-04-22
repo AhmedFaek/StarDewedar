@@ -1,9 +1,14 @@
+import { useState } from 'react'
 import { StatCard } from '../components/ui/StatCard'
 import { Badge } from '../components/ui/Badge'
 import { TableCard } from '../components/ui/TableCard'
+import { Pagination } from '../components/ui/Pagination'
 import { dashboardStats, recentActivity } from '../data/mockData'
 
 export default function Dashboard() {
+  const [currentPage, setCurrentPage] = useState(1)
+  const itemsPerPage = 4
+  
   // Stat Cards Data
   const statCardsData = dashboardStats
 
@@ -92,26 +97,10 @@ export default function Dashboard() {
     }
   ]
 
-  // Pagination Component
-  const Pagination = () => (
-    <nav className="flex gap-1">
-      <button className="w-8 h-8 flex items-center justify-center border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors">
-        <span className="material-symbols-outlined text-sm">chevron_left</span>
-      </button>
-      <button className="w-8 h-8 flex items-center justify-center border border-primary bg-primary text-white text-xs font-bold font-headline">
-        1
-      </button>
-      <button className="w-8 h-8 flex items-center justify-center border border-outline-variant border-opacity-30 text-secondary hover:bg-white text-xs font-bold font-headline transition-colors">
-        2
-      </button>
-      <button className="w-8 h-8 flex items-center justify-center border border-outline-variant border-opacity-30 text-secondary hover:bg-white text-xs font-bold font-headline transition-colors">
-        3
-      </button>
-      <button className="w-8 h-8 flex items-center justify-center border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors">
-        <span className="material-symbols-outlined text-sm">chevron_right</span>
-      </button>
-    </nav>
-  )
+  // Calculate pagination
+  const totalPages = Math.ceil(activityData.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  const displayedActivity = activityData.slice(startIdx, startIdx + itemsPerPage)
 
   return (
     <div>
@@ -136,11 +125,18 @@ export default function Dashboard() {
       <TableCard
         title="Recent Request Activity"
         columns={activityColumns}
-        data={activityData}
+        data={displayedActivity}
         actions={true}
         viewAllLink="#"
-        footerContent={<Pagination />}
-      />
+          />
+           <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalDisplayed={displayedActivity.length}
+          totalItems={activityData.length}
+          variant="table"
+        />
     </div>
   )
 }
