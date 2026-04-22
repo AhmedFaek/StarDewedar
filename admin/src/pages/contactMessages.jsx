@@ -1,24 +1,37 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '../components'
 import { Pagination } from '../components/ui/Pagination'
-import { contactMessages as mockMessages } from '../data/mockData'
+import { formatDate } from '../utils/helpers'
+import { getAllMessages } from '../services/contactService'
 
 export default function ContactMessagesPage() {
-  const [messages] = useState(mockMessages)
+  const [messages, setMessages] = useState([])
+  const [loading, setLoading] = useState(true)
   const [selectedMsg, setSelectedMsg] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
 
-  // --- PAGINATION LOGIC ---
+  // --- FETCH ---
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        setLoading(true)
+        const data = await getAllMessages()
+        setMessages(data || [])
+      } catch (error) {
+        console.error('Failed to load messages:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchMessages()
+  }, [])
+
+  // --- PAGINATION ---
   const itemsPerPage = 4
   const totalPages = Math.ceil(messages.length / itemsPerPage)
   const startIdx = (currentPage - 1) * itemsPerPage
   const displayedData = messages.slice(startIdx, startIdx + itemsPerPage)
-
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      month: 'short', day: 'numeric', year: 'numeric'
-    })
-  }
 
   return (
     <div className="max-w-full relative">
@@ -39,28 +52,38 @@ export default function ContactMessagesPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-surface-variant">
-              {displayedData.map((msg) => (
-                <tr key={msg.id} className="hover:bg-surface-container-low transition-colors group">
-                  <td className="px-8 py-6">
-                    <span className="block font-bold text-primary">{msg.first_name} {msg.last_name}</span>
-                    <span className="text-xs font-mono text-slate-400">{msg.email}</span>
-                  </td>
-                  <td className="px-8 py-6 max-w-md">
-                    <p className="text-sm text-secondary truncate">{msg.message}</p>
-                  </td>
-                  <td className="px-8 py-6 text-sm text-secondary font-medium">
-                    {formatDate(msg.created_at)}
-                  </td>
-                  <td className="px-8 py-6 text-right">
-                    <button 
-                      onClick={() => setSelectedMsg(msg)}
-                      className="bg-primary text-white p-2 rounded hover:bg-tertiary transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-base">mail</span>
-                    </button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center text-secondary font-bold">LOADING DATA...</td>
                 </tr>
-              ))}
+              ) : messages.length === 0 ? (
+                <tr>
+                  <td colSpan="4" className="p-10 text-center text-secondary font-bold">NO MESSAGES FOUND.</td>
+                </tr>
+              ) : (
+                displayedData.map((msg) => (
+                  <tr key={msg.id} className="hover:bg-surface-container-low transition-colors group">
+                    <td className="px-8 py-6">
+                      <span className="block font-bold text-primary">{msg.first_name} {msg.last_name}</span>
+                      <span className="text-xs font-mono text-slate-400">{msg.email}</span>
+                    </td>
+                    <td className="px-8 py-6 max-w-md">
+                      <p className="text-sm text-secondary truncate">{msg.message}</p>
+                    </td>
+                    <td className="px-8 py-6 text-sm text-secondary font-medium">
+                      {msg.created_at ? formatDate(msg.created_at) : '—'}
+                    </td>
+                    <td className="px-8 py-6 text-right">
+                      <button
+                        onClick={() => setSelectedMsg(msg)}
+                        className="bg-primary text-white p-2 rounded hover:bg-tertiary transition-colors"
+                      >
+                        <span className="material-symbols-outlined text-base">mail</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -75,13 +98,16 @@ export default function ContactMessagesPage() {
         />
       </div>
 
+      {/* --- MODAL --- */}
       {selectedMsg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-xl shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-xl shadow-2xl">
             <div className="px-8 py-6 bg-surface-container-low border-b border-surface-variant flex justify-between items-center">
               <div>
                 <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase">Message Detail</h3>
-                <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">Received: {formatDate(selectedMsg.created_at)}</p>
+                <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
+                  Received: {selectedMsg.created_at ? formatDate(selectedMsg.created_at) : '—'}
+                </p>
               </div>
               <button onClick={() => setSelectedMsg(null)} className="text-secondary hover:text-primary">
                 <span className="material-symbols-outlined">close</span>
@@ -104,22 +130,23 @@ export default function ContactMessagesPage() {
 
               <div>
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Message Body</label>
-                <div className="bg-surface-container-low p-6 border border-surface-variant rounded text-sm text-secondary leading-relaxed italic">
+                <div className="bg-surface-container-low p-6 border border-surface-variant text-sm text-secondary leading-relaxed italic">
                   "{selectedMsg.message}"
                 </div>
               </div>
 
               <div className="flex gap-3">
-                <a 
+                <a
                   href={`mailto:${selectedMsg.email}`}
                   className="flex-1 bg-primary text-white py-3 text-center text-xs font-black uppercase tracking-widest hover:bg-tertiary transition-colors"
                 >
                   Reply via Email
                 </a>
                 {selectedMsg.whatsapp_number && (
-                  <a 
-                    href={`https://wa.me/${selectedMsg.whatsapp_number.replace(/\D/g,'')}`}
+                  <a
+                    href={`https://wa.me/${selectedMsg.whatsapp_number.replace(/\D/g, '')}`}
                     target="_blank"
+                    rel="noreferrer"
                     className="flex-1 border border-green-600 text-green-600 py-3 text-center text-xs font-black uppercase tracking-widest hover:bg-green-50 transition-colors"
                   >
                     WhatsApp
