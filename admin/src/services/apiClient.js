@@ -10,10 +10,16 @@ export const apiClient = async (url, options = {}) => {
         const token = await getValidAccessToken()
 
         // Add auth header if not already present
+        // apiClient.js - fixed
         const headers = {
-            'Content-Type': 'application/json',
-            ...options.headers,
+            ...options.headers, // ✅ spread first so caller can override
             'Authorization': `Bearer ${token}`,
+        }
+
+        // Only set JSON default if Content-Type wasn't explicitly set
+        // (FormData requests must NOT have Content-Type set at all)
+        if (!headers['Content-Type'] && !(options.body instanceof FormData)) {
+            headers['Content-Type'] = 'application/json'
         }
 
         const response = await fetch(url, {

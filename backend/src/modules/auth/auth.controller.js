@@ -22,7 +22,7 @@ export const login = async (req, res, next) => {
 export const refresh = async (req, res, next) => {
     try {
         const { refreshToken } = req.body
-        const data = service.refreshToken(refreshToken)
+        const data = await service.refreshToken(refreshToken)
         res.json(data)
     } catch (err) {
         next(err)

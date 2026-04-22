@@ -1,42 +1,41 @@
 import { API_BASE_URL } from '../utils/constants'
 
+let refreshPromise = null
+
+
 /**
  * Refresh access token using refresh token
  */
 export const refreshAccessToken = async () => {
     try {
         const refreshToken = localStorage.getItem('refreshToken')
-
         if (!refreshToken) {
+            window.location.href = '/login'
             throw new Error('No refresh token available')
         }
 
         const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                refreshToken: refreshToken,
-            }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ refreshToken }),
         })
 
         if (!response.ok) {
+            // ✅ Only clear tokens if the server explicitly rejects the refresh token
+            if (response.status === 401 || response.status === 403) {
+                localStorage.removeItem('accessToken')
+                localStorage.removeItem('refreshToken')
+                window.location.href = '/login'
+            }
             throw new Error('Failed to refresh token')
         }
 
         const data = await response.json()
-
-        // Update access token in localStorage
         localStorage.setItem('accessToken', data.accessToken)
-
         return data.accessToken
+
     } catch (error) {
         console.error('Token refresh failed:', error)
-        // Clear tokens and redirect to login
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-        window.location.href = '/login'
         throw error
     }
 }
@@ -72,7 +71,13 @@ export const getValidAccessToken = async () => {
     }
 
     if (isTokenExpired(accessToken)) {
-        return await refreshAccessToken()
+        // ✅ If a refresh is already in flight, wait for it instead of firing another
+        if (!refreshPromise) {
+            refreshPromise = refreshAccessToken().finally(() => {
+                refreshPromise = null
+            })
+        }
+        return await refreshPromise
     }
 
     return accessToken
