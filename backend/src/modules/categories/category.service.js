@@ -1,7 +1,7 @@
 import * as repo from './category.repository.js'
 
 export const createCategory = async (data) => {
-  const existing = await repo.findByNameAndType(data.name, data.type)
+  const existing = await repo.findByNameAndType(data.name_en, data.name_ar, data.type)
 
   if (existing) {
     throw new Error('Category already exists')

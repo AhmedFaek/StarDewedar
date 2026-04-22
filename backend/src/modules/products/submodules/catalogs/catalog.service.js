@@ -15,11 +15,17 @@ const uploadPDF = (file) => {
     })
 }
 
-export const uploadCatalog = async (productId, file) => {
+export const uploadCatalog = async (productId, file, data = {}) => {
     const result = await uploadPDF(file)
 
     await repo.createCatalog({
         product_id: productId,
+        title_en: data.title_en || null,
+        title_ar: data.title_ar || null,
         file_url: result.secure_url,
     })
+}
+
+export const getCatalogsByProductId = (productId) => {
+    return repo.getAllCatalogsByProductId(productId)
 }

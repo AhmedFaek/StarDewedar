@@ -16,13 +16,23 @@ export const getCategoryById = (id) => {
   })
 }
 
-export const findByNameAndType = (name, type) => {
+export const findByNameAndType = (name_en, name_ar, type) => {
   return prisma.category.findFirst({
     where: {
-      name: {
-        equals: name,
-        mode: 'insensitive',
-      },
+      OR: [
+        {
+          name_en: {
+            equals: name_en,
+            mode: 'insensitive',
+          },
+        },
+        {
+          name_ar: {
+            equals: name_ar,
+            mode: 'insensitive',
+          },
+        },
+      ],
       type,
     },
   })
