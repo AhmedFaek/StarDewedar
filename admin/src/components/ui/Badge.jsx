@@ -4,19 +4,20 @@ export const Badge = ({
   icon,
   className = ''
 }) => {
-  const baseClasses = "inline-flex items-center gap-2 px-2.5 py-0.5 text-xs font-black font-headline uppercase tracking-tighter"
+  const baseClasses = "inline-flex items-center gap-2 px-2.5 py-1 text-[10px] font-black font-headline uppercase tracking-widest transition-colors shadow-sm"
   
   const variantClasses = {
-    default: 'bg-surface-container text-on-surface',
-    error: 'bg-error-container text-on-error-container',
-    success: 'bg-primary-fixed text-on-primary-fixed',
-    warning: 'bg-secondary-container text-on-secondary-container',
-    urgent: 'bg-tertiary-fixed text-on-tertiary-fixed',
+    // Standard M3 dynamic tokens
+    default: 'bg-surface-container text-primary', 
+    error: 'bg-error text-white',
+    success: 'bg-green-600 text-white',
+    warning: 'bg-amber-400 text-amber-950',
+    urgent: 'bg-tertiary text-white',
   }
 
   return (
     <span className={`${baseClasses} ${variantClasses[variant]} ${className}`}>
-      {icon && <span className="material-symbols-outlined text-sm">{icon}</span>}
+      {icon && <span className="material-symbols-outlined text-[14px]">{icon}</span>}
       {children}
     </span>
   )
