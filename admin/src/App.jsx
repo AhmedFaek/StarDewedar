@@ -6,6 +6,7 @@ import Products from './pages/Products'
 import Projects from './pages/Projects'
 import QuoteRequests from './pages/quoteRequests'
 import VisitRequests from './pages/visitRequests'
+import ContactMessagesPage from './pages/contactMessages'
 
 export default function App() {
   return (
@@ -18,6 +19,7 @@ export default function App() {
           <Route path="/projects" element={<Projects />} />
           <Route path="/quote-requests" element={<QuoteRequests />} />
           <Route path="/visits" element={<VisitRequests />} />
+          <Route path="/messages" element={<ContactMessagesPage />} />
         </Routes>
       </MainLayout>
     </BrowserRouter>

@@ -217,3 +217,26 @@ export const categories = [
         createdDate: '2024-02-20 13:45'
     }
 ]
+
+export const contactMessages = [
+    {
+        id: '994i2844-i63f-85h8-e150-880099884444',
+        first_name: 'David',
+        last_name: 'Miller',
+        email: 'd.miller@techgrid.com',
+        phone_number: '+1-555-999-8888',
+        whatsapp_number: '+15559998888',
+        message: 'Hello, we are interested in a long-term partnership for transformer components. Who is the right person to speak with regarding procurement?',
+        created_at: '2024-05-21T08:00:00Z'
+    },
+    {
+        id: '005j3955-j74g-96i9-f261-991100995555',
+        first_name: 'Sophia',
+        last_name: 'Wang',
+        email: 'sophia.w@buildcorp.cn',
+        phone_number: '+86-10-8888-9999',
+        whatsapp_number: null,
+        message: 'I am writing to report a technical issue with the Type-C circuit breaker installed last week at our East Facility. It seems to be tripping under nominal load.',
+        created_at: '2024-05-20T16:20:00Z'
+    }
+];

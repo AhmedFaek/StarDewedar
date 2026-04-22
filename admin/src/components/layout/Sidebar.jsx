@@ -11,7 +11,6 @@ export const Sidebar = () => {
     { id: 'quotes', label: 'Quote Requests', icon: 'request_quote', path: '/quote-requests' },
     { id: 'visits', label: 'Visit Requests', icon: 'calendar_today', path: '/visits' },
     { id: 'messages', label: 'Contact Messages', icon: 'chat', path: '/messages' },
-    { id: 'users', label: 'Users', icon: 'group', path: '/users' },
   ]
 
   const bottomItems = [
