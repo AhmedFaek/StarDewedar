@@ -1,0 +1,270 @@
+{
+  "common": {
+    "loading": "جارِ تحميل البيانات...",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "discard": "تجاهل",
+    "delete": "حذف",
+    "edit": "تعديل",
+    "close": "إغلاق",
+    "add": "إضافة",
+    "saving": "جارِ الحفظ...",
+    "processing": "جارِ المعالجة...",
+    "confirm_delete": "هل أنت متأكد من الحذف؟",
+    "no_data": "لا توجد بيانات.",
+    "error": "حدث خطأ ما",
+    "success": "تمت العملية بنجاح"
+  },
+
+  
+  "sidebar": {
+    "dashboard": "لوحة التحكم",
+    "categories": "الفئات",
+    "products": "المنتجات",
+    "projects": "المشاريع",
+    "quotes": "طلبات التسعير",
+    "visits": "طلبات الزيارة",
+    "messages": "رسائل التواصل",
+    "adminDashboard": "لوحة الإدارة",
+    "logout": "تسجيل الخروج"
+  },
+
+
+  "nav": {
+    "dashboard": "لوحة التحكم",
+    "products": "المنتجات",
+    "categories": "التصنيفات",
+    "projects": "المشاريع",
+    "quotes": "طلبات الأسعار",
+    "visits": "طلبات الزيارة",
+    "inbox": "الرسائل"
+  },
+
+  "login": {
+    "title": "تسجيل دخول المشرف",
+    "subtitle": "تفويض النظام",
+    "email_label": "البريد الإلكتروني",
+    "email_placeholder": "admin@system.com",
+    "password_label": "كلمة المرور",
+    "password_placeholder": "••••••••",
+    "submit": "تسجيل الدخول",
+    "submitting": "جارِ تسجيل الدخول..."
+  },
+
+  "dashboard": {
+    "title": "نظرة عامة على العمليات",
+    "total_products": "إجمالي المنتجات",
+    "total_projects": "إجمالي المشاريع",
+    "quote_requests": "طلبات الأسعار",
+    "visit_requests": "طلبات الزيارة",
+    "catalog_items": "عنصر في الكتالوج",
+    "active_projects": "مشاريع نشطة",
+    "pending": "قيد الانتظار"
+  },
+   "pagination": {
+    "displaying": "عرض {{totalDisplayed}} من {{totalItems}} عنصر"
+  },
+
+  "products": {
+    "title": "المنتجات",
+    "subtitle": "مخزون النظام",
+    "add_button": "إضافة منتج",
+    "no_products": "لا توجد منتجات",
+    "loading": "جارِ تحميل المنتجات...",
+    "delete_confirm": "هل أنت متأكد من حذف هذا المنتج؟",
+    "delete_success": "تم حذف المنتج بنجاح",
+    "save_success": "تم حفظ المنتج بنجاح",
+    "save_error": "فشل حفظ المنتج",
+    "table": {
+      "id": "الرقم",
+      "name": "اسم المنتج",
+      "price": "السعر",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "add_title": "إدخال جديد",
+      "edit_title": "تعديل المنتج",
+      "name_label": "اسم المنتج",
+      "name_placeholder": "مثال: مكوّن أساسي X1",
+      "price_label": "سعر الوحدة (ج.م)",
+      "category_label": "التصنيف",
+      "category_placeholder": "اختر التصنيف",
+      "description_label": "الوصف الفني",
+      "description_placeholder": "أدخل تفاصيل شاملة للمنتج...",
+      "assets_label": "المستندات والملفات",
+      "catalog_label": "رفع الكتالوج (PDF)",
+      "images_label": "رفع صور المنتج",
+      "images_selected": "{{count}} صورة مختارة",
+      "submit": "حفظ في النظام"
+    }
+  },
+
+  "categories": {
+    "title": "التصنيفات",
+    "subtitle": "مخزون النظام",
+    "add_button": "إضافة تصنيف",
+    "no_categories": "لا توجد تصنيفات",
+    "loading": "جارِ تحميل التصنيفات...",
+    "delete_confirm": "هل أنت متأكد من حذف هذا التصنيف؟",
+    "delete_success": "تم حذف التصنيف بنجاح",
+    "save_success": "تم حفظ التصنيف بنجاح",
+    "table": {
+      "id": "الرقم",
+      "name": "اسم التصنيف",
+      "type": "النوع",
+      "created": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "add_title": "تصنيف جديد",
+      "edit_title": "تعديل التصنيف",
+      "name_label": "اسم التصنيف",
+      "name_placeholder": "مثال: جهد عالي",
+      "type_label": "نوع التشغيل",
+      "type_product": "منتج",
+      "type_project": "مشروع",
+      "audit_label": "سجل النظام",
+      "ref_id": "الرقم المرجعي",
+      "created": "تاريخ الإنشاء",
+      "submit_add": "إضافة تصنيف",
+      "submit_edit": "تحديث النظام"
+    }
+  },
+
+  "projects": {
+    "title": "المشاريع",
+    "subtitle": "دورة حياة العمليات",
+    "add_button": "مشروع جديد",
+    "delete_confirm": "هل أنت متأكد من حذف هذا المشروع؟",
+    "save_error": "خطأ في حفظ المشروع",
+    "delete_error": "فشل الحذف",
+    "table": {
+      "code": "الكود",
+      "details": "التفاصيل والعميل",
+      "timeline": "الجدول الزمني",
+      "budget": "الميزانية",
+      "management": "الإدارة",
+      "manage": "إدارة",
+      "delete": "حذف",
+      "timeline_to": "إلى"
+    },
+    "modal": {
+      "add_title": "بدء مشروع",
+      "edit_title": "تعديل المشروع",
+      "title_label": "عنوان المشروع",
+      "client_label": "اسم العميل",
+      "location_label": "الموقع / المنشأة",
+      "category_label": "التصنيف",
+      "category_placeholder": "اختر التصنيف",
+      "budget_label": "الميزانية (ج.م)",
+      "start_date_label": "تاريخ البدء",
+      "end_date_label": "تاريخ الانتهاء",
+      "gallery_label": "معرض المشروع",
+      "gallery_browse": "استعراض",
+      "gallery_new_images": "صور جديدة مختارة",
+      "gallery_existing": "{{count}} صورة موجودة في السحابة",
+      "description_label": "وصف المشروع",
+      "description_placeholder": "الوصف",
+      "submit": "حفظ بيانات المشروع",
+      "discard": "تجاهل"
+    }
+  },
+
+  "quotes": {
+    "title": "طلبات الأسعار",
+    "subtitle": "المبيعات",
+    "no_quotes": "لا توجد طلبات أسعار.",
+    "table": {
+      "requester": "مقدم الطلب",
+      "contact": "التواصل",
+      "subject": "الموضوع / المنتج",
+      "status": "الحالة",
+      "action": "إجراء",
+      "review": "مراجعة التفاصيل ←",
+      "general_inquiry": "استفسار عام"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "contacted": "تم التواصل",
+      "closed": "مغلق"
+    },
+    "modal": {
+      "title": "تفاصيل الطلب",
+      "customer_label": "العميل",
+      "status_label": "إدارة الحالة",
+      "saving": "جارِ الحفظ...",
+      "product_label": "المنتج المطلوب",
+      "product_default": "وحدة من الكتالوج",
+      "product_ref": "مرجع",
+      "specs_label": "المواصفات التفصيلية",
+      "file_label": "مستند مرفق",
+      "file_download": "تحميل",
+      "delete": "حذف الطلب",
+      "close": "إغلاق النافذة"
+    },
+    "delete_confirm": "هل أنت متأكد من حذف طلب السعر هذا؟",
+    "delete_error": "فشل حذف الطلب",
+    "status_error": "فشل تحديث الحالة"
+  },
+
+  "visits": {
+    "title": "طلبات الزيارة",
+    "subtitle": "عمليات الميدان",
+    "no_visits": "لا توجد طلبات زيارة.",
+    "table": {
+      "factory": "المصنع / النشاط",
+      "contact": "التواصل",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "action": "إجراء",
+      "view": "عرض الطلب ←"
+    },
+    "status": {
+      "pending": "قيد الانتظار",
+      "contacted": "جارِ التنسيق",
+      "closed": "مكتمل / مؤرشف"
+    },
+    "modal": {
+      "title": "تفاصيل الزيارة",
+      "subtitle": "عملية: فحص ميداني",
+      "factory_label": "موقع المصنع",
+      "address_label": "العنوان",
+      "status_label": "حالة الفحص",
+      "saving": "جارِ الحفظ...",
+      "rep_label": "المندوب في الموقع",
+      "date_label": "التاريخ المفضل للفحص",
+      "details_label": "نطاق العمل / التفاصيل",
+      "delete": "حذف الطلب",
+      "whatsapp": "واتساب",
+      "close": "إغلاق"
+    },
+    "delete_confirm": "هل أنت متأكد من حذف طلب الزيارة هذا؟",
+    "delete_error": "فشل حذف الزيارة",
+    "status_error": "فشل تحديث الحالة"
+  },
+
+  "inbox": {
+    "title": "الرسائل الواردة",
+    "subtitle": "دعم العملاء",
+    "no_messages": "لا توجد رسائل.",
+    "table": {
+      "sender": "المُرسِل",
+      "preview": "معاينة الرسالة",
+      "received": "تاريخ الاستلام",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "title": "تفاصيل الرسالة",
+      "received": "استُلمت في",
+      "from_label": "من",
+      "lines_label": "خطوط التواصل",
+      "phone": "الهاتف",
+      "whatsapp": "واتساب",
+      "na": "غير متوفر",
+      "body_label": "نص الرسالة",
+      "reply_email": "الرد عبر البريد",
+      "reply_whatsapp": "واتساب",
+      "close": "إغلاق"
+    }
+  }
+}

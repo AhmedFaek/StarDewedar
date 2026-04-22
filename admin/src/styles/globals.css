@@ -36,3 +36,18 @@ body {
         overflow: hidden;
     }
 }
+
+
+
+.arabic body {
+    font-family: 'Cairo', sans-serif;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* Fix spacing */
+.arabic .font-headline {
+    letter-spacing: 0;
+}

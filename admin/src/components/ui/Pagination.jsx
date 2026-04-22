@@ -1,12 +1,16 @@
+import { useTranslation } from 'react-i18next'
+
 export const Pagination = ({ 
   currentPage, 
   totalPages, 
   onPageChange,
   totalDisplayed,
   totalItems,
-  variant = 'table', // 'table' or 'compact'
+  variant = 'table',
   className = ''
 }) => {
+  const { t, i18n } = useTranslation()
+  const isAr = i18n.language === 'ar'
   const isTableVariant = variant === 'table'
 
   const containerClasses = isTableVariant
@@ -15,14 +19,19 @@ export const Pagination = ({
 
   return (
     <div className={`${containerClasses} ${className}`}>
+
+      {/* Info Text */}
       {isTableVariant && totalDisplayed !== undefined && totalItems !== undefined && (
-        <p className="text-xs font-bold font-headline uppercase tracking-widest opacity-60">
-          Displaying {totalDisplayed} of {totalItems} entries
+        <p className={`text-xs font-bold font-headline opacity-60 ${
+          isAr ? '' : 'uppercase tracking-widest'
+        }`}>
+          {t('pagination.displaying', { totalDisplayed, totalItems })}
         </p>
       )}
 
       <div className={isTableVariant ? 'flex items-center gap-1' : 'flex gap-1'}>
-        {/* Previous Button */}
+        
+        {/* Previous */}
         <button
           onClick={() => onPageChange(Math.max(1, currentPage - 1))}
           disabled={currentPage === 1}
@@ -32,10 +41,12 @@ export const Pagination = ({
               : 'border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors disabled:opacity-50'
           }`}
         >
-          <span className="material-symbols-outlined text-sm">chevron_left</span>
+          <span className="material-symbols-outlined text-sm">
+            {isAr ? 'chevron_right' : 'chevron_left'}
+          </span>
         </button>
 
-        {/* Page Numbers */}
+        {/* Pages */}
         {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
           <button
             key={page}
@@ -54,7 +65,7 @@ export const Pagination = ({
           </button>
         ))}
 
-        {/* Next Button */}
+        {/* Next */}
         <button
           onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
           disabled={currentPage === totalPages}
@@ -64,8 +75,11 @@ export const Pagination = ({
               : 'border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors disabled:opacity-50'
           }`}
         >
-          <span className="material-symbols-outlined text-sm">chevron_right</span>
+          <span className="material-symbols-outlined text-sm">
+            {isAr ? 'chevron_left' : 'chevron_right'}
+          </span>
         </button>
+
       </div>
     </div>
   )

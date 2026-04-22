@@ -1,0 +1,268 @@
+{
+  "common": {
+    "loading": "LOADING DATA...",
+    "save": "Save",
+    "cancel": "Cancel",
+    "discard": "Discard",
+    "delete": "Delete",
+    "edit": "Edit",
+    "close": "Close",
+    "add": "Add",
+    "saving": "Saving...",
+    "processing": "Processing...",
+    "confirm_delete": "Are you sure you want to delete this?",
+    "no_data": "No data found.",
+    "error": "Something went wrong",
+    "success": "Done successfully"
+  },
+  "pagination": {
+    "displaying": "Displaying {{totalDisplayed}} of {{totalItems}} entries"
+  },
+
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "categories": "Categories",
+    "products": "Products",
+    "projects": "Projects",
+    "quotes": "Quote Requests",
+    "visits": "Visit Requests",
+    "messages": "Contact Messages",
+    "adminDashboard": "Admin Dashboard",
+    "logout": "Log Out"
+    },
+
+  "nav": {
+    "dashboard": "Dashboard",
+    "products": "Products",
+    "categories": "Categories",
+    "projects": "Projects",
+    "quotes": "Quotes",
+    "visits": "Visits",
+    "inbox": "Inbox"
+  },
+
+  "login": {
+    "title": "ADMIN LOGIN",
+    "subtitle": "System Authorization",
+    "email_label": "Access Email",
+    "email_placeholder": "admin@system.com",
+    "password_label": "Password",
+    "password_placeholder": "••••••••",
+    "submit": "LOGIN",
+    "submitting": "LOGGING IN..."
+  },
+
+  "dashboard": {
+    "title": "Operational Overview",
+    "total_products": "Total Products",
+    "total_projects": "Total Projects",
+    "quote_requests": "Quote Requests",
+    "visit_requests": "Visit Requests",
+    "catalog_items": "catalog items",
+    "active_projects": "active projects",
+    "pending": "PENDING"
+  },
+
+  "products": {
+    "title": "PRODUCTS",
+    "subtitle": "System Inventory",
+    "add_button": "Add Product",
+    "no_products": "No products found",
+    "loading": "Loading products...",
+    "delete_confirm": "Are you sure you want to delete this product?",
+    "delete_success": "Product deleted successfully",
+    "save_success": "Product saved successfully",
+    "save_error": "Failed to save product",
+    "table": {
+      "id": "# ID",
+      "name": "Product Name",
+      "price": "Unit Price",
+      "actions": "Actions"
+    },
+    "modal": {
+      "add_title": "New System Entry",
+      "edit_title": "Edit Product",
+      "name_label": "Product Name",
+      "name_placeholder": "e.g. CORE COMPONENT X1",
+      "price_label": "Unit Price (EGP)",
+      "category_label": "System Classification",
+      "category_placeholder": "Select Classification",
+      "description_label": "Technical Description",
+      "description_placeholder": "Enter comprehensive product details...",
+      "assets_label": "Documentation & Assets",
+      "catalog_label": "Upload Catalog (PDF)",
+      "images_label": "Upload Product Images",
+      "images_selected": "{{count}} Image(s) selected",
+      "submit": "Commit to System"
+    }
+  },
+
+  "categories": {
+    "title": "CATEGORIES",
+    "subtitle": "System Inventory",
+    "add_button": "Add Category",
+    "no_categories": "No categories found",
+    "loading": "Loading categories...",
+    "delete_confirm": "Are you sure you want to delete this category?",
+    "delete_success": "Category deleted successfully",
+    "save_success": "Category saved successfully",
+    "table": {
+      "id": "# ID",
+      "name": "Category Name",
+      "type": "Type",
+      "created": "Created Date",
+      "actions": "Engineering Actions"
+    },
+    "modal": {
+      "add_title": "New Classification",
+      "edit_title": "Edit Category",
+      "name_label": "Category Label",
+      "name_placeholder": "e.g. HIGH VOLTAGE",
+      "type_label": "Operational Type",
+      "type_product": "Product",
+      "type_project": "Project",
+      "audit_label": "System Audit",
+      "ref_id": "Reference ID",
+      "created": "Created",
+      "submit_add": "Add Category",
+      "submit_edit": "Update System"
+    }
+  },
+
+  "projects": {
+    "title": "PROJECTS",
+    "subtitle": "Operational Lifecycle",
+    "add_button": "New Project",
+    "delete_confirm": "Are you sure you want to delete this project?",
+    "save_error": "Error saving project",
+    "delete_error": "Delete failed",
+    "table": {
+      "code": "Code",
+      "details": "Details & Client",
+      "timeline": "Timeline",
+      "budget": "Budget",
+      "management": "Management",
+      "manage": "Manage",
+      "delete": "Delete",
+      "timeline_to": "TO"
+    },
+    "modal": {
+      "add_title": "Initiate Project",
+      "edit_title": "Modify Project",
+      "title_label": "Project Title",
+      "client_label": "Client Entity",
+      "location_label": "Location / Site",
+      "category_label": "Category",
+      "category_placeholder": "Select Category",
+      "budget_label": "Budget (EGP)",
+      "start_date_label": "Start Date",
+      "end_date_label": "End Date",
+      "gallery_label": "Project Gallery",
+      "gallery_browse": "Browse",
+      "gallery_new_images": "New Images Selected",
+      "gallery_existing": "{{count}} existing photos in cloud",
+      "description_label": "Project Description",
+      "description_placeholder": "Description",
+      "submit": "Save Project Data",
+      "discard": "Discard"
+    }
+  },
+
+  "quotes": {
+    "title": "QUOTES",
+    "subtitle": "System Sales",
+    "no_quotes": "NO QUOTE REQUESTS FOUND.",
+    "table": {
+      "requester": "Requester",
+      "contact": "Contact",
+      "subject": "Subject / Product",
+      "status": "Status",
+      "action": "Action",
+      "review": "Review Details →",
+      "general_inquiry": "General Inquiry"
+    },
+    "status": {
+      "pending": "Pending",
+      "contacted": "Contacted",
+      "closed": "Closed"
+    },
+    "modal": {
+      "title": "Request Detail",
+      "customer_label": "Customer",
+      "status_label": "Status Management",
+      "saving": "Saving...",
+      "product_label": "Requested Product",
+      "product_default": "Standard Catalog Unit",
+      "product_ref": "Reference",
+      "specs_label": "Detailed Specifications",
+      "file_label": "Attached Document",
+      "file_download": "Download",
+      "delete": "Delete Request",
+      "close": "Close Window"
+    },
+    "delete_confirm": "Are you sure you want to delete this quote request?",
+    "delete_error": "Failed to delete quote",
+    "status_error": "Failed to update status"
+  },
+
+  "visits": {
+    "title": "VISITS",
+    "subtitle": "Field Operations",
+    "no_visits": "NO VISIT REQUESTS FOUND.",
+    "table": {
+      "factory": "Factory / Activity",
+      "contact": "Contact",
+      "date": "Date",
+      "status": "Status",
+      "action": "Action",
+      "view": "View Request →"
+    },
+    "status": {
+      "pending": "Pending",
+      "contacted": "In Coordination",
+      "closed": "Completed / Archived"
+    },
+    "modal": {
+      "title": "Visit Logistics",
+      "subtitle": "Operation: Field Inspection",
+      "factory_label": "Factory Location",
+      "address_label": "Address",
+      "status_label": "Inspection Status",
+      "saving": "Saving...",
+      "rep_label": "On-site Representative",
+      "date_label": "Preferred Inspection Date",
+      "details_label": "Scope of Work / Details",
+      "delete": "Delete Request",
+      "whatsapp": "WhatsApp",
+      "close": "Close"
+    },
+    "delete_confirm": "Are you sure you want to delete this visit request?",
+    "delete_error": "Failed to delete visit",
+    "status_error": "Failed to update status"
+  },
+
+  "inbox": {
+    "title": "INBOX",
+    "subtitle": "Customer Support",
+    "no_messages": "NO MESSAGES FOUND.",
+    "table": {
+      "sender": "Sender",
+      "preview": "Message Preview",
+      "received": "Received",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "Message Detail",
+      "received": "Received",
+      "from_label": "From",
+      "lines_label": "Direct Lines",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp",
+      "na": "N/A",
+      "body_label": "Message Body",
+      "reply_email": "Reply via Email",
+      "reply_whatsapp": "WhatsApp",
+      "close": "Close"
+    }
+  }
+}
