@@ -40,7 +40,6 @@ model Product {
   category       Category               @relation(fields: [category_id], references: [id])
   images         ProductImage[]
   catalogs       ProductCatalog[]
-  specifications ProductSpecification[]
   quote_requests QuoteRequest[]
 }
 
@@ -50,7 +49,7 @@ model ProductImage {
   image_url  String
   created_at DateTime @default(now())
 
-  product Product @relation(fields: [product_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model ProductCatalog {
@@ -60,17 +59,7 @@ model ProductCatalog {
   title      String?
   created_at DateTime @default(now())
 
-  product Product @relation(fields: [product_id], references: [id])
-}
-
-model ProductSpecification {
-  id         String   @id @default(uuid())
-  product_id String
-  key        String
-  value      String
-  created_at DateTime @default(now())
-
-  product Product @relation(fields: [product_id], references: [id])
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model Project {
@@ -98,7 +87,7 @@ model ProjectImage {
   image_url  String
   created_at DateTime @default(now())
 
-  project Project @relation(fields: [project_id], references: [id])
+  project Project @relation(fields: [project_id], references: [id], onDelete: Cascade)
 }
 
 model QuoteRequest {
@@ -122,7 +111,7 @@ model QuoteRequest {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  product Product? @relation(fields: [product_id], references: [id])
+  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
 }
 
 model VisitRequest {
