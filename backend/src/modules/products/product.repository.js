@@ -10,7 +10,6 @@ export const getAllProducts = () => {
             category: true,
             images: true,
             catalogs: true,
-            specifications: true,
         },
         orderBy: { created_at: 'desc' },
     })
@@ -22,7 +21,6 @@ export const getProductById = (id) => {
         include: {
             images: true,
             catalogs: true,
-            specifications: true,
         },
     })
 }
