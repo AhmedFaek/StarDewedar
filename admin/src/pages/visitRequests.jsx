@@ -1,10 +1,18 @@
 import { useState } from 'react'
 import { Badge, Button } from '../components'
-import { visitRequests } from '../data/mockData'
+import { Pagination } from '../components/ui/Pagination'
+import { visitRequests as mockVisits } from '../data/mockData'
 
 export default function VisitRequestsPage() {
-  const [data, setData] = useState(visitRequests)
+  const [data, setData] = useState(mockVisits)
   const [selectedVisit, setSelectedVisit] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  // --- PAGINATION LOGIC ---
+  const itemsPerPage = 4
+  const totalPages = Math.ceil(data.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  const displayedData = data.slice(startIdx, startIdx + itemsPerPage)
 
   const handleStatusChange = (id, newStatus) => {
     const updatedData = data.map(visit => 
@@ -16,7 +24,7 @@ export default function VisitRequestsPage() {
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case 'new': return 'bg-primary text-[#FF0000]'
+      case 'new': return 'bg-primary text-[#FF0000]' // Fixed contrast
       case 'contacted': return 'bg-amber-100 text-amber-700'
       case 'closed': return 'bg-slate-100 text-slate-500'
       default: return 'bg-surface-variant text-secondary'
@@ -31,58 +39,67 @@ export default function VisitRequestsPage() {
       </div>
 
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-container-low border-b border-surface-variant">
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Factory / Activity</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Contact</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Date</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-center">Status</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-variant">
-            {data.map((visit) => (
-              <tr key={visit.id} className="hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6">
-                  <span className="block font-black text-primary font-headline tracking-tight leading-tight uppercase">
-                    {visit.factory_name}
-                  </span>
-                  <span className="text-[10px] text-tertiary font-bold uppercase">{visit.factory_activity}</span>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="block text-m font-bold text-primary">{visit.name}</span>
-                  <span className="block text-s font-mono text-secondary">{visit.whatsapp_number}</span>
-                </td>
-                <td className="px-8 py-6">
-                  <div className="flex items-center gap-2 text-primary font-bold">
-                    <span className="material-symbols-outlined text-sm text-tertiary">calendar_today</span>
-                    <span className="text-sm">{visit.preferred_date}</span>
-                  </div>
-                </td>
-                <td className="px-8 py-6 text-center">
-                   <Badge className={getStatusVariant(visit.status)}>{visit.status}</Badge>
-                </td>
-                <td className="px-8 py-6 text-right">
-                  <button 
-                    onClick={() => setSelectedVisit(visit)}
-                    className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter"
-                  >
-                    View Request →
-                  </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-low border-b border-surface-variant">
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Factory / Activity</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Contact</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Date</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-center">Status</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-right">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-surface-variant">
+              {displayedData.map((visit) => (
+                <tr key={visit.id} className="hover:bg-surface-container-low transition-colors group">
+                  <td className="px-8 py-6">
+                    <span className="block font-black text-primary font-headline tracking-tight leading-tight uppercase">
+                      {visit.factory_name}
+                    </span>
+                    <span className="text-[10px] text-tertiary font-bold uppercase">{visit.factory_activity}</span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className="block text-sm font-bold text-primary">{visit.name}</span>
+                    <span className="block text-xs font-mono text-secondary">{visit.whatsapp_number}</span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <div className="flex items-center gap-2 text-primary font-bold">
+                      <span className="material-symbols-outlined text-sm text-tertiary">calendar_today</span>
+                      <span className="text-sm">{visit.preferred_date}</span>
+                    </div>
+                  </td>
+                  <td className="px-8 py-6 text-center">
+                     <Badge className={getStatusVariant(visit.status)}>{visit.status}</Badge>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                    <button 
+                      onClick={() => setSelectedVisit(visit)}
+                      className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter"
+                    >
+                      View Request →
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalDisplayed={displayedData.length}
+          totalItems={data.length}
+          variant="table"
+        />
       </div>
 
-      {/* --- VISIT DETAIL POP SCREEN --- */}
+      {/* Modal remains the same but uses handleStatusChange correctly */}
       {selectedVisit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            
-            {/* Header */}
             <div className="flex justify-between items-center px-8 py-6 bg-surface-container-low border-b border-surface-variant">
               <div>
                 <h3 className="text-2xl font-black font-headline tracking-tighter text-primary uppercase">
@@ -95,10 +112,8 @@ export default function VisitRequestsPage() {
               </button>
             </div>
 
-            {/* Content */}
             <div className="px-8 py-8 space-y-6">
               <div className="grid grid-cols-2 gap-8">
-                {/* Site Info */}
                 <div className="space-y-4">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">Factory Location</label>
@@ -111,7 +126,6 @@ export default function VisitRequestsPage() {
                   </div>
                 </div>
 
-                {/* Status & Contact */}
                 <div className="space-y-4">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">Inspection Status</label>
@@ -133,7 +147,6 @@ export default function VisitRequestsPage() {
                 </div>
               </div>
 
-              {/* Schedule Block */}
               <div className="p-4 bg-surface-container-low border-l-4 border-primary flex items-center justify-between">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">Preferred Inspection Date</label>
@@ -142,7 +155,6 @@ export default function VisitRequestsPage() {
                 <span className="material-symbols-outlined text-4xl text-surface-variant">event_available</span>
               </div>
 
-              {/* Visit Details */}
               <div>
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Scope of Work / Details</label>
                 <div className="bg-surface-container-low p-4 border border-surface-variant text-sm text-secondary leading-relaxed h-32 overflow-y-auto">
@@ -151,7 +163,6 @@ export default function VisitRequestsPage() {
               </div>
             </div>
 
-            {/* Footer */}
             <div className="px-8 py-6 bg-surface-container-low border-t border-surface-variant flex justify-between items-center">
                <div className="flex gap-4">
                   <a href={`https://wa.me/${selectedVisit.whatsapp_number.replace(/\D/g,'')}`} target="_blank" className="flex items-center gap-2 text-xs font-black text-green-600 hover:opacity-80 transition-opacity uppercase tracking-widest">

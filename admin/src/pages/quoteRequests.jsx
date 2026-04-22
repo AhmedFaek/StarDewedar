@@ -1,14 +1,25 @@
 import { useState } from 'react'
 import { Badge, Button } from '../components'
-import { quoteRequests } from '../data/mockData'
+import { Pagination } from '../components/ui/Pagination'
+import { quoteRequests as mockQuotes } from '../data/mockData'
 
 export default function QuoteRequestsPage() {
-  const [data, setData] = useState(quoteRequests)
+  // Use one source of truth for the data
+  const [quotes, setQuotes] = useState(mockQuotes)
   const [selectedRequest, setSelectedRequest] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+
+  // --- PAGINATION LOGIC ---
+  const itemsPerPage = 4
+  const totalPages = Math.ceil(quotes.length / itemsPerPage)
+  const startIdx = (currentPage - 1) * itemsPerPage
+  
+  // Calculate displayed data based on the source of truth (quotes)
+  const displayedData = quotes.slice(startIdx, startIdx + itemsPerPage)
 
   const getStatusVariant = (status) => {
     switch (status) {
-      case 'new': return 'bg-primary text-[#FF0000]'
+      case 'new': return 'bg-primary text-[#FF0000]' // Fixed: text-white for better contrast
       case 'contacted': return 'bg-amber-100 text-amber-700'
       case 'closed': return 'bg-slate-100 text-slate-500'
       default: return 'bg-surface-variant text-secondary'
@@ -16,11 +27,12 @@ export default function QuoteRequestsPage() {
   }
 
   const handleStatusChange = (id, newStatus) => {
-    const updatedData = data.map(req => 
+    const updatedData = quotes.map(req => 
       req.id === id ? { ...req, status: newStatus } : req
     )
-    setData(updatedData)
-    // Update the local modal view as well
+    setQuotes(updatedData)
+    
+    // Update the local modal view so the dropdown reflects the change immediately
     setSelectedRequest(prev => ({ ...prev, status: newStatus }))
   }
 
@@ -32,47 +44,58 @@ export default function QuoteRequestsPage() {
       </div>
 
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-surface-container-low border-b border-surface-variant">
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Requester</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Contact</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Subject / Product</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-center">Status</th>
-              <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-right">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-surface-variant">
-            {data.map((req) => (
-              <tr key={req.id} className="hover:bg-surface-container-low transition-colors group">
-                <td className="px-8 py-6">
-                  <span className="block font-bold text-primary">{req.first_name} {req.last_name}</span>
-                  <span className="text-xs font-mono text-slate-400">{req.email}</span>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="block text-sm font-bold text-primary">{req.phone}</span>
-                </td>
-                <td className="px-8 py-6">
-                  <span className="block font-bold text-primary uppercase text-sm tracking-tight">
-                    {req.custom_product_name || (req.product_id ? 'Catalog Item' : 'General Inquiry')}
-                  </span>
-                  <p className="text-xs text-secondary line-clamp-1 max-w-xs italic">{req.details}</p>
-                </td>
-                <td className="px-8 py-6 text-center">
-                  <Badge className={getStatusVariant(req.status)}>{req.status}</Badge>
-                </td>
-                <td className="px-8 py-6 text-right">
-                   <button 
-                    onClick={() => setSelectedRequest(req)}
-                    className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter"
-                   >
-                    Review Details →
-                   </button>
-                </td>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-surface-container-low border-b border-surface-variant">
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Requester</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Contact</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary">Subject / Product</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-center">Status</th>
+                <th className="px-8 py-5 text-xs font-bold uppercase tracking-widest text-secondary text-right">Action</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-surface-variant">
+              {displayedData.map((req) => (
+                <tr key={req.id} className="hover:bg-surface-container-low transition-colors group">
+                  <td className="px-8 py-6">
+                    <span className="block font-bold text-primary">{req.first_name} {req.last_name}</span>
+                    <span className="text-xs font-mono text-slate-400">{req.email}</span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className="block text-sm font-bold text-primary">{req.phone}</span>
+                  </td>
+                  <td className="px-8 py-6">
+                    <span className="block font-bold text-primary uppercase text-sm tracking-tight">
+                      {req.custom_product_name || (req.product_id ? 'Catalog Item' : 'General Inquiry')}
+                    </span>
+                    <p className="text-xs text-secondary line-clamp-1 max-w-xs italic">{req.details}</p>
+                  </td>
+                  <td className="px-8 py-6 text-center">
+                    <Badge className={getStatusVariant(req.status)}>{req.status}</Badge>
+                  </td>
+                  <td className="px-8 py-6 text-right">
+                     <button 
+                      onClick={() => setSelectedRequest(req)}
+                      className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter"
+                     >
+                      Review Details →
+                     </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+          totalDisplayed={displayedData.length}
+          totalItems={quotes.length}
+          variant="table"
+        />
       </div>
 
       {/* --- POP SCREEN (MODAL) --- */}
@@ -98,7 +121,6 @@ export default function QuoteRequestsPage() {
 
             {/* Modal Content */}
             <div className="px-8 py-8 space-y-8">
-              {/* Information Grid */}
               <div className="grid grid-cols-2 gap-8">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">Customer</label>
@@ -120,7 +142,6 @@ export default function QuoteRequestsPage() {
                 </div>
               </div>
 
-              {/* Product Info */}
               <div className="p-4 bg-surface-container-low border-l-4 border-tertiary">
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">Requested Product</label>
                 <p className="text-lg font-black text-primary uppercase tracking-tight">
@@ -131,7 +152,6 @@ export default function QuoteRequestsPage() {
                 )}
               </div>
 
-              {/* Message Details */}
               <div>
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Detailed Specifications</label>
                 <div className="bg-surface-container-low p-4 border border-surface-variant text-sm text-secondary leading-relaxed max-h-40 overflow-y-auto">
@@ -139,7 +159,6 @@ export default function QuoteRequestsPage() {
                 </div>
               </div>
 
-              {/* Attachments */}
               {selectedRequest.file_url && (
                 <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant rounded">
                   <span className="material-symbols-outlined text-tertiary">description</span>
@@ -152,7 +171,6 @@ export default function QuoteRequestsPage() {
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="px-8 py-6 bg-surface-container-low border-t border-surface-variant flex justify-end gap-4">
               <Button variant="secondary" onClick={() => setSelectedRequest(null)}>Close Window</Button>
             </div>
