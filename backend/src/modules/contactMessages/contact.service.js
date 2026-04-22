@@ -1,6 +1,7 @@
 import * as repo from './contact.repository.js'
 import env from '../../config/env.js'
 import nodemailer from 'nodemailer'
+import {baseEmailTemplate} from '../../utils/email.template.js'
 
 const transporter = nodemailer.createTransport({
     host: 'smtp.mail.yahoo.com',
@@ -17,63 +18,50 @@ const transporter = nodemailer.createTransport({
 })
 
 export const sendContactEmail = async (data) => {
-    try {
-        const mailOptions = {
-            from: `"Star Dewedar Website" <${env.yahooEmail}>`,
-            to: env.yahooEmail, // send to yourself (recommended)
-            subject: `New Contact Message from ${data.first_name} ${data.last_name}`,
+  try {
+    const content = `
+      <div style="margin-bottom:20px;">
+        <p><strong>Name:</strong> ${data.first_name} ${data.last_name}</p>
 
-            html: `
-        <div style="font-family: Arial, sans-serif; color: #333; line-height:1.6;">
-          
-          <h2 style="color: #2F2FE4;">New Contact Message Received</h2>
-          
-          <p><strong>Name:</strong> ${data.first_name} ${data.last_name}</p>
+        <p>
+          <strong>Email:</strong>
+          <a href="mailto:${data.email}" style="color:#2F2FE4;">
+            ${data.email}
+          </a>
+        </p>
 
-          <p>
-            <strong>Email:</strong> 
-            <a href="mailto:${data.email}" style="color:#2F2FE4;">
-              ${data.email}
-            </a>
-          </p>
+        <p><strong>Phone:</strong> ${data.phone_number || 'N/A'}</p>
+        <p><strong>WhatsApp:</strong> ${data.whatsapp_number || 'N/A'}</p>
+      </div>
 
-          <p><strong>Phone:</strong> ${data.phone_number || 'N/A'}</p>
-          <p><strong>WhatsApp:</strong> ${data.whatsapp_number || 'N/A'}</p>
+      <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
+        <strong>Message:</strong>
+        <p>${data.message}</p>
+      </div>
 
-          <hr style="border:0; border-top:1px solid #eee; margin:20px 0;" />
+      <div style="margin-top:25px;">
+        <a href="mailto:${data.email}"
+          style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
+          Reply to Customer
+        </a>
+      </div>
+    `;
 
-          <p><strong>Message:</strong></p>
-          <p style="background:#f9f9f9; padding:15px; border-left:4px solid #2F2FE4;">
-            ${data.message}
-          </p>
+    const mailOptions = {
+      from: `"Star Dewedar Website" <${env.yahooEmail}>`,
+      to: env.yahooEmail,
+      subject: `New Contact Message - ${data.first_name} ${data.last_name}`,
+      html: baseEmailTemplate({
+        title: "New Contact Message Received",
+        content,
+      }),
+    };
 
-          <div style="margin-top:25px;">
-            <a 
-              href="mailto:${data.email}?subject=Re: Your message to Star Dewedar"
-              style="
-                display:inline-block;
-                padding:12px 18px;
-                background:#2F2FE4;
-                color:#ffffff;
-                text-decoration:none;
-                border-radius:6px;
-                font-weight:bold;
-              "
-            >
-              Reply to Customer
-            </a>
-          </div>
-
-        </div>
-      `,
-        };
-
-        const response = await transporter.sendMail(mailOptions);
-        return response;
-    } catch (error) {
-        console.error("❌ Yahoo SMTP Error:", error);
-        throw error;
-    }
+    return await transporter.sendMail(mailOptions);
+  } catch (error) {
+    console.error("❌ Yahoo SMTP Error:", error);
+    throw error;
+  }
 };
 
 export const createContact = async (data) => {

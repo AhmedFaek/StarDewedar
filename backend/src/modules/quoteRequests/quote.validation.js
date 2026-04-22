@@ -1,19 +1,32 @@
-import { z } from 'zod'
+import { z } from 'zod';
 
 export const createQuoteRequestSchema = z.object({
-    first_name: z.string().min(2),
-    last_name: z.string().min(2),
-    phone: z.string().min(10),
+    first_name: z.string().trim().min(2),
+    last_name: z.string().trim().min(2),
+
+    phone: z.string().trim().min(10),
+
     email: z.string().email(),
-    product_id: z.string().optional(),
-    custom_product_name: z.string().optional(),
-    custom_image_url: z.string().optional(),
-    details: z.string().min(5),
-    file_url: z.string().optional(),
-}).refine(
-    (data) => data.product_id || (data.custom_product_name && data.custom_image_url),
-    {
-        message: 'Either product_id or (custom_product_name and custom_image_url) must be provided',
-        path: ['product_id'],
-    }
-)
+
+    product_id: z.string().trim().optional(),
+
+    custom_product_name: z.string().trim().optional(),
+    custom_image_url: z.string().url().optional(),
+
+    details: z.string().trim().min(5),
+
+    file_url: z.string().url().optional(),
+})
+    .refine(
+        (data) => {
+            const hasProduct = !!data.product_id;
+            const hasCustom =
+                !!data.custom_product_name && !!data.custom_image_url;
+
+            return hasProduct || hasCustom;
+        },
+        {
+            message: 'You must provide either product_id OR custom product (name + image)',
+            path: ['product_id'],
+        }
+    );

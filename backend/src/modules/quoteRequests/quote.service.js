@@ -1,5 +1,8 @@
 import * as repo from './quote.repository.js'
 import * as contactService from '../contactMessages/contact.service.js'
+import {baseEmailTemplate} from '../../utils/email.template.js'
+import env from '../../config/env.js'
+import nodemailer from 'nodemailer'
 
 export const createQuoteRequest = async (data) => {
     // Set default status to 'pending'
@@ -13,47 +16,92 @@ export const createQuoteRequest = async (data) => {
     const quoteRequest = await repo.create(quoteData)
 
     // Send email notification to company
-    //await sendQuoteRequestEmail(quoteRequest)
+    await sendQuoteRequestEmail(quoteRequest)
 
     return quoteRequest
 }
+
+const transporter = nodemailer.createTransport({
+    host: 'smtp.mail.yahoo.com',
+    port: 465,         // Use 465 for Yahoo
+    secure: true,      // true for 465, false for other ports
+    auth: {
+        user: env.yahooEmail,
+        pass: env.yahooPassword,
+    },
+    // Yahoo often requires these headers to avoid being flagged as spam/invalid
+    tls: {
+        rejectUnauthorized: false
+    }
+})
 
 export const sendQuoteRequestEmail = async (quoteRequest) => {
     try {
         const productInfo = quoteRequest.product
             ? `<p><strong>Product:</strong> ${quoteRequest.product.name}</p>`
-            : `<p><strong>Custom Product:</strong> ${quoteRequest.custom_product_name}</p>`
+            : `<p><strong>Custom Product:</strong> ${quoteRequest.custom_product_name}</p>`;
 
-        const emailData = {
-            first_name: quoteRequest.first_name,
-            last_name: quoteRequest.last_name,
-            email: quoteRequest.email,
-            phone_number: quoteRequest.phone,
-            whatsapp_number: null,
-            message: `
-                <h2>New Quote Request</h2>
-                
-                <p><strong>Name:</strong> ${quoteRequest.first_name} ${quoteRequest.last_name}</p>
-                <p><strong>Email:</strong> ${quoteRequest.email}</p>
-                <p><strong>Phone:</strong> ${quoteRequest.phone}</p>
-                
-                ${productInfo}
-                
-                <p><strong>Details:</strong></p>
-                <p>${quoteRequest.details}</p>
-                
-                ${quoteRequest.file_url ? `<p><strong>File:</strong> <a href="${quoteRequest.file_url}">Download</a></p>` : ''}
-                
-                <p><strong>Status:</strong> ${quoteRequest.status}</p>
-            `,
-        }
+        const fileInfo = quoteRequest.file_url
+            ? `
+        <p>
+          <strong>File:</strong>
+          <a href="${quoteRequest.file_url}" style="color:#2F2FE4;">
+            Download File
+          </a>
+        </p>
+      `
+            : "";
 
-        await contactService.sendContactEmail(emailData)
+        const content = `
+      <div style="margin-bottom:20px;">
+        <p><strong>Name:</strong> ${quoteRequest.first_name} ${quoteRequest.last_name}</p>
+
+        <p>
+          <strong>Email:</strong>
+          <a href="mailto:${quoteRequest.email}" style="color:#2F2FE4;">
+            ${quoteRequest.email}
+          </a>
+        </p>
+
+        <p><strong>Phone:</strong> ${quoteRequest.phone}</p>
+        <p><strong>Status:</strong> ${quoteRequest.status}</p>
+      </div>
+
+      <div style="border-left:4px solid #2F2FE4; padding-left:12px; margin-bottom:20px;">
+        ${productInfo}
+      </div>
+
+      <div style="background:#f4f6ff; padding:15px; border-radius:8px;">
+        <strong>Details:</strong>
+        <p>${quoteRequest.details}</p>
+      </div>
+
+      ${fileInfo}
+
+      <div style="margin-top:25px;">
+        <a href="mailto:${quoteRequest.email}"
+          style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
+          Reply to Customer
+        </a>
+      </div>
+    `;
+
+        const mailOptions = {
+            from: `"Star Dewedar Website" <${env.yahooEmail}>`,
+            to: env.yahooEmail,
+            subject: `New Quote Request - ${quoteRequest.first_name} ${quoteRequest.last_name}`,
+            html: baseEmailTemplate({
+                title: "New Quote Request 💼",
+                content,
+            }),
+        };
+
+        return await transporter.sendMail(mailOptions);
     } catch (error) {
-        console.error('Error sending quote request email:', error)
-        // Don't throw - quote was created successfully, just log the email error
+        console.error("❌ Yahoo SMTP Error:", error);
+        throw error;
     }
-}
+};
 
 export const getQuoteRequests = () => repo.findAll()
 
