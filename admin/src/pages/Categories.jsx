@@ -119,7 +119,7 @@ export default function Categories() {
                     <td className="px-8 py-6 text-xs font-mono text-slate-400">#{String(item.id).slice(0, 6).padStart(3, '0')}</td>
                     <td className="px-8 py-6"><span className="block font-bold text-primary font-headline tracking-tight uppercase">{item.name_en}</span><span className="block text-xs text-secondary font-medium">{item.name_ar}</span></td>
                     <td className="px-8 py-6">
-                      <Badge className={item.type?.toLowerCase() === 'product' ? 'bg-primary text-[#124170]' : 'bg-amber-500 text-white'}>
+                      <Badge className={item.type?.toLowerCase() === 'product' ? 'bg-primary text-[#124170]' : 'bg-amber-500 text-[#EE4B2B]'}>
                         {item.type?.toLowerCase() === 'product' ? t('categories.modal.type_product') : t('categories.modal.type_project')}
                       </Badge>
                     </td>
