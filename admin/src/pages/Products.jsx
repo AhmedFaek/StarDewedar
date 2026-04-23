@@ -116,12 +116,12 @@ export default function ProductsPage() {
       {error && <div className="mb-6 p-4 bg-error-container border border-error text-on-error-container rounded"><p className="text-sm font-medium">{error}</p></div>}
       {success && <div className="mb-6 p-4 bg-tertiary-fixed border border-tertiary text-on-tertiary-fixed rounded"><p className="text-sm font-medium">{success}</p></div>}
 
-      <div className="flex justify-between items-end mb-12">
+      <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between lg:mb-12">
         <div>
           <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('products.subtitle')}</span>
-          <h2 className="text-5xl font-black font-headline tracking-tighter text-primary leading-none">{t('products.title')}.</h2>
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('products.title')}.</h2>
         </div>
-        <Button variant="tertiary" size="lg" icon="add_box" onClick={openAddModal} disabled={loading}>{t('products.add_button')}</Button>
+        <Button variant="tertiary" size="lg" icon="add_box" onClick={openAddModal} disabled={loading} className="w-full sm:w-auto">{t('products.add_button')}</Button>
       </div>
 
       {loading && !products.length ? (
@@ -163,14 +163,14 @@ export default function ProductsPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
           <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <form onSubmit={handleSave}>
-              <div className="px-8 py-6 bg-surface-container-low border-b border-surface-variant flex justify-between items-center sticky top-0 z-10">
-                <h3 className="text-2xl font-black font-headline tracking-tighter text-primary uppercase">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">
                   {selectedProduct?.id ? t('products.modal.edit_title') : t('products.modal.add_title')}<span className="text-tertiary">.</span>
                 </h3>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-secondary hover:text-primary transition-colors" disabled={isSaving}><span className="material-symbols-outlined">close</span></button>
               </div>
-              <div className="p-8 space-y-8">
-                <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-6 p-4 sm:p-6 lg:space-y-8 lg:p-8">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Name (EN)</label>
                     <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase" value={formData.name_en} onChange={(e) => setFormData({ ...formData, name_en: e.target.value })} placeholder="Product name in English" required disabled={isSaving} />
@@ -193,7 +193,7 @@ export default function ProductsPage() {
                     </select>
                   </div>
                 </div>
-                <div className="col-span-2 grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Description (EN)</label>
                     <textarea className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary focus:outline-none focus:border-tertiary resize-none" value={formData.description_en} onChange={(e) => setFormData({ ...formData, description_en: e.target.value })} placeholder="Product description in English" rows="3" disabled={isSaving} />
@@ -223,9 +223,9 @@ export default function ProductsPage() {
                   </div>
                 )}
               </div>
-              <div className="px-8 py-6 bg-surface-container-low border-t border-surface-variant flex justify-end items-center gap-6 sticky bottom-0">
+              <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:items-center sm:justify-end sm:gap-4 sm:px-6 lg:gap-6 lg:px-8 lg:py-6">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-xs font-black uppercase tracking-[0.2em] text-secondary hover:text-error transition-colors disabled:opacity-50" disabled={isSaving}>{t('common.discard')}</button>
-                <Button type="submit" variant="tertiary" disabled={isSaving} className="min-w-[180px]">
+                <Button type="submit" variant="tertiary" disabled={isSaving} className="w-full sm:min-w-[180px] sm:w-auto">
                   {isSaving ? t('common.processing') : t('products.modal.submit')}
                 </Button>
               </div>

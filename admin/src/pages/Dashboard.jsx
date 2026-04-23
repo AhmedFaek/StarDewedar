@@ -57,12 +57,12 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="mb-12">
-        <h2 className="text-5xl font-black font-headline tracking-tighter text-primary uppercase leading-none">
+      <div className="mb-8 sm:mb-10 lg:mb-12">
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-primary uppercase leading-none sm:text-4xl lg:text-5xl">
           {t('dashboard.title')}
         </h2>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-0.5 bg-outline-variant bg-opacity-10 mb-12">
+      <div className="mb-12 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4 lg:gap-0.5 lg:bg-outline-variant lg:bg-opacity-10">
         {statCardsData.map((stat, index) => (
           <StatCard key={index} {...stat} />
         ))}

@@ -2,10 +2,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
 
-export const Sidebar = () => {
-    const { t } = useTranslation()
+export const Sidebar = ({ isOpen, onClose }) => {
+  const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
+  const isAr = i18n.language === 'ar'
 
   const navItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: 'dashboard', path: '/' },
@@ -21,6 +22,7 @@ export const Sidebar = () => {
     // Clear tokens from localStorage
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
+    onClose?.()
     // Redirect to login
     navigate('/login')
   }
@@ -28,25 +30,45 @@ export const Sidebar = () => {
   const isActive = (path) => location.pathname === path
 
   return (
-    <aside className="w-64 h-screen fixed top-0 bg-primary flex flex-col z-50
-       left-0 arabic:left-auto arabic:right-0">
+    <aside
+      className={`fixed inset-y-0 z-50 flex h-screen w-64 flex-col bg-primary shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:shadow-none ${
+        isAr ? 'right-0' : 'left-0'
+      } ${
+        isOpen
+          ? 'translate-x-0'
+          : isAr
+            ? 'translate-x-full lg:translate-x-0'
+            : '-translate-x-full lg:translate-x-0'
+      }`}
+    >
       {/* Branding */}
-      <div className="px-6 py-8">
-        <h1 className="font-headline text-xl font-black tracking-tighter text-white">
-          STAR DEWEDAR
-        </h1>
-        <p className="font-headline uppercase tracking-widest text-xs font-bold text-slate-500 mt-1">
-          Admin Dashboard
-        </p>
+      <div className="flex items-start justify-between gap-4 px-6 py-6 lg:py-8">
+        <div>
+          <h1 className="font-headline text-xl font-black tracking-tighter text-white">
+            STAR DEWEDAR
+          </h1>
+          <p className="mt-1 font-headline text-xs font-bold uppercase tracking-widest text-slate-500">
+            Admin Dashboard
+          </p>
+        </div>
+        <button
+          type="button"
+          aria-label="Close sidebar"
+          onClick={onClose}
+          className="text-slate-400 transition-colors hover:text-white lg:hidden"
+        >
+          <span className="material-symbols-outlined">close</span>
+        </button>
       </div>
 
       {/* Main Navigation */}
-      <nav className="flex-1 space-y-1 overflow-y-auto">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 pb-4">
         {navItems.map((item) => (
           <Link
             key={item.id}
             to={item.path}
-            className={`px-6 py-4 flex items-center gap-3 font-headline uppercase tracking-widest text-xs font-bold transition-smooth ${
+            onClick={onClose}
+            className={`flex items-center gap-3 rounded-md px-3 py-3 font-headline text-xs font-bold uppercase tracking-widest transition-smooth sm:px-4 ${
               isActive(item.path)
                 ? 'text-tertiary-fixed bg-primary-container border-r-4 border-tertiary-fixed'
                 : 'text-slate-400 hover:text-white hover:bg-primary-container'
@@ -59,17 +81,17 @@ export const Sidebar = () => {
       </nav>
 
       {/* Bottom Navigation */}
-      <div className="mt-auto pb-8 space-y-1">
+      <div className="mt-auto space-y-1 px-3 pb-6">
 
         {/* Language Switcher */}
-        <div className="px-6 py-3">
+        <div className="px-3 py-2 sm:px-4">
           <LanguageSwitcher className="text-slate-400 hover:text-white" />
         </div>
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="w-full px-6 py-4 flex items-center gap-3 font-headline uppercase tracking-widest text-xs font-bold transition-smooth text-slate-400 hover:text-white hover:bg-primary-container"
+          className="flex w-full items-center gap-3 rounded-md px-3 py-3 font-headline text-xs font-bold uppercase tracking-widest text-slate-400 transition-smooth hover:bg-primary-container hover:text-white sm:px-4"
         >
           <span className="material-symbols-outlined text-lg">logout</span>
           {t('sidebar.logout')}

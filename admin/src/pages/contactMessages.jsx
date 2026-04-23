@@ -35,9 +35,9 @@ export default function ContactMessagesPage() {
 
   return (
     <div className="max-w-full relative">
-      <div className="mb-12">
+      <div className="mb-8 sm:mb-10 lg:mb-12">
         <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('inbox.subtitle')}</span>
-        <h2 className="text-5xl font-black font-headline tracking-tighter text-primary leading-none">{t('inbox.title')}<span className="text-tertiary">.</span></h2>
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('inbox.title')}<span className="text-tertiary">.</span></h2>
       </div>
 
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
@@ -81,16 +81,16 @@ export default function ContactMessagesPage() {
 
       {selectedMsg && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-xl shadow-2xl">
-            <div className="px-8 py-6 bg-surface-container-low border-b border-surface-variant flex justify-between items-center">
+          <div className="max-h-[90vh] w-full max-w-xl overflow-y-auto border border-surface-variant bg-surface-container-lowest shadow-2xl">
+            <div className="flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
               <div>
                 <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase">{t('inbox.modal.title')}</h3>
                 <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">{t('inbox.modal.received')}: {selectedMsg.created_at ? formatDate(selectedMsg.created_at) : '—'}</p>
               </div>
               <button onClick={() => setSelectedMsg(null)} className="text-secondary hover:text-primary"><span className="material-symbols-outlined">close</span></button>
             </div>
-            <div className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-4 pb-6 border-b border-surface-variant">
+            <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+              <div className="grid grid-cols-1 gap-4 border-b border-surface-variant pb-6 sm:grid-cols-2">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">{t('inbox.modal.from_label')}</label>
                   <p className="font-bold text-primary">{selectedMsg.first_name} {selectedMsg.last_name}</p>
@@ -106,15 +106,15 @@ export default function ContactMessagesPage() {
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('inbox.modal.body_label')}</label>
                 <div className="bg-surface-container-low p-6 border border-surface-variant text-sm text-secondary leading-relaxed italic">"{selectedMsg.message}"</div>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row">
                 <a href={`mailto:${selectedMsg.email}`} className="flex-1 bg-primary text-white py-3 text-center text-xs font-black uppercase tracking-widest hover:bg-tertiary transition-colors">{t('inbox.modal.reply_email')}</a>
                 {selectedMsg.whatsapp_number && (
                   <a href={`https://wa.me/${selectedMsg.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex-1 border border-green-600 text-green-600 py-3 text-center text-xs font-black uppercase tracking-widest hover:bg-green-50 transition-colors">{t('inbox.modal.reply_whatsapp')}</a>
                 )}
               </div>
             </div>
-            <div className="px-8 py-4 bg-surface-container-low text-right">
-              <Button variant="secondary" onClick={() => setSelectedMsg(null)}>{t('inbox.modal.close')}</Button>
+            <div className="bg-surface-container-low px-4 py-4 text-right sm:px-6 lg:px-8">
+              <Button variant="secondary" onClick={() => setSelectedMsg(null)} className="w-full sm:w-auto">{t('inbox.modal.close')}</Button>
             </div>
           </div>
         </div>

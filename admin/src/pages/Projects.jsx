@@ -94,16 +94,16 @@ export default function Projects() {
 
   return (
     <div className="max-w-full relative">
-      <div className="flex justify-between items-end mb-12">
+      <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between lg:mb-12">
         <div>
           <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">
             {t('projects.subtitle')}
           </span>
-          <h2 className="text-5xl font-black font-headline tracking-tighter text-primary leading-none">
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">
             {t('projects.title')}<span className="text-tertiary">.</span>
           </h2>
         </div>
-        <Button variant="tertiary" size="lg" icon="account_tree" onClick={openAddModal}>
+        <Button variant="tertiary" size="lg" icon="account_tree" onClick={openAddModal} className="w-full sm:w-auto">
           {t('projects.add_button')}
         </Button>
       </div>
@@ -167,15 +167,15 @@ export default function Projects() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md">
           <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <form onSubmit={handleSave}>
-              <div className="px-8 py-6 bg-surface-container-low border-b border-surface-variant flex justify-between sticky top-0 z-10">
-                <h3 className="text-2xl font-black uppercase">
+              <div className="sticky top-0 z-10 flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
+                <h3 className="text-xl font-black uppercase sm:text-2xl">
                   {selectedProject?.id ? t('projects.modal.edit_title') : t('projects.modal.add_title')}.
                 </h3>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="material-symbols-outlined">close</button>
               </div>
 
-              <div className="p-8 space-y-6">
-                <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-6 p-4 sm:p-6 lg:p-8">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Title (EN)</label>
                     <input name="title_en" className="w-full border border-surface-variant px-4 py-3 uppercase font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_en} required />
@@ -199,7 +199,7 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Location (EN)</label>
                     <input name="location_en" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_en} />
@@ -210,14 +210,14 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.budget_label')}</label>
                     <input name="budget" type="number" className="w-full border border-surface-variant px-4 py-3 font-mono bg-surface-container-low" defaultValue={selectedProject?.budget} />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6 p-4 bg-surface-container-low border border-surface-variant">
+                <div className="grid grid-cols-1 gap-4 border border-surface-variant bg-surface-container-low p-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.start_date_label')}</label>
                     <input name="start_date" type="date" className="w-full border border-surface-variant px-4 py-2 text-sm bg-surface-container-lowest" defaultValue={toDateInputValue(selectedProject?.start_date)} />
@@ -230,7 +230,7 @@ export default function Projects() {
 
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase mb-3 block">{t('projects.modal.gallery_label')}</label>
-                  <div className="flex items-center gap-4">
+                  <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center">
                     <label className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-surface-variant hover:border-tertiary bg-surface-container-low w-32 h-32 transition-colors">
                       <span className="material-symbols-outlined text-tertiary">add_a_photo</span>
                       <span className="text-[9px] font-bold uppercase mt-2">{t('projects.modal.gallery_browse')}</span>
@@ -248,7 +248,7 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Description (EN)</label>
                     <textarea name="description_en" rows="4" className="w-full border border-surface-variant px-4 py-3 text-sm bg-surface-container-low" defaultValue={selectedProject?.description_en} placeholder="Project description in English" />
@@ -260,11 +260,11 @@ export default function Projects() {
                 </div>
               </div>
 
-              <div className="px-8 py-6 border-t border-surface-variant bg-surface-container-low flex justify-end gap-4 sticky bottom-0">
+              <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:justify-end sm:gap-4 sm:px-6 lg:px-8 lg:py-6">
                 <button type="button" className="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary" onClick={() => setIsModalOpen(false)}>
                   {t('projects.modal.discard')}
                 </button>
-                <Button type="submit" variant="tertiary">{t('projects.modal.submit')}</Button>
+                <Button type="submit" variant="tertiary" className="w-full sm:w-auto">{t('projects.modal.submit')}</Button>
               </div>
             </form>
           </div>

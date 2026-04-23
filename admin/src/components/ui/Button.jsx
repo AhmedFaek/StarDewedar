@@ -6,7 +6,7 @@ export const Button = ({
   icon,
   ...props 
 }) => {
-  const baseClasses = "font-headline font-bold uppercase tracking-widest transition-smooth flex items-center gap-2 justify-center"
+  const baseClasses = "font-headline font-bold uppercase tracking-widest transition-smooth inline-flex items-center gap-2 justify-center text-center"
   
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-xs',

@@ -68,9 +68,9 @@ export default function VisitRequestsPage() {
 
   return (
     <div className="max-w-full relative">
-      <div className="mb-12">
+      <div className="mb-8 sm:mb-10 lg:mb-12">
         <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('visits.subtitle')}</span>
-        <h2 className="text-5xl font-black font-headline tracking-tighter text-primary leading-none">{t('visits.title')}.</h2>
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('visits.title')}.</h2>
       </div>
 
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
@@ -126,16 +126,16 @@ export default function VisitRequestsPage() {
 
       {selectedVisit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-2xl shadow-2xl overflow-hidden">
-            <div className="flex justify-between items-center px-8 py-6 bg-surface-container-low border-b border-surface-variant">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-surface-variant bg-surface-container-lowest shadow-2xl">
+            <div className="flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
               <div>
-                <h3 className="text-2xl font-black font-headline tracking-tighter text-primary uppercase">{t('visits.modal.title')}<span className="text-tertiary">.</span></h3>
+                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">{t('visits.modal.title')}<span className="text-tertiary">.</span></h3>
                 <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">{t('visits.modal.subtitle')}</p>
               </div>
               <button onClick={() => setSelectedVisit(null)} className="text-secondary hover:text-primary transition-colors"><span className="material-symbols-outlined">close</span></button>
             </div>
-            <div className="px-8 py-8 space-y-6">
-              <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8">
                 <div className="space-y-4">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">{t('visits.modal.factory_label')}</label>
@@ -168,7 +168,7 @@ export default function VisitRequestsPage() {
                   </div>
                 </div>
               </div>
-              <div className="p-4 bg-surface-container-low border-l-4 border-primary flex items-center justify-between">
+              <div className="flex flex-col gap-4 border-l-4 border-primary bg-surface-container-low p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">{t('visits.modal.date_label')}</label>
                   <p className="text-xl font-black text-primary tracking-tight">{selectedVisit.preferred_date ? formatDate(selectedVisit.preferred_date) : '—'}</p>
@@ -180,16 +180,18 @@ export default function VisitRequestsPage() {
                 <div className="bg-surface-container-low p-4 border border-surface-variant text-sm text-secondary leading-relaxed h-32 overflow-y-auto">{selectedVisit.details}</div>
               </div>
             </div>
-            <div className="px-8 py-6 bg-surface-container-low border-t border-surface-variant flex justify-between items-center">
-              <div className="flex items-center gap-4">
+            <div className="border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 lg:px-8 lg:py-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
                 <button onClick={() => handleDelete(selectedVisit.id)} className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity">{t('visits.modal.delete')}</button>
                 {selectedVisit.whatsapp_number && (
                   <a href={`https://wa.me/${selectedVisit.whatsapp_number.replace(/\D/g, '')}`} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-black text-green-600 hover:opacity-80 transition-opacity uppercase tracking-widest">
                     <span className="material-symbols-outlined text-sm">chat</span> {t('visits.modal.whatsapp')}
                   </a>
                 )}
+                </div>
+                <Button variant="secondary" onClick={() => setSelectedVisit(null)} className="w-full sm:w-auto">{t('visits.modal.close')}</Button>
               </div>
-              <Button variant="secondary" onClick={() => setSelectedVisit(null)}>{t('visits.modal.close')}</Button>
             </div>
           </div>
         </div>

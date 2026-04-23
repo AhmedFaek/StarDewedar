@@ -67,9 +67,9 @@ export default function QuoteRequestsPage() {
 
   return (
     <div className="max-w-full relative">
-      <div className="mb-12">
+      <div className="mb-8 sm:mb-10 lg:mb-12">
         <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('quotes.subtitle')}</span>
-        <h2 className="text-5xl font-black font-headline tracking-tighter text-primary leading-none">{t('quotes.title')}.</h2>
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('quotes.title')}.</h2>
       </div>
 
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
@@ -122,16 +122,16 @@ export default function QuoteRequestsPage() {
 
       {selectedRequest && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-2xl shadow-2xl overflow-hidden">
-            <div className="flex justify-between items-center px-8 py-6 bg-surface-container-low border-b border-surface-variant">
+          <div className="max-h-[90vh] w-full max-w-2xl overflow-y-auto border border-surface-variant bg-surface-container-lowest shadow-2xl">
+            <div className="flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
               <div>
-                <h3 className="text-2xl font-black font-headline tracking-tighter text-primary uppercase">{t('quotes.modal.title')}<span className="text-tertiary">.</span></h3>
+                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">{t('quotes.modal.title')}<span className="text-tertiary">.</span></h3>
                 <p className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">ID: {selectedRequest.id}</p>
               </div>
               <button onClick={() => setSelectedRequest(null)} className="text-secondary hover:text-primary transition-colors"><span className="material-symbols-outlined">close</span></button>
             </div>
-            <div className="px-8 py-8 space-y-8">
-              <div className="grid grid-cols-2 gap-8">
+            <div className="space-y-6 px-4 py-4 sm:px-6 sm:py-6 lg:space-y-8 lg:px-8 lg:py-8">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:gap-8">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">{t('quotes.modal.customer_label')}</label>
                   <p className="font-bold text-primary">{selectedRequest.first_name} {selectedRequest.last_name}</p>
@@ -172,9 +172,9 @@ export default function QuoteRequestsPage() {
                 </div>
               )}
             </div>
-            <div className="px-8 py-6 bg-surface-container-low border-t border-surface-variant flex justify-between items-center">
+            <div className="flex flex-col gap-3 border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8 lg:py-6">
               <button onClick={() => handleDelete(selectedRequest.id)} className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity">{t('quotes.modal.delete')}</button>
-              <Button variant="secondary" onClick={() => setSelectedRequest(null)}>{t('quotes.modal.close')}</Button>
+              <Button variant="secondary" onClick={() => setSelectedRequest(null)} className="w-full sm:w-auto">{t('quotes.modal.close')}</Button>
             </div>
           </div>
         </div>

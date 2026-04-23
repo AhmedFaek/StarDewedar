@@ -14,7 +14,7 @@ export const Pagination = ({
   const isTableVariant = variant === 'table'
 
   const containerClasses = isTableVariant
-    ? 'px-8 py-6 bg-primary flex justify-between items-center text-white'
+    ? 'bg-primary px-4 py-4 text-white sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8'
     : 'flex gap-1'
 
   return (
@@ -29,7 +29,7 @@ export const Pagination = ({
         </p>
       )}
 
-      <div className={isTableVariant ? 'flex items-center gap-1' : 'flex gap-1'}>
+      <div className={isTableVariant ? 'mt-3 flex flex-wrap items-center justify-end gap-1 sm:mt-0' : 'flex gap-1'}>
         
         {/* Previous */}
         <button
