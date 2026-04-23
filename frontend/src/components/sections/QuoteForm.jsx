@@ -45,9 +45,6 @@ export default function QuoteForm({ productId = null }) {
     const file = e.target.files?.[0]
     if (file) {
       setFileName(file.name)
-      // Note: Backend might not support file upload via JSON, 
-      // but let's keep it here for now. 
-      // If backend needs FormData, we'll need to change the API utility.
       setFormData((prev) => ({ ...prev, file_url: file }))
     }
   }
@@ -57,25 +54,24 @@ export default function QuoteForm({ productId = null }) {
     setIsSubmitting(true)
     setSubmitMessage('')
     try {
-      const payload = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        phone: formData.phone,
-        email: formData.email,
-        details: formData.details
-      }
+      const formDataToSend = new FormData()
+      formDataToSend.append('first_name', formData.first_name)
+      formDataToSend.append('last_name', formData.last_name)
+      formDataToSend.append('phone', formData.phone)
+      formDataToSend.append('email', formData.email)
+      formDataToSend.append('details', formData.details)
 
       if (formData.product_id && formData.product_id !== 'custom') {
-        payload.product_id = formData.product_id
+        formDataToSend.append('product_id', formData.product_id)
       } else {
-        payload.custom_product_name = formData.custom_product_name || 'Custom Product Request'
+        formDataToSend.append('custom_product_name', formData.custom_product_name || 'Custom Product Request')
       }
 
-      if (formData.file_url && typeof formData.file_url === 'string') {
-          payload.file_url = formData.file_url
+      if (formData.file_url instanceof File) {
+        formDataToSend.append('file', formData.file_url)
       }
 
-      await api.sendQuoteRequest(payload)
+      await api.sendQuoteRequest(formDataToSend)
       
       setSubmitMessage(t('requestQuote.successMsg'))
       setFormData({ first_name: '', last_name: '', phone: '', email: '', product_id: productId || '', custom_product_name: '', details: '', file_url: null })
@@ -120,8 +116,7 @@ export default function QuoteForm({ productId = null }) {
             <InputField label={t('requestQuote.customProductName')} name="custom_product_name" placeholder={t('requestQuote.customProductPlaceholder')} value={formData.custom_product_name} onChange={handleInputChange} />
           )}
           <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={5} required />
-          {/* <FileUploadField label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} /> */}
-          {/* File upload might need backend changes to support multipart/form-data for public requests */}
+          <FileUploadField label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} />
           {fileName && <p className="text-xs text-tertiary-fixed font-semibold">{t('requestQuote.fileSelected')} {fileName}</p>}
           {submitMessage && (
             <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${

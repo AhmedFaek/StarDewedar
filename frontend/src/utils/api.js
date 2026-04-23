@@ -25,11 +25,14 @@ export const api = {
     }).then(handleResponse),
 
     // Quotes
-    sendQuoteRequest: (data) => fetch(`${API_URL}/quotes`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-    }).then(handleResponse),
+    sendQuoteRequest: (data) => {
+        const isFormData = data instanceof FormData
+        return fetch(`${API_URL}/quotes`, {
+            method: 'POST',
+            headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+            body: isFormData ? data : JSON.stringify(data),
+        }).then(handleResponse)
+    },
 
     // Visits
     sendVisitRequest: (data) => fetch(`${API_URL}/visits`, {

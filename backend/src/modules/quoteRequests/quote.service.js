@@ -3,13 +3,35 @@ import * as contactService from '../contactMessages/contact.service.js'
 import {baseEmailTemplate} from '../../utils/email.template.js'
 import env from '../../config/env.js'
 import nodemailer from 'nodemailer'
+import cloudinary from '../../config/storage.js'
 
-export const createQuoteRequest = async (data) => {
+const uploadToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { 
+                resource_type: 'auto'
+            },
+            (error, result) => {
+                if (error) return reject(error)
+                resolve(result)
+            }
+        )
+        stream.end(file.buffer)
+    })
+}
+
+export const createQuoteRequest = async (data, file) => {
     // Set default status to 'pending'
     const quoteData = {
         ...data,
         status: 'pending',
         product_id: data.product_id || null,
+    }
+
+    // Handle file upload if provided
+    if (file) {
+        const result = await uploadToCloudinary(file)
+        quoteData.file_url = result.secure_url
     }
 
     // Create quote request in DB
@@ -38,7 +60,7 @@ const transporter = nodemailer.createTransport({
 export const sendQuoteRequestEmail = async (quoteRequest) => {
     try {
         const productInfo = quoteRequest.product
-            ? `<p><strong>Product:</strong> ${quoteRequest.product.name}</p>`
+            ? `<p><strong>Product:</strong> ${quoteRequest.product.name_ar}</p>`
             : `<p><strong>Custom Product:</strong> ${quoteRequest.custom_product_name}</p>`;
 
         const fileInfo = quoteRequest.file_url

@@ -4,10 +4,12 @@ import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import { ROLES } from '../../utils/constants.js'
 
+import upload from '../../middleware/upload.middleware.js'
+
 const router = express.Router()
 
 // Create a new quote request
-router.post('/', controller.createQuote)
+router.post('/', upload.single('file'), controller.createQuote)
 
 // Get all quote requests
 router.get('/', auth,

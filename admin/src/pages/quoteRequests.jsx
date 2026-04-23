@@ -65,6 +65,11 @@ export default function QuoteRequestsPage() {
     }
   }
 
+  const handleFileOpen = (fileUrl) => {
+    if (!fileUrl) return
+    window.open(fileUrl, '_blank', 'noopener,noreferrer')
+  }
+
   return (
     <div className="max-w-full relative">
       <div className="mb-8 sm:mb-10 lg:mb-12">
@@ -153,7 +158,7 @@ export default function QuoteRequestsPage() {
               <div className="p-4 bg-surface-container-low border-l-4 border-tertiary">
                 <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">{t('quotes.modal.product_label')}</label>
                 <p className="text-lg font-black text-primary uppercase tracking-tight">
-                  {selectedRequest.custom_product_name || selectedRequest.product?.name || t('quotes.modal.product_default')}
+                  {selectedRequest.custom_product_name || selectedRequest.product?.name_ar || t('quotes.modal.product_default')}
                 </p>
                 {selectedRequest.product_id && <p className="text-xs font-mono text-secondary italic">{t('quotes.modal.product_ref')}: {selectedRequest.product_id}</p>}
               </div>
@@ -166,9 +171,14 @@ export default function QuoteRequestsPage() {
                   <span className="material-symbols-outlined text-tertiary">description</span>
                   <div className="flex-1">
                     <p className="text-xs font-bold text-primary uppercase">{t('quotes.modal.file_label')}</p>
-                    <p className="text-[10px] text-slate-400 font-mono truncate">{selectedRequest.file_url}</p>
                   </div>
-                  <a href={selectedRequest.file_url} target="_blank" rel="noreferrer" className="text-xs font-black text-tertiary hover:underline uppercase">{t('quotes.modal.file_download')}</a>
+                  <button
+                    type="button"
+                    onClick={() => handleFileOpen(selectedRequest.file_url)}
+                    className="text-xs font-black text-tertiary hover:underline uppercase"
+                  >
+                    {t('quotes.modal.file_download')}
+                  </button>
                 </div>
               )}
             </div>

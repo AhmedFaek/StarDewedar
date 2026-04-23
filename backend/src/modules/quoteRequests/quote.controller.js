@@ -4,7 +4,7 @@ import { createQuoteRequestSchema } from './quote.validation.js'
 export const createQuote = async (req, res) => {
     try {
         const validatedData = createQuoteRequestSchema.parse(req.body)
-        const quote = await service.createQuoteRequest(validatedData)
+        const quote = await service.createQuoteRequest(validatedData, req.file)
         res.status(201).json({
             success: true,
             message: 'Quote request created successfully',
