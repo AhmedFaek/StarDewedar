@@ -22,14 +22,14 @@ export default function AboutPreview() {
             <div className="flex gap-12 border-t border-outline-variant/15 pt-8">
               <div>
                 <div className="font-headline text-4xl font-black text-primary">10+</div>
-                <div className="font-label uppercase text-xs tracking-widest text-outline">
+                <div className="font-label uppercase text-sm tracking-widest text-outline">
                   {t('aboutPreview.yearsExp')}
                 </div>
               </div>
 
               <div>
                 <div className="font-headline text-4xl font-black text-primary">300+</div>
-                <div className="font-label uppercase text-xs tracking-widest text-outline">
+                <div className="font-label uppercase text-sm tracking-widest text-outline">
                   {t('aboutPreview.projectsCompleted')}
                 </div>
               </div>

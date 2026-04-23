@@ -54,7 +54,7 @@ export default function Projects() {
               <div className="absolute inset-0 flex items-center justify-center p-8 sm:p-12">
                 <div className="border-2 border-white/20 p-6 sm:p-8 w-full h-full flex items-end">
                   <div>
-                    <p className="text-tertiary-fixed font-label text-[10px] tracking-[0.3em] uppercase mb-2">{t('projects.coreServices')}</p>
+                    <p className="text-tertiary-fixed font-label text-[13px] tracking-[0.3em] uppercase mb-2">{t('projects.coreServices')}</p>
                     <span className="text-white font-headline text-3xl sm:text-4xl font-bold transition-all duration-500">
                       {String(currentServiceIndex + 1).padStart(2, '0')}. {services[currentServiceIndex]}
                     </span>
@@ -199,8 +199,14 @@ export default function Projects() {
               <h2 className="text-white font-headline text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter leading-none mb-4 sm:mb-6">{t('projects.ctaTitle')}</h2>
               <p className="text-white text-base sm:text-lg font-body">{t('projects.ctaDesc')}</p>
             </div>
-            <button className="bg-tertiary-fixed text-on-tertiary-fixed px-8 sm:px-12 py-4 sm:py-5 font-headline font-black uppercase text-xs sm:text-sm tracking-widest hover:scale-105 transition-all flex-shrink-0">
-              {t('projects.ctaButton')}
+            <button
+              onClick={() => {
+                window.history.pushState({}, '', '/contact')
+                window.dispatchEvent(new PopStateEvent('popstate'))
+              }}
+              className="bg-tertiary-fixed text-black px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
+            >
+              {t('ctaBanner.button')}
             </button>
           </div>
         </section>

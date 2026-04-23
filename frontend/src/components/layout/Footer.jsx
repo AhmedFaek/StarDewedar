@@ -49,24 +49,6 @@ export default function Footer() {
         </ul>
       </div>
 
-      {/* Compliance Links */}
-      <div>
-        <h5 className="font-headline font-bold uppercase text-xs tracking-[0.2em] text-white mb-4 sm:mb-6">
-          {t('footer.compliance')}
-        </h5>
-        <ul className="space-y-3 sm:space-y-4">
-          {complianceLinks.map((link) => (
-            <li key={link}>
-              <a
-                href={`#${link.toLowerCase()}`}
-                className="text-slate-400 hover:text-white transition-all text-sm font-body"
-              >
-                {link}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </div>
 
       {/* Contact */}
       <div>

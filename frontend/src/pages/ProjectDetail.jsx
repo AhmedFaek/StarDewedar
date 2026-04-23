@@ -98,38 +98,38 @@ export default function ProjectDetail() {
             <div className="lg:col-span-4 space-y-6">
               <div className="sticky top-32 space-y-6">
                 <div className="bg-primary text-white p-8">
-                  <h3 className="text-xs uppercase tracking-[0.3em] mb-6">{t('projectDetail.projectInfo')}</h3>
+                  <h3 className="text-sm uppercase tracking-[0.3em] mb-6">{t('projectDetail.projectInfo')}</h3>
                   <div className="space-y-6">
                     <div>
-                      <span className="text-[10px] uppercase text-white/60">{t('projectDetail.client')}</span>
+                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.client')}</span>
                       <p className="text-xl font-bold">{project.client_name}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase text-white/60">{t('projectDetail.category')}</span>
+                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.category')}</span>
                       <p className="text-xl font-bold">{project.category?.name}</p>
                     </div>
                     {project.location && (
                       <div>
-                        <span className="text-[10px] uppercase text-white/60">{t('projectDetail.location')}</span>
+                        <span className="text-[12px] uppercase text-white/60">{t('projectDetail.location')}</span>
                         <p className="text-xl font-bold">{project.location}</p>
                       </div>
                     )}
                     <div className="border-t border-white/10 pt-6">
-                      <span className="text-[10px] uppercase text-white/60">{t('projectDetail.budget')}</span>
+                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.budget')}</span>
                       <p className="text-3xl font-black text-tertiary-fixed">EGP {formatCurrency(project.budget)}</p>
                     </div>
                   </div>
                 </div>
 
                 <div className="bg-surface-container-low p-8">
-                  <h3 className="text-xs uppercase tracking-[0.3em] mb-6">{t('projectDetail.timeline')}</h3>
+                  <h3 className="text-sm uppercase tracking-[0.3em] mb-6">{t('projectDetail.timeline')}</h3>
                   <div className="space-y-4">
                     <div>
-                      <span className="text-[10px] uppercase text-outline">{t('projectDetail.start')}</span>
+                      <span className="text-[12px] uppercase text-outline">{t('projectDetail.start')}</span>
                       <p className="font-bold">{formatDate(project.start_date)}</p>
                     </div>
                     <div>
-                      <span className="text-[10px] uppercase text-outline">{t('projectDetail.end')}</span>
+                      <span className="text-[12px] uppercase text-outline">{t('projectDetail.end')}</span>
                       <p className="font-bold">{formatDate(project.end_date)}</p>
                     </div>
                   </div>

@@ -20,10 +20,10 @@ export default function Header() {
     const path = window.location.pathname
     if (path.includes('/request-quote')) setCurrentPage('quote')
     else if (path.includes('/request-visit')) setCurrentPage('visit')
-    else if (path.includes('/projects')) setActiveLink('Projects')
+    else if (path.includes('/project-detail') || path.includes('/projects')) setActiveLink('Projects')
     else if (path.includes('/about')) setActiveLink('About')
     else if (path.includes('/contact')) setActiveLink('Contact')
-    else if (path.includes('/products')) setActiveLink('Products')
+    else if (path.includes('/product-detail') || path.includes('/products')) setActiveLink('Products')
     else setCurrentPage('')
   }, [])
 

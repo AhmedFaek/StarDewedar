@@ -55,7 +55,7 @@ export default function About() {
             {stats.map((stat, i) => (
               <div key={i} className={`text-center transition-all duration-700 ${visibleStats ? 'opacity-100' : 'opacity-0'}`}>
                 <h2 className="text-4xl font-black text-tertiary-fixed">{stat.number}</h2>
-                <p className="text-xs uppercase tracking-widest">{stat.label}</p>
+                <p className="text-sm uppercase tracking-widest">{stat.label}</p>
               </div>
             ))}
           </div>

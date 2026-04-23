@@ -14,7 +14,7 @@ export default function SuccessPartners() {
     <section className="py-20 sm:py-24 lg:py-32 px-4 sm:px-8 md:px-16 bg-surface">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 sm:mb-20">
-          <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-4 block">
+          <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-s mb-4 block">
             {t('successPartners.badge')}
           </span>
           <h2 className="text-primary font-headline text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight mb-6">
