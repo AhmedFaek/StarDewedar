@@ -1,11 +1,20 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 
 export default function Header() {
+  const { t, i18n } = useTranslation()
   const [activeLink, setActiveLink] = useState('Products')
   const [currentPage, setCurrentPage] = useState('') // Tracks 'quote' or 'visit'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const navLinks = ['Products', 'Projects', 'About', 'Contact']
+  const isRTL = i18n.language === 'ar'
+
+  const navLinks = [
+    { key: 'Products', label: t('nav.products') },
+    { key: 'Projects', label: t('nav.projects') },
+    { key: 'About', label: t('nav.about') },
+    { key: 'Contact', label: t('nav.contact') },
+  ]
 
   useEffect(() => {
     const path = window.location.pathname
@@ -17,6 +26,17 @@ export default function Header() {
     else if (path.includes('/products')) setActiveLink('Products')
     else setCurrentPage('')
   }, [])
+
+  // Update document direction when language changes
+  useEffect(() => {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
+    document.documentElement.lang = i18n.language
+  }, [i18n.language, isRTL])
+
+  const toggleLanguage = () => {
+    const newLang = i18n.language === 'ar' ? 'en' : 'ar'
+    i18n.changeLanguage(newLang)
+  }
 
   const navigateTo = (path, pageType) => {
     setActiveLink(null)
@@ -63,25 +83,34 @@ export default function Header() {
       </button>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex space-x-8">
+      <nav className="hidden md:flex space-x-8 rtl:space-x-reverse">
         {navLinks.map((link) => (
           <a
-            key={link}
-            href={`#${link.toLowerCase()}`}
-            onClick={() => handleNavClick(link)}
+            key={link.key}
+            href={`#${link.key.toLowerCase()}`}
+            onClick={() => handleNavClick(link.key)}
             className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${
-              activeLink === link && !currentPage
+              activeLink === link.key && !currentPage
                 ? 'text-slate-950 border-b-2 border-yellow-400'
                 : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
             }`}
           >
-            {link}
+            {link.label}
           </a>
         ))}
       </nav>
 
-      {/* CTA Buttons - Desktop */}
+      {/* CTA Buttons + Lang Switch - Desktop */}
       <div className="hidden sm:flex items-center gap-2">
+        {/* Language Switcher */}
+        <button
+          onClick={toggleLanguage}
+          className="font-headline font-bold uppercase text-[10px] lg:text-xs px-3 py-2 tracking-widest transition-all border border-slate-300 text-slate-900 hover:bg-slate-100"
+          aria-label="Switch language"
+        >
+          {i18n.language === 'ar' ? 'EN' : 'AR'}
+        </button>
+
         <button 
           onClick={() => navigateTo('/request-visit', 'visit')}
           className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border ${
@@ -90,7 +119,7 @@ export default function Header() {
               : 'border-slate-300 text-slate-900 hover:bg-slate-100'
           }`}
         >
-          Request a Visit
+          {t('nav.requestVisit')}
         </button>
         
         <button 
@@ -101,7 +130,7 @@ export default function Header() {
               : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
           }`}
         >
-          Request a Quote
+          {t('nav.requestQuote')}
         </button>
       </div>
 
@@ -122,27 +151,34 @@ export default function Header() {
           <div className="px-4 py-4 space-y-3">
             {navLinks.map((link) => (
               <a
-                key={link}
-                href={`#${link.toLowerCase()}`}
-                onClick={() => handleNavClick(link)}
+                key={link.key}
+                href={`#${link.key.toLowerCase()}`}
+                onClick={() => handleNavClick(link.key)}
                 className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${
-                  activeLink === link && !currentPage
+                  activeLink === link.key && !currentPage
                     ? 'text-yellow-500'
                     : 'text-slate-600 hover:text-slate-950'
                 }`}
               >
-                {link}
+                {link.label}
               </a>
             ))}
             
             <div className="pt-2 flex flex-col gap-2">
+              {/* Mobile Language Switcher */}
+              <button
+                onClick={toggleLanguage}
+                className="w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all bg-slate-200 text-slate-900"
+              >
+                {i18n.language === 'ar' ? 'English' : 'العربية'}
+              </button>
               <button
                 onClick={() => navigateTo('/request-visit', 'visit')}
                 className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${
                   currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
                 }`}
               >
-                Request a Visit
+                {t('nav.requestVisit')}
               </button>
               <button
                 onClick={() => navigateTo('/request-quote', 'quote')}
@@ -150,7 +186,7 @@ export default function Header() {
                   currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
                 }`}
               >
-                Request a Quote
+                {t('nav.requestQuote')}
               </button>
             </div>
           </div>

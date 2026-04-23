@@ -1,4 +1,8 @@
+import { useTranslation } from 'react-i18next'
+
 export default function AboutPreview() {
+  const { t } = useTranslation()
+
   return (
     <section className="bg-surface py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-8">
@@ -7,29 +11,26 @@ export default function AboutPreview() {
           {/* Left */}
           <div className="md:col-span-7">
             <h2 className="font-headline text-4xl md:text-6xl font-black tracking-tighter text-primary mb-8">
-              Reliable Electrical Solutions
-              <br />Built for Real Projects.
+              {t('aboutPreview.title1')}
+              <br />{t('aboutPreview.title2')}
             </h2>
 
             <p className="text-secondary text-lg leading-relaxed mb-8">
-              Star Dewedar Co. is specialized in supplying and installing low-voltage
-              electrical equipment for industrial and commercial projects. We focus on
-              delivering practical, efficient, and reliable solutions tailored to real-world
-              requirements.
+              {t('aboutPreview.description')}
             </p>
 
             <div className="flex gap-12 border-t border-outline-variant/15 pt-8">
               <div>
                 <div className="font-headline text-4xl font-black text-primary">10+</div>
                 <div className="font-label uppercase text-xs tracking-widest text-outline">
-                  Years Experience
+                  {t('aboutPreview.yearsExp')}
                 </div>
               </div>
 
               <div>
                 <div className="font-headline text-4xl font-black text-primary">300+</div>
                 <div className="font-label uppercase text-xs tracking-widest text-outline">
-                  Projects Completed
+                  {t('aboutPreview.projectsCompleted')}
                 </div>
               </div>
             </div>
@@ -38,12 +39,11 @@ export default function AboutPreview() {
           {/* Right */}
           <div className="md:col-span-5 bg-surface-container-low p-8">
             <h3 className="font-headline text-xl font-bold uppercase mb-4 border-b border-tertiary-fixed pb-2 w-fit">
-              Our Approach
+              {t('aboutPreview.ourApproach')}
             </h3>
 
             <p className="text-on-surface-variant mb-6">
-              From reviewing technical documents to final project delivery, we follow a
-              structured workflow that guarantees performance, safety, and timely execution.
+              {t('aboutPreview.approachDesc')}
             </p>
 
             <img

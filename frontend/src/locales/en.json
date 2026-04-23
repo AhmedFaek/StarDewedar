@@ -1,0 +1,276 @@
+{
+  "nav": {
+    "products": "Products",
+    "projects": "Projects",
+    "about": "About",
+    "contact": "Contact",
+    "requestVisit": "Request a Visit",
+    "requestQuote": "Request a Quote"
+  },
+
+  "hero": {
+    "badge": "Star Dewedar Co.",
+    "title1": "SUPPLYING & INSTALLING",
+    "title2": "ELECTRICAL SYSTEMS",
+    "description": "We deliver reliable low-voltage electrical solutions for industrial and commercial projects — from equipment supply to full installation and final system validation.",
+    "ctaQuote": "Request a Quote",
+    "ctaProjects": "View Projects"
+  },
+
+  "aboutPreview": {
+    "title1": "Reliable Electrical Solutions",
+    "title2": "Built for Real Projects.",
+    "description": "Star Dewedar Co. is specialized in supplying and installing low-voltage electrical equipment for industrial and commercial projects. We focus on delivering practical, efficient, and reliable solutions tailored to real-world requirements.",
+    "yearsExp": "Years Experience",
+    "projectsCompleted": "Projects Completed",
+    "ourApproach": "Our Approach",
+    "approachDesc": "From reviewing technical documents to final project delivery, we follow a structured workflow that guarantees performance, safety, and timely execution."
+  },
+
+  "productCards": {
+    "sectionTitle": "Engineered Products",
+    "sectionSubtitle": "Precision components for heavy infrastructure",
+    "viewCatalog": "View Catalog",
+    "cat1": "Product Category 01",
+    "cat2": "Product Category 02",
+    "cat3": "Product Category 03",
+    "title1": "Electrical Panels",
+    "desc1": "Custom-designed control centers for heavy power regulation and distribution.",
+    "title2": "Industrial Lighting",
+    "desc2": "Heavy-duty LED arrays designed for maximum visibility in high-heat environments.",
+    "title3": "Sub-Components",
+    "desc3": "Replacement parts and specialized gear for mission-critical maintenance."
+  },
+
+  "successPartners": {
+    "badge": "OUR SUCCESS PARTNERS",
+    "title": "TRUSTED BY INDUSTRY LEADERS",
+    "description": "Star Dewedar has partnered with some of the world's most respected companies to deliver high-performance electrical and lighting solutions."
+  },
+
+  "projectShowcase": {
+    "title1": "Project",
+    "title2": "Portfolios"
+  },
+
+  "whyChooseUs": {
+    "feature1Title": "High Quality Execution",
+    "feature1Desc": "We ensure every project meets strict performance and safety standards through careful planning and professional installation.",
+    "feature2Title": "Efficient Project Delivery",
+    "feature2Desc": "By selecting the right equipment and executing efficiently, we complete projects on time without compromising quality.",
+    "feature3Title": "Experienced Team",
+    "feature3Desc": "Our engineers and technicians bring strong field experience to handle complex electrical systems with confidence."
+  },
+
+  "ctaBanner": {
+    "title": "Partner with the Experts. Request a Quote Today.",
+    "button": "Contact Us"
+  },
+
+  "footer": {
+    "brand": "Star Dewedar",
+    "brandDescription": "Star Dewidar Company is one of the leading companies in the field of supplying and installing low-voltage electrical equipment. The company is managed by highly efficient, trained engineers and technicians.",
+    "explore": "Explore",
+    "exploreProducts": "Products",
+    "exploreProjects": "Projects",
+    "exploreAbout": "About Us",
+    "exploreCaseStudies": "Case Studies",
+    "compliance": "Compliance",
+    "privacyPolicy": "Privacy Policy",
+    "technicalSpecs": "Technical Specs",
+    "complianceLink": "Compliance",
+    "globalDistribution": "Global Distribution",
+    "contact": "Contact",
+    "headquarters": "Headquarters: Tanta, EG",
+    "email": "info@stardewedar.com",
+    "copyright": "© 2026 Star Dewedar. Engineered for Power."
+  },
+
+  "about": {
+    "badge": "About Star Dewedar",
+    "heroTitle1": "BUILT ON",
+    "heroTitle2": "POWER & PRECISION",
+    "heroDesc": "Star Dewedar Co. specializes in supplying and installing electrical equipment for industrial and commercial projects with precision, reliability, and efficiency.",
+    "stat1": "Years Experience",
+    "stat2": "Projects Delivered",
+    "stat3": "Industrial Clients",
+    "stat4": "Execution Precision",
+    "whoWeAre": "WHO WE ARE",
+    "whoWeAreP1": "Star Dewedar Co. is a leading company in the field of civil and electrical works, specializing in supplying and installing low-voltage electrical equipment.",
+    "whoWeAreP2": "Our operations are handled by highly trained engineers and skilled technicians, ensuring every project is delivered with accuracy, safety, and long-term reliability.",
+    "howWeWork": "HOW WE WORK",
+    "workflow1": "Reviewing technical documents and project requirements",
+    "workflow2": "Official testing & validation with national electricity authorities",
+    "workflow3": "Supplying and installing electrical equipment",
+    "workflow4": "Final delivery with full system inspection and verification",
+    "whyChooseUs": "WHY CHOOSE US",
+    "strength1Title": "Best Quality & Efficiency",
+    "strength1Desc": "We ensure every electrical project operates at maximum performance by selecting optimal solutions tailored to real industrial needs.",
+    "strength2Title": "Competitive Pricing",
+    "strength2Desc": "We balance cost and performance by choosing the most suitable equipment and delivering projects within tight deadlines.",
+    "strength3Title": "Accumulated Expertise",
+    "strength3Desc": "Our engineers and technicians bring years of hands-on experience in electrical systems, ensuring reliable execution.",
+    "ourExpertise": "OUR EXPERTISE",
+    "expertCat1": "Low Voltage Systems",
+    "expertCat1Items": ["Distribution Panels", "Control Panels", "Electrical Cabinets"],
+    "expertCat2": "Industrial Projects",
+    "expertCat2Items": ["Factories", "Warehouses", "Production Lines"],
+    "expertCat3": "Power Infrastructure",
+    "expertCat3Items": ["Installation", "Testing", "Maintenance"],
+    "expertCat4": "Custom Solutions",
+    "expertCat4Items": ["Client-Specific Designs", "Non-Standard Equipment"],
+    "ctaTitle": "LET'S BUILD YOUR NEXT PROJECT",
+    "ctaDesc": "Partner with Star Dewedar for reliable electrical solutions built on engineering precision and execution excellence."
+  },
+
+  "contact": {
+    "badge": "Establish Connection",
+    "heroTitle1": "Contact",
+    "heroTitle2": "Engineering",
+    "heroDesc": "Connect with Star Dewedar's technical department for industrial supply or high-voltage engineering consultations.",
+    "formTitle": "Technical Inquiry",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "workEmail": "Work Email",
+    "phoneNumber": "Phone Number",
+    "detailedBrief": "Detailed Brief",
+    "briefPlaceholder": "DESCRIBE YOUR INQUIRY...",
+    "transmitting": "Transmitting...",
+    "transmitInquiry": "Transmit Inquiry",
+    "successMsg": "✓ Message transmitted successfully.",
+    "failMsg": "✗ Transmission failed. Please try again.",
+    "errorMsg": "✗ Error occurred during transmission.",
+    "locations": "Locations",
+    "officeAddress": "Office Address",
+    "officeAddressText": "Fayrouz Tower, Othman mohamed st, off Modoreya st, Tanta",
+    "factoryAddress": "Factory Address",
+    "factoryAddressText": "Wadi El-Natron, Industrial zone (3)",
+    "storeAddress": "Store Address",
+    "storeAddressText": "El madares st, off el nahas st, Tanta",
+    "directLines": "Direct Lines",
+    "phoneLabel": "Phone Number",
+    "phoneText": "+20 11 11777478",
+    "whatsappLabel": "Whatsapp Number",
+    "whatsappText": "+20 1000108529",
+    "emailLabel": "Email Address",
+    "emailText": "info@stardewedar.com",
+    "visitOffice": "Visit Our Office",
+    "coordinates": "Coordinates: 30°47'05.8\"N 30°59'46.8\"E",
+    "getDirections": "Get Directions"
+  },
+
+  "requestVisit": {
+    "heroTitle1": "PRECISION",
+    "heroTitle2": "ON-SITE",
+    "heroTitle3": "ASSESSMENT",
+    "heroDesc": "Our senior engineers provide comprehensive on-site technical evaluations for complex power systems and lighting infrastructures. We identify critical inefficiencies and engineer scalable solutions designed for the heavy industrial sector.",
+    "voltagePro": "VOLTAGE PRO",
+    "certifiedDiv": "Certified Engineering Division",
+    "section1Title": "Facility Information",
+    "factoryName": "Factory Name",
+    "factoryNamePlaceholder": "E.G. NORTHERN STEEL WORKS",
+    "factoryActivity": "Factory Activity",
+    "factoryActivityPlaceholder": "E.G. HEAVY MANUFACTURING",
+    "section2Title": "Primary Contact",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phoneNumber": "Phone Number",
+    "whatsappNumber": "WhatsApp Number",
+    "emailAddress": "Email Address",
+    "section3Title": "Visit Logistics",
+    "physicalAddress": "Physical Address",
+    "technicalDetails": "Technical Details & Purpose",
+    "technicalDetailsPlaceholder": "DESCRIBE SPECIFIC TECHNICAL ISSUES OR PROJECT SCOPE...",
+    "submitButton": "SCHEDULE ENGINEER VISIT"
+  },
+
+  "requestQuote": {
+    "sidebarBadge": "Requesting Precision",
+    "sidebarTitle1": "ENGINEERING",
+    "sidebarTitle2": "THE FUTURE.",
+    "sidebarDesc": "Submit your technical specifications for a comprehensive architectural and electrical evaluation. Our lead engineers review every proposal within 24 hours.",
+    "formTitle": "Project Specification Form",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "phone": "Phone",
+    "workEmail": "Work Email Address",
+    "selectProduct": "Select Product",
+    "selectPlaceholder": "Choose a product or custom",
+    "customProduct": "Custom Product",
+    "customProductName": "Custom Product Name",
+    "customProductPlaceholder": "Describe your custom product...",
+    "projectScope": "Project Scope & Details",
+    "projectScopePlaceholder": "Describe the load requirements, site conditions, and voltage specifications...",
+    "fileUpload": "Technical Blueprints (PDF/DWG)",
+    "fileSelected": "✓ File selected:",
+    "submitting": "Submitting...",
+    "submitRequest": "Submit Request",
+    "successMsg": "✓ Quote request submitted successfully! We will contact you soon.",
+    "failMsg": "✗ Failed to submit quote request. Please try again.",
+    "errorMsg": "✗ An error occurred. Please try again."
+  },
+
+  "products": {
+    "heroTitle1": "ENGINEERED",
+    "heroTitle2": "POWER",
+    "heroDesc": "Premium industrial electrical solutions built for long-term operational integrity and resilience.",
+    "allProducts": "All Products",
+    "electricalPanels": "Electrical Panels",
+    "lighting": "Lighting",
+    "components": "Components",
+    "maxPrice": "Max Price",
+    "featured": "Featured",
+    "priceLowHigh": "Price: Low to High",
+    "priceHighLow": "Price: High to Low",
+    "searchPlaceholder": "SEARCH PRODUCTS...",
+    "viewDetails": "View Details",
+    "noProducts": "No products match your current filters.",
+    "resetFilters": "Reset All Filters"
+  },
+
+  "productDetail": {
+    "pricePoint": "Price Point",
+    "requestQuote": "Request A Quote",
+    "dataSheet": "Technical Data Sheet (PDF)",
+    "relatedProducts": "Related Products"
+  },
+
+  "projects": {
+    "badge": "STAR DEWEDAR PROJECTS",
+    "heroTitle1": "ENGINEERING",
+    "heroTitle2": "POWER.",
+    "heroDesc": "From industrial facilities to commercial infrastructures, Star Dewedar delivers high-performance electrical solutions. Our projects include low-voltage panels, power distribution systems, and advanced lighting installations — engineered for reliability, safety, and long-term operation.",
+    "coreServices": "CORE SERVICES",
+    "service1": "ELECTRICAL PANELS",
+    "service2": "LIGHTING SYSTEMS",
+    "service3": "INDUSTRIAL INSTALLATIONS",
+    "service4": "POWER DISTRIBUTION",
+    "projectArchives": "Project Archives",
+    "filterByClass": "Filter by infrastructure class",
+    "allProjects": "All Projects",
+    "featured": "Featured",
+    "client": "Client",
+    "projectBudget": "Project Budget",
+    "viewTechnicalSpecs": "View Technical Specs",
+    "ctaTitle": "HAVE A COMPLEX REQUIREMENT?",
+    "ctaDesc": "Our engineering team specializes in non-standard industrial environments and extreme load requirements.",
+    "ctaButton": "Consult an Engineer"
+  },
+
+  "projectDetail": {
+    "projectOverview": "PROJECT OVERVIEW",
+    "projectInfo": "Project Info",
+    "client": "Client",
+    "category": "Category",
+    "location": "Location",
+    "budget": "Budget",
+    "timeline": "Timeline",
+    "start": "Start",
+    "end": "End"
+  },
+
+  "langSwitch": {
+    "en": "EN",
+    "ar": "AR"
+  }
+}
