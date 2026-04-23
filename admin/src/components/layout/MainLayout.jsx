@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Sidebar } from './Sidebar'
 import { TopAppBar } from './TopAppBar'
 
 export const MainLayout = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const location = useLocation()
+  const { i18n } = useTranslation()
+  const isAr = i18n.language === 'ar'
 
   useEffect(() => {
     setIsSidebarOpen(false)
@@ -27,7 +30,7 @@ export const MainLayout = ({ children }) => {
         onClose={() => setIsSidebarOpen(false)}
       />
 
-      <div className="min-h-screen w-full lg:pl-64">
+      <div className={`min-h-screen w-full ${isAr ? 'lg:pr-64' : 'lg:pl-64'}`}>
         <TopAppBar onMenuClick={() => setIsSidebarOpen((prev) => !prev)} />
 
         <main className="min-w-0 pt-16">
