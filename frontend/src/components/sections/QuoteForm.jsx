@@ -69,8 +69,6 @@ export default function QuoteForm({ productId = null }) {
         payload.product_id = formData.product_id
       } else {
         payload.custom_product_name = formData.custom_product_name || 'Custom Product Request'
-        // Backend requires custom_image_url for custom products
-        payload.custom_image_url = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837'
       }
 
       if (formData.file_url && typeof formData.file_url === 'string') {

@@ -20,8 +20,7 @@ export const createQuoteRequestSchema = z.object({
     .refine(
         (data) => {
             const hasProduct = !!data.product_id;
-            const hasCustom =
-                !!data.custom_product_name && !!data.custom_image_url;
+            const hasCustom = !!data.custom_product_name;
 
             return hasProduct || hasCustom;
         },
