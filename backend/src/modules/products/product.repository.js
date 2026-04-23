@@ -19,6 +19,7 @@ export const getProductById = (id) => {
     return prisma.product.findUnique({
         where: { id },
         include: {
+            category: true,
             images: true,
             catalogs: true,
         },

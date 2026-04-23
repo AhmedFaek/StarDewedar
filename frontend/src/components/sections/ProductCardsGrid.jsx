@@ -1,44 +1,29 @@
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { api } from '../../utils/api'
 
 export default function ProductCardsGrid() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const [products, setProducts] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  const products = [
-    {
-      id: 1,
-      category: t('productCards.cat1'),
-      title: t('productCards.title1'),
-      description: t('productCards.desc1'),
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuBDOBAuDcWDLzWDhRwr6Ms_nc_sw7ADHHEAlAD2b5TteqQc0WMTLYdMGPcVT9FSDaXysMjjAGKmytA0VUlhfpVgRW-64jF3XBHSziY2zYnRt3p4gJHv9YQ2JXRQ2S8GCItQB-kz_MZh-34a7ziEQWYjP_c8AVSQO6xZVYV2cFYcNmEmcqy14VkCflVnG0IvjQ90LR-JDZt2xq4V2_YZdGLA3l-hD8ii48n4jJP2NWMNtHjTaPNdx_XUYDegY24UYEa_9CP9J7f3KKzc',
-      tags: ['600V Rated', 'IP67 Shield'],
-      bgColor: 'bg-surface-container-lowest',
-      textColor: 'text-on-surface',
-    },
-    {
-      id: 2,
-      category: t('productCards.cat2'),
-      title: t('productCards.title2'),
-      description: t('productCards.desc2'),
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuDYqEKkMA3g4HsSR3JNljqrLWz82f8Had2RD14tN5Ika24xrQ6S9mPcKsrudx1kn1qpP33YsxVswG44-0JtcwmfKQjH2Hv5OeiLMMiP21WEOLfqe66C45QsLNFp8Ioc8vFy2kEJJyRafMM35p2gxQ9K7TkxznPhy_iGdI3BcWGzysc6rv4TAhbhfzOmxImPwnnleqeJdv8x08aTiWS7sg37J1KFmYjzM20OzsKqc1MsXRtSCLogzAin9_Jc0IYqxNqIWrtzdA56HpMq',
-      tags: ['High Bay', 'Shock Resistant'],
-      bgColor: 'bg-primary',
-      textColor: 'text-white',
-      gradient: true,
-    },
-    {
-      id: 3,
-      category: t('productCards.cat3'),
-      title: t('productCards.title3'),
-      description: t('productCards.desc3'),
-      image:
-        'https://lh3.googleusercontent.com/aida-public/AB6AXuB9fxM-0QqsnuXQT2gcoNQ2G7WrHcXcZimNFwXk9cxm7Sktcrkj029eQ1A6gx2zxBYUiwUewDqhqty23OyB-XaNrc7ja9PwFjlzKW1IoiqdVPFI_v4Kh0jM6oeZb1u5YIT2NW78IlidzIyb9lHfFncYNCKOIEH3hyK-YLxvJk_-qHFor3Nz9ls10hNjqmZ0Heu-0y3x0yMHejk-8LjYsf-K3gBEJYCIz-bccYx9qwmz-bmuCEmdy0ghSN24t2HIbAphgwlYZEh8',
-      tags: ['Modular', 'Low Impedance'],
-      bgColor: 'bg-surface-container-lowest',
-      textColor: 'text-on-surface',
-    },
-  ]
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await api.getProducts()
+        setProducts(data.slice(0, 3)) // Show only first 3
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchProducts()
+  }, [])
+
+  if (loading) {
+    return <div className="py-20 text-center">{t('common.loading') || 'Loading...'}</div>
+  }
 
   return (
     <section className="bg-surface-container-low py-16 md:py-24">
@@ -53,60 +38,59 @@ export default function ProductCardsGrid() {
               {t('productCards.sectionSubtitle')}
             </p>
           </div>
-          <a className="flex md:flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
+          <button onClick={() => window.navigateTo('products')} className="flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
             {t('productCards.viewCatalog')}{' '}
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
-          </a>
+          </button>
         </div>
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8">
-          {products.map((product) => (
-            <div
-              key={product.id}
-              className={`${product.bgColor} group cursor-pointer overflow-hidden flex flex-col transition-transform hover:scale-105`}
-            >
-              {/* Image Container */}
-              <div className="h-48 sm:h-64 md:h-80 overflow-hidden">
-                <img
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  src={product.image}
-                  alt={product.title}
-                />
-              </div>
+          {products.map((product, index) => {
+            const isMiddle = index === 1
+            const name = i18n.language === 'ar' ? product.name_ar : product.name_en
+            const description = i18n.language === 'ar' ? product.description_ar : product.description_en
+            const categoryName = i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en
 
-              {/* Content Container */}
+            return (
               <div
-                className={`p-5 sm:p-6 md:p-8 flex-grow ${product.gradient ? 'voltage-gradient' : ''} ${product.textColor}`}
+                key={product.id}
+                onClick={() => window.navigateTo('product-detail', product.id)}
+                className={`${isMiddle ? 'bg-primary' : 'bg-surface-container-lowest'} group cursor-pointer overflow-hidden flex flex-col transition-transform hover:scale-105`}
               >
-                <span className="text-[9px] sm:text-[10px] font-label font-bold uppercase tracking-[0.2em] block mb-3 sm:mb-4 opacity-75">
-                  {product.category}
-                </span>
+                {/* Image Container */}
+                <div className="h-48 sm:h-64 md:h-80 overflow-hidden">
+                  <img
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'}
+                    alt={name}
+                  />
+                </div>
 
-                <h3 className="font-headline text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">{product.title}</h3>
+                {/* Content Container */}
+                <div
+                  className={`p-5 sm:p-6 md:p-8 flex-grow ${isMiddle ? 'voltage-gradient text-white' : 'text-on-surface'}`}
+                >
+                  <span className="text-[9px] sm:text-[10px] font-label font-bold uppercase tracking-[0.2em] block mb-3 sm:mb-4 opacity-75">
+                    {categoryName}
+                  </span>
 
-                <p className={`mb-6 sm:mb-8 text-sm sm:text-base ${product.textColor === 'text-white' ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
-                  {product.description}
-                </p>
+                  <h3 className="font-headline text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4">{name}</h3>
 
-                {/* Tags */}
-                <div className="flex gap-2 flex-wrap">
-                  {product.tags.map((tag) => (
-                    <span
-                      key={tag}
-                      className={`px-2 sm:px-3 py-1 text-[9px] sm:text-[10px] font-bold tracking-widest uppercase ${
-                        product.gradient
-                          ? 'bg-primary-container text-on-primary-container'
-                          : 'bg-secondary-container text-on-surface'
-                      }`}
-                    >
-                      {tag}
+                  <p className={`mb-6 sm:mb-8 text-sm sm:text-base line-clamp-3 ${isMiddle ? 'text-on-primary-container' : 'text-on-surface-variant'}`}>
+                    {description}
+                  </p>
+
+                  <div className="flex justify-between items-center mt-auto">
+                    <span className="font-headline font-black text-sm">
+                        EGP {product.price ? Number(product.price).toLocaleString() : 'N/A'}
                     </span>
-                  ))}
+                    <span className="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </section>

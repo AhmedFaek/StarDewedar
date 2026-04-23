@@ -5,24 +5,14 @@ import InputField from '../forms/InputField'
 import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
+import { api } from '../../utils/api'
 
 export default function QuoteForm({ productId = null }) {
-  const { t } = useTranslation()
-
-  const productMapping = {
-    'ax-90': 'AX-Series Distribution Hub',
-    'lum-tx500': 'Titan High-Bay Luminaire',
-    'cmp-k12': 'Kinetix Contactors',
-    'swg-mod-3': 'Modular Switchgear M3',
-    'sen-pf-40': 'Precision Flow Sensor',
-    'brk-ap-100': 'Armor-Plate Breaker',
-  }
-
-  const getMappedProductId = (id) => productMapping[id] || ''
-
+  const { t, i18n } = useTranslation()
+  const [products, setProducts] = useState([])
   const [formData, setFormData] = useState({
     first_name: '', last_name: '', phone: '', email: '',
-    product_id: getMappedProductId(productId) || '',
+    product_id: productId || '',
     custom_product_name: '', details: '', file_url: null,
   })
 
@@ -30,19 +20,20 @@ export default function QuoteForm({ productId = null }) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState('')
 
-  const productOptions = [
-    { value: 'AX-Series Distribution Hub', label: 'AX-Series Distribution Hub' },
-    { value: 'Titan High-Bay Luminaire', label: 'Titan High-Bay Luminaire' },
-    { value: 'Kinetix Contactors', label: 'Kinetix Contactors' },
-    { value: 'Modular Switchgear M3', label: 'Modular Switchgear M3' },
-    { value: 'Precision Flow Sensor', label: 'Precision Flow Sensor' },
-    { value: 'Armor-Plate Breaker', label: 'Armor-Plate Breaker' },
-    { value: 'custom', label: t('requestQuote.customProduct') },
-  ]
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const data = await api.getProducts()
+        setProducts(data)
+      } catch (error) {
+        console.error('Error fetching products:', error)
+      }
+    }
+    fetchProducts()
+  }, [])
 
   useEffect(() => {
-    const mappedId = getMappedProductId(productId)
-    if (mappedId) setFormData((prev) => ({ ...prev, product_id: mappedId }))
+    if (productId) setFormData((prev) => ({ ...prev, product_id: productId }))
   }, [productId])
 
   const handleInputChange = (e) => {
@@ -54,6 +45,9 @@ export default function QuoteForm({ productId = null }) {
     const file = e.target.files?.[0]
     if (file) {
       setFileName(file.name)
+      // Note: Backend might not support file upload via JSON, 
+      // but let's keep it here for now. 
+      // If backend needs FormData, we'll need to change the API utility.
       setFormData((prev) => ({ ...prev, file_url: file }))
     }
   }
@@ -63,24 +57,22 @@ export default function QuoteForm({ productId = null }) {
     setIsSubmitting(true)
     setSubmitMessage('')
     try {
-      const submitData = new FormData()
-      submitData.append('first_name', formData.first_name)
-      submitData.append('last_name', formData.last_name)
-      submitData.append('phone', formData.phone)
-      submitData.append('email', formData.email)
-      submitData.append('product_id', formData.product_id)
-      submitData.append('custom_product_name', formData.custom_product_name)
-      submitData.append('details', formData.details)
-      if (formData.file_url) submitData.append('file_url', formData.file_url)
-
-      const response = await fetch('/api/quote-requests', { method: 'POST', body: submitData })
-      if (response.ok) {
-        setSubmitMessage(t('requestQuote.successMsg'))
-        setFormData({ first_name: '', last_name: '', phone: '', email: '', product_id: productId || '', custom_product_name: '', details: '', file_url: null })
-        setFileName('')
-      } else {
-        setSubmitMessage(t('requestQuote.failMsg'))
+      // The current backend createQuote controller uses createQuoteRequestSchema.parse(req.body)
+      // which suggests it expects JSON. 
+      // However, it has a file_url field. 
+      // If we want to upload a file, we usually use FormData.
+      // For now, let's try sending as JSON and see.
+      
+      const payload = { ...formData, status: 'PENDING' }
+      if (payload.product_id === 'custom') {
+          payload.product_id = null
       }
+
+      await api.sendQuoteRequest(payload)
+      
+      setSubmitMessage(t('requestQuote.successMsg'))
+      setFormData({ first_name: '', last_name: '', phone: '', email: '', product_id: productId || '', custom_product_name: '', details: '', file_url: null })
+      setFileName('')
     } catch (error) {
       console.error('Form submission error:', error)
       setSubmitMessage(t('requestQuote.errorMsg'))
@@ -88,6 +80,14 @@ export default function QuoteForm({ productId = null }) {
       setIsSubmitting(false)
     }
   }
+
+  const productOptions = [
+    ...products.map(p => ({
+      value: p.id,
+      label: i18n.language === 'ar' ? p.name_ar : p.name_en
+    })),
+    { value: 'custom', label: t('requestQuote.customProduct') },
+  ]
 
   return (
     <section className="lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
@@ -113,10 +113,11 @@ export default function QuoteForm({ productId = null }) {
             <InputField label={t('requestQuote.customProductName')} name="custom_product_name" placeholder={t('requestQuote.customProductPlaceholder')} value={formData.custom_product_name} onChange={handleInputChange} />
           )}
           <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={5} required />
-          <FileUploadField label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} />
+          {/* <FileUploadField label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} /> */}
+          {/* File upload might need backend changes to support multipart/form-data for public requests */}
           {fileName && <p className="text-xs text-tertiary-fixed font-semibold">{t('requestQuote.fileSelected')} {fileName}</p>}
           {submitMessage && (
-            <div className={`p-4 text-sm font-semibold ${submitMessage.includes('✓') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+            <div className={`p-4 text-sm font-semibold ${submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
               {submitMessage}
             </div>
           )}

@@ -4,22 +4,51 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import TextAreaField from '../components/forms/TextAreaField'
+import { api } from '../utils/api'
 
 export default function RequestVisit() {
   const { t } = useTranslation()
   const [formData, setFormData] = useState({
-    factoryName: '', factoryActivity: '', firstName: '', lastName: '',
-    phoneNumber: '', whatsappNumber: '', email: '', physicalAddress: '', technicalDetails: '',
+    factory_name: '', factory_activity: '', name: '', 
+    phone_number: '', whatsapp_number: '', email: '', 
+    address: '', details: '', preferred_date: new Date().toISOString().split('T')[0]
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submitMessage, setSubmitMessage] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    console.log('Form submitted:', formData)
+    setIsSubmitting(true)
+    setSubmitMessage('')
+    try {
+      // Backend VisitRequest model fields:
+      // factory_name, factory_activity, name, phone_number, whatsapp_number, email, address, preferred_date, details, status
+      
+      const payload = { 
+          ...formData, 
+          status: 'PENDING',
+          preferred_date: new Date(formData.preferred_date).toISOString()
+      }
+      
+      await api.sendVisitRequest(payload)
+      
+      setSubmitMessage(t('requestVisit.successMsg'))
+      setFormData({
+        factory_name: '', factory_activity: '', name: '', 
+        phone_number: '', whatsapp_number: '', email: '', 
+        address: '', details: '', preferred_date: new Date().toISOString().split('T')[0]
+      })
+    } catch (error) {
+      console.error('Error submitting visit request:', error)
+      setSubmitMessage(t('requestVisit.errorMsg'))
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -69,8 +98,8 @@ export default function RequestVisit() {
                     <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section1Title')}</h2>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-                    <InputField label={t('requestVisit.factoryName')} placeholder={t('requestVisit.factoryNamePlaceholder')} name="factoryName" value={formData.factoryName} onChange={handleChange} />
-                    <InputField label={t('requestVisit.factoryActivity')} placeholder={t('requestVisit.factoryActivityPlaceholder')} name="factoryActivity" value={formData.factoryActivity} onChange={handleChange} />
+                    <InputField label={t('requestVisit.factoryName')} placeholder={t('requestVisit.factoryNamePlaceholder')} name="factory_name" value={formData.factory_name} onChange={handleChange} required />
+                    <InputField label={t('requestVisit.factoryActivity')} placeholder={t('requestVisit.factoryActivityPlaceholder')} name="factory_activity" value={formData.factory_activity} onChange={handleChange} required />
                   </div>
                 </div>
 
@@ -81,13 +110,10 @@ export default function RequestVisit() {
                     <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section2Title')}</h2>
                   </div>
                   <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-                    <InputField label={t('requestVisit.firstName')} placeholder="" name="firstName" value={formData.firstName} onChange={handleChange} />
-                    <InputField label={t('requestVisit.lastName')} placeholder="" name="lastName" value={formData.lastName} onChange={handleChange} />
-                    <InputField label={t('requestVisit.phoneNumber')} type="tel" placeholder="" name="phoneNumber" value={formData.phoneNumber} onChange={handleChange} />
-                    <InputField label={t('requestVisit.whatsappNumber')} type="tel" placeholder="" name="whatsappNumber" value={formData.whatsappNumber} onChange={handleChange} />
-                    <div className="md:col-span-2">
-                      <InputField label={t('requestVisit.emailAddress')} type="email" placeholder="" name="email" value={formData.email} onChange={handleChange} />
-                    </div>
+                    <InputField label={t('requestVisit.firstName')} placeholder="" name="name" value={formData.name} onChange={handleChange} required />
+                    <InputField label={t('requestVisit.phoneNumber')} type="tel" placeholder="" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
+                    <InputField label={t('requestVisit.whatsappNumber')} type="tel" placeholder="" name="whatsapp_number" value={formData.whatsapp_number} onChange={handleChange} />
+                    <InputField label={t('requestVisit.emailAddress')} type="email" placeholder="" name="email" value={formData.email} onChange={handleChange} required />
                   </div>
                 </div>
 
@@ -98,17 +124,19 @@ export default function RequestVisit() {
                     <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section3Title')}</h2>
                   </div>
                   <div className="space-y-6 sm:space-y-8">
-                    <InputField label={t('requestVisit.physicalAddress')} placeholder="" name="physicalAddress" value={formData.physicalAddress} onChange={handleChange} />
-                    <TextAreaField label={t('requestVisit.technicalDetails')} placeholder={t('requestVisit.technicalDetailsPlaceholder')} name="technicalDetails" value={formData.technicalDetails} onChange={handleChange} rows={4} />
+                    <InputField label={t('requestVisit.physicalAddress')} placeholder="" name="address" value={formData.address} onChange={handleChange} required />
+                    <InputField label={t('requestVisit.preferredDate')} type="date" name="preferred_date" value={formData.preferred_date} onChange={handleChange} required />
+                    <TextAreaField label={t('requestVisit.technicalDetails')} placeholder={t('requestVisit.technicalDetailsPlaceholder')} name="details" value={formData.details} onChange={handleChange} rows={4} required />
                   </div>
                 </div>
 
                 {/* Submit */}
                 <div className="pt-6 sm:pt-8">
-                  <button type="submit" className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group">
-                    <span>{t('requestVisit.submitButton')}</span>
+                  <button type="submit" disabled={isSubmitting} className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50">
+                    <span>{isSubmitting ? t('requestQuote.submitting') : t('requestVisit.submitButton')}</span>
                     <span className="material-symbols-outlined text-xl sm:text-2xl group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
                   </button>
+                  {submitMessage && <p className="mt-4 font-bold text-sm text-primary uppercase tracking-widest">{submitMessage}</p>}
                 </div>
               </form>
             </div>
