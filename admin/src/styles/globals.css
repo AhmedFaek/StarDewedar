@@ -2,9 +2,17 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
+:root {
+    --font-body: 'Inter', sans-serif;
+    --font-headline-family: 'Space Grotesk', sans-serif;
+}
+
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-body);
     overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 html,
@@ -14,7 +22,7 @@ body,
 }
 
 .font-headline {
-    font-family: 'Space Grotesk', sans-serif;
+    font-family: var(--font-headline-family);
 }
 
 .material-symbols-outlined {
@@ -46,15 +54,63 @@ body,
 
 
 
+.arabic {
+    --font-body: 'Cairo', sans-serif;
+    --font-headline-family: 'Cairo', sans-serif;
+}
+
 .arabic body {
-    font-family: 'Cairo', sans-serif;
+    font-family: var(--font-body);
+    line-height: 1.7;
 }
 
-body {
-    font-family: 'Inter', sans-serif;
-}
-
-/* Fix spacing */
-.arabic .font-headline {
+.arabic .font-headline,
+.arabic h1,
+.arabic h2,
+.arabic h3,
+.arabic h4,
+.arabic h5,
+.arabic h6 {
+    font-family: var(--font-headline-family);
+    font-weight: 800;
     letter-spacing: 0;
+    line-height: 1.35;
+}
+
+.arabic p,
+.arabic span:not(.material-symbols-outlined),
+.arabic label,
+.arabic th,
+.arabic td,
+.arabic a,
+.arabic button,
+.arabic input,
+.arabic textarea,
+.arabic select {
+    font-family: var(--font-body);
+}
+
+.arabic .tracking-tight,
+.arabic .tracking-tighter,
+.arabic .tracking-wide,
+.arabic .tracking-widest,
+.arabic .uppercase {
+    letter-spacing: 0;
+}
+
+.arabic input,
+.arabic textarea,
+.arabic select,
+.arabic button {
+    font-weight: 600;
+}
+
+.arabic .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-weight: 400;
+    font-style: normal;
+    letter-spacing: normal;
+    text-transform: none;
+    white-space: nowrap;
+    direction: ltr;
 }
