@@ -57,15 +57,24 @@ export default function QuoteForm({ productId = null }) {
     setIsSubmitting(true)
     setSubmitMessage('')
     try {
-      // The current backend createQuote controller uses createQuoteRequestSchema.parse(req.body)
-      // which suggests it expects JSON. 
-      // However, it has a file_url field. 
-      // If we want to upload a file, we usually use FormData.
-      // For now, let's try sending as JSON and see.
-      
-      const payload = { ...formData, status: 'PENDING' }
-      if (payload.product_id === 'custom') {
-          payload.product_id = null
+      const payload = {
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        phone: formData.phone,
+        email: formData.email,
+        details: formData.details
+      }
+
+      if (formData.product_id && formData.product_id !== 'custom') {
+        payload.product_id = formData.product_id
+      } else {
+        payload.custom_product_name = formData.custom_product_name || 'Custom Product Request'
+        // Backend requires custom_image_url for custom products
+        payload.custom_image_url = 'https://images.unsplash.com/photo-1581092160562-40aa08e78837'
+      }
+
+      if (formData.file_url && typeof formData.file_url === 'string') {
+          payload.file_url = formData.file_url
       }
 
       await api.sendQuoteRequest(payload)
@@ -117,8 +126,17 @@ export default function QuoteForm({ productId = null }) {
           {/* File upload might need backend changes to support multipart/form-data for public requests */}
           {fileName && <p className="text-xs text-tertiary-fixed font-semibold">{t('requestQuote.fileSelected')} {fileName}</p>}
           {submitMessage && (
-            <div className={`p-4 text-sm font-semibold ${submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              {submitMessage}
+            <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
+              submitMessage.includes('✓') || submitMessage.includes('نجاح') 
+                ? 'bg-green-50 border-green-500 text-green-800' 
+                : 'bg-red-50 border-red-500 text-red-800'
+            }`}>
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-xl">
+                  {submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'check_circle' : 'error'}
+                </span>
+                <p className="font-headline font-bold text-sm tracking-tight">{submitMessage}</p>
+              </div>
             </div>
           )}
           <div className="pt-4 sm:pt-6">

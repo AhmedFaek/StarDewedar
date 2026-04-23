@@ -131,12 +131,25 @@ export default function RequestVisit() {
                 </div>
 
                 {/* Submit */}
-                <div className="pt-6 sm:pt-8">
+                <div className="pt-6 sm:pt-8 space-y-6">
+                  {submitMessage && (
+                    <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
+                      submitMessage.includes('✓') || submitMessage.includes('نجاح') 
+                        ? 'bg-green-50 border-green-500 text-green-800' 
+                        : 'bg-red-50 border-red-500 text-red-800'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-xl">
+                          {submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'check_circle' : 'error'}
+                        </span>
+                        <p className="font-headline font-bold text-sm tracking-tight">{submitMessage}</p>
+                      </div>
+                    </div>
+                  )}
                   <button type="submit" disabled={isSubmitting} className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50">
                     <span>{isSubmitting ? t('requestQuote.submitting') : t('requestVisit.submitButton')}</span>
                     <span className="material-symbols-outlined text-xl sm:text-2xl group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
                   </button>
-                  {submitMessage && <p className="mt-4 font-bold text-sm text-primary uppercase tracking-widest">{submitMessage}</p>}
                 </div>
               </form>
             </div>

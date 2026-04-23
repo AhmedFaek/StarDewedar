@@ -181,7 +181,10 @@
     "physicalAddress": "Physical Address",
     "technicalDetails": "Technical Details & Purpose",
     "technicalDetailsPlaceholder": "DESCRIBE SPECIFIC TECHNICAL ISSUES OR PROJECT SCOPE...",
-    "submitButton": "SCHEDULE ENGINEER VISIT"
+    "submitButton": "SCHEDULE ENGINEER VISIT",
+    "successMsg": "✓ Visit request scheduled successfully. We will contact you soon.",
+    "failMsg": "✗ Failed to schedule visit request. Please try again.",
+    "errorMsg": "✗ An error occurred. Please try again."
   },
 
   "requestQuote": {

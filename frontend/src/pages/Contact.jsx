@@ -111,7 +111,20 @@ export default function Contact() {
                   <button type="submit" disabled={isSubmitting} className="bg-primary text-white px-12 py-5 font-headline font-bold uppercase text-sm tracking-widest hover:brightness-110 transition-all disabled:opacity-50">
                     {isSubmitting ? t('contact.transmitting') : t('contact.transmitInquiry')}
                   </button>
-                  {submitMessage && <p className="mt-4 font-bold text-sm text-primary uppercase tracking-widest">{submitMessage}</p>}
+                  {submitMessage && (
+                    <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
+                      submitMessage.includes('✓') || submitMessage.includes('بنجاح') 
+                        ? 'bg-green-50 border-green-500 text-green-800' 
+                        : 'bg-red-50 border-red-500 text-red-800'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-xl">
+                          {submitMessage.includes('✓') || submitMessage.includes('بنجاح') ? 'check_circle' : 'error'}
+                        </span>
+                        <p className="font-headline font-bold text-sm tracking-tight">{submitMessage}</p>
+                      </div>
+                    </div>
+                  )}
                 </form>
               </div>
 
