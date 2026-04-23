@@ -10,7 +10,7 @@ export default function RequestQuote() {
   useEffect(() => {
     // Get product_id from URL query params
     const params = new URLSearchParams(window.location.search)
-    const id = params.get('product_id')
+    const id = params.get('productId')
     if (id) {
       setProductId(id)
     }

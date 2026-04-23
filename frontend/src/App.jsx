@@ -44,8 +44,9 @@ export default function App() {
 
   // Simple navigation helper
   window.navigateTo = (page, productId) => {
-    if (page === 'request-quote') {
-      window.history.pushState({}, '', '/request-quote')
+    if (page === 'request-quote' || page === 'quote') {
+      const query = productId ? `?productId=${productId}` : ''
+      window.history.pushState({}, '', `/request-quote${query}`)
       setCurrentPage('request-quote')
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
