@@ -10,7 +10,9 @@ export default function Projects() {
   const [activeFilter, setActiveFilter] = useState('all')
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0)
   const [categories, setCategories] = useState(['all'])
+  const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
+  const itemsPerPage = 6
 
   const services = [
     t('projects.service1'), t('projects.service2'), t('projects.service3'), t('projects.service4'),
@@ -26,11 +28,13 @@ export default function Projects() {
       try {
         const [projectsData, categoriesData] = await Promise.all([
           api.getProjects(),
-          fetch('/api/categories').then(res => res.json())
+          api.getCategories()
         ])
         setProjects(projectsData)
         
-        const projectCategories = categoriesData.filter(c => c.type === 'PROJECT')
+        const projectCategories = (categoriesData || []).filter(
+          (category) => String(category.type || '').toLowerCase() === 'project'
+        )
         setCategories(['all', ...projectCategories.map(c => c.name_en)])
       } catch (error) {
         console.error('Error fetching data:', error)
@@ -44,7 +48,19 @@ export default function Projects() {
     return () => clearInterval(interval)
   }, [])
 
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [activeFilter])
+
+  const formatCurrency = (amount) => {
+    if (!amount) return i18n.language === 'ar' ? 'غير محدد' : 'N/A'
+    return `EGP ${Number(amount).toLocaleString('en-EG')}`
+  }
+
   const filteredProjects = activeFilter === 'all' ? projects : projects.filter((p) => p.category?.name_en === activeFilter)
+  const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage))
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage)
 
   if (loading) {
     return (
@@ -105,7 +121,7 @@ export default function Projects() {
         {/* Project Grid */}
         <section className="px-4 sm:px-8 md:px-16">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 sm:gap-8">
-            {filteredProjects.map((project, index) => {
+            {paginatedProjects.map((project, index) => {
               // Determine layout based on index or property if needed
               let colSpan = "lg:col-span-4"
               if (index === 0) colSpan = "lg:col-span-8"
@@ -118,7 +134,7 @@ export default function Projects() {
 
               return (
                 <div key={project.id} className={`${colSpan} group cursor-pointer`} onClick={() => navigateToProject(project.id)}>
-                   <div className="relative overflow-hidden bg-slate-200 aspect-video">
+                  <div className="relative overflow-hidden bg-slate-200 aspect-video">
                     <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" alt={title} src={project.images?.[0]?.image_url || 'https://via.placeholder.com/800x450'} />
                     <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                     <div className="absolute top-4 sm:top-6 left-4 sm:left-6 flex gap-2">
@@ -127,12 +143,78 @@ export default function Projects() {
                   </div>
                   <div className="mt-6">
                     <h3 className="text-primary font-headline text-2xl font-black uppercase tracking-tighter mb-4">{title}</h3>
-                    <p className="text-on-surface-variant leading-relaxed font-body text-sm line-clamp-2">{description}</p>
+                    <p className="text-on-surface-variant leading-relaxed font-body text-sm line-clamp-2 mb-5">{description}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 border-t border-outline-variant/20 pt-4">
+                      <div>
+                        <p className="text-[10px] font-label font-bold uppercase tracking-[0.18em] text-secondary mb-1">
+                          {t('projects.client')}
+                        </p>
+                        <p className="text-sm font-headline font-bold text-primary">
+                          {project.client_name || (i18n.language === 'ar' ? 'غير محدد' : 'N/A')}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-label font-bold uppercase tracking-[0.18em] text-secondary mb-1">
+                          {t('projectDetail.budget')}
+                        </p>
+                        <p className="text-sm font-headline font-bold text-primary">
+                          {formatCurrency(project.budget)}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               )
             })}
           </div>
+          {filteredProjects.length === 0 && (
+            <div className="py-20 text-center">
+              <p className="text-secondary font-label uppercase tracking-widest">
+                {i18n.language === 'ar' ? 'لا توجد مشاريع مطابقة لهذا التصنيف.' : 'No projects match this filter.'}
+              </p>
+            </div>
+          )}
+          {filteredProjects.length > 0 && (
+            <div className="mt-12 flex flex-col gap-4 border-t border-outline-variant/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-xs font-label uppercase tracking-widest text-secondary">
+                {i18n.language === 'ar'
+                  ? `عرض ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredProjects.length)} من ${filteredProjects.length}`
+                  : `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredProjects.length)} of ${filteredProjects.length}`}
+              </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                  className="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest text-primary bg-surface-container-high hover:bg-outline-variant disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {i18n.language === 'ar' ? 'السابق' : 'Previous'}
+                </button>
+                {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() => setCurrentPage(page)}
+                    className={`min-w-10 px-3 py-2 text-xs font-headline font-bold transition-all ${
+                      currentPage === page
+                        ? 'bg-primary text-white'
+                        : 'bg-surface-container-high text-primary hover:bg-outline-variant'
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                  className="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest text-primary bg-surface-container-high hover:bg-outline-variant disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {i18n.language === 'ar' ? 'التالي' : 'Next'}
+                </button>
+              </div>
+            </div>
+          )}
         </section>
 
         {/* CTA */}
