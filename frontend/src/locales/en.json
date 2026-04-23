@@ -269,7 +269,10 @@
     "budget": "Budget",
     "timeline": "Timeline",
     "start": "Start",
-    "end": "End"
+    "end": "End",
+    "duration": "Duration",
+    "daysCount_one": "{{count}} day",
+    "daysCount_other": "{{count}} days"
   },
 
   "langSwitch": {

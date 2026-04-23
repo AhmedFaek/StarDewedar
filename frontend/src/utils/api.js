@@ -12,6 +12,7 @@ export const api = {
     // Products
     getProducts: () => fetch(`${API_URL}/products`).then(handleResponse),
     getProductById: (id) => fetch(`${API_URL}/products/${id}`).then(handleResponse),
+    getCategories: () => fetch(`${API_URL}/categories`).then(handleResponse),
 
     // Projects
     getProjects: () => fetch(`${API_URL}/projects`).then(handleResponse),

@@ -7,8 +7,8 @@ import { api } from '../utils/api'
 export default function Products() {
   const { t, i18n } = useTranslation()
   const [products, setProducts] = useState([])
-  const [categories, setCategories] = useState(['All Products'])
-  const [selectedCategory, setSelectedCategory] = useState('All Products')
+  const [categories, setCategories] = useState([])
+  const [selectedCategory, setSelectedCategory] = useState('all')
   const [searchTerm, setSearchTerm] = useState('')
   const [maxPrice, setMaxPrice] = useState(1000000)
   const [sortBy, setSortBy] = useState('featured')
@@ -19,12 +19,14 @@ export default function Products() {
       try {
         const [productsData, categoriesData] = await Promise.all([
           api.getProducts(),
-          fetch('/api/categories').then(res => res.json())
+          api.getCategories(),
         ])
         setProducts(productsData)
         
-        const productCategories = categoriesData.filter(c => c.type === 'PRODUCT')
-        setCategories(['All Products', ...productCategories.map(c => c.name_en)]) // Use English name for state tracking
+        const productCategories = (categoriesData || []).filter(
+          (category) => String(category.type || '').toLowerCase() === 'product'
+        )
+        setCategories(productCategories)
 
         // Update maxPrice based on products if any exist
         if (productsData.length > 0) {
@@ -40,17 +42,12 @@ export default function Products() {
     fetchData()
   }, [])
 
-  const getCategoryName = (category) => {
-    if (typeof category === 'string') return category
-    return i18n.language === 'ar' ? category.name_ar : category.name_en
-  }
-
   const filteredProducts = products
     .filter((product) => {
       const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
-      const categoryNameEn = product.category?.name_en || ''
+      const categoryId = product.category?.id || product.category_id || ''
       
-      const matchesCategory = selectedCategory === 'All Products' || categoryNameEn === selectedCategory
+      const matchesCategory = selectedCategory === 'all' || categoryId === selectedCategory
       const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
       const matchesPrice = product.price ? Number(product.price) <= maxPrice : true
 
@@ -95,17 +92,35 @@ export default function Products() {
         <section className="bg-surface-container-low px-4 sm:px-8 md:px-16 py-6 border-b border-outline-variant/10">
           <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
             <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => (
-                <button key={typeof cat === 'string' ? cat : cat.id} onClick={() => setSelectedCategory(typeof cat === 'string' ? cat : cat.name_en)}
-                  className={`px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold transition-all ${selectedCategory === (typeof cat === 'string' ? cat : cat.name_en) ? 'bg-primary text-white shadow-lg shadow-primary/20' : 'bg-surface-container-lowest text-primary hover:bg-surface-variant'}`}>
-                  {cat === 'All Products' ? t('products.allProducts') : (products.find(p => p.category?.name_en === cat)?.category?.[i18n.language === 'ar' ? 'name_ar' : 'name_en'] || cat)}
+              <button
+                key="all-products"
+                onClick={() => setSelectedCategory('all')}
+                className={`px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold transition-all ${
+                  selectedCategory === 'all'
+                    ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                    : 'bg-surface-container-lowest text-primary hover:bg-surface-variant'
+                }`}
+              >
+                {t('products.allProducts')}
+              </button>
+              {categories.map((category) => (
+                <button
+                  key={category.id}
+                  onClick={() => setSelectedCategory(category.id)}
+                  className={`px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold transition-all ${
+                    selectedCategory === category.id
+                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
+                      : 'bg-surface-container-lowest text-primary hover:bg-surface-variant'
+                  }`}
+                >
+                  {i18n.language === 'ar' ? category.name_ar : category.name_en}
                 </button>
               ))}
             </div>
             <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
               <div className="flex flex-col gap-1 min-w-[150px]">
-                <label className="text-[9px] font-black uppercase tracking-widest text-secondary">
-                  {t('products.maxPrice')}: ${maxPrice.toLocaleString()}
+                <label className="text-[10px] font-black uppercase tracking-widest text-secondary">
+                  {t('products.maxPrice')}: EGP{maxPrice.toLocaleString()}
                 </label>
                 <input type="range" min="0" max="1000000" step="1000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full accent-primary" />
               </div>
@@ -158,7 +173,7 @@ export default function Products() {
             <div className="py-20 text-center">
               <span className="material-symbols-outlined text-6xl text-outline mb-4">inventory_2</span>
               <p className="text-secondary font-label uppercase tracking-widest">{t('products.noProducts')}</p>
-              <button onClick={() => { setSelectedCategory('All Products'); setMaxPrice(1000000); setSearchTerm(''); }} className="mt-4 text-primary font-black text-xs underline underline-offset-4 uppercase tracking-widest">
+              <button onClick={() => { setSelectedCategory('all'); setMaxPrice(1000000); setSearchTerm(''); }} className="mt-4 text-primary font-black text-xs underline underline-offset-4 uppercase tracking-widest">
                 {t('products.resetFilters')}
               </button>
             </div>

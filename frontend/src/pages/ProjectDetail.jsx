@@ -56,7 +56,10 @@ export default function ProjectDetail() {
 
   const formatDate = (date) => {
     if (!date) return 'N/A'
-    return new Date(date).toLocaleDateString(i18n.language === 'ar' ? 'ar-EG' : 'en-EG', { year: 'numeric', month: 'short' })
+    return new Date(date).toLocaleDateString(
+      i18n.language === 'ar' ? 'ar-EG' : 'en-EG',
+      { day: 'numeric', month: 'short', year: 'numeric' }
+    )
   }
 
   const formatCurrency = (amount) => {
@@ -64,10 +67,46 @@ export default function ProjectDetail() {
     return Number(amount).toLocaleString()
   }
 
+  const getDurationInDays = (startDate, endDate) => {
+    if (!startDate || !endDate) return null
+
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return null
+
+    const millisecondsPerDay = 1000 * 60 * 60 * 24
+    const diffInMilliseconds = end.getTime() - start.getTime()
+    const diffInDays = Math.ceil(diffInMilliseconds / millisecondsPerDay)
+
+    return diffInDays >= 0 ? diffInDays + 1 : null
+  }
+
+  const getDurationLabel = () => {
+    const translated = t('projectDetail.duration')
+    return translated === 'projectDetail.duration'
+      ? (i18n.language === 'ar' ? 'المدة' : 'Duration')
+      : translated
+  }
+
+  const formatDurationDays = (days) => {
+    if (!days) return 'N/A'
+
+    if (i18n.language === 'ar') {
+      if (days === 1) return 'يوم واحد'
+      if (days === 2) return 'يومان'
+      if (days >= 3 && days <= 10) return `${days} أيام`
+      return `${days} يوم`
+    }
+
+    return `${days} ${days === 1 ? 'day' : 'days'}`
+  }
+
   const title = i18n.language === 'ar' ? project.title_ar : project.title_en
   const description = i18n.language === 'ar' ? project.description_ar : project.description_en
   const categoryName = i18n.language === 'ar' ? project.category?.name_ar : project.category?.name_en
   const location = i18n.language === 'ar' ? project.location_ar : project.location_en
+  const durationInDays = getDurationInDays(project.start_date, project.end_date)
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -140,6 +179,12 @@ export default function ProjectDetail() {
                     <div>
                       <span className="text-[12px] uppercase text-outline">{t('projectDetail.end')}</span>
                       <p className="font-bold">{formatDate(project.end_date)}</p>
+                    </div>
+                    <div>
+                      <span className="text-[12px] uppercase text-outline">{getDurationLabel()}</span>
+                      <p className="font-bold">
+                        {formatDurationDays(durationInDays)}
+                      </p>
                     </div>
                   </div>
                 </div>
