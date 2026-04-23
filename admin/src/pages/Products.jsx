@@ -83,7 +83,7 @@ export default function ProductsPage() {
         formDataObj.append('price', formData.price)
         formDataObj.append('category_id', formData.category_id)
         images.forEach(img => formDataObj.append('images', img))
-        if (catalogs.length > 0) formDataObj.append('catalog', catalogs)
+        if (catalogs.length > 0) formDataObj.append('catalog', catalogs[0])
         await productService.createProduct(formDataObj)
         setSuccess(t('products.save_success'))
       }

@@ -28,6 +28,7 @@ export default function ProductDetail() {
       try {
         const foundProduct = await api.getProductById(productId)
         setProduct(foundProduct)
+        console.log('Fetched product:', foundProduct)
         setActiveImage(foundProduct.images?.[0]?.image_url || '')
         
         // Fetch all products to find related ones (by category)
@@ -122,7 +123,7 @@ export default function ProductDetail() {
                 {product.catalogs?.[0] && (
                   <a href={product.catalogs[0].file_url} target="_blank" rel="noopener noreferrer" className="w-full border border-outline-variant text-primary py-4 text-[10px] font-headline font-bold uppercase tracking-[0.15em] flex items-center justify-center gap-3 hover:bg-surface-container-high transition-all">
                     <span className="material-symbols-outlined text-base">download</span>
-                    {i18n.language === 'ar' ? product.catalogs[0].title_ar : product.catalogs[0].title_en || t('productDetail.dataSheet')}
+                    {t('productDetail.dataSheet')}
                   </a>
                 )}
               </div>

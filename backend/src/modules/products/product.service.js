@@ -2,8 +2,19 @@ import * as repo from './product.repository.js'
 import * as imageService from './submodules/images/image.service.js'
 import * as catalogService from './submodules/catalogs/catalog.service.js'
 
+const normalizeProductData = (data = {}) => ({
+    name_en: data.name_en,
+    name_ar: data.name_ar,
+    description_en: data.description_en || null,
+    description_ar: data.description_ar || null,
+    price: data.price || null,
+    category_id: data.category_id,
+})
+
 export const createProduct = async (data, files) => {
-    const product = await repo.createProduct(data)
+    console.log('Creating product with data:', data)
+    const productData = normalizeProductData(data)
+    const product = await repo.createProduct(productData)
     const productId = product.id
 
     // Upload images

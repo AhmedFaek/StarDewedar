@@ -19,6 +19,7 @@ const uploadPDF = (file) => {
 
 export const uploadCatalog = async (productId, file, data = {}) => {
     const result = await uploadPDF(file)
+    console.log('Catalog uploaded to Cloudinary:', result)
 
     await repo.createCatalog({
         product_id: productId,
