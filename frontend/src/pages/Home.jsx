@@ -17,18 +17,23 @@ export default function Home() {
         <div className="animate-fade-in-up animate-delay-100">
           <AboutPreview />
         </div>
+        <hr></hr>
         <div className="animate-fade-in-up animate-delay-200">
           <ProductCardsGrid />
         </div>
+        <hr></hr>
         <div className="animate-fade-in-up animate-delay-300">
           <SuccessPartners />
         </div>
+        <hr></hr>
         <div className="animate-fade-in-up animate-delay-200">
           <ProjectShowcase />
         </div>
+        <hr></hr>
         <div className="animate-fade-in-up animate-delay-300">
           <WhyChooseUs />
         </div>
+        <hr></hr>
         <div className="animate-fade-in-up animate-delay-200">
           <CTABanner />
         </div>
