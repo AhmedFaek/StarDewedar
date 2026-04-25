@@ -1,13 +1,10 @@
-import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
+import AnimatedCounter from '../components/shared/AnimatedCounter'
 
 export default function About() {
   const { t } = useTranslation()
-  const [visibleStats, setVisibleStats] = useState(false)
-
-  useEffect(() => { setVisibleStats(true) }, [])
 
   const stats = [
     { number: '10+', label: t('about.stat1') },
@@ -40,7 +37,7 @@ export default function About() {
         {/* HERO */}
         <section className="relative h-[500px] bg-primary overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary to-primary_container opacity-90"></div>
-          <div className="relative h-full flex flex-col justify-end px-6 md:px-16 pb-16">
+          <div className="relative h-full flex flex-col justify-end px-6 md:px-16 pb-16 animate-fade-in-up">
             <span className="text-tertiary-fixed font-label text-xs uppercase tracking-widest mb-4">{t('about.badge')}</span>
             <h1 className="font-headline text-5xl md:text-7xl font-black text-white leading-none">
               {t('about.heroTitle1')}<br />{t('about.heroTitle2')}
@@ -53,8 +50,10 @@ export default function About() {
         <section className="py-16 bg-primary-container text-white">
           <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6">
             {stats.map((stat, i) => (
-              <div key={i} className={`text-center transition-all duration-700 ${visibleStats ? 'opacity-100' : 'opacity-0'}`}>
-                <h2 className="text-4xl font-black text-tertiary-fixed">{stat.number}</h2>
+              <div key={i} className="text-center animate-fade-in-up" style={{ animationDelay: `${i * 120}ms` }}>
+                <h2 className="text-4xl font-black text-tertiary-fixed">
+                  <AnimatedCounter value={stat.number} />
+                </h2>
                 <p className="text-sm uppercase tracking-widest">{stat.label}</p>
               </div>
             ))}

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../utils/api'
+import PageLoader from '../shared/PageLoader'
 
 export default function ProductCardsGrid() {
   const { t, i18n } = useTranslation()
@@ -22,7 +23,7 @@ export default function ProductCardsGrid() {
   }, [])
 
   if (loading) {
-    return <div className="py-20 text-center">{t('common.loading') || 'Loading...'}</div>
+    return <PageLoader fullscreen={false} label={t('common.loading') || 'Loading products'} />
   }
 
   return (

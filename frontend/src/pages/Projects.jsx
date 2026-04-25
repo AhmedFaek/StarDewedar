@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
+import PageLoader from '../components/shared/PageLoader'
 
 export default function Projects() {
   const { t, i18n } = useTranslation()
@@ -87,11 +88,7 @@ export default function Projects() {
   const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage)
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-      </div>
-    )
+    return <PageLoader label={t('common.loading') || 'Loading projects'} />
   }
 
   return (

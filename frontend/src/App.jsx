@@ -8,13 +8,18 @@ import ProjectDetail from './pages/ProjectDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 import Contact from './pages/Contact'
+import PageLoader from './components/shared/PageLoader'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home')
+  const [isRouteLoading, setIsRouteLoading] = useState(true)
 
   // Simple routing based on URL path
   useEffect(() => {
+    let loadingTimeout
+
     const handleRouteChange = () => {
+      setIsRouteLoading(true)
       const path = window.location.pathname
       if (path.includes('request-quote')) {
         setCurrentPage('request-quote')
@@ -35,15 +40,24 @@ export default function App() {
       } else {
         setCurrentPage('home')
       }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+      window.clearTimeout(loadingTimeout)
+      loadingTimeout = window.setTimeout(() => setIsRouteLoading(false), 500)
     }
 
     handleRouteChange()
     window.addEventListener('popstate', handleRouteChange)
-    return () => window.removeEventListener('popstate', handleRouteChange)
+
+    return () => {
+      window.clearTimeout(loadingTimeout)
+      window.removeEventListener('popstate', handleRouteChange)
+    }
   }, [])
 
   // Simple navigation helper
   window.navigateTo = (page, productId) => {
+    setIsRouteLoading(true)
     if (page === 'request-quote' || page === 'quote') {
       const query = productId ? `?productId=${productId}` : ''
       window.history.pushState({}, '', `/request-quote${query}`)
@@ -75,6 +89,12 @@ export default function App() {
       window.history.pushState({}, '', '/')
       setCurrentPage('home')
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.setTimeout(() => setIsRouteLoading(false), 500)
+  }
+
+  if (isRouteLoading) {
+    return <PageLoader label="Loading page" />
   }
 
   return currentPage === 'product-detail' ? (

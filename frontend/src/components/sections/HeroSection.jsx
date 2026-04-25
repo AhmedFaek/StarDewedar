@@ -4,10 +4,10 @@ export default function HeroSection() {
   const { t } = useTranslation()
 
   return (
-    <section className="relative min-h-screen h-screen flex items-center overflow-hidden pt-16 sm:pt-20">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
       <div className="absolute inset-0 z-0">
         <img
-          className="w-full h-full object-cover grayscale brightness-50"
+          className="w-full h-full object-cover grayscale brightness-50 animate-soft-zoom"
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu_E600Z8bryxCjYDsmqyspYpOO4zZCErIg2hY22a_ug5oR0tHtDEwUUWU6EF_xZWVnJ90JVOVWi6b9XBP6QCP33pcjvhzcU9vq6Vh-6YaKvpcgtxDLrlYGlIPJbuotzy0PmxKOzPfDidAilorQ2Zb34qhGAzMOl41sYp8i2fH3TCoZAAVQ9Vz0r3lefdPpc9Uetny9wuVShgGqadZF07GqPRU4syP30KvP6TQEi6Z-RjufikHOkwJXhW1BePtAR3-A_-Nnx0ADGUy"
           alt="Electrical industrial systems"
         />
@@ -16,11 +16,11 @@ export default function HeroSection() {
 
       <div className="container mx-auto px-4 sm:px-8 relative z-10">
         <div className="max-w-4xl">
-          <span className="inline-block bg-tertiary-fixed text-on-tertiary-fixed px-4 py-1 font-label font-bold uppercase tracking-widest text-xs mb-6">
+          <span className="inline-block bg-tertiary-fixed text-on-tertiary-fixed px-4 py-1 font-label font-bold uppercase tracking-widest text-xs mb-6 animate-fade-in-up">
             {t('hero.badge')}
           </span>
 
-          <h1 className="font-headline text-5xl md:text-7xl xl:text-7xl font-black text-white leading-tight tracking-tighter mb-8">
+          <h1 className="font-headline text-5xl md:text-7xl xl:text-7xl font-black text-white leading-tight tracking-tighter mb-8 animate-fade-in-up animate-delay-100">
             {t('hero.title1')}
             <br />
             <span className="text-tertiary-fixed">
@@ -28,11 +28,11 @@ export default function HeroSection() {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl font-body leading-relaxed">
+          <p className="text-lg md:text-xl text-slate-300 mb-10 max-w-2xl font-body leading-relaxed animate-fade-in-up animate-delay-200">
             {t('hero.description')}
           </p>
 
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up animate-delay-300">
             <button
               onClick={() => {
                 window.history.pushState({}, '', '/request-quote')
