@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
-  const [activeLink, setActiveLink] = useState('Products')
+  const [activeLink, setActiveLink] = useState(null)
   const [currentPage, setCurrentPage] = useState('') // Tracks 'quote' or 'visit'
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -18,13 +18,28 @@ export default function Header() {
 
   useEffect(() => {
     const path = window.location.pathname
-    if (path.includes('/request-quote')) setCurrentPage('quote')
-    else if (path.includes('/request-visit')) setCurrentPage('visit')
-    else if (path.includes('/project-detail') || path.includes('/projects')) setActiveLink('Projects')
-    else if (path.includes('/about')) setActiveLink('About')
-    else if (path.includes('/contact')) setActiveLink('Contact')
-    else if (path.includes('/product-detail') || path.includes('/products')) setActiveLink('Products')
-    else setCurrentPage('')
+    if (path.includes('/request-quote')) {
+      setCurrentPage('quote')
+      setActiveLink(null)
+    } else if (path.includes('/request-visit')) {
+      setCurrentPage('visit')
+      setActiveLink(null)
+    } else if (path.includes('/project-detail') || path.includes('/projects')) {
+      setActiveLink('Projects')
+      setCurrentPage('')
+    } else if (path.includes('/about')) {
+      setActiveLink('About')
+      setCurrentPage('')
+    } else if (path.includes('/contact')) {
+      setActiveLink('Contact')
+      setCurrentPage('')
+    } else if (path.includes('/product-detail') || path.includes('/products')) {
+      setActiveLink('Products')
+      setCurrentPage('')
+    } else {
+      setActiveLink(null)
+      setCurrentPage('')
+    }
   }, [])
 
   // Update document direction when language changes
@@ -47,7 +62,7 @@ export default function Header() {
   }
 
   const handleLogoClick = () => {
-    setActiveLink('Products')
+    setActiveLink(null)
     setCurrentPage('')
     setMobileMenuOpen(false)
     window.history.pushState({}, '', '/')
