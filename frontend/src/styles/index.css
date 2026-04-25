@@ -9,6 +9,7 @@
 @layer base {
   html {
     @apply font-inter text-onSurface;
+    overflow-x: hidden;
   }
 
   /* RTL / Arabic overrides */
@@ -59,6 +60,8 @@
   body {
     @apply bg-surface;
     overflow-x: hidden;
+    overflow-y: auto;
+    margin: 0;
   }
 }
 

@@ -10,7 +10,7 @@ export default function AboutPreview() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
 
           {/* Left */}
-          <div className="md:col-span-7 animate-fade-in-up">
+          <div className="md:col-span-7">
             <h2 className="font-headline text-4xl md:text-6xl font-black tracking-tighter text-primary mb-8">
               {t('aboutPreview.title1')}
               <br />{t('aboutPreview.title2')}
@@ -42,7 +42,7 @@ export default function AboutPreview() {
           </div>
 
           {/* Right */}
-          <div className="md:col-span-5 bg-surface-container-low p-8 animate-fade-in-up animate-delay-200">
+          <div className="md:col-span-5 bg-surface-container-low p-8">
             <h3 className="font-headline text-xl font-bold uppercase mb-4 border-b border-tertiary-fixed pb-2 w-fit">
               {t('aboutPreview.ourApproach')}
             </h3>

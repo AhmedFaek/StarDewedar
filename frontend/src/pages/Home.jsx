@@ -7,36 +7,48 @@ import SuccessPartners from '../components/sections/SuccessPartners'
 import ProjectShowcase from '../components/sections/ProjectShowcase'
 import WhyChooseUs from '../components/sections/WhyChooseUs'
 import CTABanner from '../components/sections/CTABanner'
+import ScrollReveal from '../components/shared/ScrollReveal'
 
 export default function Home() {
   return (
     <>
       <Header />
-      <main className="overflow-x-hidden">
+      <main>
         <HeroSection />
-        <div className="animate-fade-in-up animate-delay-100">
+        
+        <ScrollReveal delay={100}>
           <AboutPreview />
-        </div>
-        <hr></hr>
-        <div className="animate-fade-in-up animate-delay-200">
+        </ScrollReveal>
+        
+       
+        
+        <ScrollReveal delay={200}>
           <ProductCardsGrid />
-        </div>
-        <hr></hr>
-        <div className="animate-fade-in-up animate-delay-300">
+        </ScrollReveal>
+        
+       
+        
+        <ScrollReveal delay={300}>
           <SuccessPartners />
-        </div>
-        <hr></hr>
-        <div className="animate-fade-in-up animate-delay-200">
+        </ScrollReveal>
+        
+       
+        
+        <ScrollReveal delay={200}>
           <ProjectShowcase />
-        </div>
-        <hr></hr>
-        <div className="animate-fade-in-up animate-delay-300">
+        </ScrollReveal>
+        
+       
+        
+        <ScrollReveal delay={300}>
           <WhyChooseUs />
-        </div>
-        <hr></hr>
-        <div className="animate-fade-in-up animate-delay-200">
+        </ScrollReveal>
+        
+       
+        
+        <ScrollReveal delay={200}>
           <CTABanner />
-        </div>
+        </ScrollReveal>
       </main>
       <Footer />
     </>
