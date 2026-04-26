@@ -133,6 +133,7 @@
     "lastName": "اسم العائلة",
     "workEmail": "البريد الإلكتروني",
     "phoneNumber": "رقم الهاتف",
+    "whatsappNumber": "رقم الواتساب (اختياري)",
     "detailedBrief": "ملخص تفصيلي",
     "briefPlaceholder": "صف استفسارك...",
     "transmitting": "جاري الإرسال...",

@@ -71,7 +71,7 @@ export default function Products() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Header />
-      <main className="flex-grow pt-24 pb-20">
+      <main className="flex-grow pt-32 pb-20">
         {/* Hero */}
         <header className="relative w-full h-64 md:h-[409px] flex items-center px-4 sm:px-8 md:px-16 overflow-hidden bg-primary">
           <div className="absolute inset-0 opacity-40">

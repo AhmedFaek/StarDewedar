@@ -133,6 +133,7 @@
     "lastName": "Last Name",
     "workEmail": "Work Email",
     "phoneNumber": "Phone Number",
+    "whatsappNumber": "WhatsApp Number (Optional)",
     "detailedBrief": "Detailed Brief",
     "briefPlaceholder": "DESCRIBE YOUR INQUIRY...",
     "transmitting": "Transmitting...",

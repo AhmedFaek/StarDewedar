@@ -90,25 +90,25 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
-      <button 
-        onClick={handleLogoClick}
-        className="text-xl sm:text-2xl font-black tracking-tighter text-slate-950 uppercase font-headline hover:opacity-70 transition-opacity"
-      >
-        Star Dewedar
+      <button onClick={handleLogoClick}>
+        <img
+          src="/logo/logo.png"
+          alt="Star Dewedar"
+          className="h-16 sm:h-20 lg:h-24 w-auto object-contain"
+        />
       </button>
 
       {/* Desktop Navigation */}
-      <nav className="hidden md:flex space-x-8 rtl:space-x-reverse">
+      <nav className="hidden md:flex space-x-6 rtl:space-x-reverse">
         {navLinks.map((link) => (
           <a
             key={link.key}
             href={`#${link.key.toLowerCase()}`}
             onClick={() => handleNavClick(link.key)}
-            className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${
-              activeLink === link.key && !currentPage
-                ? 'text-slate-950 border-b-2 border-yellow-400'
-                : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
-            }`}
+            className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${activeLink === link.key && !currentPage
+              ? 'text-slate-950 border-b-2 border-yellow-400'
+              : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
+              }`}
           >
             {link.label}
           </a>
@@ -126,24 +126,22 @@ export default function Header() {
           {i18n.language === 'ar' ? 'EN' : 'AR'}
         </button>
 
-        <button 
+        <button
           onClick={() => navigateTo('/request-visit', 'visit')}
-          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border ${
-            currentPage === 'visit'
-              ? 'bg-slate-900 text-white'
-              : 'border-slate-300 text-slate-900 hover:bg-slate-100'
-          }`}
+          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border ${currentPage === 'visit'
+            ? 'bg-slate-900 text-white'
+            : 'border-slate-300 text-slate-900 hover:bg-slate-100'
+            }`}
         >
           {t('nav.requestVisit')}
         </button>
-        
-        <button 
+
+        <button
           onClick={() => navigateTo('/request-quote', 'quote')}
-          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border border-transparent ${
-            currentPage === 'quote'
-              ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
-              : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
-          }`}
+          className={`font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border border-transparent ${currentPage === 'quote'
+            ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
+            : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
+            }`}
         >
           {t('nav.requestQuote')}
         </button>
@@ -169,16 +167,15 @@ export default function Header() {
                 key={link.key}
                 href={`#${link.key.toLowerCase()}`}
                 onClick={() => handleNavClick(link.key)}
-                className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${
-                  activeLink === link.key && !currentPage
-                    ? 'text-yellow-500'
-                    : 'text-slate-600 hover:text-slate-950'
-                }`}
+                className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${activeLink === link.key && !currentPage
+                  ? 'text-yellow-500'
+                  : 'text-slate-600 hover:text-slate-950'
+                  }`}
               >
                 {link.label}
               </a>
             ))}
-            
+
             <div className="pt-2 flex flex-col gap-2">
               {/* Mobile Language Switcher */}
               <button
@@ -189,17 +186,15 @@ export default function Header() {
               </button>
               <button
                 onClick={() => navigateTo('/request-visit', 'visit')}
-                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${
-                  currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
-                }`}
+                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
+                  }`}
               >
                 {t('nav.requestVisit')}
               </button>
               <button
                 onClick={() => navigateTo('/request-quote', 'quote')}
-                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${
-                  currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
-                }`}
+                className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
+                  }`}
               >
                 {t('nav.requestQuote')}
               </button>

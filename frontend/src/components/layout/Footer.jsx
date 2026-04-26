@@ -23,8 +23,8 @@ export default function Footer() {
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
         {/* Brand Section */}
         <div className="sm:col-span-2 lg:col-span-1">
-          <a 
-            href="/" 
+          <a
+            href="/"
             onClick={(e) => handleLinkClick(e, 'home')}
             className="inline-block text-lg sm:text-xl font-bold tracking-widest text-white uppercase font-headline mb-4 sm:mb-6 hover:text-yellow-400 transition-colors"
           >

@@ -76,6 +76,8 @@ export default function QuoteForm({ productId = null }) {
       setSubmitMessage(t('requestQuote.successMsg'))
       setFormData({ first_name: '', last_name: '', phone: '', email: '', product_id: productId || '', custom_product_name: '', details: '', file_url: null })
       setFileName('')
+      // Refresh the page after a short delay so the user can see the success message
+      setTimeout(() => window.location.reload(), 1500)
     } catch (error) {
       console.error('Form submission error:', error)
       setSubmitMessage(t('requestQuote.errorMsg'))

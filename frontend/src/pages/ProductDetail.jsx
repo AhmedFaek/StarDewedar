@@ -79,7 +79,7 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <Header />
-      <main className="flex-grow pt-24 pb-20 px-4 sm:px-8 max-w-screen-2xl mx-auto w-full">
+      <main className="flex-grow pt-32 pb-20 px-4 sm:px-8 max-w-screen-2xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-24">
           {/* Gallery */}
           <div className="lg:col-span-7 grid grid-cols-6 gap-4">

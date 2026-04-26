@@ -54,12 +54,12 @@ export default function RequestVisit() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Header />
-      <main className="flex-grow pt-24 pb-20">
+      <main className="flex-grow pt-32 pb-20">
         {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-16">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end">
             <div>
-              <h1 className="font-headline font-black text-5xl sm:text-6xl md:text-7xl lg:text-8xl tracking-tighter text-primary leading-[0.9] mb-6 sm:mb-8">
+              <h1 className="font-headline font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter text-primary leading-[0.9] mb-6 sm:mb-8">
                 {t('requestVisit.heroTitle1')} <br className="hidden sm:block" />
                 {t('requestVisit.heroTitle2')} <br className="hidden sm:block" />
                 {t('requestVisit.heroTitle3')}
@@ -82,10 +82,6 @@ export default function RequestVisit() {
               <img alt="Industrial Infrastructure" className="absolute inset-0 w-full h-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXZISKS79x-rJ4alZw-7c4maLXMGQAatrDHFwCvhqQaCz1XZl8dwrIywaSEJymATGxM2aGR4CVRQ_q7aAFMxgmu6Z-JCp9soJ2u_FOPUpiITSquZVxgIRaVuXwJ7mZN-o_z_UHShQ7agdzCiwoPxHrThbec7E_xuF7sH0JT-uMh5bAXu_635PhOAdR5fFk_z476CLmEZg1BWa9jSM2-jCPqyS4V7cMrPgefJoqqmHR3Ml14dO6yj1ltRWO0NzoozAKs2YpfGo90B81" />
               <div className="absolute inset-0 bg-primary/40"></div>
-              <div className="absolute bottom-6 sm:bottom-8 left-6 sm:left-8">
-                <div className="font-headline text-tertiary-fixed text-3xl sm:text-4xl font-black">{t('requestVisit.voltagePro')}</div>
-                <div className="font-label text-white uppercase tracking-widest text-[10px] sm:text-xs mt-2">{t('requestVisit.certifiedDiv')}</div>
-              </div>
             </div>
 
             {/* Form Side */}

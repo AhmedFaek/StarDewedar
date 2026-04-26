@@ -94,7 +94,7 @@ export default function Projects() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Header />
-      <main className="pt-24 pb-32">
+      <main className="pt-32 pb-32">
         <section className="px-4 sm:px-8 md:px-16 mb-24">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-0 border-l-4 border-primary rtl:border-l-0 rtl:border-r-4">
             <div className="md:col-span-8 bg-[#f2f4f7] p-8 sm:p-12 lg:p-24 flex flex-col justify-center">
