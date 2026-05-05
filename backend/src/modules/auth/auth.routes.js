@@ -4,6 +4,7 @@ import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import {
+    registerSchema,
     createUserSchema,
     loginSchema,
     refreshSchema,
@@ -12,20 +13,27 @@ import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 
-//  LOGIN
+// ── Public routes ────────────────────────────────────────────────────────────
+
+// Customer self-registration
+router.post('/register', validate(registerSchema), controller.register)
+
+// Login (any role)
 router.post('/login', validate(loginSchema), controller.login)
 
-//  REFRESH
+// Refresh access token
 router.post('/refresh', validate(refreshSchema), controller.refresh)
 
-//  LOGOUT
+// ── Authenticated routes ──────────────────────────────────────────────────────
+
+// Logout (requires valid access token)
 router.post('/logout', auth, controller.logout)
 
-//  CREATE USER (ONLY CO-FOUNDER)
+// Create a user (admin only)
 router.post(
     '/create-user',
     auth,
-    requireRole(ROLES.CO_FOUNDER),
+    requireRole(ROLES.ADMIN),
     validate(createUserSchema),
     controller.createUser
 )
