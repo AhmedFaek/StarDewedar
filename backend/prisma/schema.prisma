@@ -7,14 +7,17 @@ datasource db {
 }
 
 model User {
-  id              String   @id @default(uuid())
-  name            String
-  email           String   @unique
-  password        String
-  whatsapp_number String?
-  role            String
-  created_at      DateTime @default(now())
-  updated_at      DateTime @updatedAt
+  id                   String   @id @default(uuid())
+  name                 String
+  email                String   @unique
+  password             String
+  whatsapp_number      String?
+  phone_number         String?
+  company_name         String?
+  role                 String   // "admin" | "customer"
+  hashed_refresh_token String?
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
 }
 
 model Category {
