@@ -8,6 +8,7 @@ import contactRoutes from './modules/contactMessages/contact.routes.js'
 import quoteRoutes from './modules/quoteRequests/quote.routes.js'
 import visitRoutes from './modules/visitRequests/visit.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
+import userRoutes from './modules/users/user.routes.js'
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/api/contact', contactRoutes)
 app.use('/api/quotes', quoteRoutes)
 app.use('/api/visits', visitRoutes)
 app.use('/api/dashboard', dashboardRoutes)
+app.use('/api/users', userRoutes)
 
 // Test route
 app.get('/', (req, res) => {
