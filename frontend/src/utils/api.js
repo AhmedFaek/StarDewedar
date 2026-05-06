@@ -95,6 +95,20 @@ export const api = {
     logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
         .finally(() => clearAuth()),
 
+    // ── Saved Products (Favourites) ──────────────────────────────────────────
+
+    /** GET /users/me/saved-products — list all saved products */
+    getSavedProducts: () => authFetch(`${API_URL}/users/me/saved-products`),
+
+    /** GET /users/me/saved-products/:id/check — is this product saved? */
+    checkSaved: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}/check`),
+
+    /** POST /users/me/saved-products/:id — save a product */
+    saveProduct: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}`, { method: 'POST' }),
+
+    /** DELETE /users/me/saved-products/:id — unsave a product */
+    unsaveProduct: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}`, { method: 'DELETE' }),
+
     // ── i18n helper ─────────────────────────────────────────────────────────
 
     getLocalizedField: (obj, field, lang) => {
