@@ -4,6 +4,7 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
 import PageLoader from '../components/shared/PageLoader'
+import FavouriteButton from '../components/shared/FavouriteButton'
 
 export default function ProductDetail() {
   const { t, i18n } = useTranslation()
@@ -117,6 +118,12 @@ export default function ProductDetail() {
                   {t('productDetail.requestQuote')}
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>
+                {/* Save to Favourites — only for authenticated users */}
+                <FavouriteButton
+                  productId={product.id}
+                  size="md"
+                  className="!w-full !h-auto !rounded-none py-4 px-6 border border-outline-variant !bg-transparent hover:!bg-surface-container-high text-sm font-headline font-bold uppercase tracking-widest gap-3 flex-row"
+                />
                 {product.catalogs?.[0] && (
                   <a href={product.catalogs[0].file_url} target="_blank" rel="noopener noreferrer" className="w-full border border-outline-variant text-primary py-4 text-[10px] font-headline font-bold uppercase tracking-[0.15em] flex items-center justify-center gap-3 hover:bg-surface-container-high transition-all">
                     <span className="material-symbols-outlined text-base">download</span>

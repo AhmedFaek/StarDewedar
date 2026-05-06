@@ -4,6 +4,7 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
 import PageLoader from '../components/shared/PageLoader'
+import FavouriteButton from '../components/shared/FavouriteButton'
 
 export default function Products() {
   const { t, i18n } = useTranslation()
@@ -142,6 +143,10 @@ export default function Products() {
                 <div key={product.id} className="group bg-surface-container-lowest border border-outline-variant/15 flex flex-col">
                   <div className="aspect-[4/3] overflow-hidden bg-surface-container-high relative">
                     <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
+                    {/* Favourite button — top-right corner, auth-gated */}
+                    <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                      <FavouriteButton productId={product.id} size="sm" />
+                    </div>
                   </div>
                   <div className="p-8 flex-grow flex flex-col">
                     <span className="text-tertiary font-label text-[10px] tracking-widest uppercase font-black mb-2">
