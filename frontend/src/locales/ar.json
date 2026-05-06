@@ -274,6 +274,30 @@
     "end": "النهاية"
   },
 
+  "auth": {
+    "login": "تسجيل الدخول",
+    "register": "إنشاء حساب",
+    "logout": "تسجيل الخروج",
+    "loggingIn": "جاري تسجيل الدخول...",
+    "registering": "جاري إنشاء الحساب...",
+    "loggingOut": "جاري تسجيل الخروج...",
+    "createAccount": "إنشاء حساب",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "confirmPassword": "تأكيد كلمة المرور",
+    "fullName": "الاسم الكامل",
+    "fullNamePlaceholder": "محمد أحمد",
+    "phoneOptional": "الهاتف (اختياري)",
+    "companyOptional": "الشركة (اختياري)",
+    "companyPlaceholder": "اسم شركتك",
+    "noAccount": "ليس لديك حساب؟",
+    "hasAccount": "لديك حساب بالفعل؟",
+    "registerHere": "سجل هنا",
+    "loginHere": "سجل دخولك هنا",
+    "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+    "errorGeneric": "حدث خطأ. يرجى المحاولة مرة أخرى."
+  },
+
   "langSwitch": {
     "en": "EN",
     "ar": "AR"
