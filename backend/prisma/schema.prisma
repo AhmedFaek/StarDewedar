@@ -18,6 +18,8 @@ model User {
   hashed_refresh_token String?
   created_at           DateTime @default(now())
   updated_at           DateTime @updatedAt
+
+  saved_products SavedProduct[]
 }
 
 model Category {
@@ -52,6 +54,7 @@ model Product {
   images         ProductImage[]
   catalogs       ProductCatalog[]
   quote_requests QuoteRequest[]
+  saved_by       SavedProduct[]
 }
 
 model ProductImage {
@@ -74,6 +77,18 @@ model ProductCatalog {
   created_at DateTime @default(now())
 
   product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+}
+
+model SavedProduct {
+  id         String   @id @default(uuid())
+  user_id    String
+  product_id String
+  saved_at   DateTime @default(now())
+
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
 }
 
 model Project {
