@@ -241,6 +241,15 @@ export default function Header() {
                       </div>
                     </div>
                     <button
+                      id="header-saved-btn"
+                      onClick={() => { setUserMenuOpen(false); window.navigateTo('saved-products') }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-red-400"
+                        style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                      {t('favourites.mySaved')}
+                    </button>
+                    <button
                       id="header-logout-btn"
                       onClick={handleLogout}
                       disabled={loggingOut}
@@ -350,6 +359,15 @@ export default function Header() {
                         <p className="text-[10px] text-slate-400">{user.email}</p>
                       </div>
                     </div>
+                    <button
+                      id="mobile-saved-btn"
+                      onClick={() => { setMobileMenuOpen(false); window.navigateTo('saved-products') }}
+                      className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-red-400"
+                        style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>
+                      {t('favourites.mySaved')}
+                    </button>
                     <button
                       id="mobile-logout-btn"
                       onClick={handleLogout}

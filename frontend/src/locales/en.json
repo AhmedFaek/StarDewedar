@@ -302,6 +302,24 @@
     "account": "My Account"
   },
 
+  "favourites": {
+    "save": "Save to Favourites",
+    "remove": "Remove from Favourites",
+    "mySaved": "My Saved Products",
+    "myFavourites": "My Favourites",
+    "savedFor": "Saved products for",
+    "noSaved": "No saved products yet",
+    "item": "product saved",
+    "items": "products saved",
+    "empty": "No saved products yet",
+    "emptyDesc": "Browse our products and click the heart icon to save your favourites here.",
+    "browseProducts": "Browse Products",
+    "browseMore": "Browse More Products",
+    "loginRequired": "Login required",
+    "loginDesc": "Please log in to view your saved products.",
+    "goBack": "Go Back"
+  },
+
   "whatsapp": {
     "chatWithUs": "Chat with us"
   },

@@ -10,6 +10,7 @@ import RequestVisit from './pages/RequestVisit'
 import Contact from './pages/Contact'
 import PageLoader from './components/shared/PageLoader'
 import WhatsAppFloat from './components/shared/WhatsAppFloat'
+import SavedProducts from './pages/SavedProducts'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -26,6 +27,8 @@ export default function App() {
         setCurrentPage('request-quote')
       } else if (path.includes('request-visit')) {
         setCurrentPage('request-visit')
+      } else if (path.includes('saved-products')) {
+        setCurrentPage('saved-products')
       } else if (path.includes('contact')) {
         setCurrentPage('contact')
       } else if (path.includes('about')) {
@@ -63,6 +66,9 @@ export default function App() {
       const query = productId ? `?productId=${productId}` : ''
       window.history.pushState({}, '', `/request-quote${query}`)
       setCurrentPage('request-quote')
+    } else if (page === 'saved-products') {
+      window.history.pushState({}, '', '/saved-products')
+      setCurrentPage('saved-products')
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
@@ -100,7 +106,9 @@ export default function App() {
 
   return (
     <>
-      {currentPage === 'product-detail' ? (
+      {currentPage === 'saved-products' ? (
+        <SavedProducts />
+      ) : currentPage === 'product-detail' ? (
         <ProductDetail />
       ) : currentPage === 'project-detail' ? (
         <ProjectDetail />
