@@ -302,6 +302,10 @@
     "account": "My Account"
   },
 
+  "whatsapp": {
+    "chatWithUs": "Chat with us"
+  },
+
   "langSwitch": {
     "en": "EN",
     "ar": "AR"
