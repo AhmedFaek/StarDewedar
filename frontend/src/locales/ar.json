@@ -295,7 +295,8 @@
     "registerHere": "سجل هنا",
     "loginHere": "سجل دخولك هنا",
     "passwordMismatch": "كلمتا المرور غير متطابقتين.",
-    "errorGeneric": "حدث خطأ. يرجى المحاولة مرة أخرى."
+    "errorGeneric": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "account": "حسابي"
   },
 
   "langSwitch": {
