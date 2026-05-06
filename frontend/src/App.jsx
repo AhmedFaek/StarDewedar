@@ -9,6 +9,7 @@ import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 import Contact from './pages/Contact'
 import PageLoader from './components/shared/PageLoader'
+import WhatsAppFloat from './components/shared/WhatsAppFloat'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -97,23 +98,28 @@ export default function App() {
     return <PageLoader label="Loading page" />
   }
 
-  return currentPage === 'product-detail' ? (
-    <ProductDetail />
-  ) : currentPage === 'project-detail' ? (
-    <ProjectDetail />
-  ) : currentPage === 'projects' ? (
-    <Projects />
-  ) : currentPage === 'products' ? (
-    <Products />
-  ) : currentPage === 'about' ? (
-    <About />
-  ) : currentPage === 'request-quote' ? (
-    <RequestQuote />
-  ) : currentPage === 'request-visit' ? (
-    <RequestVisit />
-  ) : currentPage === 'contact' ? (
-    <Contact />
-  ) : (
-    <Home />
+  return (
+    <>
+      {currentPage === 'product-detail' ? (
+        <ProductDetail />
+      ) : currentPage === 'project-detail' ? (
+        <ProjectDetail />
+      ) : currentPage === 'projects' ? (
+        <Projects />
+      ) : currentPage === 'products' ? (
+        <Products />
+      ) : currentPage === 'about' ? (
+        <About />
+      ) : currentPage === 'request-quote' ? (
+        <RequestQuote />
+      ) : currentPage === 'request-visit' ? (
+        <RequestVisit />
+      ) : currentPage === 'contact' ? (
+        <Contact />
+      ) : (
+        <Home />
+      )}
+      <WhatsAppFloat />
+    </>
   )
 }

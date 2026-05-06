@@ -1,4 +1,4 @@
-import prisma from '../../utils/prisma.js';
+import prisma from '../../utils/prisma.js'
 
 export const findUserByEmail = (email) => {
     return prisma.user.findUnique({
@@ -17,3 +17,26 @@ export const createUser = (data) => {
         data,
     })
 }
+
+export const updateUser = (id, data) => {
+    return prisma.user.update({
+        where: { id },
+        data,
+    })
+}
+
+export const findAllUsers = () => {
+    return prisma.user.findMany({
+        select: {
+            id: true,
+            name: true,
+            email: true,
+            role: true,
+            phone_number: true,
+            whatsapp_number: true,
+            company_name: true,
+            created_at: true,
+        },
+        orderBy: { created_at: 'desc' },
+    })
+}

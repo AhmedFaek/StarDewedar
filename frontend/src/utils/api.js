@@ -1,3 +1,5 @@
+import { getValidAccessToken, saveTokens, saveUser, clearAuth } from './auth.js'
+
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
 const handleResponse = async (response) => {
@@ -6,6 +8,25 @@ const handleResponse = async (response) => {
         throw error
     }
     return response.json()
+}
+
+/**
+ * Authenticated fetch — attaches Bearer token and handles 401 refresh-and-retry.
+ */
+const authFetch = async (url, options = {}) => {
+    const token = await getValidAccessToken()
+    const headers = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    }
+    const res = await fetch(url, { ...options, headers })
+    if (res.status === 401) {
+        // Token may have just expired mid-request — clearAuth and throw
+        clearAuth()
+        throw { message: 'Session expired. Please log in again.', status: 401 }
+    }
+    return handleResponse(res)
 }
 
 export const api = {
@@ -42,7 +63,40 @@ export const api = {
         body: JSON.stringify(data),
     }).then(handleResponse),
 
-    // i18n helper
+    // ── Auth ────────────────────────────────────────────────────────────────
+
+    /** POST /auth/register */
+    register: (data) => fetch(`${API_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+    }).then(async (res) => {
+        const body = await res.json().catch(() => ({ message: 'Something went wrong' }))
+        if (!res.ok) throw body
+        saveTokens(body.accessToken, body.refreshToken)
+        saveUser(body.user)
+        return body
+    }),
+
+    /** POST /auth/login */
+    login: (email, password) => fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+    }).then(async (res) => {
+        const body = await res.json().catch(() => ({ message: 'Something went wrong' }))
+        if (!res.ok) throw body
+        saveTokens(body.accessToken, body.refreshToken)
+        saveUser(body.user)
+        return body
+    }),
+
+    /** POST /auth/logout — requires valid access token */
+    logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
+        .finally(() => clearAuth()),
+
+    // ── i18n helper ─────────────────────────────────────────────────────────
+
     getLocalizedField: (obj, field, lang) => {
         if (!obj) return ''
         const fieldName = `${field}_${lang}`
