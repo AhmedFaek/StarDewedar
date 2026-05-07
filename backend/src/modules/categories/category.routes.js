@@ -30,7 +30,7 @@ router.get('/:id', controller.getCategoryById)
 router.post(
   '/',
   auth,
-  requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+  requireRole(ROLES.ADMIN),
   validate(createCategorySchema),
   controller.createCategory
 )
@@ -41,7 +41,7 @@ router.post(
    router.put(
    '/:id',
    auth,
-   requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+   requireRole(ROLES.ADMIN),
    validate(updateCategorySchema),
    controller.updateCategory
    )
@@ -52,7 +52,7 @@ router.post(
 router.delete(
   '/:id',
   auth,
-  requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+  requireRole(ROLES.ADMIN),
   controller.deleteCategory
 )
 

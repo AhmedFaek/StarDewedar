@@ -15,7 +15,7 @@ router.get('/:id', controller.getProjectById)
 router.post(
     '/',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     upload.array('images'),        // ✅ multer parses multipart body first
     validate(createProjectSchema), // ✅ now req.body is populated
     controller.createProject
@@ -24,14 +24,14 @@ router.post(
 router.put(
     '/:id',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.updateProject
 )
 
 router.delete(
     '/:id',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.deleteProject
 )
 
