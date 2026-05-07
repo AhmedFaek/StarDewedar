@@ -1,4 +1,6 @@
 import * as userRepo from './user.repository.js'
+import * as quoteRepo from '../quoteRequests/quote.repository.js'
+import * as visitRepo from '../visitRequests/visit.repository.js'
 
 /**
  * GET /api/users/me/saved-products
@@ -64,6 +66,37 @@ export const checkSaved = async (req, res, next) => {
         const { productId } = req.params
         const record = await userRepo.isProductSaved(userId, productId)
         res.json({ saved: Boolean(record), saved_at: record?.saved_at ?? null })
+    } catch (err) {
+        next(err)
+    }
+}
+/**
+ * GET /api/users/me/quotes
+ * Returns all quote requests submitted by the authenticated user's email.
+ */
+export const getMyQuotes = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const user = await userRepo.findUserById(userId)
+        if (!user) return res.status(404).json({ message: 'User not found.' })
+        const quotes = await quoteRepo.findByEmail(user.email)
+        res.json(quotes)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/**
+ * GET /api/users/me/visits
+ * Returns all visit requests submitted by the authenticated user's email.
+ */
+export const getMyVisits = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const user = await userRepo.findUserById(userId)
+        if (!user) return res.status(404).json({ message: 'User not found.' })
+        const visits = await visitRepo.findByEmail(user.email)
+        res.json(visits)
     } catch (err) {
         next(err)
     }
