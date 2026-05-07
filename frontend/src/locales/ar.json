@@ -288,6 +288,7 @@
     "fullName": "الاسم الكامل",
     "fullNamePlaceholder": "محمد أحمد",
     "phoneOptional": "الهاتف (اختياري)",
+    "whatsappOptional": "واتساب (اختياري)",
     "companyOptional": "الشركة (اختياري)",
     "companyPlaceholder": "اسم شركتك",
     "noAccount": "ليس لديك حساب؟",
@@ -315,6 +316,29 @@
     "loginRequired": "يسجيل الدخول مطلوب",
     "loginDesc": "يرجى تسجيل الدخول لعرض منتجاتك المحفوظة.",
     "goBack": "رجوع"
+  },
+
+  "myRequests": {
+    "title": "طلباتي",
+    "subtitle": "طلبات عروض الأسعار وزيارات المصنع التي قدمتها",
+    "quotes": "طلبات عرض السعر",
+    "visits": "طلبات الزيارة",
+    "noQuotes": "لا توجد طلبات عرض سعر بعد",
+    "noVisits": "لا توجد طلبات زيارة بعد",
+    "noQuotesDesc": "لم تقدم أي طلبات عرض سعر حتى الآن. تصفح منتجاتنا واطلب عرض سعر.",
+    "noVisitsDesc": "لم تقم بجدولة أي زيارات للمصنع حتى الآن.",
+    "requestQuote": "طلب عرض سعر",
+    "requestVisit": "جدولة زيارة",
+    "status": "الحالة",
+    "submitted": "مُقدَّم",
+    "product": "المنتج",
+    "customProduct": "منتج مخصص",
+    "date": "التاريخ",
+    "factory": "المصنع",
+    "preferredDate": "التاريخ المفضل",
+    "loading": "جاري تحميل طلباتك...",
+    "error": "فشل تحميل الطلبات. يرجى المحاولة مرة أخرى.",
+    "retry": "حاول مجدداً"
   },
 
   "whatsapp": {

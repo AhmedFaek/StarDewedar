@@ -291,6 +291,7 @@
     "fullName": "Full Name",
     "fullNamePlaceholder": "John Doe",
     "phoneOptional": "Phone (Optional)",
+    "whatsappOptional": "WhatsApp (Optional)",
     "companyOptional": "Company (Optional)",
     "companyPlaceholder": "Your Company",
     "noAccount": "Don't have an account?",
@@ -318,6 +319,29 @@
     "loginRequired": "Login required",
     "loginDesc": "Please log in to view your saved products.",
     "goBack": "Go Back"
+  },
+
+  "myRequests": {
+    "title": "My Requests",
+    "subtitle": "Your submitted quote and visit requests",
+    "quotes": "Quote Requests",
+    "visits": "Visit Requests",
+    "noQuotes": "No quote requests yet",
+    "noVisits": "No visit requests yet",
+    "noQuotesDesc": "You haven't submitted any quote requests. Browse our products and request a quote.",
+    "noVisitsDesc": "You haven't scheduled any factory visits yet.",
+    "requestQuote": "Request a Quote",
+    "requestVisit": "Schedule a Visit",
+    "status": "Status",
+    "submitted": "Submitted",
+    "product": "Product",
+    "customProduct": "Custom Product",
+    "date": "Date",
+    "factory": "Factory",
+    "preferredDate": "Preferred Date",
+    "loading": "Loading your requests...",
+    "error": "Failed to load requests. Please try again.",
+    "retry":"Retry"
   },
 
   "whatsapp": {
