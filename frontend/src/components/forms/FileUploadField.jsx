@@ -8,7 +8,7 @@ export default function FileUploadField({
 }) {
   return (
     <div className="flex flex-col">
-      <label className="font-label font-bold uppercase text-[9px] sm:text-[10px] tracking-[0.15em] text-secondary mb-2 sm:mb-3">
+      <label className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary mb-2 sm:mb-3">
         {label}
       </label>
       <div className="relative group">

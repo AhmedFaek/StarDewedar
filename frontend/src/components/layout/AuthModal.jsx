@@ -74,6 +74,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     password: '',
     confirmPassword: '',
     phone_number: '',
+    whatsapp_number: '',
     company_name: '',
   })
 
@@ -88,8 +89,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     try {
       const { confirmPassword, ...payload } = regData
       // Remove empty optional fields
-      if (!payload.phone_number) delete payload.phone_number
-      if (!payload.company_name) delete payload.company_name
+      if (!payload.phone_number)     delete payload.phone_number
+      if (!payload.whatsapp_number)  delete payload.whatsapp_number
+      if (!payload.company_name)     delete payload.company_name
       const res = await api.register(payload)
       onAuthSuccess(res.user)
       onClose()
@@ -265,6 +267,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                   />
                 </div>
                 <div>
+                  <label className="auth-label">{t('auth.whatsappOptional')}</label>
+                  <div style={{ position: 'relative' }}>
+                    <span
+                      className="material-symbols-outlined"
+                      style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', fontSize: '16px', color: '#22c55e', pointerEvents: 'none' }}
+                    >chat</span>
+                    <input
+                      id="auth-reg-whatsapp"
+                      type="tel"
+                      value={regData.whatsapp_number}
+                      onChange={e => setRegData(p => ({ ...p, whatsapp_number: e.target.value }))}
+                      className="auth-input"
+                      style={{ paddingLeft: '34px' }}
+                      placeholder="+20 ..."
+                    />
+                  </div>
+                </div>
+                <div className="col-span-2">
                   <label className="auth-label">{t('auth.companyOptional')}</label>
                   <input
                     id="auth-reg-company"
