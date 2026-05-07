@@ -109,6 +109,14 @@ export const api = {
     /** DELETE /users/me/saved-products/:id — unsave a product */
     unsaveProduct: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}`, { method: 'DELETE' }),
 
+    // ── My Requests ──────────────────────────────────────────────────────────
+
+    /** GET /users/me/quotes — list all quote requests by the logged-in user's email */
+    getMyQuotes: () => authFetch(`${API_URL}/users/me/quotes`),
+
+    /** GET /users/me/visits — list all visit requests by the logged-in user's email */
+    getMyVisits: () => authFetch(`${API_URL}/users/me/visits`),
+
     // ── i18n helper ─────────────────────────────────────────────────────────
 
     getLocalizedField: (obj, field, lang) => {
