@@ -15,7 +15,7 @@ router.post('/', validate(createContactSchema), controller.createContact)
 router.get(
     '/',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getAllMessages
 )
 

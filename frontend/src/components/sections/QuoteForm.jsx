@@ -6,6 +6,7 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import { api } from '../../utils/api'
+import { isLoggedIn } from '../../utils/auth'
 
 export default function QuoteForm({ productId = null }) {
   const { t, i18n } = useTranslation()
@@ -30,6 +31,21 @@ export default function QuoteForm({ productId = null }) {
       }
     }
     fetchProducts()
+  }, [])
+
+  // Pre-fill user info if logged in
+  useEffect(() => {
+    if (!isLoggedIn()) return
+    api.getMe().then((user) => {
+      const parts = (user.name || '').split(' ')
+      setFormData((prev) => ({
+        ...prev,
+        first_name: parts[0] || prev.first_name,
+        last_name:  parts[1] || prev.last_name,
+        email:      user.email       || prev.email,
+        phone:      user.phone_number || prev.phone,
+      }))
+    }).catch(() => { /* not logged in or token expired — ignore */ })
   }, [])
 
   useEffect(() => {

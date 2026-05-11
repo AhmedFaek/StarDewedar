@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import AuthModal from './AuthModal.jsx'
+import MyRequestsPanel from './MyRequestsPanel.jsx'
 import { getUser, isLoggedIn, clearAuth } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 
@@ -15,6 +16,7 @@ export default function Header() {
   const [authModal, setAuthModal] = useState({ open: false, tab: 'login' })
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [requestsPanelOpen, setRequestsPanelOpen] = useState(false)
   const userMenuRef = useRef(null)
 
   const isRTL = i18n.language === 'ar'
@@ -241,6 +243,14 @@ export default function Header() {
                       </div>
                     </div>
                     <button
+                      id="header-my-requests-btn"
+                      onClick={() => { setUserMenuOpen(false); setRequestsPanelOpen(true) }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-yellow-500">request_quote</span>
+                      {t('myRequests.title')}
+                    </button>
+                    <button
                       id="header-saved-btn"
                       onClick={() => { setUserMenuOpen(false); window.navigateTo('saved-products') }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
@@ -360,6 +370,14 @@ export default function Header() {
                       </div>
                     </div>
                     <button
+                      id="mobile-my-requests-btn"
+                      onClick={() => { setMobileMenuOpen(false); setRequestsPanelOpen(true) }}
+                      className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-yellow-500">request_quote</span>
+                      {t('myRequests.title')}
+                    </button>
+                    <button
                       id="mobile-saved-btn"
                       onClick={() => { setMobileMenuOpen(false); window.navigateTo('saved-products') }}
                       className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
@@ -410,6 +428,13 @@ export default function Header() {
         defaultTab={authModal.tab}
         onClose={() => setAuthModal(p => ({ ...p, open: false }))}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* My Requests Panel */}
+      <MyRequestsPanel
+        isOpen={requestsPanelOpen}
+        onClose={() => setRequestsPanelOpen(false)}
+        user={user}
       />
     </>
   )

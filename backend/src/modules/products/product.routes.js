@@ -17,7 +17,7 @@ const router = express.Router()
 router.post(
     '/',
     auth,
-   requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+   requireRole(ROLES.ADMIN),
     upload.fields([
         { name: 'images', maxCount: 5 },
         { name: 'catalog', maxCount: 1 },
@@ -42,7 +42,7 @@ router.get('/:id', controller.getProductById)
 router.put(
     '/:id',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.updateProduct
 )
 
@@ -52,7 +52,7 @@ router.put(
 router.delete(
     '/:id',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.deleteProduct
 )
 

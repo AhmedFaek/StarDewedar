@@ -23,7 +23,7 @@ export default function WhatsAppFloat() {
         position: 'fixed',
         bottom: '28px',
         ...(isRTL ? { left: '28px' } : { right: '28px' }),
-        zIndex: 999,
+        zIndex: 199,
         display: 'flex',
         flexDirection: isRTL ? 'row-reverse' : 'row',
         alignItems: 'center',

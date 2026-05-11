@@ -1,8 +1,10 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
+import { api } from '../utils/api'
+import { isLoggedIn } from '../utils/auth'
 
 export default function Contact() {
   const { t } = useTranslation()
@@ -19,6 +21,22 @@ export default function Contact() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  // Pre-fill user info if logged in
+  useEffect(() => {
+    if (!isLoggedIn()) return
+    api.getMe().then((user) => {
+      const parts = (user.name || '').split(' ')
+      setFormData((prev) => ({
+        ...prev,
+        first_name:      parts[0]              || prev.first_name,
+        last_name:       parts[1]              || prev.last_name,
+        email:           user.email            || prev.email,
+        phone_number:    user.phone_number     || prev.phone_number,
+        whatsapp_number: user.whatsapp_number  || prev.whatsapp_number,
+      }))
+    }).catch(() => {})
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

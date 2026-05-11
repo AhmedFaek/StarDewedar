@@ -1,10 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import TextAreaField from '../components/forms/TextAreaField'
 import { api } from '../utils/api'
+import { isLoggedIn } from '../utils/auth'
 
 export default function RequestVisit() {
   const { t } = useTranslation()
@@ -20,6 +21,21 @@ export default function RequestVisit() {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
+
+  // Pre-fill user info if logged in
+  useEffect(() => {
+    if (!isLoggedIn()) return
+    api.getMe().then((user) => {
+      const parts = (user.name || '').split(' ')
+      setFormData((prev) => ({
+        ...prev,
+        name:             parts[0] ? `${parts[0]}${parts[1] ? ' ' + parts[1] : ''}` : prev.name,
+        phone_number:    user.phone_number    || prev.phone_number,
+        whatsapp_number: user.whatsapp_number || prev.whatsapp_number,
+        email:           user.email           || prev.email,
+      }))
+    }).catch(() => {})
+  }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

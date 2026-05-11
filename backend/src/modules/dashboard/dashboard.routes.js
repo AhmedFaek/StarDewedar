@@ -10,7 +10,7 @@ const router = express.Router()
 router.get(
     '/stats',
     auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getStats
 )
 
