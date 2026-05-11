@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api.js'
 
 /* ── Status Badge ─────────────────────────────────────────────────────────── */
@@ -179,7 +180,8 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
     return () => { document.body.style.overflow = '' }
   }, [isOpen])
 
-  const navigate = (page) => { onClose(); window.navigateTo(page) }
+  const navigate = useNavigate()
+  const goTo = (path) => { onClose(); navigate(path) }
 
   const tabs = [
     { key: 'quotes', label: t('myRequests.quotes'), icon: 'request_quote', count: quotes.length },
@@ -267,7 +269,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
                 text={t('myRequests.noQuotes')}
                 desc={t('myRequests.noQuotesDesc')}
                 ctaLabel={t('myRequests.requestQuote')}
-                onCta={() => navigate('request-quote')}
+                onCta={() => goTo('/request-quote')}
               />
             ) : (
               <div className="p-4 space-y-3">
@@ -281,7 +283,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
                 text={t('myRequests.noVisits')}
                 desc={t('myRequests.noVisitsDesc')}
                 ctaLabel={t('myRequests.requestVisit')}
-                onCta={() => navigate('request-visit')}
+                onCta={() => goTo('/request-visit')}
               />
             ) : (
               <div className="p-4 space-y-3">
@@ -295,14 +297,14 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
         {!loading && !error && (
           <div className="shrink-0 border-t border-slate-200 px-4 pt-4 pb-6 bg-white grid grid-cols-2 gap-2">
             <button
-              onClick={() => navigate('request-quote')}
+              onClick={() => goTo('/request-quote')}
               className="flex items-center justify-center gap-1.5 py-2.5 text-[9px] font-black uppercase tracking-widest border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white transition-colors"
             >
               <span className="material-symbols-outlined text-sm leading-none">request_quote</span>
               {t('myRequests.requestQuote')}
             </button>
             <button
-              onClick={() => navigate('request-visit')}
+              onClick={() => goTo('/request-visit')}
               className="flex items-center justify-center gap-1.5 py-2.5 text-[9px] font-black uppercase tracking-widest bg-yellow-400 text-slate-900 hover:bg-yellow-300 transition-colors"
             >
               <span className="material-symbols-outlined text-sm leading-none">factory</span>

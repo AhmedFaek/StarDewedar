@@ -1,14 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
-import PageLoader from '../components/shared/PageLoader'
+import ContentLoader from '../components/shared/ContentLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
 import { useCompare } from '../utils/compareContext'
 
 export default function ProductDetail() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
   const { addToCompare, removeFromCompare, isInCompare } = useCompare()
   const [product, setProduct] = useState(null)
   const [activeImage, setActiveImage] = useState('')
@@ -19,26 +22,18 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true)
   const [compareToast, setCompareToast] = useState('')
 
-  useEffect(() => {
-    const handleIdChange = async () => {
-      setLoading(true)
-      const params = new URLSearchParams(window.location.search)
-      const productId = params.get('id')
-      
-      if (!productId) {
-        setLoading(false)
-        return
-      }
+  const productId = searchParams.get('id')
 
+  useEffect(() => {
+    if (!productId) { setLoading(false); return }
+    setLoading(true)
+    ;(async () => {
       try {
         const foundProduct = await api.getProductById(productId)
         setProduct(foundProduct)
-        console.log('Fetched product:', foundProduct)
         setActiveImage(foundProduct.images?.[0]?.image_url || '')
-        
-        // Fetch all products to find related ones (by category)
         const allProducts = await api.getProducts()
-        const related = allProducts.filter(item => 
+        const related = allProducts.filter(item =>
           item.category_id === foundProduct.category_id && item.id !== foundProduct.id
         )
         setRelatedProducts(related)
@@ -48,15 +43,19 @@ export default function ProductDetail() {
       } finally {
         setLoading(false)
       }
-    }
-    handleIdChange()
-    window.addEventListener('popstate', handleIdChange)
-    return () => window.removeEventListener('popstate', handleIdChange)
-  }, [])
+    })()
+  }, [productId])
 
   if (loading) {
-    return <PageLoader label={t('common.loading') || 'Loading product'} />
+    return (
+      <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+        <Header />
+        <main className="flex-grow"><ContentLoader variant="product-detail" /></main>
+        <Footer />
+      </div>
+    )
   }
+
 
   if (!product) {
       return (
@@ -89,10 +88,12 @@ export default function ProductDetail() {
 
   const handleMouseEnter = (e) => { const elem = e.currentTarget; const { width, height } = elem.getBoundingClientRect(); setImgSize({ width, height }); setShowMagnifier(true) }
   const handleMouseMove = (e) => { const elem = e.currentTarget; const { top, left } = elem.getBoundingClientRect(); setCoords({ x: e.pageX - left - window.pageXOffset, y: e.pageY - top - window.pageYOffset }) }
-  const navigateToProduct = (id) => { window.history.pushState({}, '', `${window.location.pathname}?id=${id}`); window.dispatchEvent(new PopStateEvent('popstate')) }
+
+
 
   const name = i18n.language === 'ar' ? product.name_ar : product.name_en
   const description = i18n.language === 'ar' ? product.description_ar : product.description_en
+  const navigateToProduct = (id) => navigate(`/product-detail?id=${id}`)
   const categoryName = i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en
 
   return (
@@ -132,7 +133,7 @@ export default function ProductDetail() {
                 </p>
               </div>
               <div className="flex flex-col gap-3">
-                <button onClick={() => window.navigateTo('quote', product.id)} className="w-full bg-primary text-white py-5 text-xs font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-primary/90 transition-all">
+                <button onClick={() => navigate(`/request-quote?productId=${product.id}`)} className="w-full bg-primary text-white py-5 text-xs font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-primary/90 transition-all">
                   {t('productDetail.requestQuote')}
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>

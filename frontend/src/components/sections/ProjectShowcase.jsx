@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
-import PageLoader from '../shared/PageLoader'
+import ContentLoader from '../shared/ContentLoader'
+
 
 export default function ProjectShowcase() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -23,7 +26,7 @@ export default function ProjectShowcase() {
   }, [])
 
   if (loading) {
-    return <PageLoader fullscreen={false} label={t('common.loading') || 'Loading projects'} />
+    return <ContentLoader rows={2} />
   }
 
   const layoutMapping = [
@@ -49,7 +52,7 @@ export default function ProjectShowcase() {
               <div 
                 key={project.id} 
                 className={`${layout.colSpan} relative group overflow-hidden h-64 sm:h-80 md:h-auto cursor-pointer`}
-                onClick={() => window.navigateTo('project-detail', project.id)}
+                onClick={() => navigate(`/project-detail?id=${project.id}`)}
               >
                 <img 
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 

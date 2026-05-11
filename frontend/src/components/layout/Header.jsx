@@ -1,14 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate, useLocation } from 'react-router-dom'
 import AuthModal from './AuthModal.jsx'
 import MyRequestsPanel from './MyRequestsPanel.jsx'
-import { getUser, isLoggedIn, clearAuth } from '../../utils/auth.js'
+import { getUser, isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
-  const [activeLink, setActiveLink] = useState(null)
-  const [currentPage, setCurrentPage] = useState('') // Tracks 'quote' or 'visit'
+  const navigate = useNavigate()
+  const location = useLocation()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // ── Auth state ────────────────────────────────────────────────────────────
@@ -21,39 +22,25 @@ export default function Header() {
 
   const isRTL = i18n.language === 'ar'
 
+  // ── Derive active state from current URL (always in sync) ─────────────────
+  const path = location.pathname
+  const activeLink = path.startsWith('/products') || path.startsWith('/product-detail')
+    ? 'Products'
+    : path.startsWith('/projects') || path.startsWith('/project-detail')
+    ? 'Projects'
+    : path.startsWith('/about') ? 'About'
+    : path.startsWith('/contact') ? 'Contact'
+    : null
+  const currentPage = path.startsWith('/request-quote') ? 'quote'
+    : path.startsWith('/request-visit') ? 'visit'
+    : ''
+
   const navLinks = [
     { key: 'Products', label: t('nav.products') },
     { key: 'Projects', label: t('nav.projects') },
     { key: 'About', label: t('nav.about') },
     { key: 'Contact', label: t('nav.contact') },
   ]
-
-  // ── Route detection ───────────────────────────────────────────────────────
-  useEffect(() => {
-    const path = window.location.pathname
-    if (path.includes('/request-quote')) {
-      setCurrentPage('quote')
-      setActiveLink(null)
-    } else if (path.includes('/request-visit')) {
-      setCurrentPage('visit')
-      setActiveLink(null)
-    } else if (path.includes('/project-detail') || path.includes('/projects')) {
-      setActiveLink('Projects')
-      setCurrentPage('')
-    } else if (path.includes('/about')) {
-      setActiveLink('About')
-      setCurrentPage('')
-    } else if (path.includes('/contact')) {
-      setActiveLink('Contact')
-      setCurrentPage('')
-    } else if (path.includes('/product-detail') || path.includes('/products')) {
-      setActiveLink('Products')
-      setCurrentPage('')
-    } else {
-      setActiveLink(null)
-      setCurrentPage('')
-    }
-  }, [])
 
   // Update document direction when language changes
   useEffect(() => {
@@ -79,35 +66,14 @@ export default function Header() {
     i18n.changeLanguage(newLang)
   }
 
-  const navigateTo = (path, pageType) => {
-    setActiveLink(null)
-    setCurrentPage(pageType)
-    setMobileMenuOpen(false)
-    window.history.pushState({}, '', path)
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }
-
   const handleLogoClick = () => {
-    setActiveLink(null)
-    setCurrentPage('')
     setMobileMenuOpen(false)
-    window.history.pushState({}, '', '/')
-    window.dispatchEvent(new PopStateEvent('popstate'))
+    navigate('/')
   }
 
   const handleNavClick = (link) => {
-    const routes = {
-      Products: '/products',
-      Projects: '/projects',
-      About: '/about',
-      Contact: '/contact',
-    }
-    if (routes[link]) {
-      window.history.pushState({}, '', routes[link])
-      window.dispatchEvent(new PopStateEvent('popstate'))
-    }
-    setActiveLink(link)
-    setCurrentPage('')
+    const routes = { Products: '/products', Projects: '/projects', About: '/about', Contact: '/contact' }
+    if (routes[link]) navigate(routes[link])
     setMobileMenuOpen(false)
   }
 
@@ -186,7 +152,7 @@ export default function Header() {
           </button>
 
           <button
-            onClick={() => navigateTo('/request-visit', 'visit')}
+            onClick={() => { setMobileMenuOpen(false); navigate('/request-visit') }}
             className={`${ctaBase} ${currentPage === 'visit'
               ? 'bg-slate-900 text-white border-slate-900'
               : 'border-slate-300 text-slate-900 hover:bg-slate-100'
@@ -196,7 +162,7 @@ export default function Header() {
           </button>
 
           <button
-            onClick={() => navigateTo('/request-quote', 'quote')}
+            onClick={() => { setMobileMenuOpen(false); navigate('/request-quote') }}
             className={`${ctaBase} border-transparent ${currentPage === 'quote'
               ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
               : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
@@ -252,7 +218,7 @@ export default function Header() {
                     </button>
                     <button
                       id="header-saved-btn"
-                      onClick={() => { setUserMenuOpen(false); window.navigateTo('saved-products') }}
+                      onClick={() => { setUserMenuOpen(false); navigate('/saved-products') }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
                     >
                       <span className="material-symbols-outlined text-base leading-none text-red-400"
@@ -343,14 +309,14 @@ export default function Header() {
                   {i18n.language === 'ar' ? 'English' : 'العربية'}
                 </button>
                 <button
-                  onClick={() => navigateTo('/request-visit', 'visit')}
+                  onClick={() => { setMobileMenuOpen(false); navigate('/request-visit') }}
                   className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
                     }`}
                 >
                   {t('nav.requestVisit')}
                 </button>
                 <button
-                  onClick={() => navigateTo('/request-quote', 'quote')}
+                  onClick={() => { setMobileMenuOpen(false); navigate('/request-quote') }}
                   className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
                     }`}
                 >
@@ -379,7 +345,7 @@ export default function Header() {
                     </button>
                     <button
                       id="mobile-saved-btn"
-                      onClick={() => { setMobileMenuOpen(false); window.navigateTo('saved-products') }}
+                      onClick={() => { setMobileMenuOpen(false); navigate('/saved-products') }}
                       className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
                     >
                       <span className="material-symbols-outlined text-base leading-none text-red-400"

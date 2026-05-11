@@ -1,14 +1,16 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
-import PageLoader from '../components/shared/PageLoader'
+import ContentLoader from '../components/shared/ContentLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
 import { api } from '../utils/api'
 import { getUser, isLoggedIn } from '../utils/auth'
 
 export default function SavedProducts() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const user = getUser()
@@ -29,7 +31,14 @@ export default function SavedProducts() {
     setProducts(prev => prev.filter(p => p.id !== productId))
   }
 
-  if (loading) return <PageLoader label={t('common.loading') || 'Loading'} />
+  if (loading) return (
+    <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+      <Header />
+      <main className="flex-grow"><ContentLoader variant="saved-products" /></main>
+      <Footer />
+    </div>
+  )
+
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
@@ -91,7 +100,7 @@ export default function SavedProducts() {
             </p>
             <p className="text-outline text-xs mb-8">{t('favourites.emptyDesc')}</p>
             <button
-              onClick={() => window.navigateTo('products')}
+              onClick={() => navigate('/products')}
               className="px-6 py-3 bg-primary text-white font-headline font-bold uppercase text-xs tracking-widest hover:bg-primary/90 transition-all flex items-center gap-2 mx-auto"
             >
               <span className="material-symbols-outlined text-sm">grid_view</span>
@@ -149,7 +158,7 @@ export default function SavedProducts() {
                             : 'N/A'}
                         </span>
                         <button
-                          onClick={() => window.navigateTo('product-detail', product.id)}
+                          onClick={() => navigate(`/product-detail?id=${product.id}`)}
                           className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors"
                         >
                           {t('products.viewDetails')}
@@ -165,7 +174,7 @@ export default function SavedProducts() {
             {/* Browse more */}
             <div className="mt-16 pt-8 border-t border-outline-variant/10 text-center">
               <button
-                onClick={() => window.navigateTo('products')}
+                onClick={() => navigate('/products')}
                 className="inline-flex items-center gap-2 text-primary font-headline font-bold uppercase text-xs tracking-widest hover:text-tertiary transition-colors"
               >
                 <span className="material-symbols-outlined text-sm">grid_view</span>

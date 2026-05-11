@@ -1,42 +1,36 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useSearchParams } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
-import PageLoader from '../components/shared/PageLoader'
+import ContentLoader from '../components/shared/ContentLoader'
 
 export default function ProjectDetail() {
   const { t, i18n } = useTranslation()
+  const [searchParams] = useSearchParams()
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const handleIdChange = async () => {
-      setLoading(true)
-      const params = new URLSearchParams(window.location.search)
-      const id = params.get('id')
-      
-      if (!id) {
-          setLoading(false)
-          return
-      }
+  const id = searchParams.get('id')
 
-      try {
-        const found = await api.getProjectById(id)
-        setProject(found)
-      } catch (error) {
-        console.error('Error fetching project:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    handleIdChange()
-    window.addEventListener('popstate', handleIdChange)
-    return () => window.removeEventListener('popstate', handleIdChange)
-  }, [])
+  useEffect(() => {
+    if (!id) { setLoading(false); return }
+    setLoading(true)
+    api.getProjectById(id)
+      .then(found => { setProject(found); window.scrollTo(0, 0) })
+      .catch(err => console.error('Error fetching project:', err))
+      .finally(() => setLoading(false))
+  }, [id])
 
   if (loading) {
-    return <PageLoader label={t('common.loading') || 'Loading project'} />
+    return (
+      <div className="min-h-screen flex flex-col bg-surface">
+        <Header />
+        <main className="flex-grow"><ContentLoader variant="detail" /></main>
+        <Footer />
+      </div>
+    )
   }
 
   if (!project) {
