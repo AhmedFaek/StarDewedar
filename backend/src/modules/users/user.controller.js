@@ -3,6 +3,23 @@ import * as quoteRepo from '../quoteRequests/quote.repository.js'
 import * as visitRepo from '../visitRequests/visit.repository.js'
 
 /**
+ * GET /api/users/me
+ * Returns safe profile fields for the authenticated user.
+ */
+export const getMe = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const user = await userRepo.findUserById(userId)
+        if (!user) return res.status(404).json({ message: 'User not found.' })
+        // Strip sensitive fields before sending
+        const { password_hash, hashed_refresh_token, ...safe } = user
+        res.json(safe)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/**
  * GET /api/users/me/saved-products
  * Returns all saved products for the authenticated user.
  */

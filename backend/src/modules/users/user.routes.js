@@ -7,6 +7,11 @@ const router = express.Router()
 // All routes require a valid access token
 router.use(auth)
 
+// ── Profile ──────────────────────────────────────────────────────────────────
+
+// GET  /api/users/me  → return the authenticated user's profile (safe fields)
+router.get('/me', controller.getMe)
+
 // ── Saved Products (Favourites) ───────────────────────────────────────────────
 
 // GET  /api/users/me/saved-products              → list all saved products
