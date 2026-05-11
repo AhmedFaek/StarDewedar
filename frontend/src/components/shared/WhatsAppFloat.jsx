@@ -1,15 +1,24 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useCompare } from '../../utils/compareContext'
 
 const WHATSAPP_NUMBER = '201000108529' // international format, no +
 const WHATSAPP_MESSAGE = encodeURIComponent('Hello! I found you through your website and would like to learn more.')
 
+// Height of the CompareDrawer bar (px) — keep in sync with the drawer padding
+const DRAWER_HEIGHT = 72
+
 export default function WhatsAppFloat() {
   const { t, i18n } = useTranslation()
   const [hovered, setHovered] = useState(false)
+  const { compareList } = useCompare()
 
   const isRTL = i18n.language === 'ar'
   const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
+  const drawerOpen = compareList.length > 0
+
+  // Lift the button above the drawer when it's visible
+  const bottomOffset = drawerOpen ? DRAWER_HEIGHT + 16 : 28
 
   return (
     <a
@@ -21,7 +30,8 @@ export default function WhatsAppFloat() {
       onMouseLeave={() => setHovered(false)}
       style={{
         position: 'fixed',
-        bottom: '28px',
+        bottom: `${bottomOffset}px`,
+        transition: 'bottom 0.3s cubic-bezier(0.16,1,0.3,1)',
         ...(isRTL ? { left: '28px' } : { right: '28px' }),
         zIndex: 199,
         display: 'flex',
