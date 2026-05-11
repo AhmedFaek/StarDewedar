@@ -1,20 +1,15 @@
 import Icon from '../shared/Icon'
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 
 export default function Footer() {
   const { t } = useTranslation()
 
-  const handleLinkClick = (e, path) => {
-    e.preventDefault()
-    if (path.startsWith('#')) return
-    window.navigateTo(path)
-  }
-
   const exploreLinks = [
-    { label: t('footer.exploreProducts'), path: 'products' },
-    { label: t('footer.exploreProjects'), path: 'projects' },
-    { label: t('footer.exploreAbout'), path: 'about' },
-    { label: t('nav.contact'), path: 'contact' },
+    { label: t('footer.exploreProducts'), path: '/products' },
+    { label: t('footer.exploreProjects'), path: '/projects' },
+    { label: t('footer.exploreAbout'), path: '/about' },
+    { label: t('nav.contact'), path: '/contact' },
   ]
 
 
@@ -23,13 +18,12 @@ export default function Footer() {
       <div className="container mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 sm:gap-12">
         {/* Brand Section */}
         <div className="sm:col-span-2 lg:col-span-1">
-          <a
-            href="/"
-            onClick={(e) => handleLinkClick(e, 'home')}
+          <Link
+            to="/"
             className="inline-block text-lg sm:text-xl font-bold tracking-widest text-white uppercase font-headline mb-4 sm:mb-6 hover:text-yellow-400 transition-colors"
           >
             {t('footer.brand')}
-          </a>
+          </Link>
           <p className="text-slate-400 font-body text-sm leading-relaxed">
             {t('footer.brandDescription')}
           </p>
@@ -43,13 +37,12 @@ export default function Footer() {
           <ul className="space-y-3 sm:space-y-4">
             {exploreLinks.map((link) => (
               <li key={link.path}>
-                <a
-                  href={`/${link.path}`}
-                  onClick={(e) => handleLinkClick(e, link.path)}
+                <Link
+                  to={link.path}
                   className="text-slate-400 hover:text-white transition-all text-sm font-body"
                 >
                   {link.label}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
