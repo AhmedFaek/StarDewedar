@@ -1,15 +1,16 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { useCompare, MAX_COMPARE } from '../../utils/compareContext'
 
 export default function CompareDrawer() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const { compareList, removeFromCompare, clearCompare } = useCompare()
 
   if (compareList.length === 0) return null
 
   const handleCompare = () => {
-    const ids = compareList.map((p) => p.id).join(',')
-    window.navigateTo('compare', null, ids)
+    navigate('/compare')
   }
 
   return (
@@ -67,7 +68,7 @@ export default function CompareDrawer() {
             {Array.from({ length: MAX_COMPARE - compareList.length }).map((_, i) => (
               <button
                 key={`slot-${i}`}
-                onClick={() => window.navigateTo('products')}
+                onClick={() => navigate('/products')}
                 className="flex items-center gap-2 border border-white/25 border-dashed px-4 py-2 rounded-sm opacity-60 hover:opacity-100 hover:border-white/60 transition-all cursor-pointer"
               >
                 <span className="material-symbols-outlined text-white text-sm">add</span>

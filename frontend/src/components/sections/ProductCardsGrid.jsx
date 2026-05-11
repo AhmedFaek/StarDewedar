@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
 import PageLoader from '../shared/PageLoader'
 
 export default function ProductCardsGrid() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -39,7 +41,7 @@ export default function ProductCardsGrid() {
               {t('productCards.sectionSubtitle')}
             </p>
           </div>
-          <button onClick={() => window.navigateTo('products')} className="flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
+          <button onClick={() => navigate('/products')} className="flex items-center gap-2 font-label font-bold uppercase text-xs tracking-widest text-primary hover:text-tertiary transition-colors">
             {t('productCards.viewCatalog')}{' '}
             <span className="material-symbols-outlined text-sm">arrow_forward</span>
           </button>
@@ -56,7 +58,7 @@ export default function ProductCardsGrid() {
             return (
               <div
                 key={product.id}
-                onClick={() => window.navigateTo('product-detail', product.id)}
+                onClick={() => navigate(`/product-detail?id=${product.id}`)}
                 className={`${isMiddle ? 'bg-primary' : 'bg-surface-container-lowest'} group cursor-pointer overflow-hidden flex flex-col transition-transform hover:scale-105`}
               >
                 {/* Image Container */}

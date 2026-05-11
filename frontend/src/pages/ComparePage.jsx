@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { useCompare, MAX_COMPARE } from '../utils/compareContext'
@@ -95,6 +96,7 @@ function EmptySlot({ onSelect, lang, allProducts, compareList }) {
 // ── Product column header ──────────────────────────────────────────────────────
 function ProductHeader({ product, onRemove }) {
   const { i18n, t } = useTranslation()
+  const navigate = useNavigate()
   const name = i18n.language === 'ar' ? product.name_ar : product.name_en
   const img = product.images?.[0]?.image_url
 
@@ -128,7 +130,7 @@ function ProductHeader({ product, onRemove }) {
 
       {/* CTA */}
       <button
-        onClick={() => window.navigateTo('quote', product.id)}
+        onClick={() => navigate(`/request-quote?productId=${product.id}`)}
         className="w-full bg-primary text-white py-2.5 text-[10px] font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-primary/90 transition-all mt-2"
       >
         {t('productDetail.requestQuote')}
@@ -141,6 +143,7 @@ function ProductHeader({ product, onRemove }) {
 // ── Main Compare Page ──────────────────────────────────────────────────────────
 export default function ComparePage() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const { compareList, addToCompare, removeFromCompare, clearCompare } = useCompare()
   const [allProducts, setAllProducts] = useState([])
   const [loadedProducts, setLoadedProducts] = useState(false)
@@ -223,7 +226,7 @@ export default function ComparePage() {
             <h2 className="text-2xl font-headline font-bold text-primary">{t('compare.page.empty')}</h2>
             <p className="text-secondary max-w-sm">{t('compare.page.emptyDesc')}</p>
             <button
-              onClick={() => window.navigateTo('products')}
+              onClick={() => navigate('/products')}
               className="mt-4 bg-primary text-white px-8 py-4 font-headline font-bold uppercase text-xs tracking-widest hover:bg-primary/90 transition-all"
             >
               {t('compare.page.browseProducts')}

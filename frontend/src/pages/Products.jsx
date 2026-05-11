@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -8,6 +9,7 @@ import FavouriteButton from '../components/shared/FavouriteButton'
 
 export default function Products() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -162,7 +164,7 @@ export default function Products() {
                       <span className="text-primary font-headline font-black text-base">
                         EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A'}
                       </span>
-                      <button onClick={() => window.navigateTo('product-detail', product.id)} className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors">
+                      <button onClick={() => navigate(`/product-detail?id=${product.id}`)} className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors">
                         {t('products.viewDetails')}
                         <span className="material-symbols-outlined text-sm group-hover/btn:translate-x-1 transition-transform">arrow_forward</span>
                       </button>
