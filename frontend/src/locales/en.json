@@ -348,6 +348,10 @@
     "chatWithUs": "Chat with us"
   },
 
+  "common": {
+    "loading": "Loading..."
+  },
+
   "compare": {
     "drawer": {
       "comparing": "Comparing",

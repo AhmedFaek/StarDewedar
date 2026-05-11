@@ -344,6 +344,9 @@
   "whatsapp": {
     "chatWithUs": "تحدث معنا"
   },
+  "common": {
+    "loading": "جاري التحميل..."
+  },
 
   "compare": {
     "drawer": {
