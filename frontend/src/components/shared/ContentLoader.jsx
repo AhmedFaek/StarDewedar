@@ -215,6 +215,44 @@ function DetailSkeleton() {
   )
 }
 
+// ── Saved products skeleton ────────────────────────────────────────────────────
+function SavedProductsSkeleton() {
+  return (
+    <div className="pt-32 pb-20 px-4 sm:px-8 md:px-16 max-w-screen-2xl mx-auto w-full">
+      {/* Page header */}
+      <div className="mb-12 border-b border-outline-variant/20 pb-8 space-y-4">
+        <div className="flex items-center gap-4">
+          {/* Heart icon placeholder */}
+          <div className="w-8 h-8 rounded-full bg-red-100 flex-shrink-0" />
+          <Sk w="260px" h="40px" />
+        </div>
+        <Sk w="200px" h="14px" />
+      </div>
+
+      {/* Product card grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={i} className="border border-outline-variant/10 bg-surface-container-lowest flex flex-col">
+            {/* Card image */}
+            <Sk w="100%" h="220px" className="rounded-none" />
+            {/* Card info */}
+            <div className="p-6 space-y-3 flex-grow flex flex-col">
+              <Sk w="70px" h="10px" />
+              <Sk w="75%" h="20px" />
+              <Sk w="90%" h="12px" />
+              <Sk w="80%" h="12px" />
+              <div className="mt-auto pt-4 border-t border-outline-variant/10 flex justify-between items-center">
+                <Sk w="90px" h="16px" />
+                <Sk w="80px" h="14px" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
 // ── Product-detail skeleton ────────────────────────────────────────────────────
 function ProductDetailSkeleton() {
   return (
@@ -282,6 +320,7 @@ export default function ContentLoader({ variant, rows = 4 }) {
       {variant === 'projects'       && <ProjectsSkeleton />}
       {variant === 'detail'         && <DetailSkeleton />}
       {variant === 'product-detail' && <ProductDetailSkeleton />}
+      {variant === 'saved-products' && <SavedProductsSkeleton />}
       {!variant                     && <GenericSkeleton rows={rows} />}
     </>
   )

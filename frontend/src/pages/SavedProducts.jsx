@@ -34,10 +34,11 @@ export default function SavedProducts() {
   if (loading) return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <Header />
-      <main className="flex-grow pt-32"><ContentLoader rows={3} /></main>
+      <main className="flex-grow"><ContentLoader variant="saved-products" /></main>
       <Footer />
     </div>
   )
+
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
