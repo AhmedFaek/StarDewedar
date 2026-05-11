@@ -5,9 +5,11 @@ import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
 import PageLoader from '../components/shared/PageLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
+import { useCompare } from '../utils/compareContext'
 
 export default function ProductDetail() {
   const { t, i18n } = useTranslation()
+  const { addToCompare, removeFromCompare, isInCompare } = useCompare()
   const [product, setProduct] = useState(null)
   const [activeImage, setActiveImage] = useState('')
   const [relatedProducts, setRelatedProducts] = useState([])
@@ -15,6 +17,7 @@ export default function ProductDetail() {
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 })
   const [showMagnifier, setShowMagnifier] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [compareToast, setCompareToast] = useState('')
 
   useEffect(() => {
     const handleIdChange = async () => {
@@ -69,6 +72,21 @@ export default function ProductDetail() {
 
   const allImages = product.images?.map(img => img.image_url) || []
 
+  const handleCompareClick = () => {
+    if (isInCompare(product.id)) {
+      removeFromCompare(product.id)
+      return
+    }
+    const result = addToCompare(product)
+    if (result.error === 'max') {
+      setCompareToast(t('compare.toast.max'))
+      setTimeout(() => setCompareToast(''), 3500)
+    } else if (result.error === 'category') {
+      setCompareToast(t('compare.toast.category'))
+      setTimeout(() => setCompareToast(''), 3500)
+    }
+  }
+
   const handleMouseEnter = (e) => { const elem = e.currentTarget; const { width, height } = elem.getBoundingClientRect(); setImgSize({ width, height }); setShowMagnifier(true) }
   const handleMouseMove = (e) => { const elem = e.currentTarget; const { top, left } = elem.getBoundingClientRect(); setCoords({ x: e.pageX - left - window.pageXOffset, y: e.pageY - top - window.pageYOffset }) }
   const navigateToProduct = (id) => { window.history.pushState({}, '', `${window.location.pathname}?id=${id}`); window.dispatchEvent(new PopStateEvent('popstate')) }
@@ -118,6 +136,30 @@ export default function ProductDetail() {
                   {t('productDetail.requestQuote')}
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>
+
+                {/* Compare button */}
+                <button
+                  onClick={handleCompareClick}
+                  className={`w-full py-4 text-[10px] font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 border transition-all ${
+                    isInCompare(product.id)
+                      ? 'bg-primary/10 border-primary text-primary'
+                      : 'border-outline-variant text-secondary hover:border-primary hover:text-primary hover:bg-surface-container-high'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    {isInCompare(product.id) ? 'check_circle' : 'compare_arrows'}
+                  </span>
+                  {isInCompare(product.id) ? t('compare.button.alreadyIn') : t('compare.button.add')}
+                </button>
+
+                {/* Compare toast */}
+                {compareToast && (
+                  <div className="px-4 py-3 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-label animate-in fade-in slide-in-from-top-1 duration-200">
+                    <span className="material-symbols-outlined text-sm align-middle mr-1">warning</span>
+                    {compareToast}
+                  </div>
+                )}
+
                 {/* Save to Favourites — only for authenticated users */}
                 <FavouriteButton
                   productId={product.id}
