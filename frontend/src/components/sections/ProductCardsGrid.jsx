@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
-import PageLoader from '../shared/PageLoader'
+import ContentLoader from '../shared/ContentLoader'
+
 
 export default function ProductCardsGrid() {
   const { t, i18n } = useTranslation()
@@ -25,7 +26,7 @@ export default function ProductCardsGrid() {
   }, [])
 
   if (loading) {
-    return <PageLoader fullscreen={false} label={t('common.loading') || 'Loading products'} />
+    return <ContentLoader rows={2} />
   }
 
   return (
