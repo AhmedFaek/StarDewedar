@@ -95,6 +95,9 @@ export const api = {
     logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
         .finally(() => clearAuth()),
 
+    /** GET /users/me — returns the authenticated user's profile (safe fields) */
+    getMe: () => authFetch(`${API_URL}/users/me`),
+
     // ── Saved Products (Favourites) ──────────────────────────────────────────
 
     /** GET /users/me/saved-products — list all saved products */
