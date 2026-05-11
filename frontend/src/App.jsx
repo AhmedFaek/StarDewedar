@@ -8,9 +8,12 @@ import ProjectDetail from './pages/ProjectDetail'
 import RequestQuote from './pages/RequestQuote'
 import RequestVisit from './pages/RequestVisit'
 import Contact from './pages/Contact'
+import ComparePage from './pages/ComparePage'
 import PageLoader from './components/shared/PageLoader'
 import WhatsAppFloat from './components/shared/WhatsAppFloat'
 import SavedProducts from './pages/SavedProducts'
+import { CompareProvider } from './utils/compareContext'
+import CompareDrawer from './components/shared/CompareDrawer'
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState('home')
@@ -29,6 +32,8 @@ export default function App() {
         setCurrentPage('request-visit')
       } else if (path.includes('saved-products')) {
         setCurrentPage('saved-products')
+      } else if (path.includes('compare')) {
+        setCurrentPage('compare')
       } else if (path.includes('contact')) {
         setCurrentPage('contact')
       } else if (path.includes('about')) {
@@ -60,7 +65,7 @@ export default function App() {
   }, [])
 
   // Simple navigation helper
-  window.navigateTo = (page, productId) => {
+  window.navigateTo = (page, productId, compareIds) => {
     setIsRouteLoading(true)
     if (page === 'request-quote' || page === 'quote') {
       const query = productId ? `?productId=${productId}` : ''
@@ -69,6 +74,9 @@ export default function App() {
     } else if (page === 'saved-products') {
       window.history.pushState({}, '', '/saved-products')
       setCurrentPage('saved-products')
+    } else if (page === 'compare') {
+      window.history.pushState({}, '', '/compare')
+      setCurrentPage('compare')
     } else if (page === 'request-visit') {
       window.history.pushState({}, '', '/request-visit')
       setCurrentPage('request-visit')
@@ -105,9 +113,11 @@ export default function App() {
   }
 
   return (
-    <>
+    <CompareProvider>
       {currentPage === 'saved-products' ? (
         <SavedProducts />
+      ) : currentPage === 'compare' ? (
+        <ComparePage />
       ) : currentPage === 'product-detail' ? (
         <ProductDetail />
       ) : currentPage === 'project-detail' ? (
@@ -128,6 +138,7 @@ export default function App() {
         <Home />
       )}
       <WhatsAppFloat />
-    </>
+      <CompareDrawer />
+    </CompareProvider>
   )
 }

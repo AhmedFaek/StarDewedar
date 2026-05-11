@@ -348,6 +348,40 @@
     "chatWithUs": "Chat with us"
   },
 
+  "compare": {
+    "drawer": {
+      "comparing": "Comparing",
+      "products": "Products",
+      "addProduct": "Select a Product",
+      "clear": "Clear All",
+      "compareNow": "Compare Now"
+    },
+    "page": {
+      "badge": "Side-by-Side Comparison",
+      "title": "Product Comparison",
+      "hideSimilar": "Hide similarities",
+      "empty": "No products selected",
+      "emptyDesc": "Go to a product page and click \"Compare\" to add products here.",
+      "browseProducts": "Browse Products",
+      "diffLegend": "Highlighted rows have differences"
+    },
+    "rows": {
+      "category": "Category",
+      "price": "Price Point",
+      "description": "Description"
+    },
+    "button": {
+      "add": "Compare",
+      "remove": "Remove from Compare",
+      "alreadyIn": "In Comparison"
+    },
+    "toast": {
+      "max": "Maximum 3 products can be compared.",
+      "category": "You can only compare products in the same category."
+    },
+    "noResults": "No products found"
+  },
+
   "langSwitch": {
     "en": "EN",
     "ar": "AR"
