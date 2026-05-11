@@ -1,142 +1,57 @@
-import { useState, useEffect } from 'react'
-import Home from './pages/Home'
-import Products from './pages/Products'
-import Projects from './pages/Projects'
-import About from './pages/About'
-import ProductDetail from './pages/ProductDetail'
-import ProjectDetail from './pages/ProjectDetail'
-import RequestQuote from './pages/RequestQuote'
-import RequestVisit from './pages/RequestVisit'
-import Contact from './pages/Contact'
-import ComparePage from './pages/ComparePage'
-import PageLoader from './components/shared/PageLoader'
-import WhatsAppFloat from './components/shared/WhatsAppFloat'
-import SavedProducts from './pages/SavedProducts'
+import { lazy, Suspense } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import { CompareProvider } from './utils/compareContext'
 import CompareDrawer from './components/shared/CompareDrawer'
+import WhatsAppFloat from './components/shared/WhatsAppFloat'
+import TopProgressBar from './components/shared/TopProgressBar'
 
+// ── Lazy-loaded pages ──────────────────────────────────────────────────────────
+// Vite automatically code-splits each lazy import into its own JS chunk.
+// The chunk is only downloaded when the user first navigates to that page.
+const Home          = lazy(() => import('./pages/Home'))
+const Products      = lazy(() => import('./pages/Products'))
+const ProductDetail = lazy(() => import('./pages/ProductDetail'))
+const Projects      = lazy(() => import('./pages/Projects'))
+const ProjectDetail = lazy(() => import('./pages/ProjectDetail'))
+const About         = lazy(() => import('./pages/About'))
+const Contact       = lazy(() => import('./pages/Contact'))
+const RequestQuote  = lazy(() => import('./pages/RequestQuote'))
+const RequestVisit  = lazy(() => import('./pages/RequestVisit'))
+const SavedProducts = lazy(() => import('./pages/SavedProducts'))
+const ComparePage   = lazy(() => import('./pages/ComparePage'))
+
+// ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
-  const [currentPage, setCurrentPage] = useState('home')
-  const [isRouteLoading, setIsRouteLoading] = useState(true)
-
-  // Simple routing based on URL path
-  useEffect(() => {
-    let loadingTimeout
-
-    const handleRouteChange = () => {
-      setIsRouteLoading(true)
-      const path = window.location.pathname
-      if (path.includes('request-quote')) {
-        setCurrentPage('request-quote')
-      } else if (path.includes('request-visit')) {
-        setCurrentPage('request-visit')
-      } else if (path.includes('saved-products')) {
-        setCurrentPage('saved-products')
-      } else if (path.includes('compare')) {
-        setCurrentPage('compare')
-      } else if (path.includes('contact')) {
-        setCurrentPage('contact')
-      } else if (path.includes('about')) {
-        setCurrentPage('about')
-      } else if (path.includes('project-detail')) {
-        setCurrentPage('project-detail')
-      } else if (path.includes('projects')) {
-        setCurrentPage('projects')
-      } else if (path.includes('product-detail')) {
-        setCurrentPage('product-detail')
-      } else if (path.includes('products')) {
-        setCurrentPage('products')
-      } else {
-        setCurrentPage('home')
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' })
-      window.clearTimeout(loadingTimeout)
-      loadingTimeout = window.setTimeout(() => setIsRouteLoading(false), 500)
-    }
-
-    handleRouteChange()
-    window.addEventListener('popstate', handleRouteChange)
-
-    return () => {
-      window.clearTimeout(loadingTimeout)
-      window.removeEventListener('popstate', handleRouteChange)
-    }
-  }, [])
-
-  // Simple navigation helper
-  window.navigateTo = (page, productId, compareIds) => {
-    setIsRouteLoading(true)
-    if (page === 'request-quote' || page === 'quote') {
-      const query = productId ? `?productId=${productId}` : ''
-      window.history.pushState({}, '', `/request-quote${query}`)
-      setCurrentPage('request-quote')
-    } else if (page === 'saved-products') {
-      window.history.pushState({}, '', '/saved-products')
-      setCurrentPage('saved-products')
-    } else if (page === 'compare') {
-      window.history.pushState({}, '', '/compare')
-      setCurrentPage('compare')
-    } else if (page === 'request-visit') {
-      window.history.pushState({}, '', '/request-visit')
-      setCurrentPage('request-visit')
-    } else if (page === 'about') {
-      window.history.pushState({}, '', '/about')
-      setCurrentPage('about')
-    } else if (page === 'projects') {
-      window.history.pushState({}, '', '/projects')
-      setCurrentPage('projects')
-    } else if (page === 'project-detail') {
-      const query = productId ? `?id=${productId}` : ''
-      window.history.pushState({}, '', `/project-detail${query}`)
-      setCurrentPage('project-detail')
-    } else if (page === 'product-detail') {
-      const query = productId ? `?id=${productId}` : ''
-      window.history.pushState({}, '', `/product-detail${query}`)
-      setCurrentPage('product-detail')
-    } else if (page === 'products') {
-      window.history.pushState({}, '', '/products')
-      setCurrentPage('products')
-    } else if (page === 'contact') {
-      window.history.pushState({}, '', '/contact')
-      setCurrentPage('contact')
-    } else {
-      window.history.pushState({}, '', '/')
-      setCurrentPage('home')
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-    window.setTimeout(() => setIsRouteLoading(false), 500)
-  }
-
-  if (isRouteLoading) {
-    return <PageLoader label="Loading page" />
-  }
-
   return (
+    // CompareProvider, WhatsAppFloat and CompareDrawer live OUTSIDE the Suspense
+    // boundary so they are NEVER unmounted during page transitions — the compare
+    // list survives navigation without needing any workarounds.
     <CompareProvider>
-      {currentPage === 'saved-products' ? (
-        <SavedProducts />
-      ) : currentPage === 'compare' ? (
-        <ComparePage />
-      ) : currentPage === 'product-detail' ? (
-        <ProductDetail />
-      ) : currentPage === 'project-detail' ? (
-        <ProjectDetail />
-      ) : currentPage === 'projects' ? (
-        <Projects />
-      ) : currentPage === 'products' ? (
-        <Products />
-      ) : currentPage === 'about' ? (
-        <About />
-      ) : currentPage === 'request-quote' ? (
-        <RequestQuote />
-      ) : currentPage === 'request-visit' ? (
-        <RequestVisit />
-      ) : currentPage === 'contact' ? (
-        <Contact />
-      ) : (
-        <Home />
-      )}
+      {/*
+        Suspense wraps only the page area.
+        While a lazy chunk is downloading, TopProgressBar renders as the fallback.
+        The previous page stays mounted underneath (React keeps it in the tree)
+        so the user still sees content rather than a blank screen.
+      */}
+      <Suspense fallback={<TopProgressBar />}>
+        <Routes>
+          <Route path="/"                element={<Home />} />
+          <Route path="/products"        element={<Products />} />
+          <Route path="/product-detail"  element={<ProductDetail />} />
+          <Route path="/projects"        element={<Projects />} />
+          <Route path="/project-detail"  element={<ProjectDetail />} />
+          <Route path="/about"           element={<About />} />
+          <Route path="/contact"         element={<Contact />} />
+          <Route path="/request-quote"   element={<RequestQuote />} />
+          <Route path="/request-visit"   element={<RequestVisit />} />
+          <Route path="/saved-products"  element={<SavedProducts />} />
+          <Route path="/compare"         element={<ComparePage />} />
+          {/* Catch-all → home */}
+          <Route path="*"               element={<Home />} />
+        </Routes>
+      </Suspense>
+
+      {/* Always-visible global UI — unaffected by page changes */}
       <WhatsAppFloat />
       <CompareDrawer />
     </CompareProvider>
