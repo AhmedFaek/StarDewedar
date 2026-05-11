@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
-import PageLoader from '../components/shared/PageLoader'
+import ContentLoader from '../components/shared/ContentLoader'
 
 export default function Projects() {
   const { t, i18n } = useTranslation()
+  const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [activeFilter, setActiveFilter] = useState('all')
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0)
@@ -22,10 +24,7 @@ export default function Projects() {
     t('projects.service4'),
   ]
 
-  const navigateToProject = (projectId) => {
-    window.history.pushState({}, '', `/project-detail?id=${projectId}`)
-    window.dispatchEvent(new PopStateEvent('popstate'))
-  }
+  const navigateToProject = (id) => navigate(`/project-detail?id=${id}`)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -88,7 +87,13 @@ export default function Projects() {
   const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage)
 
   if (loading) {
-    return <PageLoader label={t('common.loading') || 'Loading projects'} />
+    return (
+      <div className="min-h-screen flex flex-col bg-surface">
+        <Header />
+        <main className="flex-grow"><ContentLoader variant="projects" /></main>
+        <Footer />
+      </div>
+    )
   }
 
   return (
@@ -305,10 +310,7 @@ export default function Projects() {
               </p>
             </div>
             <button
-              onClick={() => {
-                window.history.pushState({}, '', '/contact')
-                window.dispatchEvent(new PopStateEvent('popstate'))
-              }}
+              onClick={() => navigate('/contact')}
               className="bg-tertiary-fixed text-black px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
             >
               {t('ctaBanner.button')}

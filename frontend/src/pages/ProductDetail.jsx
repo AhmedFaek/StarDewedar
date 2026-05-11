@@ -4,7 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
-import PageLoader from '../components/shared/PageLoader'
+import ContentLoader from '../components/shared/ContentLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
 import { useCompare } from '../utils/compareContext'
 
@@ -47,8 +47,15 @@ export default function ProductDetail() {
   }, [productId])
 
   if (loading) {
-    return <PageLoader label={t('common.loading') || 'Loading product'} />
+    return (
+      <div className="min-h-screen flex flex-col bg-surface text-on-surface">
+        <Header />
+        <main className="flex-grow"><ContentLoader variant="product-detail" /></main>
+        <Footer />
+      </div>
+    )
   }
+
 
   if (!product) {
       return (
