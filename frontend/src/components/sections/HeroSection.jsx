@@ -7,7 +7,7 @@ export default function HeroSection() {
     <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
       <div className="absolute inset-0 z-0">
         <video
-          className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.4] sm:brightness-50"
+          className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
           autoPlay
           loop
           muted
