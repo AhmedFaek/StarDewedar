@@ -1,81 +1,32 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../utils/api.js'
+import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
+import { useNotification } from '../../hooks/useNotification.js'
 
 /**
- * AuthModal — slide-in modal with Login / Register / Forgot Password views.
+ * AuthModal - slide-in modal with Login / Register / Forgot Password views.
  *
  * Props:
- *   isOpen        {boolean}   — controls visibility
- *   onClose       {function}  — called when user closes modal
- *   onAuthSuccess {function}  — called with the user object after successful auth
- *   defaultTab    {'login'|'register'} — which tab to start on
+ *   isOpen        {boolean}   - controls visibility
+ *   onClose       {function}  - called when user closes modal
+ *   onAuthSuccess {function}  - called with the user object after successful auth
+ *   defaultTab    {'login'|'register'} - which tab to start on
  */
 export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab = 'login' }) {
   const { t } = useTranslation()
+  const { showSuccess, showError, showInfo } = useNotification()
   const [tab, setTab] = useState(defaultTab)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const overlayRef = useRef(null)
 
-  // ── Forgot password state ─────────────────────────────────────────────────
+  // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotSent, setForgotSent] = useState(false)
 
-  // Sync defaultTab when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      setTab(defaultTab)
-      setError('')
-      setShowForgotPassword(false)
-      setForgotSent(false)
-      setForgotEmail('')
-    }
-  }, [isOpen, defaultTab])
-
-  // Lock body scroll while open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
-
-  // Escape key closes modal
-  useEffect(() => {
-    const handler = (e) => { if (e.key === 'Escape') onClose() }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
-
-  const handleOverlayClick = (e) => {
-    if (e.target === overlayRef.current) onClose()
-  }
-
-  // ── Login ────────────────────────────────────────────────────────────────
-
   const [loginData, setLoginData] = useState({ email: '', password: '' })
-
-  const handleLogin = async (e) => {
-    e.preventDefault()
-    setError('')
-    setLoading(true)
-    try {
-      const res = await api.login(loginData.email, loginData.password)
-      onAuthSuccess(res.user)
-      onClose()
-    } catch (err) {
-      setError(err?.message || t('auth.errorGeneric'))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // ── Register ─────────────────────────────────────────────────────────────
-
   const [regData, setRegData] = useState({
     name: '',
     email: '',
@@ -86,31 +37,81 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     company_name: '',
   })
 
-  const handleRegister = async (e) => {
+  useEffect(() => {
+    if (isOpen) {
+      setTab(defaultTab)
+      setError('')
+      setShowForgotPassword(false)
+      setForgotSent(false)
+      setForgotEmail('')
+    }
+  }, [isOpen, defaultTab])
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const handleOverlayClick = (e) => {
+    if (e.target === overlayRef.current) onClose()
+  }
+
+  const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-    if (regData.password !== regData.confirmPassword) {
-      setError(t('auth.passwordMismatch'))
-      return
-    }
     setLoading(true)
     try {
-      const { confirmPassword, ...payload } = regData
-      // Remove empty optional fields
-      if (!payload.phone_number)     delete payload.phone_number
-      if (!payload.whatsapp_number)  delete payload.whatsapp_number
-      if (!payload.company_name)     delete payload.company_name
-      const res = await api.register(payload)
+      const res = await api.login(loginData.email, loginData.password)
+      showSuccess(t('notifications.loginSuccess'))
       onAuthSuccess(res.user)
       onClose()
     } catch (err) {
-      setError(err?.message || t('auth.errorGeneric'))
+      showError(getApiErrorMessage(err, { t }))
     } finally {
       setLoading(false)
     }
   }
 
-  // ── Forgot Password ──────────────────────────────────────────────────────
+  const handleRegister = async (e) => {
+    e.preventDefault()
+    setError('')
+
+    if (regData.password !== regData.confirmPassword) {
+      setError(t('auth.passwordMismatch'))
+      return
+    }
+
+    setLoading(true)
+    try {
+      const { confirmPassword, ...payload } = regData
+      if (!payload.phone_number) delete payload.phone_number
+      if (!payload.whatsapp_number) delete payload.whatsapp_number
+      if (!payload.company_name) delete payload.company_name
+
+      const res = await api.register(payload)
+      showSuccess(t('notifications.registrationSuccess'))
+      onAuthSuccess(res.user)
+      onClose()
+    } catch (err) {
+      showError(getApiErrorMessage(err, { t }))
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleForgotPassword = async (e) => {
     e.preventDefault()
@@ -118,9 +119,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setLoading(true)
     try {
       await api.forgotPassword(forgotEmail)
+      showInfo(t('notifications.forgotPasswordSent'))
       setForgotSent(true)
     } catch (err) {
-      setError(err?.message || t('auth.errorGeneric'))
+      showError(getApiErrorMessage(err, { t }))
     } finally {
       setLoading(false)
     }
@@ -143,94 +145,77 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div
-        className="relative w-full max-w-md bg-white shadow-2xl overflow-hidden"
+        className="relative w-full max-w-md overflow-hidden bg-white shadow-2xl"
         style={{ animation: 'slideUp 0.25s ease' }}
       >
-        {/* ── Header bar ─────────────────────────────────────────────────── */}
         <div className="flex items-center justify-between px-6 pt-6 pb-0">
           <img src="/logo/logo.png" alt="Star Dewedar" className="h-10 w-auto object-contain" />
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-700 transition-colors"
+            className="text-slate-400 transition-colors hover:text-slate-700"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-2xl">close</span>
           </button>
         </div>
 
-        {/* ── Tabs (hidden in forgot-password view) ──────────────────────── */}
         {!showForgotPassword && (
-          <div className="flex border-b border-slate-200 mt-4 px-6">
-            {['login', 'register'].map((t_) => (
+          <div className="mt-4 flex border-b border-slate-200 px-6">
+            {['login', 'register'].map((tabKey) => (
               <button
-                key={t_}
-                onClick={() => { setTab(t_); setError('') }}
-                className={`
-                  flex-1 py-3 font-headline font-bold uppercase text-xs tracking-widest transition-all border-b-2
-                  ${tab === t_
-                    ? 'text-slate-900 border-yellow-400'
-                    : 'text-slate-400 border-transparent hover:text-slate-600'}
-                `}
+                key={tabKey}
+                onClick={() => {
+                  setTab(tabKey)
+                  setError('')
+                }}
+                className={`flex-1 border-b-2 py-3 font-headline text-xs font-bold uppercase tracking-widest transition-all
+                  ${tab === tabKey
+                    ? 'border-yellow-400 text-slate-900'
+                    : 'border-transparent text-slate-400 hover:text-slate-600'}`}
               >
-                {t_ === 'login' ? t('auth.login') : t('auth.register')}
+                {tabKey === 'login' ? t('auth.login') : t('auth.register')}
               </button>
             ))}
           </div>
         )}
 
-        {/* ── Forms ──────────────────────────────────────────────────────── */}
         <div className="px-6 py-6">
-          {/* Error banner */}
-          {error && (
-            <div className="mb-4 px-4 py-3 bg-red-50 border border-red-200 text-red-700 text-xs font-medium">
-              {error}
-            </div>
-          )}
-
-          {/* ── Forgot Password view ───────────────────────────────────── */}
           {showForgotPassword ? (
             <div>
-              {/* Back to login */}
               <button
                 type="button"
                 onClick={handleBackToLogin}
-                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors mb-4 font-headline font-bold uppercase tracking-widest"
+                className="mb-4 flex items-center gap-1 text-xs font-headline font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-700"
               >
                 <span className="material-symbols-outlined text-sm">arrow_back</span>
                 {t('auth.backToLogin')}
               </button>
 
               {forgotSent ? (
-                /* ── Success state ── */
-                <div className="text-center py-4">
-                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-50 mb-4">
+                <div className="py-4 text-center">
+                  <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-50">
                     <span className="material-symbols-outlined text-3xl text-green-500">mark_email_read</span>
                   </div>
-                  <h3 className="text-sm font-bold text-slate-900 mb-2 font-headline uppercase tracking-wider">
+                  <h3 className="mb-2 font-headline text-sm font-bold uppercase tracking-wider text-slate-900">
                     {t('auth.forgotSentTitle')}
                   </h3>
-                  <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                  <p className="mb-6 text-xs leading-relaxed text-slate-500">
                     {t('auth.forgotSentDesc')}
                   </p>
-                  <button
-                    type="button"
-                    onClick={handleBackToLogin}
-                    className="auth-btn-primary"
-                  >
+                  <button type="button" onClick={handleBackToLogin} className="auth-btn-primary">
                     {t('auth.backToLogin')}
                   </button>
                 </div>
               ) : (
-                /* ── Forgot password form ── */
                 <form onSubmit={handleForgotPassword} className="space-y-4">
-                  <div className="text-center mb-2">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-50 mb-3">
+                  <div className="mb-2 text-center">
+                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow-50">
                       <span className="material-symbols-outlined text-3xl text-yellow-500">lock_reset</span>
                     </div>
-                    <h3 className="text-sm font-bold text-slate-900 font-headline uppercase tracking-wider">
+                    <h3 className="font-headline text-sm font-bold uppercase tracking-wider text-slate-900">
                       {t('auth.forgotPasswordTitle')}
                     </h3>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                    <p className="mt-1 text-xs leading-relaxed text-slate-500">
                       {t('auth.forgotPasswordDesc')}
                     </p>
                   </div>
@@ -241,17 +226,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       type="email"
                       required
                       value={forgotEmail}
-                      onChange={e => setForgotEmail(e.target.value)}
+                      onChange={(e) => setForgotEmail(e.target.value)}
                       className="auth-input"
                       placeholder="name@company.com"
                     />
                   </div>
-                  <button
-                    id="auth-forgot-submit"
-                    type="submit"
-                    disabled={loading}
-                    className="auth-btn-primary"
-                  >
+                  <button id="auth-forgot-submit" type="submit" disabled={loading} className="auth-btn-primary">
                     {loading ? t('auth.sending') : t('auth.sendResetLink')}
                   </button>
                 </form>
@@ -259,7 +239,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
             </div>
           ) : (
             <>
-              {/* ── Login form ───────────────────────────────────────────────── */}
               {tab === 'login' && (
                 <form onSubmit={handleLogin} className="space-y-4">
                   <div>
@@ -269,7 +248,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       type="email"
                       required
                       value={loginData.email}
-                      onChange={e => setLoginData(p => ({ ...p, email: e.target.value }))}
+                      onChange={(e) => setLoginData((prev) => ({ ...prev, email: e.target.value }))}
                       className="auth-input"
                       placeholder="name@company.com"
                     />
@@ -281,36 +260,36 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       type="password"
                       required
                       value={loginData.password}
-                      onChange={e => setLoginData(p => ({ ...p, password: e.target.value }))}
+                      onChange={(e) => setLoginData((prev) => ({ ...prev, password: e.target.value }))}
                       className="auth-input"
                       placeholder="••••••••"
                     />
                   </div>
-                  {/* Forgot password link */}
                   <div className="flex justify-end">
                     <button
                       id="auth-forgot-link"
                       type="button"
-                      onClick={() => { setShowForgotPassword(true); setError('') }}
-                      className="text-xs text-yellow-600 hover:text-yellow-700 font-semibold transition-colors"
+                      onClick={() => {
+                        setShowForgotPassword(true)
+                        setError('')
+                      }}
+                      className="text-xs font-semibold text-yellow-600 transition-colors hover:text-yellow-700"
                     >
                       {t('auth.forgotPassword')}
                     </button>
                   </div>
-                  <button
-                    id="auth-login-submit"
-                    type="submit"
-                    disabled={loading}
-                    className="auth-btn-primary"
-                  >
+                  <button id="auth-login-submit" type="submit" disabled={loading} className="auth-btn-primary">
                     {loading ? t('auth.loggingIn') : t('auth.login')}
                   </button>
-                  <p className="text-center text-xs text-slate-500 pt-1">
+                  <p className="pt-1 text-center text-xs text-slate-500">
                     {t('auth.noAccount')}{' '}
                     <button
                       type="button"
-                      onClick={() => { setTab('register'); setError('') }}
-                      className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+                      onClick={() => {
+                        setTab('register')
+                        setError('')
+                      }}
+                      className="font-semibold text-yellow-600 underline hover:text-yellow-700"
                     >
                       {t('auth.registerHere')}
                     </button>
@@ -318,7 +297,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                 </form>
               )}
 
-              {/* ── Register form ────────────────────────────────────────────── */}
               {tab === 'register' && (
                 <form onSubmit={handleRegister} className="space-y-4">
                   <div className="grid grid-cols-2 gap-3">
@@ -329,7 +307,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         type="text"
                         required
                         value={regData.name}
-                        onChange={e => setRegData(p => ({ ...p, name: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, name: e.target.value }))}
                         className="auth-input"
                         placeholder={t('auth.fullNamePlaceholder')}
                       />
@@ -341,7 +319,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         type="email"
                         required
                         value={regData.email}
-                        onChange={e => setRegData(p => ({ ...p, email: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, email: e.target.value }))}
                         className="auth-input"
                         placeholder="name@company.com"
                       />
@@ -354,7 +332,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         required
                         minLength={6}
                         value={regData.password}
-                        onChange={e => setRegData(p => ({ ...p, password: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, password: e.target.value }))}
                         className="auth-input"
                         placeholder="••••••••"
                       />
@@ -366,10 +344,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         type="password"
                         required
                         value={regData.confirmPassword}
-                        onChange={e => setRegData(p => ({ ...p, confirmPassword: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
                         className="auth-input"
                         placeholder="••••••••"
                       />
+                      {error && (
+                        <p className="mt-1 text-xs text-red-600">
+                          {error}
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="auth-label">{t('auth.phoneOptional')}</label>
@@ -377,7 +360,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         id="auth-reg-phone"
                         type="tel"
                         value={regData.phone_number}
-                        onChange={e => setRegData(p => ({ ...p, phone_number: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, phone_number: e.target.value }))}
                         className="auth-input"
                         placeholder="+20 ..."
                       />
@@ -387,13 +370,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       <div style={{ position: 'relative' }}>
                         <span
                           className="material-symbols-outlined"
-                          style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', fontSize: '16px', color: '#22c55e', pointerEvents: 'none' }}
-                        >chat</span>
+                          style={{
+                            position: 'absolute',
+                            top: '50%',
+                            left: '10px',
+                            transform: 'translateY(-50%)',
+                            fontSize: '16px',
+                            color: '#22c55e',
+                            pointerEvents: 'none',
+                          }}
+                        >
+                          chat
+                        </span>
                         <input
                           id="auth-reg-whatsapp"
                           type="tel"
                           value={regData.whatsapp_number}
-                          onChange={e => setRegData(p => ({ ...p, whatsapp_number: e.target.value }))}
+                          onChange={(e) => setRegData((prev) => ({ ...prev, whatsapp_number: e.target.value }))}
                           className="auth-input"
                           style={{ paddingLeft: '34px' }}
                           placeholder="+20 ..."
@@ -406,26 +399,24 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         id="auth-reg-company"
                         type="text"
                         value={regData.company_name}
-                        onChange={e => setRegData(p => ({ ...p, company_name: e.target.value }))}
+                        onChange={(e) => setRegData((prev) => ({ ...prev, company_name: e.target.value }))}
                         className="auth-input"
                         placeholder={t('auth.companyPlaceholder')}
                       />
                     </div>
                   </div>
-                  <button
-                    id="auth-reg-submit"
-                    type="submit"
-                    disabled={loading}
-                    className="auth-btn-primary"
-                  >
+                  <button id="auth-reg-submit" type="submit" disabled={loading} className="auth-btn-primary">
                     {loading ? t('auth.registering') : t('auth.createAccount')}
                   </button>
-                  <p className="text-center text-xs text-slate-500 pt-1">
+                  <p className="pt-1 text-center text-xs text-slate-500">
                     {t('auth.hasAccount')}{' '}
                     <button
                       type="button"
-                      onClick={() => { setTab('login'); setError('') }}
-                      className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+                      onClick={() => {
+                        setTab('login')
+                        setError('')
+                      }}
+                      className="font-semibold text-yellow-600 underline hover:text-yellow-700"
                     >
                       {t('auth.loginHere')}
                     </button>
@@ -437,7 +428,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
         </div>
       </div>
 
-      {/* Scoped animations + utility classes */}
       <style>{`
         @keyframes fadeIn  { from { opacity: 0 } to { opacity: 1 } }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: translateY(0) } }
