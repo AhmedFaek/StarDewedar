@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api.js'
+import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
+import { useNotification } from '../../hooks/useNotification.js'
 
 /* ── Status Badge ─────────────────────────────────────────────────────────── */
 
@@ -121,6 +123,7 @@ function EmptyState({ icon, text, desc, ctaLabel, onCta }) {
 
 export default function MyRequestsPanel({ isOpen, onClose, user }) {
   const { t, i18n } = useTranslation()
+  const { showError } = useNotification()
   const lang = i18n.language
   const isRTL = lang === 'ar'
   const panelRef = useRef(null)
@@ -155,7 +158,10 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
         setVisits(Array.isArray(v) ? v : [])
         setFetched(true)
       })
-      .catch(() => setError(t('myRequests.error')))
+      .catch((err) => {
+        setError(t('myRequests.error'))
+        showError(getApiErrorMessage(err, { t }))
+      })
       .finally(() => setLoading(false))
   }, [isOpen, fetched, t])
 

@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
+import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
+import { useNotification } from '../../hooks/useNotification.js'
 
 /**
  * FavouriteButton — heart toggle for a single product.
@@ -15,6 +17,7 @@ import { api } from '../../utils/api.js'
  */
 export default function FavouriteButton({ productId, size = 'md', className = '', onUnsaved }) {
   const { t } = useTranslation()
+  const { showSuccess, showError } = useNotification()
   const loggedIn = isLoggedIn()
 
   const [saved, setSaved] = useState(false)
@@ -48,12 +51,15 @@ export default function FavouriteButton({ productId, size = 'md', className = ''
     try {
       if (next) {
         await api.saveProduct(productId)
+        showSuccess(t('notifications.savedProductSuccess'))
       } else {
         await api.unsaveProduct(productId)
         onUnsaved?.(productId)
+        showSuccess(t('notifications.removedProductSuccess'))
       }
-    } catch {
+    } catch (error) {
       setSaved(!next) // revert on error
+      showError(getApiErrorMessage(error, { t }))
     } finally {
       setLoading(false)
     }

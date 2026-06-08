@@ -12,6 +12,30 @@ import userRoutes from './modules/users/user.routes.js'
 
 const app = express()
 
+const resolveErrorStatus = (err) => {
+    if (typeof err?.status === 'number') return err.status
+    if (typeof err?.statusCode === 'number') return err.statusCode
+    if (typeof err?.code === 'number' && err.code >= 400 && err.code < 600) return err.code
+
+    const message = String(err?.message || '').toLowerCase()
+
+    if (
+        message.includes('invalid credentials') ||
+        message.includes('invalid token') ||
+        message.includes('invalid refresh token') ||
+        message.includes('unauthorized')
+    ) {
+        return 401
+    }
+
+    if (message.includes('forbidden')) return 403
+    if (message.includes('not found')) return 404
+    if (message.includes('validation')) return 400
+    if (message.includes('already exists') || message.includes('conflict')) return 409
+
+    return 500
+}
+
 // Middlewares
 app.use(cors())
 app.use(express.json())
@@ -31,6 +55,22 @@ app.use('/api/users', userRoutes)
 // Test route
 app.get('/', (req, res) => {
     res.send('API is running...')
+})
+
+app.use((err, req, res, next) => {
+    if (res.headersSent) {
+        return next(err)
+    }
+
+    const status = resolveErrorStatus(err)
+    const message = err?.message || 'Something went wrong'
+    const payload = { message }
+
+    if (Array.isArray(err?.errors) && err.errors.length > 0) {
+        payload.errors = err.errors
+    }
+
+    res.status(status).json(payload)
 })
 
 export default app

@@ -7,12 +7,14 @@ import { api } from '../utils/api'
 import ContentLoader from '../components/shared/ContentLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
 import { useCompare } from '../utils/compareContext'
+import { useNotification } from '../hooks/useNotification.js'
 
 export default function ProductDetail() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { addToCompare, removeFromCompare, isInCompare } = useCompare()
+  const { showWarning } = useNotification()
   const [product, setProduct] = useState(null)
   const [activeImage, setActiveImage] = useState('')
   const [relatedProducts, setRelatedProducts] = useState([])
@@ -20,12 +22,14 @@ export default function ProductDetail() {
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 })
   const [showMagnifier, setShowMagnifier] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [compareToast, setCompareToast] = useState('')
 
   const productId = searchParams.get('id')
 
   useEffect(() => {
-    if (!productId) { setLoading(false); return }
+    if (!productId) {
+      setLoading(false)
+      return
+    }
     setLoading(true)
     ;(async () => {
       try {
@@ -33,9 +37,7 @@ export default function ProductDetail() {
         setProduct(foundProduct)
         setActiveImage(foundProduct.images?.[0]?.image_url || '')
         const allProducts = await api.getProducts()
-        const related = allProducts.filter(item =>
-          item.category_id === foundProduct.category_id && item.id !== foundProduct.id
-        )
+        const related = allProducts.filter((item) => item.category_id === foundProduct.category_id && item.id !== foundProduct.id)
         setRelatedProducts(related)
         window.scrollTo(0, 0)
       } catch (error) {
@@ -56,40 +58,49 @@ export default function ProductDetail() {
     )
   }
 
-
   if (!product) {
-      return (
-          <div className="min-h-screen flex flex-col">
-              <Header />
-              <main className="flex-grow flex items-center justify-center">
-                  <p>{t('products.noProducts')}</p>
-              </main>
-              <Footer />
-          </div>
-      )
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow flex items-center justify-center">
+          <p>{t('products.noProducts')}</p>
+        </main>
+        <Footer />
+      </div>
+    )
   }
 
-  const allImages = product.images?.map(img => img.image_url) || []
+  const allImages = product.images?.map((img) => img.image_url) || []
 
   const handleCompareClick = () => {
     if (isInCompare(product.id)) {
       removeFromCompare(product.id)
       return
     }
+
     const result = addToCompare(product)
     if (result.error === 'max') {
-      setCompareToast(t('compare.toast.max'))
-      setTimeout(() => setCompareToast(''), 3500)
+      showWarning(t('notifications.compareLimitWarning'))
     } else if (result.error === 'category') {
-      setCompareToast(t('compare.toast.category'))
-      setTimeout(() => setCompareToast(''), 3500)
+      showWarning(t('notifications.compareCategoryWarning'))
     }
   }
 
-  const handleMouseEnter = (e) => { const elem = e.currentTarget; const { width, height } = elem.getBoundingClientRect(); setImgSize({ width, height }); setShowMagnifier(true) }
-  const handleMouseMove = (e) => { const elem = e.currentTarget; const { top, left } = elem.getBoundingClientRect(); setCoords({ x: e.pageX - left - window.pageXOffset, y: e.pageY - top - window.pageYOffset }) }
+  const handleMouseEnter = (e) => {
+    const elem = e.currentTarget
+    const { width, height } = elem.getBoundingClientRect()
+    setImgSize({ width, height })
+    setShowMagnifier(true)
+  }
 
-
+  const handleMouseMove = (e) => {
+    const elem = e.currentTarget
+    const { top, left } = elem.getBoundingClientRect()
+    setCoords({
+      x: e.pageX - left - window.pageXOffset,
+      y: e.pageY - top - window.pageYOffset,
+    })
+  }
 
   const name = i18n.language === 'ar' ? product.name_ar : product.name_en
   const description = i18n.language === 'ar' ? product.description_ar : product.description_en
@@ -101,35 +112,65 @@ export default function ProductDetail() {
       <Header />
       <main className="flex-grow pt-32 pb-20 px-4 sm:px-8 max-w-screen-2xl mx-auto w-full">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-24">
-          {/* Gallery */}
           <div className="lg:col-span-7 grid grid-cols-6 gap-4">
-            <div className="col-span-6 bg-surface-container-low aspect-[16/10] relative overflow-hidden cursor-crosshair group border border-outline-variant/10" onMouseEnter={handleMouseEnter} onMouseMove={handleMouseMove} onMouseLeave={() => setShowMagnifier(false)}>
+            <div
+              className="col-span-6 bg-surface-container-low aspect-[16/10] relative overflow-hidden cursor-crosshair group border border-outline-variant/10"
+              onMouseEnter={handleMouseEnter}
+              onMouseMove={handleMouseMove}
+              onMouseLeave={() => setShowMagnifier(false)}
+            >
               <img alt={name} className="w-full h-full object-cover" src={activeImage || 'https://via.placeholder.com/800x500'} />
               {showMagnifier && (
-                <div style={{ position: "absolute", pointerEvents: "none", height: "250px", width: "250px", top: `${coords.y - 125}px`, left: `${coords.x - 125}px`, backgroundImage: `url('${activeImage}')`, backgroundRepeat: "no-repeat", backgroundSize: `${imgSize.width * 2.5}px ${imgSize.height * 2.5}px`, backgroundPosition: `${-coords.x * 2.5 + 125}px ${-coords.y * 2.5 + 125}px`, border: "1px solid rgba(255,255,255,0.2)", boxShadow: "0 20px 50px rgba(0,0,0,0.5)", borderRadius: "2px", zIndex: 10 }} />
+                <div
+                  style={{
+                    position: 'absolute',
+                    pointerEvents: 'none',
+                    height: '250px',
+                    width: '250px',
+                    top: `${coords.y - 125}px`,
+                    left: `${coords.x - 125}px`,
+                    backgroundImage: `url('${activeImage}')`,
+                    backgroundRepeat: 'no-repeat',
+                    backgroundSize: `${imgSize.width * 2.5}px ${imgSize.height * 2.5}px`,
+                    backgroundPosition: `${-coords.x * 2.5 + 125}px ${-coords.y * 2.5 + 125}px`,
+                    border: '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                    borderRadius: '2px',
+                    zIndex: 10,
+                  }}
+                />
               )}
             </div>
             <div className="col-span-6 flex flex-wrap gap-4">
               {allImages.map((image, idx) => (
-                <button key={idx} className={`w-20 h-20 bg-surface-container-low overflow-hidden border-2 transition-all ${activeImage === image ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'}`} onClick={() => setActiveImage(image)}>
+                <button
+                  key={idx}
+                  className={`w-20 h-20 bg-surface-container-low overflow-hidden border-2 transition-all ${
+                    activeImage === image ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                  }`}
+                  onClick={() => setActiveImage(image)}
+                >
                   <img src={image} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Info */}
           <div className="lg:col-span-5 space-y-10 lg:sticky lg:top-32">
             <div className="space-y-4">
-              <span className="inline-block bg-primary/10 text-primary px-3 py-1 font-label text-[10px] font-bold tracking-[0.2em] uppercase">{categoryName}</span>
-              <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-none text-primary uppercase italic">{name}</h1>
+              <span className="inline-block bg-primary/10 text-primary px-3 py-1 font-label text-[10px] font-bold tracking-[0.2em] uppercase">
+                {categoryName}
+              </span>
+              <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-none text-primary uppercase italic">
+                {name}
+              </h1>
               <p className="text-secondary/80 leading-relaxed font-body text-lg max-w-xl">{description}</p>
             </div>
             <div className="space-y-6">
               <div>
                 <p className="text-tertiary font-label text-[14px] tracking-widest uppercase font-black mb-1">{t('productDetail.pricePoint')}</p>
                 <p className="text-4xl font-headline font-black text-primary">
-                    EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
+                  EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
                 </p>
               </div>
               <div className="flex flex-col gap-3">
@@ -138,7 +179,6 @@ export default function ProductDetail() {
                   <span className="material-symbols-outlined text-sm">arrow_forward</span>
                 </button>
 
-                {/* Compare button */}
                 <button
                   onClick={handleCompareClick}
                   className={`w-full py-4 text-[10px] font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 border transition-all ${
@@ -153,15 +193,6 @@ export default function ProductDetail() {
                   {isInCompare(product.id) ? t('compare.button.alreadyIn') : t('compare.button.add')}
                 </button>
 
-                {/* Compare toast */}
-                {compareToast && (
-                  <div className="px-4 py-3 bg-amber-50 border border-amber-300 text-amber-800 text-xs font-label animate-in fade-in slide-in-from-top-1 duration-200">
-                    <span className="material-symbols-outlined text-sm align-middle mr-1">warning</span>
-                    {compareToast}
-                  </div>
-                )}
-
-                {/* Save to Favourites — only for authenticated users */}
                 <FavouriteButton
                   productId={product.id}
                   size="md"
@@ -178,7 +209,6 @@ export default function ProductDetail() {
           </div>
         </div>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <section className="pt-20 border-t border-outline-variant/15">
             <h2 className="text-3xl font-headline font-black text-primary uppercase italic mb-12">{t('productDetail.relatedProducts')}</h2>
@@ -189,13 +219,13 @@ export default function ProductDetail() {
                     <img src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} alt={i18n.language === 'ar' ? item.name_ar : item.name_en} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
                   </div>
                   <p className="text-[9px] font-bold tracking-widest uppercase text-tertiary mb-1">
-                      {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
+                    {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
                   </p>
                   <h3 className="text-lg font-headline font-bold text-primary leading-tight group-hover:text-primary/70 transition-colors uppercase">
-                      {i18n.language === 'ar' ? item.name_ar : item.name_en}
+                    {i18n.language === 'ar' ? item.name_ar : item.name_en}
                   </h3>
                   <p className="text-sm font-body mt-2 text-secondary font-bold">
-                      EGP {item.price ? Number(item.price).toLocaleString('en-EG') : 'N/A'}
+                    EGP {item.price ? Number(item.price).toLocaleString('en-EG') : 'N/A'}
                   </p>
                 </div>
               ))}

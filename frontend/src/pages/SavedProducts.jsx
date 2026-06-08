@@ -7,10 +7,13 @@ import ContentLoader from '../components/shared/ContentLoader'
 import FavouriteButton from '../components/shared/FavouriteButton'
 import { api } from '../utils/api'
 import { getUser, isLoggedIn } from '../utils/auth'
+import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
+import { useNotification } from '../hooks/useNotification.js'
 
 export default function SavedProducts() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const { showError } = useNotification()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
   const user = getUser()
@@ -22,7 +25,10 @@ export default function SavedProducts() {
     }
     api.getSavedProducts()
       .then(data => setProducts(data))
-      .catch(err => console.error('Failed to load saved products:', err))
+      .catch(err => {
+        console.error('Failed to load saved products:', err)
+        showError(getApiErrorMessage(err, { t }))
+      })
       .finally(() => setLoading(false))
   }, [])
 

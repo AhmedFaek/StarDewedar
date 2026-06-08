@@ -7,19 +7,26 @@ import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
+import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
+import { useNotification } from '../../hooks/useNotification.js'
 
 export default function QuoteForm({ productId = null }) {
   const { t, i18n } = useTranslation()
+  const { showSuccess, showError } = useNotification()
   const [products, setProducts] = useState([])
   const [formData, setFormData] = useState({
-    first_name: '', last_name: '', phone: '', email: '',
+    first_name: '',
+    last_name: '',
+    phone: '',
+    email: '',
     product_id: productId || '',
-    custom_product_name: '', details: '', file_url: null,
+    custom_product_name: '',
+    details: '',
+    file_url: null,
   })
 
   const [fileName, setFileName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState('')
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -33,23 +40,26 @@ export default function QuoteForm({ productId = null }) {
     fetchProducts()
   }, [])
 
-  // Pre-fill user info if logged in
   useEffect(() => {
     if (!isLoggedIn()) return
-    api.getMe().then((user) => {
-      const parts = (user.name || '').split(' ')
-      setFormData((prev) => ({
-        ...prev,
-        first_name: parts[0] || prev.first_name,
-        last_name:  parts[1] || prev.last_name,
-        email:      user.email       || prev.email,
-        phone:      user.phone_number || prev.phone,
-      }))
-    }).catch(() => { /* not logged in or token expired — ignore */ })
+    api.getMe()
+      .then((user) => {
+        const parts = (user.name || '').split(' ')
+        setFormData((prev) => ({
+          ...prev,
+          first_name: parts[0] || prev.first_name,
+          last_name: parts[1] || prev.last_name,
+          email: user.email || prev.email,
+          phone: user.phone_number || prev.phone,
+        }))
+      })
+      .catch(() => {})
   }, [])
 
   useEffect(() => {
-    if (productId) setFormData((prev) => ({ ...prev, product_id: productId }))
+    if (productId) {
+      setFormData((prev) => ({ ...prev, product_id: productId }))
+    }
   }, [productId])
 
   const handleInputChange = (e) => {
@@ -68,7 +78,6 @@ export default function QuoteForm({ productId = null }) {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitMessage('')
     try {
       const formDataToSend = new FormData()
       formDataToSend.append('first_name', formData.first_name)
@@ -88,24 +97,29 @@ export default function QuoteForm({ productId = null }) {
       }
 
       await api.sendQuoteRequest(formDataToSend)
-      
-      setSubmitMessage(t('requestQuote.successMsg'))
-      setFormData({ first_name: '', last_name: '', phone: '', email: '', product_id: productId || '', custom_product_name: '', details: '', file_url: null })
+      showSuccess(t('notifications.quoteSuccess'))
+      setFormData({
+        first_name: '',
+        last_name: '',
+        phone: '',
+        email: '',
+        product_id: productId || '',
+        custom_product_name: '',
+        details: '',
+        file_url: null,
+      })
       setFileName('')
-      // Refresh the page after a short delay so the user can see the success message
-      setTimeout(() => window.location.reload(), 1500)
     } catch (error) {
-      console.error('Form submission error:', error)
-      setSubmitMessage(t('requestQuote.errorMsg'))
+      showError(getApiErrorMessage(error, { t }))
     } finally {
       setIsSubmitting(false)
     }
   }
 
   const productOptions = [
-    ...products.map(p => ({
+    ...products.map((p) => ({
       value: p.id,
-      label: i18n.language === 'ar' ? p.name_ar : p.name_en
+      label: i18n.language === 'ar' ? p.name_ar : p.name_en,
     })),
     { value: 'custom', label: t('requestQuote.customProduct') },
   ]
@@ -117,7 +131,7 @@ export default function QuoteForm({ productId = null }) {
           <h2 className="text-2xl sm:text-3xl font-headline font-bold tracking-tight text-primary">
             {t('requestQuote.formTitle')}
           </h2>
-          <div className="h-1 w-20 bg-tertiary-fixed mt-3 sm:mt-4"></div>
+          <div className="h-1 w-20 bg-tertiary-fixed mt-3 sm:mt-4" />
         </header>
 
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
@@ -135,21 +149,7 @@ export default function QuoteForm({ productId = null }) {
           )}
           <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={5} required />
           <FileUploadField label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} />
-          {fileName && <p className="text-xs text-tertiary-fixed font-semibold">{t('requestQuote.fileSelected')} {fileName}</p>}
-          {submitMessage && (
-            <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
-              submitMessage.includes('✓') || submitMessage.includes('نجاح') 
-                ? 'bg-green-50 border-green-500 text-green-800' 
-                : 'bg-red-50 border-red-500 text-red-800'
-            }`}>
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-xl">
-                  {submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'check_circle' : 'error'}
-                </span>
-                <p className="font-headline font-bold text-sm tracking-tight">{submitMessage}</p>
-              </div>
-            </div>
-          )}
+          {fileName && <p className="text-xs font-semibold text-tertiary-fixed">{t('requestQuote.fileSelected')} {fileName}</p>}
           <div className="pt-4 sm:pt-6">
             <button type="submit" disabled={isSubmitting} className="w-full sm:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed">
               {isSubmitting ? t('requestQuote.submitting') : t('requestQuote.submitRequest')}
