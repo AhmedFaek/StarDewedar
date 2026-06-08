@@ -17,8 +17,9 @@ const About         = lazy(() => import('./pages/About'))
 const Contact       = lazy(() => import('./pages/Contact'))
 const RequestQuote  = lazy(() => import('./pages/RequestQuote'))
 const RequestVisit  = lazy(() => import('./pages/RequestVisit'))
-const SavedProducts = lazy(() => import('./pages/SavedProducts'))
-const ComparePage   = lazy(() => import('./pages/ComparePage'))
+const SavedProducts  = lazy(() => import('./pages/SavedProducts'))
+const ComparePage    = lazy(() => import('./pages/ComparePage'))
+const ResetPassword  = lazy(() => import('./pages/ResetPassword'))
 
 // ── App ────────────────────────────────────────────────────────────────────────
 export default function App() {
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/request-visit"   element={<RequestVisit />} />
           <Route path="/saved-products"  element={<SavedProducts />} />
           <Route path="/compare"         element={<ComparePage />} />
+          <Route path="/reset-password"  element={<ResetPassword />} />
           {/* Catch-all → home */}
           <Route path="*"               element={<Home />} />
         </Routes>
