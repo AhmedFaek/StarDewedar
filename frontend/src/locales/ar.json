@@ -158,7 +158,12 @@
     "emailText": "info@stardewedar.com",
     "visitOffice": "زيارة مكتبنا",
     "coordinates": "الإحداثيات: 30°47'05.8\"N 30°59'46.8\"E",
-    "getDirections": "احصل على الاتجاهات"
+    "getDirections": "احصل على الاتجاهات",
+    "validation": {
+      "required": "هذا الحقل مطلوب.",
+      "minChars": "يجب أن يكون {{n}} أحرف على الأقل.",
+      "invalidEmail": "يرجى إدخال بريد إلكتروني صحيح."
+    }
   },
 
   "requestVisit": {

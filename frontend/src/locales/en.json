@@ -158,7 +158,12 @@
     "emailText": "info@stardewedar.com",
     "visitOffice": "Visit Our Office",
     "coordinates": "Coordinates: 30°47'05.8\"N 30°59'46.8\"E",
-    "getDirections": "Get Directions"
+    "getDirections": "Get Directions",
+    "validation": {
+      "required": "This field is required.",
+      "minChars": "Must be at least {{n}} characters.",
+      "invalidEmail": "Please enter a valid email address."
+    }
   },
 
   "requestVisit": {
