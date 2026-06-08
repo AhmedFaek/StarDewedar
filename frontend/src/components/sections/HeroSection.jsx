@@ -6,12 +6,16 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
       <div className="absolute inset-0 z-0">
-        <img
-          className="w-full h-full object-cover grayscale brightness-50 animate-soft-zoom"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBu_E600Z8bryxCjYDsmqyspYpOO4zZCErIg2hY22a_ug5oR0tHtDEwUUWU6EF_xZWVnJ90JVOVWi6b9XBP6QCP33pcjvhzcU9vq6Vh-6YaKvpcgtxDLrlYGlIPJbuotzy0PmxKOzPfDidAilorQ2Zb34qhGAzMOl41sYp8i2fH3TCoZAAVQ9Vz0r3lefdPpc9Uetny9wuVShgGqadZF07GqPRU4syP30KvP6TQEi6Z-RjufikHOkwJXhW1BePtAR3-A_-Nnx0ADGUy"
-          alt="Electrical industrial systems"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-primary via-primary/60 to-transparent"></div>
+        <video
+          className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.4] sm:brightness-50"
+          autoPlay
+          loop
+          muted
+          playsInline
+        >
+          <source src="/logo/Use_the_uploaded_Star_Dewedar.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-primary via-primary/80 to-primary/40 sm:to-transparent"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-8 relative z-10">
