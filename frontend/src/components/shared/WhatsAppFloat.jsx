@@ -28,40 +28,17 @@ export default function WhatsAppFloat() {
       aria-label="Chat with us on WhatsApp"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className={`fixed z-[199] flex items-center justify-center w-[56px] h-[56px] no-underline transition-[bottom] duration-300 ease-out
+        ${isRTL ? 'left-4 sm:left-7' : 'right-4 sm:right-7'}`}
       style={{
-        position: 'fixed',
         bottom: `${bottomOffset}px`,
-        transition: 'bottom 0.3s cubic-bezier(0.16,1,0.3,1)',
-        ...(isRTL ? { left: '28px' } : { right: '28px' }),
-        zIndex: 199,
-        display: 'flex',
-        flexDirection: isRTL ? 'row-reverse' : 'row',
-        alignItems: 'center',
-        gap: '10px',
-        textDecoration: 'none',
       }}
     >
-      {/* Label pill — slides in on hover */}
+      {/* Label pill — absolute positioned so it doesn't push the icon, hidden on mobile */}
       <span
-        style={{
-          background: '#fff',
-          color: '#128C7E',
-          fontSize: '11px',
-          fontWeight: 700,
-          letterSpacing: '0.06em',
-          textTransform: 'uppercase',
-          padding: '6px 14px',
-          borderRadius: '999px',
-          boxShadow: '0 2px 12px rgba(0,0,0,0.15)',
-          whiteSpace: 'nowrap',
-          opacity: hovered ? 1 : 0,
-          transform: hovered
-            ? 'translateX(0)'
-            : isRTL ? 'translateX(-10px)' : 'translateX(10px)',
-          transition: 'opacity 0.2s ease, transform 0.2s ease',
-          pointerEvents: 'none',
-          fontFamily: 'inherit',
-        }}
+        className={`absolute hidden md:block whitespace-nowrap bg-white text-[#128C7E] text-[11px] font-bold tracking-wider uppercase px-3.5 py-1.5 rounded-full shadow-[0_2px_12px_rgba(0,0,0,0.15)] pointer-events-none transition-all duration-200 ease-out
+          ${hovered ? 'opacity-100 translate-x-0' : 'opacity-0 ' + (isRTL ? '-translate-x-2' : 'translate-x-2')}
+          ${isRTL ? 'left-full ml-3' : 'right-full mr-3'}`}
       >
         {t('whatsapp.chatWithUs')}
       </span>
