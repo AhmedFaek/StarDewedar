@@ -15,9 +15,11 @@ model User {
   phone_number         String?
   company_name         String?
   role                 String   // "admin" | "customer"
-  hashed_refresh_token String?
-  created_at           DateTime @default(now())
-  updated_at           DateTime @updatedAt
+  hashed_refresh_token   String?
+  reset_password_token   String?
+  reset_password_expires DateTime?
+  created_at             DateTime @default(now())
+  updated_at             DateTime @updatedAt
 
   saved_products SavedProduct[]
 }
