@@ -12,6 +12,7 @@ const requiredEnv = [
     'CLOUDINARY_SECRET',
     'YAHOO_EMAIL',
     'YAHOO_PASSWORD',
+    'FRONTEND_URL',
 ]
 
 // Validate required variables
@@ -31,4 +32,5 @@ export default {
     cloudinarySecret: process.env.CLOUDINARY_SECRET,
     yahooEmail: process.env.YAHOO_EMAIL,
     yahooPassword: process.env.YAHOO_PASSWORD,
+    frontendUrl: process.env.FRONTEND_URL,
 }
