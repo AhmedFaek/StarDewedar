@@ -19,7 +19,23 @@ export default function Contact() {
     whatsapp_number: '',
     message: '',
   })
+  const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const validate = () => {
+    const e = {}
+    if (!formData.first_name.trim() || formData.first_name.trim().length < 2)
+      e.first_name = t('contact.validation.minChars', { n: 2 })
+    if (!formData.last_name.trim() || formData.last_name.trim().length < 2)
+      e.last_name = t('contact.validation.minChars', { n: 2 })
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      e.email = t('contact.validation.invalidEmail')
+    if (!formData.phone_number.trim())
+      e.phone_number = t('contact.validation.required')
+    if (!formData.message.trim() || formData.message.trim().length < 10)
+      e.message = t('contact.validation.minChars', { n: 10 })
+    return e
+  }
 
   const mapEmbedUrl = 'https://www.google.com/maps/embed?pb=!1m17!1m12!1m3!1d3423.468205562095!2d30.993738975549045!3d30.78494437456185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14f7a7a1c0a60f3d%3A0x1d1f0c3310f5b6e6!2sTanta!5e0!3m2!1sen!2seg!4v1715624000000!5m2!1sen!2seg'
   const directionsUrl = 'https://www.google.com/maps/dir/?api=1&destination=30.784944,30.996333'
@@ -27,6 +43,8 @@ export default function Contact() {
   const handleInputChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+    // Clear error for this field on change
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
   useEffect(() => {
@@ -48,10 +66,16 @@ export default function Contact() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
     setIsSubmitting(true)
     try {
       await api.sendContactMessage(formData)
       showSuccess(t('notifications.contactSuccess'))
+      setErrors({})
       setFormData({
         first_name: '',
         last_name: '',
@@ -61,6 +85,18 @@ export default function Contact() {
         message: '',
       })
     } catch (error) {
+      // Try to map server-side field errors back to the form
+      const serverErrors = error?.errors
+      if (Array.isArray(serverErrors) && serverErrors.length > 0) {
+        const mapped = {}
+        serverErrors.forEach(({ field, message }) => {
+          if (field) mapped[field] = message
+        })
+        if (Object.keys(mapped).length > 0) {
+          setErrors(mapped)
+          return
+        }
+      }
       showError(getApiErrorMessage(error, { t }))
     } finally {
       setIsSubmitting(false)
@@ -111,12 +147,12 @@ export default function Contact() {
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <InputField label={t('contact.firstName')} name="first_name" placeholder="AHMED" value={formData.first_name} onChange={handleInputChange} required />
-                    <InputField label={t('contact.lastName')} name="last_name" placeholder="KHALED" value={formData.last_name} onChange={handleInputChange} required />
+                    <InputField label={t('contact.firstName')} name="first_name" placeholder="AHMED" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} />
+                    <InputField label={t('contact.lastName')} name="last_name" placeholder="KHALED" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required />
-                    <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" placeholder="+20 11..." value={formData.phone_number} onChange={handleInputChange} required />
+                    <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                    <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" placeholder="+20 11..." value={formData.phone_number} onChange={handleInputChange} required error={errors.phone_number} />
                   </div>
                   <InputField
                     label={(
@@ -137,16 +173,27 @@ export default function Contact() {
                   <div className="space-y-2">
                     <label className="block text-[12px] font-bold tracking-widest text-outline uppercase">
                       {t('contact.detailedBrief')}
+                      <span className="text-red-500 ms-0.5">*</span>
                     </label>
                     <textarea
                       name="message"
                       placeholder={t('contact.briefPlaceholder')}
                       value={formData.message}
-                      onChange={handleInputChange}
+                      onChange={(e) => {
+                        handleInputChange(e)
+                        if (errors.message) setErrors((prev) => ({ ...prev, message: '' }))
+                      }}
                       rows={4}
-                      className="w-full bg-surface-container-low border-0 border-b-2 border-outline-variant focus:border-tertiary focus:ring-0 px-0 py-3 text-primary transition-colors font-body resize-none"
+                      className={`w-full bg-surface-container-low border-0 border-b-2 focus:ring-0 px-0 py-3 text-primary transition-colors font-body resize-none ${
+                        errors.message
+                          ? 'border-red-500 focus:border-red-500'
+                          : 'border-outline-variant focus:border-tertiary'
+                      }`}
                       required
                     />
+                    {errors.message && (
+                      <span className="text-[11px] text-red-500 font-label">{errors.message}</span>
+                    )}
                   </div>
                   <button
                     type="submit"
