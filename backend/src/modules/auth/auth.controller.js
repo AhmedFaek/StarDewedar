@@ -52,3 +52,39 @@ export const logout = async (req, res, next) => {
         next(err)
     }
 }
+
+/* ─── Password reset / change ────────────────────────────────────────────── */
+
+/* POST /api/auth/forgot-password  — public, rate-limited */
+export const forgotPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body
+        const result = await service.forgotPassword(email)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/* POST /api/auth/reset-password  — public */
+export const resetPassword = async (req, res, next) => {
+    try {
+        const { token, newPassword } = req.body
+        const result = await service.resetPassword(token, newPassword)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/* POST /api/auth/change-password  — requires valid access token */
+export const changePassword = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const { currentPassword, newPassword } = req.body
+        const result = await service.changePassword(userId, currentPassword, newPassword)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}
