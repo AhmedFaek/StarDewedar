@@ -387,6 +387,29 @@
     "loading": "Loading..."
   },
 
+  "notifications": {
+    "genericError": "Something went wrong. Please try again.",
+    "networkError": "Network error. Please check your connection and try again.",
+    "sessionExpired": "Session expired, please log in again.",
+    "unauthorized": "Unauthorized access.",
+    "invalidCredentials": "Invalid email or password.",
+    "validationError": "Please review the form and try again.",
+    "uploadFailed": "Failed to upload image.",
+    "loginSuccess": "Login successful.",
+    "registrationSuccess": "Registration successful.",
+    "contactSuccess": "Contact message sent successfully.",
+    "quoteSuccess": "Quote request submitted successfully.",
+    "visitSuccess": "Visit request submitted successfully.",
+    "passwordChangedSuccess": "Password changed successfully.",
+    "passwordResetSuccess": "Password reset successfully.",
+    "forgotPasswordSent": "If an account exists for that email, a reset link has been sent.",
+    "logoutSuccess": "Logged out successfully.",
+    "compareLimitWarning": "Maximum 3 products can be compared.",
+    "compareCategoryWarning": "You can only compare products in the same category.",
+    "savedProductSuccess": "Product saved to favourites.",
+    "removedProductSuccess": "Product removed from favourites."
+  },
+
   "compare": {
     "drawer": {
       "comparing": "Comparing",

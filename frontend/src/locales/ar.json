@@ -383,6 +383,29 @@
     "loading": "جاري التحميل..."
   },
 
+  "notifications": {
+    "genericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+    "networkError": "حدث خطأ في الشبكة. يرجى التحقق من الاتصال والمحاولة مرة أخرى.",
+    "sessionExpired": "انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى.",
+    "unauthorized": "لا توجد صلاحية للوصول.",
+    "invalidCredentials": "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
+    "validationError": "يرجى مراجعة النموذج والمحاولة مرة أخرى.",
+    "uploadFailed": "فشل رفع الصورة.",
+    "loginSuccess": "تم تسجيل الدخول بنجاح.",
+    "registrationSuccess": "تم إنشاء الحساب بنجاح.",
+    "contactSuccess": "تم إرسال رسالة التواصل بنجاح.",
+    "quoteSuccess": "تم إرسال طلب عرض السعر بنجاح.",
+    "visitSuccess": "تم إرسال طلب الزيارة بنجاح.",
+    "passwordChangedSuccess": "تم تغيير كلمة المرور بنجاح.",
+    "passwordResetSuccess": "تمت إعادة تعيين كلمة المرور بنجاح.",
+    "forgotPasswordSent": "إذا كان هناك حساب بهذا البريد، فقد تم إرسال رابط إعادة التعيين.",
+    "logoutSuccess": "تم تسجيل الخروج بنجاح.",
+    "compareLimitWarning": "يمكن مقارنة 3 منتجات كحد أقصى.",
+    "compareCategoryWarning": "يمكنك مقارنة المنتجات من نفس الفئة فقط.",
+    "savedProductSuccess": "تم حفظ المنتج في المفضلة.",
+    "removedProductSuccess": "تمت إزالة المنتج من المفضلة."
+  },
+
   "compare": {
     "drawer": {
       "comparing": "مقارنة",
