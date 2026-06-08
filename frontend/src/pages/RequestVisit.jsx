@@ -6,62 +6,71 @@ import InputField from '../components/forms/InputField'
 import TextAreaField from '../components/forms/TextAreaField'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
+import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
+import { useNotification } from '../hooks/useNotification.js'
 
 export default function RequestVisit() {
   const { t } = useTranslation()
+  const { showSuccess, showError } = useNotification()
   const [formData, setFormData] = useState({
-    factory_name: '', factory_activity: '', name: '', 
-    phone_number: '', whatsapp_number: '', email: '', 
-    address: '', details: '', preferred_date: new Date().toISOString().split('T')[0]
+    factory_name: '',
+    factory_activity: '',
+    name: '',
+    phone_number: '',
+    whatsapp_number: '',
+    email: '',
+    address: '',
+    details: '',
+    preferred_date: new Date().toISOString().split('T')[0],
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState('')
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Pre-fill user info if logged in
   useEffect(() => {
     if (!isLoggedIn()) return
-    api.getMe().then((user) => {
-      const parts = (user.name || '').split(' ')
-      setFormData((prev) => ({
-        ...prev,
-        name:             parts[0] ? `${parts[0]}${parts[1] ? ' ' + parts[1] : ''}` : prev.name,
-        phone_number:    user.phone_number    || prev.phone_number,
-        whatsapp_number: user.whatsapp_number || prev.whatsapp_number,
-        email:           user.email           || prev.email,
-      }))
-    }).catch(() => {})
+    api.getMe()
+      .then((user) => {
+        const parts = (user.name || '').split(' ')
+        setFormData((prev) => ({
+          ...prev,
+          name: parts[0] ? `${parts[0]}${parts[1] ? ` ${parts[1]}` : ''}` : prev.name,
+          phone_number: user.phone_number || prev.phone_number,
+          whatsapp_number: user.whatsapp_number || prev.whatsapp_number,
+          email: user.email || prev.email,
+        }))
+      })
+      .catch(() => {})
   }, [])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitMessage('')
     try {
-      // Backend VisitRequest model fields:
-      // factory_name, factory_activity, name, phone_number, whatsapp_number, email, address, preferred_date, details, status
-      
-      const payload = { 
-          ...formData, 
-          status: 'PENDING',
-          preferred_date: new Date(formData.preferred_date).toISOString()
+      const payload = {
+        ...formData,
+        status: 'PENDING',
+        preferred_date: new Date(formData.preferred_date).toISOString(),
       }
-      
+
       await api.sendVisitRequest(payload)
-      
-      setSubmitMessage(t('requestVisit.successMsg'))
+      showSuccess(t('notifications.visitSuccess'))
       setFormData({
-        factory_name: '', factory_activity: '', name: '', 
-        phone_number: '', whatsapp_number: '', email: '', 
-        address: '', details: '', preferred_date: new Date().toISOString().split('T')[0]
+        factory_name: '',
+        factory_activity: '',
+        name: '',
+        phone_number: '',
+        whatsapp_number: '',
+        email: '',
+        address: '',
+        details: '',
+        preferred_date: new Date().toISOString().split('T')[0],
       })
     } catch (error) {
-      console.error('Error submitting visit request:', error)
-      setSubmitMessage(t('requestVisit.errorMsg'))
+      showError(getApiErrorMessage(error, { t }))
     } finally {
       setIsSubmitting(false)
     }
@@ -71,7 +80,6 @@ export default function RequestVisit() {
     <div className="min-h-screen flex flex-col bg-surface">
       <Header />
       <main className="flex-grow pt-32 pb-20">
-        {/* Hero Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-16">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end">
             <div>
@@ -80,7 +88,7 @@ export default function RequestVisit() {
                 {t('requestVisit.heroTitle2')} <br className="hidden sm:block" />
                 {t('requestVisit.heroTitle3')}
               </h1>
-              <div className="h-1 w-20 sm:w-32 bg-tertiary-fixed mb-6 sm:mb-8"></div>
+              <div className="h-1 w-20 sm:w-32 bg-tertiary-fixed mb-6 sm:mb-8" />
             </div>
             <div className="pb-2 sm:pb-4">
               <p className="text-secondary text-base sm:text-lg lg:text-xl leading-relaxed max-w-lg">
@@ -90,20 +98,19 @@ export default function RequestVisit() {
           </div>
         </section>
 
-        {/* Form Section */}
         <section className="max-w-7xl mx-auto px-4 sm:px-8">
           <div className="bg-surface-container-low grid md:grid-cols-12 gap-0 overflow-hidden rounded-lg">
-            {/* Image Side */}
             <div className="md:col-span-4 relative h-48 md:h-full min-h-[400px]">
-              <img alt="Industrial Infrastructure" className="absolute inset-0 w-full h-full object-cover"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXZISKS79x-rJ4alZw-7c4maLXMGQAatrDHFwCvhqQaCz1XZl8dwrIywaSEJymATGxM2aGR4CVRQ_q7aAFMxgmu6Z-JCp9soJ2u_FOPUpiITSquZVxgIRaVuXwJ7mZN-o_z_UHShQ7agdzCiwoPxHrThbec7E_xuF7sH0JT-uMh5bAXu_635PhOAdR5fFk_z476CLmEZg1BWa9jSM2-jCPqyS4V7cMrPgefJoqqmHR3Ml14dO6yj1ltRWO0NzoozAKs2YpfGo90B81" />
-              <div className="absolute inset-0 bg-primary/40"></div>
+              <img
+                alt="Industrial Infrastructure"
+                className="absolute inset-0 w-full h-full object-cover"
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBXZISKS79x-rJ4alZw-7c4maLXMGQAatrDHFwCvhqQaCz1XZl8dwrIywaSEJymATGxM2aGR4CVRQ_q7aAFMxgmu6Z-JCp9soJ2u_FOPUpiITSquZVxgIRaVuXwJ7mZN-o_z_UHShQ7agdzCiwoPxHrThbec7E_xuF7sH0JT-uMh5bAXu_635PhOAdR5fFk_z476CLmEZg1BWa9jSM2-jCPqyS4V7cMrPgefJoqqmHR3Ml14dO6yj1ltRWO0NzoozAKs2YpfGo90B81"
+              />
+              <div className="absolute inset-0 bg-primary/40" />
             </div>
 
-            {/* Form Side */}
             <div className="md:col-span-8 p-6 sm:p-8 md:p-12 lg:p-16 bg-white">
               <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12">
-                {/* Section 1 */}
                 <div>
                   <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                     <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">01</span>
@@ -115,7 +122,6 @@ export default function RequestVisit() {
                   </div>
                 </div>
 
-                {/* Section 2 */}
                 <div>
                   <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                     <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">02</span>
@@ -129,7 +135,6 @@ export default function RequestVisit() {
                   </div>
                 </div>
 
-                {/* Section 3 */}
                 <div>
                   <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
                     <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">03</span>
@@ -142,22 +147,7 @@ export default function RequestVisit() {
                   </div>
                 </div>
 
-                {/* Submit */}
                 <div className="pt-6 sm:pt-8 space-y-6">
-                  {submitMessage && (
-                    <div className={`p-6 border-l-4 shadow-sm animate-in fade-in slide-in-from-top-2 duration-300 ${
-                      submitMessage.includes('✓') || submitMessage.includes('نجاح') 
-                        ? 'bg-green-50 border-green-500 text-green-800' 
-                        : 'bg-red-50 border-red-500 text-red-800'
-                    }`}>
-                      <div className="flex items-center gap-3">
-                        <span className="material-symbols-outlined text-xl">
-                          {submitMessage.includes('✓') || submitMessage.includes('نجاح') ? 'check_circle' : 'error'}
-                        </span>
-                        <p className="font-headline font-bold text-sm tracking-tight">{submitMessage}</p>
-                      </div>
-                    </div>
-                  )}
                   <button type="submit" disabled={isSubmitting} className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50">
                     <span>{isSubmitting ? t('requestQuote.submitting') : t('requestVisit.submitButton')}</span>
                     <span className="material-symbols-outlined text-xl sm:text-2xl group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>

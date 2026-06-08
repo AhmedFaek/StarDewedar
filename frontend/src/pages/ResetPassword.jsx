@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api.js'
 import Header from '../components/layout/Header.jsx'
 import Footer from '../components/layout/Footer.jsx'
+import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
+import { useNotification } from '../hooks/useNotification.js'
 
 /**
  * ResetPassword — standalone page at /reset-password?token=...
@@ -13,6 +15,7 @@ import Footer from '../components/layout/Footer.jsx'
  */
 export default function ResetPassword() {
   const { t } = useTranslation()
+  const { showSuccess, showError } = useNotification()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = searchParams.get('token')
@@ -35,8 +38,9 @@ export default function ResetPassword() {
   useEffect(() => {
     if (!token) {
       setError(t('resetPassword.invalidToken'))
+      showError(t('resetPassword.invalidToken'))
     }
-  }, [token, t])
+  }, [token, t, showError])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -54,9 +58,12 @@ export default function ResetPassword() {
     setLoading(true)
     try {
       await api.resetPassword(token, password)
+      showSuccess(t('notifications.passwordResetSuccess'))
       setSuccess(true)
     } catch (err) {
-      setError(err?.message || t('resetPassword.errorGeneric'))
+      const message = getApiErrorMessage(err, { t })
+      setError(message)
+      showError(message)
     } finally {
       setLoading(false)
     }
