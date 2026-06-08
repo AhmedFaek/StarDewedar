@@ -95,6 +95,26 @@ export const api = {
     logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
         .finally(() => clearAuth()),
 
+    /** POST /auth/forgot-password — public, rate-limited */
+    forgotPassword: (email) => fetch(`${API_URL}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+    }).then(handleResponse),
+
+    /** POST /auth/reset-password — public */
+    resetPassword: (token, newPassword) => fetch(`${API_URL}/auth/reset-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, newPassword }),
+    }).then(handleResponse),
+
+    /** POST /auth/change-password — requires valid access token */
+    changePassword: (currentPassword, newPassword) => authFetch(`${API_URL}/auth/change-password`, {
+        method: 'POST',
+        body: JSON.stringify({ currentPassword, newPassword }),
+    }),
+
     /** GET /users/me — returns the authenticated user's profile (safe fields) */
     getMe: () => authFetch(`${API_URL}/users/me`),
 
