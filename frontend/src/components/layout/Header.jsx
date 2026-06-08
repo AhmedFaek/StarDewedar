@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import AuthModal from './AuthModal.jsx'
 import MyRequestsPanel from './MyRequestsPanel.jsx'
+import ChangePasswordModal from './ChangePasswordModal.jsx'
 import { getUser, isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 
@@ -18,6 +19,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [requestsPanelOpen, setRequestsPanelOpen] = useState(false)
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const userMenuRef = useRef(null)
 
   const isRTL = i18n.language === 'ar'
@@ -226,6 +228,14 @@ export default function Header() {
                       {t('favourites.mySaved')}
                     </button>
                     <button
+                      id="header-change-password-btn"
+                      onClick={() => { setUserMenuOpen(false); setChangePasswordOpen(true) }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-slate-400">lock</span>
+                      {t('auth.changePassword')}
+                    </button>
+                    <button
                       id="header-logout-btn"
                       onClick={handleLogout}
                       disabled={loggingOut}
@@ -353,6 +363,14 @@ export default function Header() {
                       {t('favourites.mySaved')}
                     </button>
                     <button
+                      id="mobile-change-password-btn"
+                      onClick={() => { setMobileMenuOpen(false); setChangePasswordOpen(true) }}
+                      className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-slate-400">lock</span>
+                      {t('auth.changePassword')}
+                    </button>
+                    <button
                       id="mobile-logout-btn"
                       onClick={handleLogout}
                       disabled={loggingOut}
@@ -401,6 +419,13 @@ export default function Header() {
         isOpen={requestsPanelOpen}
         onClose={() => setRequestsPanelOpen(false)}
         user={user}
+      />
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={changePasswordOpen}
+        onClose={() => setChangePasswordOpen(false)}
+        onSuccess={() => setUser(null)}
       />
     </>
   )

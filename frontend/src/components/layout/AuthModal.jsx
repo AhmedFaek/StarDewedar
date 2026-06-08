@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../utils/api.js'
 
 /**
- * AuthModal — slide-in modal with Login / Register tabs.
+ * AuthModal — slide-in modal with Login / Register / Forgot Password views.
  *
  * Props:
  *   isOpen        {boolean}   — controls visibility
@@ -18,11 +18,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const [error, setError] = useState('')
   const overlayRef = useRef(null)
 
+  // ── Forgot password state ─────────────────────────────────────────────────
+  const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [forgotEmail, setForgotEmail] = useState('')
+  const [forgotSent, setForgotSent] = useState(false)
+
   // Sync defaultTab when modal opens
   useEffect(() => {
     if (isOpen) {
       setTab(defaultTab)
       setError('')
+      setShowForgotPassword(false)
+      setForgotSent(false)
+      setForgotEmail('')
     }
   }, [isOpen, defaultTab])
 
@@ -102,6 +110,29 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     }
   }
 
+  // ── Forgot Password ──────────────────────────────────────────────────────
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      await api.forgotPassword(forgotEmail)
+      setForgotSent(true)
+    } catch (err) {
+      setError(err?.message || t('auth.errorGeneric'))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleBackToLogin = () => {
+    setShowForgotPassword(false)
+    setForgotSent(false)
+    setForgotEmail('')
+    setError('')
+  }
+
   if (!isOpen) return null
 
   return (
@@ -127,23 +158,25 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           </button>
         </div>
 
-        {/* ── Tabs ───────────────────────────────────────────────────────── */}
-        <div className="flex border-b border-slate-200 mt-4 px-6">
-          {['login', 'register'].map((t_) => (
-            <button
-              key={t_}
-              onClick={() => { setTab(t_); setError('') }}
-              className={`
-                flex-1 py-3 font-headline font-bold uppercase text-xs tracking-widest transition-all border-b-2
-                ${tab === t_
-                  ? 'text-slate-900 border-yellow-400'
-                  : 'text-slate-400 border-transparent hover:text-slate-600'}
-              `}
-            >
-              {t_ === 'login' ? t('auth.login') : t('auth.register')}
-            </button>
-          ))}
-        </div>
+        {/* ── Tabs (hidden in forgot-password view) ──────────────────────── */}
+        {!showForgotPassword && (
+          <div className="flex border-b border-slate-200 mt-4 px-6">
+            {['login', 'register'].map((t_) => (
+              <button
+                key={t_}
+                onClick={() => { setTab(t_); setError('') }}
+                className={`
+                  flex-1 py-3 font-headline font-bold uppercase text-xs tracking-widest transition-all border-b-2
+                  ${tab === t_
+                    ? 'text-slate-900 border-yellow-400'
+                    : 'text-slate-400 border-transparent hover:text-slate-600'}
+                `}
+              >
+                {t_ === 'login' ? t('auth.login') : t('auth.register')}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* ── Forms ──────────────────────────────────────────────────────── */}
         <div className="px-6 py-6">
@@ -154,167 +187,252 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
             </div>
           )}
 
-          {/* ── Login form ───────────────────────────────────────────────── */}
-          {tab === 'login' && (
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div>
-                <label className="auth-label">{t('auth.email')}</label>
-                <input
-                  id="auth-login-email"
-                  type="email"
-                  required
-                  value={loginData.email}
-                  onChange={e => setLoginData(p => ({ ...p, email: e.target.value }))}
-                  className="auth-input"
-                  placeholder="name@company.com"
-                />
-              </div>
-              <div>
-                <label className="auth-label">{t('auth.password')}</label>
-                <input
-                  id="auth-login-password"
-                  type="password"
-                  required
-                  value={loginData.password}
-                  onChange={e => setLoginData(p => ({ ...p, password: e.target.value }))}
-                  className="auth-input"
-                  placeholder="••••••••"
-                />
-              </div>
+          {/* ── Forgot Password view ───────────────────────────────────── */}
+          {showForgotPassword ? (
+            <div>
+              {/* Back to login */}
               <button
-                id="auth-login-submit"
-                type="submit"
-                disabled={loading}
-                className="auth-btn-primary"
+                type="button"
+                onClick={handleBackToLogin}
+                className="flex items-center gap-1 text-xs text-slate-500 hover:text-slate-700 transition-colors mb-4 font-headline font-bold uppercase tracking-widest"
               >
-                {loading ? t('auth.loggingIn') : t('auth.login')}
+                <span className="material-symbols-outlined text-sm">arrow_back</span>
+                {t('auth.backToLogin')}
               </button>
-              <p className="text-center text-xs text-slate-500 pt-1">
-                {t('auth.noAccount')}{' '}
-                <button
-                  type="button"
-                  onClick={() => { setTab('register'); setError('') }}
-                  className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
-                >
-                  {t('auth.registerHere')}
-                </button>
-              </p>
-            </form>
-          )}
 
-          {/* ── Register form ────────────────────────────────────────────── */}
-          {tab === 'register' && (
-            <form onSubmit={handleRegister} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <label className="auth-label">{t('auth.fullName')}</label>
-                  <input
-                    id="auth-reg-name"
-                    type="text"
-                    required
-                    value={regData.name}
-                    onChange={e => setRegData(p => ({ ...p, name: e.target.value }))}
-                    className="auth-input"
-                    placeholder={t('auth.fullNamePlaceholder')}
-                  />
+              {forgotSent ? (
+                /* ── Success state ── */
+                <div className="text-center py-4">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-green-50 mb-4">
+                    <span className="material-symbols-outlined text-3xl text-green-500">mark_email_read</span>
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 mb-2 font-headline uppercase tracking-wider">
+                    {t('auth.forgotSentTitle')}
+                  </h3>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-6">
+                    {t('auth.forgotSentDesc')}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleBackToLogin}
+                    className="auth-btn-primary"
+                  >
+                    {t('auth.backToLogin')}
+                  </button>
                 </div>
-                <div className="col-span-2">
-                  <label className="auth-label">{t('auth.email')}</label>
-                  <input
-                    id="auth-reg-email"
-                    type="email"
-                    required
-                    value={regData.email}
-                    onChange={e => setRegData(p => ({ ...p, email: e.target.value }))}
-                    className="auth-input"
-                    placeholder="name@company.com"
-                  />
-                </div>
-                <div>
-                  <label className="auth-label">{t('auth.password')}</label>
-                  <input
-                    id="auth-reg-password"
-                    type="password"
-                    required
-                    minLength={6}
-                    value={regData.password}
-                    onChange={e => setRegData(p => ({ ...p, password: e.target.value }))}
-                    className="auth-input"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label className="auth-label">{t('auth.confirmPassword')}</label>
-                  <input
-                    id="auth-reg-confirm"
-                    type="password"
-                    required
-                    value={regData.confirmPassword}
-                    onChange={e => setRegData(p => ({ ...p, confirmPassword: e.target.value }))}
-                    className="auth-input"
-                    placeholder="••••••••"
-                  />
-                </div>
-                <div>
-                  <label className="auth-label">{t('auth.phoneOptional')}</label>
-                  <input
-                    id="auth-reg-phone"
-                    type="tel"
-                    value={regData.phone_number}
-                    onChange={e => setRegData(p => ({ ...p, phone_number: e.target.value }))}
-                    className="auth-input"
-                    placeholder="+20 ..."
-                  />
-                </div>
-                <div>
-                  <label className="auth-label">{t('auth.whatsappOptional')}</label>
-                  <div style={{ position: 'relative' }}>
-                    <span
-                      className="material-symbols-outlined"
-                      style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', fontSize: '16px', color: '#22c55e', pointerEvents: 'none' }}
-                    >chat</span>
+              ) : (
+                /* ── Forgot password form ── */
+                <form onSubmit={handleForgotPassword} className="space-y-4">
+                  <div className="text-center mb-2">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-yellow-50 mb-3">
+                      <span className="material-symbols-outlined text-3xl text-yellow-500">lock_reset</span>
+                    </div>
+                    <h3 className="text-sm font-bold text-slate-900 font-headline uppercase tracking-wider">
+                      {t('auth.forgotPasswordTitle')}
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                      {t('auth.forgotPasswordDesc')}
+                    </p>
+                  </div>
+                  <div>
+                    <label className="auth-label">{t('auth.email')}</label>
                     <input
-                      id="auth-reg-whatsapp"
-                      type="tel"
-                      value={regData.whatsapp_number}
-                      onChange={e => setRegData(p => ({ ...p, whatsapp_number: e.target.value }))}
+                      id="auth-forgot-email"
+                      type="email"
+                      required
+                      value={forgotEmail}
+                      onChange={e => setForgotEmail(e.target.value)}
                       className="auth-input"
-                      style={{ paddingLeft: '34px' }}
-                      placeholder="+20 ..."
+                      placeholder="name@company.com"
                     />
                   </div>
-                </div>
-                <div className="col-span-2">
-                  <label className="auth-label">{t('auth.companyOptional')}</label>
-                  <input
-                    id="auth-reg-company"
-                    type="text"
-                    value={regData.company_name}
-                    onChange={e => setRegData(p => ({ ...p, company_name: e.target.value }))}
-                    className="auth-input"
-                    placeholder={t('auth.companyPlaceholder')}
-                  />
-                </div>
-              </div>
-              <button
-                id="auth-reg-submit"
-                type="submit"
-                disabled={loading}
-                className="auth-btn-primary"
-              >
-                {loading ? t('auth.registering') : t('auth.createAccount')}
-              </button>
-              <p className="text-center text-xs text-slate-500 pt-1">
-                {t('auth.hasAccount')}{' '}
-                <button
-                  type="button"
-                  onClick={() => { setTab('login'); setError('') }}
-                  className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
-                >
-                  {t('auth.loginHere')}
-                </button>
-              </p>
-            </form>
+                  <button
+                    id="auth-forgot-submit"
+                    type="submit"
+                    disabled={loading}
+                    className="auth-btn-primary"
+                  >
+                    {loading ? t('auth.sending') : t('auth.sendResetLink')}
+                  </button>
+                </form>
+              )}
+            </div>
+          ) : (
+            <>
+              {/* ── Login form ───────────────────────────────────────────────── */}
+              {tab === 'login' && (
+                <form onSubmit={handleLogin} className="space-y-4">
+                  <div>
+                    <label className="auth-label">{t('auth.email')}</label>
+                    <input
+                      id="auth-login-email"
+                      type="email"
+                      required
+                      value={loginData.email}
+                      onChange={e => setLoginData(p => ({ ...p, email: e.target.value }))}
+                      className="auth-input"
+                      placeholder="name@company.com"
+                    />
+                  </div>
+                  <div>
+                    <label className="auth-label">{t('auth.password')}</label>
+                    <input
+                      id="auth-login-password"
+                      type="password"
+                      required
+                      value={loginData.password}
+                      onChange={e => setLoginData(p => ({ ...p, password: e.target.value }))}
+                      className="auth-input"
+                      placeholder="••••••••"
+                    />
+                  </div>
+                  {/* Forgot password link */}
+                  <div className="flex justify-end">
+                    <button
+                      id="auth-forgot-link"
+                      type="button"
+                      onClick={() => { setShowForgotPassword(true); setError('') }}
+                      className="text-xs text-yellow-600 hover:text-yellow-700 font-semibold transition-colors"
+                    >
+                      {t('auth.forgotPassword')}
+                    </button>
+                  </div>
+                  <button
+                    id="auth-login-submit"
+                    type="submit"
+                    disabled={loading}
+                    className="auth-btn-primary"
+                  >
+                    {loading ? t('auth.loggingIn') : t('auth.login')}
+                  </button>
+                  <p className="text-center text-xs text-slate-500 pt-1">
+                    {t('auth.noAccount')}{' '}
+                    <button
+                      type="button"
+                      onClick={() => { setTab('register'); setError('') }}
+                      className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+                    >
+                      {t('auth.registerHere')}
+                    </button>
+                  </p>
+                </form>
+              )}
+
+              {/* ── Register form ────────────────────────────────────────────── */}
+              {tab === 'register' && (
+                <form onSubmit={handleRegister} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="col-span-2">
+                      <label className="auth-label">{t('auth.fullName')}</label>
+                      <input
+                        id="auth-reg-name"
+                        type="text"
+                        required
+                        value={regData.name}
+                        onChange={e => setRegData(p => ({ ...p, name: e.target.value }))}
+                        className="auth-input"
+                        placeholder={t('auth.fullNamePlaceholder')}
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="auth-label">{t('auth.email')}</label>
+                      <input
+                        id="auth-reg-email"
+                        type="email"
+                        required
+                        value={regData.email}
+                        onChange={e => setRegData(p => ({ ...p, email: e.target.value }))}
+                        className="auth-input"
+                        placeholder="name@company.com"
+                      />
+                    </div>
+                    <div>
+                      <label className="auth-label">{t('auth.password')}</label>
+                      <input
+                        id="auth-reg-password"
+                        type="password"
+                        required
+                        minLength={6}
+                        value={regData.password}
+                        onChange={e => setRegData(p => ({ ...p, password: e.target.value }))}
+                        className="auth-input"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div>
+                      <label className="auth-label">{t('auth.confirmPassword')}</label>
+                      <input
+                        id="auth-reg-confirm"
+                        type="password"
+                        required
+                        value={regData.confirmPassword}
+                        onChange={e => setRegData(p => ({ ...p, confirmPassword: e.target.value }))}
+                        className="auth-input"
+                        placeholder="••••••••"
+                      />
+                    </div>
+                    <div>
+                      <label className="auth-label">{t('auth.phoneOptional')}</label>
+                      <input
+                        id="auth-reg-phone"
+                        type="tel"
+                        value={regData.phone_number}
+                        onChange={e => setRegData(p => ({ ...p, phone_number: e.target.value }))}
+                        className="auth-input"
+                        placeholder="+20 ..."
+                      />
+                    </div>
+                    <div>
+                      <label className="auth-label">{t('auth.whatsappOptional')}</label>
+                      <div style={{ position: 'relative' }}>
+                        <span
+                          className="material-symbols-outlined"
+                          style={{ position: 'absolute', top: '50%', left: '10px', transform: 'translateY(-50%)', fontSize: '16px', color: '#22c55e', pointerEvents: 'none' }}
+                        >chat</span>
+                        <input
+                          id="auth-reg-whatsapp"
+                          type="tel"
+                          value={regData.whatsapp_number}
+                          onChange={e => setRegData(p => ({ ...p, whatsapp_number: e.target.value }))}
+                          className="auth-input"
+                          style={{ paddingLeft: '34px' }}
+                          placeholder="+20 ..."
+                        />
+                      </div>
+                    </div>
+                    <div className="col-span-2">
+                      <label className="auth-label">{t('auth.companyOptional')}</label>
+                      <input
+                        id="auth-reg-company"
+                        type="text"
+                        value={regData.company_name}
+                        onChange={e => setRegData(p => ({ ...p, company_name: e.target.value }))}
+                        className="auth-input"
+                        placeholder={t('auth.companyPlaceholder')}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    id="auth-reg-submit"
+                    type="submit"
+                    disabled={loading}
+                    className="auth-btn-primary"
+                  >
+                    {loading ? t('auth.registering') : t('auth.createAccount')}
+                  </button>
+                  <p className="text-center text-xs text-slate-500 pt-1">
+                    {t('auth.hasAccount')}{' '}
+                    <button
+                      type="button"
+                      onClick={() => { setTab('login'); setError('') }}
+                      className="text-yellow-600 hover:text-yellow-700 font-semibold underline"
+                    >
+                      {t('auth.loginHere')}
+                    </button>
+                  </p>
+                </form>
+              )}
+            </>
           )}
         </div>
       </div>
