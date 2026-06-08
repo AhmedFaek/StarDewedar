@@ -300,7 +300,42 @@
     "loginHere": "Login here",
     "passwordMismatch": "Passwords do not match.",
     "errorGeneric": "An error occurred. Please try again.",
-    "account": "My Account"
+    "account": "My Account",
+    "forgotPassword": "Forgot password?",
+    "forgotPasswordTitle": "Reset Your Password",
+    "forgotPasswordDesc": "Enter the email address associated with your account and we'll send you a link to reset your password.",
+    "sendResetLink": "Send Reset Link",
+    "sending": "Sending...",
+    "forgotSentTitle": "Check Your Email",
+    "forgotSentDesc": "If an account exists with that email, we've sent a password reset link. Please check your inbox and spam folder.",
+    "backToLogin": "Back to Login",
+    "changePassword": "Change Password",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "changingPassword": "Changing...",
+    "changePasswordSuccess": "Password changed successfully. Please log in again.",
+    "changePasswordDesc": "Your password has been updated and all sessions have been logged out."
+  },
+
+  "resetPassword": {
+    "title": "Set New Password",
+    "subtitle": "Enter your new password below.",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm New Password",
+    "resetButton": "Reset Password",
+    "resetting": "Resetting...",
+    "successTitle": "Password Reset Complete",
+    "successDesc": "Your password has been successfully reset. You can now log in with your new password.",
+    "goToLogin": "Go to Login",
+    "backToHome": "Back to Home",
+    "invalidToken": "Invalid or missing reset token. Please request a new reset link.",
+    "weakPassword": "Password does not meet the requirements.",
+    "errorGeneric": "Failed to reset password. The link may have expired.",
+    "req8Chars": "At least 8 characters",
+    "reqUppercase": "At least one uppercase letter",
+    "reqLowercase": "At least one lowercase letter",
+    "reqNumber": "At least one number"
   },
 
   "favourites": {
