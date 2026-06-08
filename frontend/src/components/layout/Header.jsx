@@ -6,11 +6,14 @@ import MyRequestsPanel from './MyRequestsPanel.jsx'
 import ChangePasswordModal from './ChangePasswordModal.jsx'
 import { getUser, isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
+import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
+import { useNotification } from '../../hooks/useNotification.js'
 
 export default function Header() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
+  const { showSuccess, showError } = useNotification()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   // ── Auth state ────────────────────────────────────────────────────────────
@@ -101,8 +104,9 @@ export default function Header() {
     setUserMenuOpen(false)
     try {
       await api.logout()
-    } catch {
-      // clearAuth is called in api.logout().finally() regardless
+      showSuccess(t('notifications.logoutSuccess'))
+    } catch (err) {
+      showError(getApiErrorMessage(err, { t }))
     } finally {
       setUser(null)
       setLoggingOut(false)
