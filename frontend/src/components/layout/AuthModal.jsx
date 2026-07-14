@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
+import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import SubmitButton from '../forms/SubmitButton.jsx'
 
 /**
  * AuthModal - slide-in modal with Login / Register / Forgot Password views.
@@ -17,7 +19,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const { t } = useTranslation()
   const { showSuccess, showError, showInfo } = useNotification()
   const [tab, setTab] = useState(defaultTab)
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const overlayRef = useRef(null)
 
@@ -70,21 +71,39 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     if (e.target === overlayRef.current) onClose()
   }
 
+  // ── Login form submission ────────────────────────────────────────
+  const { isSubmitting: loginLoading, handleSubmit: doLogin } = useFormSubmit({
+    onSubmit: () => api.login(loginData.email, loginData.password),
+    successMessage: t('notifications.loginSuccess'),
+    onSuccess: (res) => {
+      onAuthSuccess(res.user)
+      onClose()
+    },
+    t,
+  })
+
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
-    try {
-      const res = await api.login(loginData.email, loginData.password)
-      showSuccess(t('notifications.loginSuccess'))
+    await doLogin()
+  }
+
+  // ── Register form submission ─────────────────────────────────────
+  const { isSubmitting: regLoading, handleSubmit: doRegister } = useFormSubmit({
+    onSubmit: () => {
+      const { confirmPassword, ...payload } = regData
+      if (!payload.phone_number) delete payload.phone_number
+      if (!payload.whatsapp_number) delete payload.whatsapp_number
+      if (!payload.company_name) delete payload.company_name
+      return api.register(payload)
+    },
+    successMessage: t('notifications.registrationSuccess'),
+    onSuccess: (res) => {
       onAuthSuccess(res.user)
       onClose()
-    } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
-    } finally {
-      setLoading(false)
-    }
-  }
+    },
+    t,
+  })
 
   const handleRegister = async (e) => {
     e.preventDefault()
@@ -95,37 +114,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       return
     }
 
-    setLoading(true)
-    try {
-      const { confirmPassword, ...payload } = regData
-      if (!payload.phone_number) delete payload.phone_number
-      if (!payload.whatsapp_number) delete payload.whatsapp_number
-      if (!payload.company_name) delete payload.company_name
-
-      const res = await api.register(payload)
-      showSuccess(t('notifications.registrationSuccess'))
-      onAuthSuccess(res.user)
-      onClose()
-    } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
-    } finally {
-      setLoading(false)
-    }
+    await doRegister()
   }
+
+  // ── Forgot password form submission ──────────────────────────────
+  const { isSubmitting: forgotLoading, handleSubmit: doForgot } = useFormSubmit({
+    onSubmit: () => api.forgotPassword(forgotEmail),
+    onSuccess: () => {
+      showInfo(t('notifications.forgotPasswordSent'))
+      setForgotSent(true)
+    },
+    t,
+  })
 
   const handleForgotPassword = async (e) => {
     e.preventDefault()
     setError('')
-    setLoading(true)
-    try {
-      await api.forgotPassword(forgotEmail)
-      showInfo(t('notifications.forgotPasswordSent'))
-      setForgotSent(true)
-    } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
-    } finally {
-      setLoading(false)
-    }
+    await doForgot()
   }
 
   const handleBackToLogin = () => {
@@ -134,6 +139,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setForgotEmail('')
     setError('')
   }
+
+  // Determine which loading state is active for disabling UI
+  const loading = loginLoading || regLoading || forgotLoading
 
   if (!isOpen) return null
 
@@ -231,9 +239,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       placeholder="name@company.com"
                     />
                   </div>
-                  <button id="auth-forgot-submit" type="submit" disabled={loading} className="auth-btn-primary">
-                    {loading ? t('auth.sending') : t('auth.sendResetLink')}
-                  </button>
+                  <SubmitButton
+                    id="auth-forgot-submit"
+                    loading={forgotLoading}
+                    loadingText={t('auth.sending')}
+                    className="auth-btn-primary inline-flex items-center justify-center"
+                  >
+                    {t('auth.sendResetLink')}
+                  </SubmitButton>
                 </form>
               )}
             </div>
@@ -278,9 +291,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       {t('auth.forgotPassword')}
                     </button>
                   </div>
-                  <button id="auth-login-submit" type="submit" disabled={loading} className="auth-btn-primary">
-                    {loading ? t('auth.loggingIn') : t('auth.login')}
-                  </button>
+                  <SubmitButton
+                    id="auth-login-submit"
+                    loading={loginLoading}
+                    loadingText={t('auth.loggingIn')}
+                    className="auth-btn-primary inline-flex items-center justify-center"
+                  >
+                    {t('auth.login')}
+                  </SubmitButton>
                   <p className="pt-1 text-center text-xs text-slate-500">
                     {t('auth.noAccount')}{' '}
                     <button
@@ -405,9 +423,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       />
                     </div>
                   </div>
-                  <button id="auth-reg-submit" type="submit" disabled={loading} className="auth-btn-primary">
-                    {loading ? t('auth.registering') : t('auth.createAccount')}
-                  </button>
+                  <SubmitButton
+                    id="auth-reg-submit"
+                    loading={regLoading}
+                    loadingText={t('auth.registering')}
+                    className="auth-btn-primary inline-flex items-center justify-center"
+                  >
+                    {t('auth.createAccount')}
+                  </SubmitButton>
                   <p className="pt-1 text-center text-xs text-slate-500">
                     {t('auth.hasAccount')}{' '}
                     <button
