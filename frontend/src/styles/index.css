@@ -216,3 +216,21 @@
     animation-delay: 300ms;
   }
 }
+
+/* Submit button spinner */
+@keyframes submitSpin {
+  to { transform: rotate(360deg); }
+}
+
+.submit-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: submitSpin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-inline-end: 0.5em;
+  flex-shrink: 0;
+}
