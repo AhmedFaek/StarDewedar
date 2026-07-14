@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next'
 import { api } from '../utils/api.js'
 import Header from '../components/layout/Header.jsx'
 import Footer from '../components/layout/Footer.jsx'
+import SubmitButton from '../components/forms/SubmitButton.jsx'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
+import { useFormSubmit } from '../hooks/useFormSubmit.js'
 
 /**
  * ResetPassword — standalone page at /reset-password?token=...
@@ -15,14 +17,13 @@ import { useNotification } from '../hooks/useNotification.js'
  */
 export default function ResetPassword() {
   const { t } = useTranslation()
-  const { showSuccess, showError } = useNotification()
+  const { showError } = useNotification()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const token = searchParams.get('token')
 
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -42,6 +43,19 @@ export default function ResetPassword() {
     }
   }, [token, t, showError])
 
+  const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
+    onSubmit: () => api.resetPassword(token, password),
+    successMessage: t('notifications.passwordResetSuccess'),
+    onSuccess: () => setSuccess(true),
+    onError: (err) => {
+      const message = getApiErrorMessage(err, { t })
+      setError(message)
+      // Don't suppress — let the hook show the toast too
+      return false
+    },
+    t,
+  })
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -55,18 +69,7 @@ export default function ResetPassword() {
       return
     }
 
-    setLoading(true)
-    try {
-      await api.resetPassword(token, password)
-      showSuccess(t('notifications.passwordResetSuccess'))
-      setSuccess(true)
-    } catch (err) {
-      const message = getApiErrorMessage(err, { t })
-      setError(message)
-      showError(message)
-    } finally {
-      setLoading(false)
-    }
+    await submitForm()
   }
 
   const Requirement = ({ met, label }) => (
@@ -191,14 +194,15 @@ export default function ResetPassword() {
                     </div>
 
                     {/* Submit */}
-                    <button
+                    <SubmitButton
                       id="reset-submit-btn"
-                      type="submit"
-                      disabled={loading || !token || !allValid || !passwordsMatch}
-                      className="w-full py-3 bg-slate-900 text-white font-headline font-bold uppercase text-xs tracking-widest hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      loading={isSubmitting}
+                      loadingText={t('resetPassword.resetting')}
+                      disabled={!token || !allValid || !passwordsMatch}
+                      className="w-full py-3 bg-slate-900 text-white font-headline font-bold uppercase text-xs tracking-widest hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center justify-center"
                     >
-                      {loading ? t('resetPassword.resetting') : t('resetPassword.resetButton')}
-                    </button>
+                      {t('resetPassword.resetButton')}
+                    </SubmitButton>
                   </form>
                 </>
               )}
