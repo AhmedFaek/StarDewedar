@@ -218,7 +218,10 @@
     "submitRequest": "Submit Request",
     "successMsg": "✓ Quote request submitted successfully! We will contact you soon.",
     "failMsg": "✗ Failed to submit quote request. Please try again.",
-    "errorMsg": "✗ An error occurred. Please try again."
+    "errorMsg": "✗ An error occurred. Please try again.",
+    "validation": {
+      "detailsMin": "Project Scope & Details must be at least {{n}} characters."
+    }
   },
 
   "products": {
@@ -453,5 +456,12 @@
   "langSwitch": {
     "en": "EN",
     "ar": "AR"
+  },
+
+  "fileValidation": {
+    "tooLarge": "File is too large. Maximum size is {{max}}.",
+    "invalidType": "Invalid file type. Allowed types: {{types}}.",
+    "maxSize": "Maximum size: 10MB",
+    "allowedTypes": "Allowed: PDF, JPG, JPEG, PNG"
   }
 }

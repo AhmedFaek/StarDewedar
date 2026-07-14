@@ -2,8 +2,9 @@ import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { api } from '../../utils/api.js'
 import { clearAuth } from '../../utils/auth.js'
-import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
+import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import SubmitButton from '../forms/SubmitButton.jsx'
 
 /**
  * ChangePasswordModal - lets an authenticated user change their password.
@@ -15,13 +16,12 @@ import { useNotification } from '../../hooks/useNotification.js'
  */
 export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   const { t } = useTranslation()
-  const { showSuccess, showError } = useNotification()
+  const { showSuccess } = useNotification()
   const overlayRef = useRef(null)
 
   const [currentPassword, setCurrentPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState(false)
 
@@ -65,6 +65,20 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
     if (e.target === overlayRef.current) onClose()
   }
 
+  const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
+    onSubmit: () => api.changePassword(currentPassword, newPassword),
+    successMessage: t('notifications.passwordChangedSuccess'),
+    onSuccess: () => {
+      setSuccess(true)
+      setTimeout(() => {
+        clearAuth()
+        onSuccess()
+        onClose()
+      }, 3500)
+    },
+    t,
+  })
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
@@ -79,22 +93,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
       return
     }
 
-    setLoading(true)
-    try {
-      await api.changePassword(currentPassword, newPassword)
-      showSuccess(t('notifications.passwordChangedSuccess'))
-      setSuccess(true)
-
-      setTimeout(() => {
-        clearAuth()
-        onSuccess()
-        onClose()
-      }, 3500)
-    } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
-    } finally {
-      setLoading(false)
-    }
+    await submitForm()
   }
 
   const Requirement = ({ met, label }) => (
@@ -221,14 +220,15 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
                   </p>
                 )}
 
-                <button
+                <SubmitButton
                   id="change-password-submit"
-                  type="submit"
-                  disabled={loading || !allValid || !passwordsMatch}
-                  className="auth-btn-primary"
+                  loading={isSubmitting}
+                  loadingText={t('auth.changingPassword')}
+                  disabled={!allValid || !passwordsMatch}
+                  className="auth-btn-primary inline-flex items-center justify-center"
                 >
-                  {loading ? t('auth.changingPassword') : t('auth.changePassword')}
-                </button>
+                  {t('auth.changePassword')}
+                </SubmitButton>
               </form>
             </>
           )}

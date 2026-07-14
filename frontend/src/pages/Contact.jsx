@@ -3,10 +3,12 @@ import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
+import SubmitButton from '../components/forms/SubmitButton'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
+import { useFormSubmit } from '../hooks/useFormSubmit.js'
 
 export default function Contact() {
   const { t } = useTranslation()
@@ -20,7 +22,6 @@ export default function Contact() {
     message: '',
   })
   const [errors, setErrors] = useState({})
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const validate = () => {
     const e = {}
@@ -64,17 +65,10 @@ export default function Contact() {
       .catch(() => {})
   }, [])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    const validationErrors = validate()
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors)
-      return
-    }
-    setIsSubmitting(true)
-    try {
-      await api.sendContactMessage(formData)
-      showSuccess(t('notifications.contactSuccess'))
+  const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
+    onSubmit: () => api.sendContactMessage(formData),
+    successMessage: t('notifications.contactSuccess'),
+    onSuccess: () => {
       setErrors({})
       setFormData({
         first_name: '',
@@ -84,7 +78,8 @@ export default function Contact() {
         whatsapp_number: '',
         message: '',
       })
-    } catch (error) {
+    },
+    onError: (error) => {
       // Try to map server-side field errors back to the form
       const serverErrors = error?.errors
       if (Array.isArray(serverErrors) && serverErrors.length > 0) {
@@ -94,13 +89,22 @@ export default function Contact() {
         })
         if (Object.keys(mapped).length > 0) {
           setErrors(mapped)
-          return
+          return true // suppress default toast — field-level errors are shown inline
         }
       }
-      showError(getApiErrorMessage(error, { t }))
-    } finally {
-      setIsSubmitting(false)
+      return false
+    },
+    t,
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const validationErrors = validate()
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
     }
+    await submitForm()
   }
 
   const contactInfo = {
@@ -195,13 +199,13 @@ export default function Contact() {
                       <span className="text-[11px] text-red-500 font-label">{errors.message}</span>
                     )}
                   </div>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="bg-primary text-white px-12 py-5 font-headline font-bold uppercase text-sm tracking-widest hover:brightness-110 transition-all disabled:opacity-50"
+                  <SubmitButton
+                    loading={isSubmitting}
+                    loadingText={t('contact.transmitting')}
+                    className="bg-primary text-white px-12 py-5 font-headline font-bold uppercase text-sm tracking-widest hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
                   >
-                    {isSubmitting ? t('contact.transmitting') : t('contact.transmitInquiry')}
-                  </button>
+                    {t('contact.transmitInquiry')}
+                  </SubmitButton>
                 </form>
               </div>
 

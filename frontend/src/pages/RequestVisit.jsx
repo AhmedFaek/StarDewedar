@@ -4,14 +4,13 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import TextAreaField from '../components/forms/TextAreaField'
+import SubmitButton from '../components/forms/SubmitButton'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
-import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
-import { useNotification } from '../hooks/useNotification.js'
+import { useFormSubmit } from '../hooks/useFormSubmit.js'
 
 export default function RequestVisit() {
   const { t } = useTranslation()
-  const { showSuccess, showError } = useNotification()
   const [formData, setFormData] = useState({
     factory_name: '',
     factory_activity: '',
@@ -23,7 +22,6 @@ export default function RequestVisit() {
     details: '',
     preferred_date: new Date().toISOString().split('T')[0],
   })
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -46,18 +44,17 @@ export default function RequestVisit() {
       .catch(() => {})
   }, [])
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-    try {
+  const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
+    onSubmit: () => {
       const payload = {
         ...formData,
         status: 'PENDING',
         preferred_date: new Date(formData.preferred_date).toISOString(),
       }
-
-      await api.sendVisitRequest(payload)
-      showSuccess(t('notifications.visitSuccess'))
+      return api.sendVisitRequest(payload)
+    },
+    successMessage: t('notifications.visitSuccess'),
+    onSuccess: () => {
       setFormData({
         factory_name: '',
         factory_activity: '',
@@ -69,11 +66,13 @@ export default function RequestVisit() {
         details: '',
         preferred_date: new Date().toISOString().split('T')[0],
       })
-    } catch (error) {
-      showError(getApiErrorMessage(error, { t }))
-    } finally {
-      setIsSubmitting(false)
-    }
+    },
+    t,
+  })
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    await submitForm()
   }
 
   return (
@@ -148,10 +147,14 @@ export default function RequestVisit() {
                 </div>
 
                 <div className="pt-6 sm:pt-8 space-y-6">
-                  <button type="submit" disabled={isSubmitting} className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50">
-                    <span>{isSubmitting ? t('requestQuote.submitting') : t('requestVisit.submitButton')}</span>
+                  <SubmitButton
+                    loading={isSubmitting}
+                    loadingText={t('requestQuote.submitting')}
+                    className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <span>{t('requestVisit.submitButton')}</span>
                     <span className="material-symbols-outlined text-xl sm:text-2xl group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
-                  </button>
+                  </SubmitButton>
                 </div>
               </form>
             </div>

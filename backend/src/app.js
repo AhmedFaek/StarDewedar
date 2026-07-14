@@ -18,6 +18,16 @@ const resolveErrorStatus = (err) => {
     if (typeof err?.code === 'number' && err.code >= 400 && err.code < 600) return err.code
 
     const message = String(err?.message || '').toLowerCase()
+    const code = String(err?.code || '').toUpperCase()
+
+    if (
+        code.startsWith('LIMIT_') ||
+        message.includes('file too large') ||
+        message.includes('invalid file') ||
+        message.includes('file extension')
+    ) {
+        return 400
+    }
 
     if (
         message.includes('invalid credentials') ||

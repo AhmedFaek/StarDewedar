@@ -12,10 +12,27 @@ const extractResponseMessage = (error) => {
   return ''
 }
 
-const extractValidationMessages = (error) => {
-  const payload = error?.errors || error?.data?.errors
-  if (!Array.isArray(payload) || payload.length === 0) return []
+/**
+ * Try to parse Zod-style JSON from a message string.
+ * Zod's ZodError.message is a JSON-stringified array of issue objects.
+ */
+const tryParseZodMessage = (message) => {
+  if (typeof message !== 'string') return []
+  const trimmed = message.trim()
+  if (!trimmed.startsWith('[')) return []
+  try {
+    const parsed = JSON.parse(trimmed)
+    if (!Array.isArray(parsed)) return []
+    return parsed
+      .map((item) => (typeof item?.message === 'string' ? item.message : ''))
+      .filter(Boolean)
+  } catch {
+    return []
+  }
+}
 
+const extractMessagesFromArray = (payload) => {
+  if (!Array.isArray(payload) || payload.length === 0) return []
   return payload
     .map((item) => {
       if (!item) return ''
@@ -26,6 +43,18 @@ const extractValidationMessages = (error) => {
       return ''
     })
     .filter(Boolean)
+}
+
+const extractValidationMessages = (error) => {
+  const payload = error?.errors || error?.data?.errors
+  const fromArray = extractMessagesFromArray(payload)
+  if (fromArray.length > 0) return fromArray
+
+  // Fallback: try parsing Zod-style JSON from error.message or error.data?.message
+  const fromMsg = tryParseZodMessage(error?.message) || tryParseZodMessage(error?.data?.message)
+  if (fromMsg.length > 0) return fromMsg
+
+  return []
 }
 
 export const normalizeApiError = (error) => {
@@ -44,7 +73,9 @@ export const normalizeApiError = (error) => {
       __normalizedApiError: true,
       message: typeof error.message === 'string' && error.message ? error.message : DEFAULT_MESSAGE,
       status: error.status || error.statusCode || error.code,
-      validationErrors: Array.isArray(error.validationErrors) ? error.validationErrors : [],
+      validationErrors: Array.isArray(error.validationErrors) && error.validationErrors.length > 0
+        ? error.validationErrors
+        : extractValidationMessages(error),
       raw: error.raw ?? error,
     }
   }
@@ -113,6 +144,11 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
   }
 
   if (normalized.message && normalized.message !== DEFAULT_MESSAGE) {
+    // If the message looks like raw JSON (e.g. Zod stringified errors), show generic error
+    const trimmedMsg = normalized.message.trim()
+    if (trimmedMsg.startsWith('[') || trimmedMsg.startsWith('{')) {
+      return messageFor('notifications.validationError')
+    }
     return normalized.message
   }
 
