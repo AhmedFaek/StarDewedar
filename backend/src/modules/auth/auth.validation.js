@@ -14,7 +14,7 @@ const strongPassword = z
 export const registerSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
-    password: z.string().min(6),
+    password: strongPassword,
     whatsapp_number: z.string().optional(),
     phone_number: z.string().optional(),
     company_name: z.string().optional(),
@@ -24,7 +24,7 @@ export const registerSchema = z.object({
 export const createUserSchema = z.object({
     name: z.string().min(2),
     email: z.string().email(),
-    password: z.string().min(6),
+    password: strongPassword,
     whatsapp_number: z.string().optional(),
     phone_number: z.string().optional(),
     company_name: z.string().optional(),
