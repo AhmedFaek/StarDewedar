@@ -115,10 +115,10 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden bg-white shadow-2xl"
+        className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white shadow-2xl"
         style={{ animation: 'slideUp 0.25s ease' }}
       >
-        <div className="flex items-center justify-between px-6 pt-6 pb-0">
+        <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-yellow-500">lock</span>
             <h2 className="font-headline text-sm font-bold uppercase tracking-wider text-slate-900">
@@ -134,7 +134,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           </button>
         </div>
 
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 overflow-y-auto flex-1">
           {success ? (
             <div className="py-4 text-center">
               <div className="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-50">

@@ -71,6 +71,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     if (e.target === overlayRef.current) onClose()
   }
 
+  const hasMinLength = regData.password.length >= 8
+  const hasUppercase = /[A-Z]/.test(regData.password)
+  const hasLowercase = /[a-z]/.test(regData.password)
+  const hasNumber = /[0-9]/.test(regData.password)
+  const allValid = hasMinLength && hasUppercase && hasLowercase && hasNumber
+  const passwordsMatch = regData.password === regData.confirmPassword && regData.confirmPassword.length > 0
+
+  const Requirement = ({ met, label }) => (
+    <li className={`flex items-center gap-2 text-[11px] transition-colors ${met ? 'text-green-600' : 'text-slate-400'}`}>
+      <span className="material-symbols-outlined text-xs" style={met ? { fontVariationSettings: "'FILL' 1" } : {}}>
+        {met ? 'check_circle' : 'circle'}
+      </span>
+      {label}
+    </li>
+  )
+
   // ── Login form submission ────────────────────────────────────────
   const { isSubmitting: loginLoading, handleSubmit: doLogin } = useFormSubmit({
     onSubmit: () => api.login(loginData.email, loginData.password),
@@ -108,6 +124,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const handleRegister = async (e) => {
     e.preventDefault()
     setError('')
+
+    if (!allValid) {
+      setError(t('resetPassword.weakPassword'))
+      return
+    }
 
     if (regData.password !== regData.confirmPassword) {
       setError(t('auth.passwordMismatch'))
@@ -153,10 +174,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div
-        className="relative w-full max-w-md overflow-hidden bg-white shadow-2xl"
+        className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white shadow-2xl"
         style={{ animation: 'slideUp 0.25s ease' }}
       >
-        <div className="flex items-center justify-between px-6 pt-6 pb-0">
+        <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
           <img src="/logo/logo.png" alt="Star Dewedar" className="h-10 w-auto object-contain" />
           <button
             onClick={onClose}
@@ -168,7 +189,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
         </div>
 
         {!showForgotPassword && (
-          <div className="mt-4 flex border-b border-slate-200 px-6">
+          <div className="mt-4 flex border-b border-slate-200 px-6 flex-shrink-0">
             {['login', 'register'].map((tabKey) => (
               <button
                 key={tabKey}
@@ -187,7 +208,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           </div>
         )}
 
-        <div className="px-6 py-6">
+        <div className="px-6 py-6 overflow-y-auto flex-1">
           {showForgotPassword ? (
             <div>
               <button
@@ -342,20 +363,27 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         placeholder="name@company.com"
                       />
                     </div>
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
                       <label className="auth-label">{t('auth.password')}</label>
                       <input
                         id="auth-reg-password"
                         type="password"
                         required
-                        minLength={6}
                         value={regData.password}
                         onChange={(e) => setRegData((prev) => ({ ...prev, password: e.target.value }))}
                         className="auth-input"
                         placeholder="••••••••"
                       />
+                      {regData.password.length > 0 && (
+                        <ul className="mt-1.5 space-y-1">
+                          <Requirement met={hasMinLength} label={t('resetPassword.req8Chars')} />
+                          <Requirement met={hasUppercase} label={t('resetPassword.reqUppercase')} />
+                          <Requirement met={hasLowercase} label={t('resetPassword.reqLowercase')} />
+                          <Requirement met={hasNumber} label={t('resetPassword.reqNumber')} />
+                        </ul>
+                      )}
                     </div>
-                    <div>
+                    <div className="col-span-2 sm:col-span-1">
                       <label className="auth-label">{t('auth.confirmPassword')}</label>
                       <input
                         id="auth-reg-confirm"
@@ -363,9 +391,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         required
                         value={regData.confirmPassword}
                         onChange={(e) => setRegData((prev) => ({ ...prev, confirmPassword: e.target.value }))}
-                        className="auth-input"
+                        className={`auth-input ${
+                          regData.confirmPassword.length > 0
+                            ? passwordsMatch
+                              ? '!border-green-400'
+                              : '!border-red-300'
+                            : ''
+                        }`}
                         placeholder="••••••••"
                       />
+                      {regData.confirmPassword.length > 0 && !passwordsMatch && (
+                        <p className="mt-1 text-[11px] text-red-500">{t('auth.passwordMismatch')}</p>
+                      )}
                       {error && (
                         <p className="mt-1 text-xs text-red-600">
                           {error}
@@ -427,7 +464,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                     id="auth-reg-submit"
                     loading={regLoading}
                     loadingText={t('auth.registering')}
-                    className="auth-btn-primary inline-flex items-center justify-center"
+                    disabled={!allValid || !passwordsMatch}
+                    className="auth-btn-primary inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('auth.createAccount')}
                   </SubmitButton>
