@@ -46,33 +46,46 @@ export const isLoggedIn = () => Boolean(getRefreshToken() && getUser())
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
+// Keep track of any active refresh request to avoid concurrent duplicate requests
+let refreshPromise = null
+
 /**
  * Attempt to get a fresh access token using the stored refresh token.
  * Returns the new access token or null if refresh fails.
  */
 export const refreshAccessToken = async () => {
+  if (refreshPromise) {
+    return refreshPromise
+  }
+
   const refreshToken = getRefreshToken()
   if (!refreshToken) return null
 
-  try {
-    const res = await fetch(`${API_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    })
+  refreshPromise = (async () => {
+    try {
+      const res = await fetch(`${API_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      })
 
-    if (!res.ok) {
+      if (!res.ok) {
+        clearAuth()
+        return null
+      }
+
+      const data = await res.json()
+      saveTokens(data.accessToken, data.refreshToken)
+      return data.accessToken
+    } catch {
       clearAuth()
       return null
+    } finally {
+      refreshPromise = null
     }
+  })()
 
-    const data = await res.json()
-    saveTokens(data.accessToken, data.refreshToken)
-    return data.accessToken
-  } catch {
-    clearAuth()
-    return null
-  }
+  return refreshPromise
 }
 
 /**
@@ -81,7 +94,16 @@ export const refreshAccessToken = async () => {
  */
 export const getValidAccessToken = async () => {
   let token = getAccessToken()
-  if (token) return token
+  if (token) {
+    const decoded = decodeJwt(token)
+    if (decoded && decoded.exp) {
+      // Preemptively refresh if token expires in the next 10 seconds
+      const isExpired = decoded.exp * 1000 < Date.now() + 10000
+      if (!isExpired) {
+        return token
+      }
+    }
+  }
   return refreshAccessToken()
 }
 

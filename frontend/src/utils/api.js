@@ -1,4 +1,4 @@
-import { getValidAccessToken, saveTokens, saveUser, clearAuth } from './auth.js'
+import { getValidAccessToken, refreshAccessToken, saveTokens, saveUser, clearAuth } from './auth.js'
 import { createApiError } from './apiErrorHandler.js'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
@@ -67,7 +67,26 @@ const authFetch = async (url, options = {}) => {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
 
-  const res = await fetch(url, { ...options, headers })
+  let res = await fetch(url, { ...options, headers })
+  if (res.status === 401 && !url.includes('/auth/refresh')) {
+    const newToken = await refreshAccessToken()
+    if (newToken) {
+      const retryHeaders = {
+        'Content-Type': 'application/json',
+        ...options.headers,
+        Authorization: `Bearer ${newToken}`,
+      }
+      res = await fetch(url, { ...options, headers: retryHeaders })
+    } else {
+      clearAuth()
+      throw {
+        __normalizedApiError: true,
+        message: 'Session expired. Please log in again.',
+        status: 401,
+      }
+    }
+  }
+
   if (res.status === 401) {
     clearAuth()
     throw {
