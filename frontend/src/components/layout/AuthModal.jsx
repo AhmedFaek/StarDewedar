@@ -15,6 +15,15 @@ import SubmitButton from '../forms/SubmitButton.jsx'
  *   onAuthSuccess {function}  - called with the user object after successful auth
  *   defaultTab    {'login'|'register'} - which tab to start on
  */
+const Requirement = ({ met, label }) => (
+  <li className={`flex items-center gap-2 text-[11px] transition-colors ${met ? 'text-green-600' : 'text-slate-400'}`}>
+    <span className="material-symbols-outlined text-xs" style={met ? { fontVariationSettings: "'FILL' 1" } : {}}>
+      {met ? 'check_circle' : 'circle'}
+    </span>
+    {label}
+  </li>
+)
+
 export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab = 'login' }) {
   const { t } = useTranslation()
   const { showSuccess, showError, showInfo } = useNotification()
@@ -77,15 +86,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const hasNumber = /[0-9]/.test(regData.password)
   const allValid = hasMinLength && hasUppercase && hasLowercase && hasNumber
   const passwordsMatch = regData.password === regData.confirmPassword && regData.confirmPassword.length > 0
-
-  const Requirement = ({ met, label }) => (
-    <li className={`flex items-center gap-2 text-[11px] transition-colors ${met ? 'text-green-600' : 'text-slate-400'}`}>
-      <span className="material-symbols-outlined text-xs" style={met ? { fontVariationSettings: "'FILL' 1" } : {}}>
-        {met ? 'check_circle' : 'circle'}
-      </span>
-      {label}
-    </li>
-  )
 
   // ── Login form submission ────────────────────────────────────────
   const { isSubmitting: loginLoading, handleSubmit: doLogin } = useFormSubmit({
@@ -170,7 +170,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/80 px-4"
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div
