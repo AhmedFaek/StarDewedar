@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
@@ -46,26 +46,24 @@ export default function Products() {
     fetchData()
   }, [])
 
-  const filteredProducts = products
-    .filter((product) => {
-      const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
-      const categoryId = product.category?.id || product.category_id || ''
-      
-      const matchesCategory = selectedCategory === 'all' || categoryId === selectedCategory
-      const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesPrice = product.price ? Number(product.price) <= maxPrice : true
+  const filteredProducts = useMemo(() => {
+    return products
+      .filter((product) => {
+        const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
+        const categoryId = product.category?.id || product.category_id || ''
+        
+        const matchesCategory = selectedCategory === 'all' || categoryId === selectedCategory
+        const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesPrice = product.price ? Number(product.price) <= maxPrice : true
 
-      if (!matchesCategory || !matchesSearch || !matchesPrice) {
-          // console.log(`Product ${name} filtered out:`, { matchesCategory, matchesSearch, matchesPrice, price: product.price, maxPrice })
-      }
-
-      return matchesCategory && matchesSearch && matchesPrice
-    })
-    .sort((a, b) => {
-      if (sortBy === 'low-high') return Number(a.price) - Number(b.price)
-      if (sortBy === 'high-low') return Number(b.price) - Number(a.price)
-      return 0
-    })
+        return matchesCategory && matchesSearch && matchesPrice
+      })
+      .sort((a, b) => {
+        if (sortBy === 'low-high') return Number(a.price) - Number(b.price)
+        if (sortBy === 'high-low') return Number(b.price) - Number(a.price)
+        return 0
+      })
+  }, [products, selectedCategory, searchTerm, maxPrice, sortBy, i18n.language])
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -79,7 +77,7 @@ export default function Products() {
             {/* Hero */}
             <header className="relative w-full h-64 md:h-[409px] flex items-center px-4 sm:px-8 md:px-16 overflow-hidden bg-primary">
               <div className="absolute inset-0 opacity-40">
-                <img alt="Industrial component" className="w-full h-full object-cover object-center" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDNuFcnQtiTph6QqIP5XDSvlK5zO66HXwz7fz7sgm8YIcsMT2eze9dACmqIL8wt5zWM-_xGniBB9pzzvGd6lRQ7X830QqOHXfrmZEgnQobHBTqiVSQVtAWFr1OMh6qZpplQ908--jyN4ikMf0zC9wFBDCzN9hIWdSovz7_8kixqyl2L4mMnCjb3zYiw6PEFZvcq5HuLqCAivtT6HdRovF4gUffC2oxZTzE5CZIVf1DZuMEO7wz5mN5ERpnO9QE3lgbj-jaxvLWrCUef" />
+                <img alt="Industrial component" className="w-full h-full object-cover object-center" src="/images/products_hero.webp" />
               </div>
               <div className="relative z-10 max-w-4xl">
                 <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-headline font-black text-white tracking-tighter leading-none mb-3 md:mb-4">
@@ -145,7 +143,7 @@ export default function Products() {
                   {filteredProducts.map((product) => (
                     <div key={product.id} className="group bg-surface-container-lowest border border-outline-variant/15 flex flex-col">
                       <div className="aspect-[4/3] overflow-hidden bg-surface-container-high relative">
-                        <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
+                        <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <FavouriteButton productId={product.id} size="sm" />
                         </div>

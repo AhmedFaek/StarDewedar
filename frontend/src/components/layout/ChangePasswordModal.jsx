@@ -14,6 +14,15 @@ import SubmitButton from '../forms/SubmitButton.jsx'
  *   onClose   {function}  - called when user closes modal
  *   onSuccess {function}  - called after successful password change (forces re-login)
  */
+const Requirement = ({ met, label }) => (
+  <li className={`flex items-center gap-2 text-xs transition-colors ${met ? 'text-green-600' : 'text-slate-400'}`}>
+    <span className="material-symbols-outlined text-sm" style={met ? { fontVariationSettings: "'FILL' 1" } : {}}>
+      {met ? 'check_circle' : 'circle'}
+    </span>
+    {label}
+  </li>
+)
+
 export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
   const { t } = useTranslation()
   const { showSuccess } = useNotification()
@@ -96,22 +105,13 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
     await submitForm()
   }
 
-  const Requirement = ({ met, label }) => (
-    <li className={`flex items-center gap-2 text-xs transition-colors ${met ? 'text-green-600' : 'text-slate-400'}`}>
-      <span className="material-symbols-outlined text-sm" style={met ? { fontVariationSettings: "'FILL' 1" } : {}}>
-        {met ? 'check_circle' : 'circle'}
-      </span>
-      {label}
-    </li>
-  )
-
   if (!isOpen) return null
 
   return (
     <div
       ref={overlayRef}
       onClick={handleOverlayClick}
-      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/70 backdrop-blur-sm px-4"
+      className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/80 px-4"
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div

@@ -21,8 +21,9 @@ export default function QuoteSidebar() {
       <div className="mt-10 sm:mt-12 relative w-full h-40 sm:h-44 md:h-48 group overflow-hidden">
         <img
           className="absolute inset-0 w-full h-full object-cover opacity-50 grayscale group-hover:grayscale-0 transition-all duration-700"
-          src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyKMgLFgC5XNNx-HDkCUwrncEq6ikYUxYn-n52LlEZGM8VVPzc3OQ1pGf6zzPAPUHZEF4Qpz2KhtgFcgSOEtidRQODxA5l124sOrnDES9mFNIT17dJuMupPlr9SFbvBVIiV2Qhqfubel0tmCXJyShgVC2NFVONDywwoEsUxtZ9CDSWanT4MVyWeBD8Vzt09MB04ihHJ2eL_SW1OoZ4PupB8M0YdiPFWRX1ORU4oVRS3EmYtrplqbByBDswNozMh8H8BDoImZCakNAY"
+          src="/images/quote_sidebar.webp"
           alt="Industrial electrical control panel"
+          loading="lazy"
         />
         <div className="absolute inset-0 bg-primary/40"></div>
       </div>

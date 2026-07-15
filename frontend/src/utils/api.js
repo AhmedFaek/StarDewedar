@@ -3,6 +3,40 @@ import { createApiError } from './apiErrorHandler.js'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
 
+// ── In-memory cache for static catalog endpoints ──────────────────────────────
+const CACHE_TTL = 60_000 // 60 seconds
+const cache = new Map() // key → { data, timestamp, promise }
+
+function cachedFetch(key, fetchFn) {
+  const now = Date.now()
+  const entry = cache.get(key)
+
+  // Return cached data if still valid
+  if (entry && entry.data !== undefined && now - entry.timestamp < CACHE_TTL) {
+    return Promise.resolve(entry.data)
+  }
+
+  // Deduplicate: if a request for this key is already in-flight, reuse it
+  if (entry && entry.promise) {
+    return entry.promise
+  }
+
+  // Start new fetch and store the promise for deduplication
+  const promise = fetchFn()
+    .then((data) => {
+      cache.set(key, { data, timestamp: Date.now(), promise: null })
+      return data
+    })
+    .catch((err) => {
+      cache.delete(key)
+      throw err
+    })
+
+  cache.set(key, { ...(entry || {}), promise })
+  return promise
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
 const readResponseBody = async (response) => {
   const text = await response.text()
 
@@ -47,12 +81,12 @@ const authFetch = async (url, options = {}) => {
 }
 
 export const api = {
-  getProducts: () => fetch(`${API_URL}/products`).then(handleResponse),
-  getProductById: (id) => fetch(`${API_URL}/products/${id}`).then(handleResponse),
-  getCategories: () => fetch(`${API_URL}/categories`).then(handleResponse),
-
-  getProjects: () => fetch(`${API_URL}/projects`).then(handleResponse),
-  getProjectById: (id) => fetch(`${API_URL}/projects/${id}`).then(handleResponse),
+  // ── Cached static catalog endpoints ──────────────────────────────────────
+  getProducts: () => cachedFetch('products', () => fetch(`${API_URL}/products`).then(handleResponse)),
+  getProductById: (id) => cachedFetch(`product:${id}`, () => fetch(`${API_URL}/products/${id}`).then(handleResponse)),
+  getCategories: () => cachedFetch('categories', () => fetch(`${API_URL}/categories`).then(handleResponse)),
+  getProjects: () => cachedFetch('projects', () => fetch(`${API_URL}/projects`).then(handleResponse)),
+  getProjectById: (id) => cachedFetch(`project:${id}`, () => fetch(`${API_URL}/projects/${id}`).then(handleResponse)),
 
   sendContactMessage: (data) => fetch(`${API_URL}/contact`, {
     method: 'POST',

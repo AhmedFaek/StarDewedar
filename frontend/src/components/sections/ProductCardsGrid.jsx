@@ -1,17 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
 import ContentLoader from '../shared/ContentLoader'
-
 
 export default function ProductCardsGrid() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
+  const containerRef = useRef(null)
+  const [hasIntersected, setHasIntersected] = useState(false)
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasIntersected(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!hasIntersected) return
     const fetchProducts = async () => {
       try {
         const data = await api.getProducts()
@@ -23,10 +41,19 @@ export default function ProductCardsGrid() {
       }
     }
     fetchProducts()
-  }, [])
+  }, [hasIntersected])
+
+  if (loading && !hasIntersected) {
+    // Render a minimal placeholder to reserve layout height before intersection
+    return <div ref={containerRef} className="min-h-[400px]" />
+  }
 
   if (loading) {
-    return <ContentLoader rows={2} />
+    return (
+      <div ref={containerRef}>
+        <ContentLoader rows={2} />
+      </div>
+    )
   }
 
   return (
@@ -68,6 +95,7 @@ export default function ProductCardsGrid() {
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'}
                     alt={name}
+                    loading="lazy"
                   />
                 </div>
 

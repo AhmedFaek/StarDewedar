@@ -1,21 +1,44 @@
 import { useTranslation } from 'react-i18next'
 
+/**
+ * Check if user prefers reduced motion (accessibility).
+ * Evaluated once at module load — no React state or listeners needed.
+ */
+const prefersReducedMotion =
+  typeof window !== 'undefined' &&
+  window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 export default function HeroSection() {
   const { t } = useTranslation()
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
       <div className="absolute inset-0 z-0">
-        <video
-          className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
-          autoPlay
-          loop
-          muted
-          playsInline
-        >
-          <source src="/logo/Use_the_uploaded_Star_Dewedar.webm" type="video/webm" />
-          <source src="/logo/Use_the_uploaded_Star_Dewedar.mp4" type="video/mp4" />
-        </video>
+        {prefersReducedMotion ? (
+          /* Accessibility: static poster for users who prefer reduced motion */
+          <img
+            src="/logo/hero_poster.webp"
+            alt=""
+            className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
+          />
+        ) : (
+          <video
+            className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
+            autoPlay
+            loop
+            muted
+            playsInline
+            poster="/logo/hero_poster.webp"
+            preload="metadata"
+          >
+            {/* Mobile-first: portrait-cropped video for narrow screens */}
+            <source src="/logo/hero_mobile_portrait.webm" type="video/webm" media="(max-width: 768px)" />
+            <source src="/logo/hero_mobile_portrait.mp4"  type="video/mp4"  media="(max-width: 768px)" />
+            {/* Desktop: full resolution */}
+            <source src="/logo/hero_desktop.webm" type="video/webm" />
+            <source src="/logo/hero_desktop.mp4"  type="video/mp4" />
+          </video>
+        )}
         <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-primary via-primary/70 to-transparent sm:to-transparent"></div>
       </div>
 

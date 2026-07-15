@@ -53,8 +53,9 @@ export default function AboutPreview() {
 
             <img
               className="w-full h-64 object-cover grayscale transition-transform duration-700 hover:scale-[1.02]"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBPs8uRs-OqR42p1eSgGiJxY4aFOgaNDEVaqABG7wqErxz7gdhiQsnX1J_uipllraAST238yiEyuJ6g0-AXfunB0oS7b8X_FnuG_46m0I5KwiUnhGML5BLcwa2WJz__RatiTf5xQtT6zwG20RqHipS6Q6CKsVBL_YHOGT9hSW0IQpFlk07gDZFjp291B-m6bEujmHCIgg3drJTDCsJ5E48YlXxVip4_8qrA2azDUDwHwPGA7chR25JSkS6dQxgDZ2SKRcK4r7fCeud_"
+              src="/images/about_preview.webp"
               alt="Electrical equipment"
+              loading="lazy"
             />
           </div>
         </div>

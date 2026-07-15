@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import Header from '../components/layout/Header'
@@ -78,13 +78,17 @@ export default function Projects() {
     return 'h-60 sm:h-64'
   }
 
-  const filteredProjects = activeFilter === 'all'
-    ? projects
-    : projects.filter((project) => project.category?.name_en === activeFilter)
+  const filteredProjects = useMemo(() => {
+    return activeFilter === 'all'
+      ? projects
+      : projects.filter((project) => project.category?.name_en === activeFilter)
+  }, [projects, activeFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage))
   const startIndex = (currentPage - 1) * itemsPerPage
-  const paginatedProjects = filteredProjects.slice(startIndex, startIndex + itemsPerPage)
+  const paginatedProjects = useMemo(() => {
+    return filteredProjects.slice(startIndex, startIndex + itemsPerPage)
+  }, [filteredProjects, startIndex, itemsPerPage])
 
   if (loading) {
     return (
@@ -119,7 +123,7 @@ export default function Projects() {
               <img
                 className="absolute inset-0 w-full h-full object-cover opacity-50 mix-blend-overlay grayscale hover:grayscale-0 transition-all duration-700"
                 alt="Low voltage distribution panels"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZbMWu98ThJxswfzhwi-taNKZMRt_RrDAS1rYNKei2-4lQvzObFlqIM2qO7PsTNk1oYzCd-z5Nn580XQakhX436e-e6LRqsENV0iZ6kz_fd8wY-qqcYofxiHWniYXZSX3cumlB1MP2nl_4cvNJIS2Q3U2SxyRR9yM5meI-ZS-aX2rrFFlYj05leb6SWTneedFFau2RrngmUI9B6QVpQhbo2ordDZmio9YGvHOagnraQFm0GD0-cgW00t4uUfsrfHEfuaSnD2dDuVhj"
+                src="/images/projects_hero.webp"
               />
               <div className="absolute inset-0 flex items-center justify-center p-8 sm:p-12">
                 <div className="border-2 border-white/20 p-6 sm:p-8 w-full h-full flex items-end">
@@ -189,6 +193,7 @@ export default function Projects() {
                   <div className={`relative overflow-hidden bg-slate-200 ${imageHeight}`}>
                     <img
                       className="h-full w-full object-cover grayscale-[0.2] transition-all duration-700 group-hover:scale-[1.03] group-hover:grayscale-0"
+                      loading="lazy"
                       alt={title}
                       src={project.images?.[0]?.image_url || 'https://via.placeholder.com/800x450'}
                     />
