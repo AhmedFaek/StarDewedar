@@ -198,7 +198,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[200] transition-opacity duration-300"
+        className="fixed inset-0 bg-slate-950/80 z-[200] transition-opacity duration-300"
         style={{ opacity: isOpen ? 1 : 0, pointerEvents: isOpen ? 'auto' : 'none' }}
         aria-hidden="true"
       />
