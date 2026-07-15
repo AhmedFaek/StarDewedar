@@ -1,9 +1,10 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
-import AuthModal from './AuthModal.jsx'
-import MyRequestsPanel from './MyRequestsPanel.jsx'
-import ChangePasswordModal from './ChangePasswordModal.jsx'
+
+const AuthModal = lazy(() => import('./AuthModal.jsx'))
+const MyRequestsPanel = lazy(() => import('./MyRequestsPanel.jsx'))
+const ChangePasswordModal = lazy(() => import('./ChangePasswordModal.jsx'))
 import { getUser, isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
@@ -125,6 +126,8 @@ export default function Header() {
           <img
             src="/logo/logo.png"
             alt="Star Dewedar"
+            width={180}
+            height={120}
             className="h-16 sm:h-20 lg:h-24 w-auto object-contain"
           />
         </button>
@@ -410,27 +413,27 @@ export default function Header() {
         )}
       </header>
 
-      {/* Auth Modal — rendered outside the header so it's not clipped */}
-      <AuthModal
-        isOpen={authModal.open}
-        defaultTab={authModal.tab}
-        onClose={() => setAuthModal(p => ({ ...p, open: false }))}
-        onAuthSuccess={handleAuthSuccess}
-      />
+      {/* Lazy-loaded modals — rendered outside the header so they're not clipped */}
+      <Suspense fallback={null}>
+        <AuthModal
+          isOpen={authModal.open}
+          defaultTab={authModal.tab}
+          onClose={() => setAuthModal(p => ({ ...p, open: false }))}
+          onAuthSuccess={handleAuthSuccess}
+        />
 
-      {/* My Requests Panel */}
-      <MyRequestsPanel
-        isOpen={requestsPanelOpen}
-        onClose={() => setRequestsPanelOpen(false)}
-        user={user}
-      />
+        <MyRequestsPanel
+          isOpen={requestsPanelOpen}
+          onClose={() => setRequestsPanelOpen(false)}
+          user={user}
+        />
 
-      {/* Change Password Modal */}
-      <ChangePasswordModal
-        isOpen={changePasswordOpen}
-        onClose={() => setChangePasswordOpen(false)}
-        onSuccess={() => setUser(null)}
-      />
+        <ChangePasswordModal
+          isOpen={changePasswordOpen}
+          onClose={() => setChangePasswordOpen(false)}
+          onSuccess={() => setUser(null)}
+        />
+      </Suspense>
     </>
   )
 }
