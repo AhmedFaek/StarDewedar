@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import Header from '../components/layout/Header'
@@ -22,6 +22,7 @@ export default function ProductDetail() {
   const [imgSize, setImgSize] = useState({ width: 0, height: 0 })
   const [showMagnifier, setShowMagnifier] = useState(false)
   const [loading, setLoading] = useState(true)
+  const rectRef = useRef({ top: 0, left: 0 })
 
   const productId = searchParams.get('id')
 
@@ -88,17 +89,20 @@ export default function ProductDetail() {
 
   const handleMouseEnter = (e) => {
     const elem = e.currentTarget
-    const { width, height } = elem.getBoundingClientRect()
-    setImgSize({ width, height })
+    const rect = elem.getBoundingClientRect()
+    rectRef.current = {
+      top: rect.top + window.pageYOffset,
+      left: rect.left + window.pageXOffset,
+    }
+    setImgSize({ width: rect.width, height: rect.height })
     setShowMagnifier(true)
   }
 
   const handleMouseMove = (e) => {
-    const elem = e.currentTarget
-    const { top, left } = elem.getBoundingClientRect()
+    const { top, left } = rectRef.current
     setCoords({
-      x: e.pageX - left - window.pageXOffset,
-      y: e.pageY - top - window.pageYOffset,
+      x: e.pageX - left,
+      y: e.pageY - top,
     })
   }
 
@@ -187,7 +191,7 @@ export default function ProductDetail() {
                       : 'border-outline-variant text-secondary hover:border-primary hover:text-primary hover:bg-surface-container-high'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-sm">
+                  <span className="material-symbols-outlined text-l">
                     {isInCompare(product.id) ? 'check_circle' : 'compare_arrows'}
                   </span>
                   {isInCompare(product.id) ? t('compare.button.alreadyIn') : t('compare.button.add')}
@@ -216,7 +220,7 @@ export default function ProductDetail() {
               {relatedProducts.map((item) => (
                 <div key={item.id} onClick={() => navigateToProduct(item.id)} className="group cursor-pointer">
                   <div className="aspect-[4/3] bg-surface-container-low overflow-hidden mb-5 border border-outline-variant/10">
-                    <img src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} alt={i18n.language === 'ar' ? item.name_ar : item.name_en} className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
+                    <img src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} alt={i18n.language === 'ar' ? item.name_ar : item.name_en} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
                   </div>
                   <p className="text-[9px] font-bold tracking-widest uppercase text-tertiary mb-1">
                     {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
