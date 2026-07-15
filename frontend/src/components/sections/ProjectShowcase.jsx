@@ -1,17 +1,35 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
 import ContentLoader from '../shared/ContentLoader'
-
 
 export default function ProjectShowcase() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const containerRef = useRef(null)
+  const [hasIntersected, setHasIntersected] = useState(false)
 
   useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setHasIntersected(true)
+          observer.disconnect()
+        }
+      },
+      { rootMargin: '200px' }
+    )
+    if (containerRef.current) {
+      observer.observe(containerRef.current)
+    }
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    if (!hasIntersected) return
     const fetchProjects = async () => {
       try {
         const data = await api.getProjects()
@@ -23,10 +41,18 @@ export default function ProjectShowcase() {
       }
     }
     fetchProjects()
-  }, [])
+  }, [hasIntersected])
+
+  if (loading && !hasIntersected) {
+    return <div ref={containerRef} className="min-h-[400px]" />
+  }
 
   if (loading) {
-    return <ContentLoader rows={2} />
+    return (
+      <div ref={containerRef}>
+        <ContentLoader rows={2} />
+      </div>
+    )
   }
 
   const layoutMapping = [
@@ -57,7 +83,8 @@ export default function ProjectShowcase() {
                 <img 
                     className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" 
                     src={project.images?.[0]?.image_url || 'https://via.placeholder.com/800x600'} 
-                    alt={title} 
+                    alt={title}
+                    loading="lazy"
                 />
                 {!layout.featured && (<div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-all"></div>)}
                 <div className={`absolute bottom-0 left-0 w-full p-6 sm:p-8 md:p-10 bg-gradient-to-t from-primary/90 to-transparent transition-all ${layout.featured ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
