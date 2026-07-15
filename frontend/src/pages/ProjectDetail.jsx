@@ -126,8 +126,8 @@ export default function ProjectDetail() {
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {project.images?.slice(1).map((img, i) => (
-                  <div key={i} className="overflow-hidden aspect-video">
-                    <img src={img.image_url} className="w-full h-full object-cover hover:scale-105 transition" alt={`Detail ${i}`} />
+                  <div key={i} className="overflow-hidden aspect-video bg-surface-container-high">
+                    <img src={img.image_url} loading="lazy" className="w-full h-full object-cover hover:scale-105 transition" alt={`Detail ${i}`} />
                   </div>
                 ))}
               </div>
