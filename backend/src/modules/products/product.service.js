@@ -38,8 +38,17 @@ export const getProductById = async (id) => {
     return product
 }
 
-export const updateProduct = (id, data) =>
-    repo.updateProduct(id, data)
+export const updateProduct = (id, data) => {
+    const payload = {}
+    if (data.name_en !== undefined) payload.name_en = data.name_en
+    if (data.name_ar !== undefined) payload.name_ar = data.name_ar
+    if (data.description_en !== undefined) payload.description_en = data.description_en
+    if (data.description_ar !== undefined) payload.description_ar = data.description_ar
+    if (data.price !== undefined) payload.price = data.price
+    if (data.category_id !== undefined) payload.category_id = data.category_id
+
+    return repo.updateProduct(id, payload)
+}
 
 export const deleteProduct = (id) =>
     repo.deleteProduct(id)

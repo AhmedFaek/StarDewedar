@@ -134,7 +134,15 @@ export const getQuoteRequestsByEmail = (email) => repo.findByEmail(email)
 export const getQuoteRequestsByStatus = (status) => repo.findByStatus(status)
 
 export const updateQuoteRequest = (id, data) => {
-    return repo.update(id, data)
+    const payload = {}
+    if (data.status !== undefined) payload.status = data.status
+    if (data.details !== undefined) payload.details = data.details
+    if (data.first_name !== undefined) payload.first_name = data.first_name
+    if (data.last_name !== undefined) payload.last_name = data.last_name
+    if (data.phone !== undefined) payload.phone = data.phone
+    if (data.email !== undefined) payload.email = data.email
+
+    return repo.update(id, payload)
 }
 
 export const deleteQuoteRequest = (id) => {

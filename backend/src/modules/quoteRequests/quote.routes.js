@@ -3,7 +3,8 @@ import rateLimit from 'express-rate-limit'
 import * as controller from './quote.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
-import { ROLES } from '../../utils/constants.js'
+import validate from '../../middleware/validation.middleware.js'
+import { updateQuoteRequestSchema } from './quote.validation.js'
 
 import upload from '../../middleware/upload.middleware.js'
 
@@ -45,6 +46,7 @@ router.get('/:id', auth,
 // Update quote request (e.g., change status)
 router.put('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validate(updateQuoteRequestSchema),
     controller.updateQuote)
 
 // Delete quote request

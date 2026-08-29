@@ -26,6 +26,14 @@ export const createQuoteRequestSchema = z.object({
         },
         {
             message: 'You must provide either product_id OR custom product (name + image)',
-            path: ['product_id'],
-        }
+    }
     );
+
+export const updateQuoteRequestSchema = z.object({
+    status: z.enum(['pending', 'in_progress', 'completed', 'rejected']).optional(),
+    details: z.string().trim().min(5).optional(),
+    first_name: z.string().trim().min(2).optional(),
+    last_name: z.string().trim().min(2).optional(),
+    phone: z.string().trim().min(10).optional(),
+    email: z.string().email().optional(),
+})

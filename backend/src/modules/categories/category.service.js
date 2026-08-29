@@ -25,7 +25,12 @@ export const getCategoryById = async (id) => {
 }
 
 export const updateCategory = async (id, data) => {
-  return await repo.updateCategory(id, data)
+  const payload = {}
+  if (data.name_en !== undefined) payload.name_en = data.name_en
+  if (data.name_ar !== undefined) payload.name_ar = data.name_ar
+  if (data.type !== undefined) payload.type = data.type
+
+  return await repo.updateCategory(id, payload)
 }
 
 export const deleteCategory = async (id) => {

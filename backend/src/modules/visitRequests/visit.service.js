@@ -102,7 +102,19 @@ export const getVisitRequestsByEmail = (email) => repo.findByEmail(email)
 export const getVisitRequestsByStatus = (status) => repo.findByStatus(status)
 
 export const updateVisitRequest = (id, data) => {
-    return repo.update(id, data)
+    const payload = {}
+    if (data.status !== undefined) payload.status = data.status
+    if (data.factory_name !== undefined) payload.factory_name = data.factory_name
+    if (data.factory_activity !== undefined) payload.factory_activity = data.factory_activity
+    if (data.name !== undefined) payload.name = data.name
+    if (data.phone_number !== undefined) payload.phone_number = data.phone_number
+    if (data.whatsapp_number !== undefined) payload.whatsapp_number = data.whatsapp_number
+    if (data.email !== undefined) payload.email = data.email
+    if (data.address !== undefined) payload.address = data.address
+    if (data.preferred_date !== undefined) payload.preferred_date = new Date(data.preferred_date)
+    if (data.details !== undefined) payload.details = data.details
+
+    return repo.update(id, payload)
 }
 
 export const deleteVisitRequest = (id) => {

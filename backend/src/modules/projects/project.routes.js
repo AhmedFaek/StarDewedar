@@ -4,7 +4,7 @@ import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import upload from '../../middleware/upload.middleware.js'
 import { ROLES } from '../../utils/constants.js'
-import { createProjectSchema } from './project.validation.js'
+import { createProjectSchema, updateProjectSchema } from './project.validation.js'
 import validate from '../../middleware/validation.middleware.js'
 
 const router = express.Router()
@@ -25,6 +25,7 @@ router.put(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validate(updateProjectSchema),
     controller.updateProject
 )
 

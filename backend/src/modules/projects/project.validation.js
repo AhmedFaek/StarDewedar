@@ -16,3 +16,5 @@ export const createProjectSchema = z.object({
     location_en: z.string().optional(),
     location_ar: z.string().optional(),
 })
+
+export const updateProjectSchema = createProjectSchema.partial()

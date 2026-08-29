@@ -6,7 +6,7 @@ import { requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import upload from '../../middleware/upload.middleware.js'
 
-import { createProductSchema } from './product.validation.js'
+import { createProductSchema, updateProductSchema } from './product.validation.js'
 import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
@@ -43,6 +43,7 @@ router.put(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validate(updateProductSchema),
     controller.updateProduct
 )
 

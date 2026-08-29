@@ -3,7 +3,8 @@ import rateLimit from 'express-rate-limit'
 import * as controller from './visit.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
-import { ROLES } from '../../utils/constants.js'
+import validate from '../../middleware/validation.middleware.js'
+import { updateVisitRequestSchema } from './visit.validation.js'
 
 const router = express.Router()
 
@@ -43,6 +44,7 @@ router.get('/:id', auth,
 // Update visit request (e.g., change status)
 router.put('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validate(updateVisitRequestSchema),
     controller.updateVisit)
 
 // Delete visit request
