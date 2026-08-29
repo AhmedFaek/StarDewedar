@@ -11,32 +11,32 @@ router.post('/', controller.createVisit)
 
 // Get all visit requests
 router.get('/', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getVisits)
 
 // Get visit requests by status
 router.get('/status/:status', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getVisitsByStatus)
 
 // Get visit requests by email
 router.get('/email/:email', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getVisitsByEmail)
 
 // Get single visit request by ID
 router.get('/:id', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.getVisitById)
 
 // Update visit request (e.g., change status)
 router.put('/:id', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.updateVisit)
 
 // Delete visit request
 router.delete('/:id', auth,
-    requireRole(ROLES.CO_FOUNDER, ROLES.PROJECT_MANAGER, ROLES.ACCOUNT_MANAGER),
+    requireRole(ROLES.ADMIN),
     controller.deleteVisit)
 
 export default router
