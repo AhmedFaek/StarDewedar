@@ -1,4 +1,5 @@
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 import * as controller from './visit.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
@@ -6,8 +7,18 @@ import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 
+const visitLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: 'Too many visit requests submitted. Please try again later.',
+    },
+})
+
 // Create a new visit request
-router.post('/', controller.createVisit)
+router.post('/', visitLimiter, controller.createVisit)
 
 // Get all visit requests
 router.get('/', auth,

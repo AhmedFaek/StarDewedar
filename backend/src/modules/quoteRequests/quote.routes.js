@@ -1,4 +1,5 @@
 import express from 'express'
+import rateLimit from 'express-rate-limit'
 import * as controller from './quote.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
@@ -8,8 +9,18 @@ import upload from '../../middleware/upload.middleware.js'
 
 const router = express.Router()
 
+const quoteLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: 'Too many quote requests submitted. Please try again later.',
+    },
+})
+
 // Create a new quote request
-router.post('/', upload.single('file'), controller.createQuote)
+router.post('/', quoteLimiter, upload.single('file'), controller.createQuote)
 
 // Get all quote requests
 router.get('/', auth,
