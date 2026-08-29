@@ -5,6 +5,7 @@ import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateQuoteRequestSchema } from './quote.validation.js'
+import { ROLES } from '../../utils/constants.js'
 
 import upload from '../../middleware/upload.middleware.js'
 

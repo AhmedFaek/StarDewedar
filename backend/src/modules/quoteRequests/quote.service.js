@@ -1,8 +1,7 @@
 import * as repo from './quote.repository.js'
 import * as contactService from '../contactMessages/contact.service.js'
-import {baseEmailTemplate} from '../../utils/email.template.js'
-import env from '../../config/env.js'
-import nodemailer from 'nodemailer'
+import { baseEmailTemplate } from '../../utils/email.template.js'
+import { sendEmail } from '../../utils/mailer.js'
 import cloudinary from '../../config/storage.js'
 
 const uploadToCloudinary = (file) => {
@@ -42,20 +41,6 @@ export const createQuoteRequest = async (data, file) => {
 
     return quoteRequest
 }
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.mail.yahoo.com',
-    port: 465,         // Use 465 for Yahoo
-    secure: true,      // true for 465, false for other ports
-    auth: {
-        user: env.yahooEmail,
-        pass: env.yahooPassword,
-    },
-    // Yahoo often requires these headers to avoid being flagged as spam/invalid
-    tls: {
-        rejectUnauthorized: false
-    }
-})
 
 export const sendQuoteRequestEmail = async (quoteRequest) => {
     try {
@@ -108,17 +93,13 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
       </div>
     `;
 
-        const mailOptions = {
-            from: `"Star Dewedar Website" <${env.yahooEmail}>`,
-            to: env.yahooEmail,
+        return await sendEmail({
             subject: `New Quote Request - ${quoteRequest.first_name} ${quoteRequest.last_name}`,
             html: baseEmailTemplate({
                 title: "New Quote Request 💼",
                 content,
             }),
-        };
-
-        return await transporter.sendMail(mailOptions);
+        });
     } catch (error) {
         console.error("❌ Yahoo SMTP Error:", error);
         throw error;

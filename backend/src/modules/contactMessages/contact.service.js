@@ -1,21 +1,6 @@
 import * as repo from './contact.repository.js'
-import env from '../../config/env.js'
-import nodemailer from 'nodemailer'
-import {baseEmailTemplate} from '../../utils/email.template.js'
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.mail.yahoo.com',
-    port: 465,         // Use 465 for Yahoo
-    secure: true,      // true for 465, false for other ports
-    auth: {
-        user: env.yahooEmail,
-        pass: env.yahooPassword,
-    },
-    // Yahoo often requires these headers to avoid being flagged as spam/invalid
-    tls: {
-        rejectUnauthorized: false
-    }
-})
+import { sendEmail } from '../../utils/mailer.js'
+import { baseEmailTemplate } from '../../utils/email.template.js'
 
 export const sendContactEmail = async (data) => {
   try {
@@ -47,17 +32,13 @@ export const sendContactEmail = async (data) => {
       </div>
     `;
 
-    const mailOptions = {
-      from: `"Star Dewedar Website" <${env.yahooEmail}>`,
-      to: env.yahooEmail,
+    return await sendEmail({
       subject: `New Contact Message - ${data.first_name} ${data.last_name}`,
       html: baseEmailTemplate({
         title: "New Contact Message Received",
         content,
       }),
-    };
-
-    return await transporter.sendMail(mailOptions);
+    });
   } catch (error) {
     console.error("❌ Yahoo SMTP Error:", error);
     throw error;

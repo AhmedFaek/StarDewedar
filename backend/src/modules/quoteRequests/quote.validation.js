@@ -30,7 +30,7 @@ export const createQuoteRequestSchema = z.object({
     );
 
 export const updateQuoteRequestSchema = z.object({
-    status: z.enum(['pending', 'in_progress', 'completed', 'rejected']).optional(),
+    status: z.enum(['pending', 'contacted', 'closed', 'in_progress', 'completed', 'rejected']).optional(),
     details: z.string().trim().min(5).optional(),
     first_name: z.string().trim().min(2).optional(),
     last_name: z.string().trim().min(2).optional(),

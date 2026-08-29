@@ -1,10 +1,12 @@
 import nodemailer from 'nodemailer'
 import env from '../config/env.js'
 
-/* ─── Yahoo SMTP transporter ─────────────────────────────────────────────── */
+/* ─── Shared Transporter Singleton ───────────────────────────────────────── */
 
-const transporter = nodemailer.createTransport({
-    service: 'yahoo',
+export const transporter = nodemailer.createTransport({
+    host: 'smtp.mail.yahoo.com',
+    port: 465,
+    secure: true,
     auth: {
         user: env.yahooEmail,
         pass: env.yahooPassword,
@@ -12,13 +14,13 @@ const transporter = nodemailer.createTransport({
 })
 
 /**
- * Send an email using the configured transporter.
- * @param {{ to: string, subject: string, html: string }} options
+ * Send an email using the shared transporter.
+ * @param {{ to?: string, subject: string, html: string }} options
  */
 export const sendEmail = async ({ to, subject, html }) => {
-    await transporter.sendMail({
-        from: `"Star Dewedar" <${env.yahooEmail}>`,
-        to,
+    return await transporter.sendMail({
+        from: `"Star Dewedar Website" <${env.yahooEmail}>`,
+        to: to || env.yahooEmail,
         subject,
         html,
     })

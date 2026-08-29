@@ -1,8 +1,7 @@
 import * as repo from './visit.repository.js';
 import * as contactService from '../contactMessages/contact.service.js';
 import { baseEmailTemplate } from '../../utils/email.template.js';
-import env from '../../config/env.js';
-import nodemailer from 'nodemailer';
+import { sendEmail } from '../../utils/mailer.js';
 
 export const createVisitRequest = async (data) => {
     const visitData = {
@@ -17,19 +16,6 @@ export const createVisitRequest = async (data) => {
 
     return visitRequest;
 };
-
-const transporter = nodemailer.createTransport({
-    host: 'smtp.mail.yahoo.com',
-    port: 465,         
-    secure: true,      
-    auth: {
-        user: env.yahooEmail,
-        pass: env.yahooPassword,
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
-})
 
 export const sendVisitRequestEmail = async (visitRequest) => {
     try {
@@ -77,19 +63,16 @@ export const sendVisitRequestEmail = async (visitRequest) => {
       </div>
     `;
 
-        const mailOptions = {
-            from: `"Star Dewedar Website" <${env.yahooEmail}>`,
-            to: env.yahooEmail,
+        return await sendEmail({
             subject: `New Visit Request - ${visitRequest.name}`,
             html: baseEmailTemplate({
                 title: 'New Visit Request 🏭',
                 content,
             }),
-        };
-
-        return await transporter.sendMail(mailOptions);
+        });
     } catch (error) {
         console.error('❌ Yahoo SMTP Error:', error);
+        throw error;
     }
 };
 

@@ -5,6 +5,7 @@ import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
+import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 

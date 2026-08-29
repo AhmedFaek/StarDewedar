@@ -13,7 +13,7 @@ export const createVisitRequestSchema = z.object({
 })
 
 export const updateVisitRequestSchema = z.object({
-    status: z.enum(['pending', 'in_progress', 'completed', 'rejected']).optional(),
+    status: z.enum(['pending', 'contacted', 'closed', 'in_progress', 'completed', 'rejected']).optional(),
     factory_name: z.string().min(2).optional(),
     factory_activity: z.string().min(2).optional(),
     name: z.string().min(2).optional(),
