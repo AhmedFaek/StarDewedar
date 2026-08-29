@@ -32,6 +32,9 @@ export const refreshAccessToken = async () => {
 
         const data = await response.json()
         localStorage.setItem('accessToken', data.accessToken)
+        if (data.refreshToken) {
+            localStorage.setItem('refreshToken', data.refreshToken)
+        }
         return data.accessToken
 
     } catch (error) {
