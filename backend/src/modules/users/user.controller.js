@@ -12,7 +12,7 @@ export const getMe = async (req, res, next) => {
         const user = await userRepo.findUserById(userId)
         if (!user) return res.status(404).json({ message: 'User not found.' })
         // Strip sensitive fields before sending
-        const { password_hash, hashed_refresh_token, ...safe } = user
+        const { password, hashed_refresh_token, reset_password_token, reset_password_expires, ...safe } = user
         res.json(safe)
     } catch (err) {
         next(err)
