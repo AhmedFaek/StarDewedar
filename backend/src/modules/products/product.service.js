@@ -12,7 +12,6 @@ const normalizeProductData = (data = {}) => ({
 })
 
 export const createProduct = async (data, files) => {
-    console.log('Creating product with data:', data)
     const productData = normalizeProductData(data)
     const product = await repo.createProduct(productData)
     const productId = product.id

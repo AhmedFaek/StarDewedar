@@ -16,7 +16,7 @@ router.post(
     '/',
     auth,
     requireRole(ROLES.ADMIN),
-    upload.array('images'),        // ✅ multer parses multipart body first
+    upload.array('images', 10),        // max 10 images per upload
     validate(createProjectSchema), // ✅ now req.body is populated
     controller.createProject
 )

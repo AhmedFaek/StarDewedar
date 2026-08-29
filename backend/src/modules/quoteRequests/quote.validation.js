@@ -1,21 +1,21 @@
 import { z } from 'zod';
 
 export const createQuoteRequestSchema = z.object({
-    first_name: z.string().trim().min(2),
-    last_name: z.string().trim().min(2),
+    first_name: z.string().trim().min(2).max(100),
+    last_name: z.string().trim().min(2).max(100),
 
-    phone: z.string().trim().min(10),
+    phone: z.string().trim().min(10).max(30),
 
-    email: z.string().email(),
+    email: z.string().email().max(254),
 
-    product_id: z.string().trim().optional(),
+    product_id: z.string().trim().max(100).optional(),
 
-    custom_product_name: z.string().trim().optional(),
-    custom_image_url: z.string().url().optional(),
+    custom_product_name: z.string().trim().max(200).optional(),
+    custom_image_url: z.string().url().max(1000).optional(),
 
-    details: z.string().trim().min(5),
+    details: z.string().trim().min(5).max(10000),
 
-    file_url: z.string().url().optional(),
+    file_url: z.string().url().max(1000).optional(),
 })
     .refine(
         (data) => {
@@ -31,9 +31,9 @@ export const createQuoteRequestSchema = z.object({
 
 export const updateQuoteRequestSchema = z.object({
     status: z.enum(['pending', 'contacted', 'closed', 'in_progress', 'completed', 'rejected']).optional(),
-    details: z.string().trim().min(5).optional(),
-    first_name: z.string().trim().min(2).optional(),
-    last_name: z.string().trim().min(2).optional(),
-    phone: z.string().trim().min(10).optional(),
-    email: z.string().email().optional(),
+    details: z.string().trim().min(5).max(10000).optional(),
+    first_name: z.string().trim().min(2).max(100).optional(),
+    last_name: z.string().trim().min(2).max(100).optional(),
+    phone: z.string().trim().min(10).max(30).optional(),
+    email: z.string().email().max(254).optional(),
 })
