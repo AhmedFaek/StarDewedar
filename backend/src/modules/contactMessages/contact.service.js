@@ -55,6 +55,6 @@ export const createContact = async (data) => {
     return message
 }
 
-export const getMessages = async () => {
-    return repo.getAllMessages()
+export const getMessages = async (options) => {
+    return repo.getAllMessages(options)
 }

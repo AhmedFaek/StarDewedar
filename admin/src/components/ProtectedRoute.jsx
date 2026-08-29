@@ -1,10 +1,11 @@
 // components/ProtectedRoute.jsx
 import { Navigate } from 'react-router-dom';
+import { getDecodedToken } from '../utils/auth';
 
 export const ProtectedRoute = ({ children }) => {
-  const accessToken = localStorage.getItem('accessToken');
+  const tokenData = getDecodedToken();
   
-  if (!accessToken) {
+  if (!tokenData || tokenData.role !== 'admin') {
     return <Navigate to="/login" replace />;
   }
   

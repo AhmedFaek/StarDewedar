@@ -14,7 +14,6 @@ export const getDecodedToken = () => {
 
         // Decode the payload (second part)
         const decoded = JSON.parse(atob(parts[1]))
-        console.log('Decoded token:', decoded) // Debug log
         return decoded
     } catch (error) {
         console.error('Failed to decode token:', error)

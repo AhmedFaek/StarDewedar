@@ -1,5 +1,6 @@
 import * as service from './visit.service.js'
 import { createVisitRequestSchema } from './visit.validation.js'
+import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createVisit = async (req, res) => {
     try {
@@ -21,7 +22,8 @@ export const createVisit = async (req, res) => {
 
 export const getVisits = async (req, res) => {
     try {
-        const visits = await service.getVisitRequests()
+        const { take, skip } = getPaginationParams(req.query)
+        const visits = await service.getVisitRequests({ take, skip })
         res.status(200).json({
             success: true,
             data: visits,

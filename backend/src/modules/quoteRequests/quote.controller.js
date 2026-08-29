@@ -1,5 +1,6 @@
 import * as service from './quote.service.js'
 import { createQuoteRequestSchema } from './quote.validation.js'
+import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createQuote = async (req, res) => {
     try {
@@ -21,7 +22,8 @@ export const createQuote = async (req, res) => {
 
 export const getQuotes = async (req, res) => {
     try {
-        const quotes = await service.getQuoteRequests()
+        const { take, skip } = getPaginationParams(req.query)
+        const quotes = await service.getQuoteRequests({ take, skip })
         res.status(200).json({
             success: true,
             data: quotes,

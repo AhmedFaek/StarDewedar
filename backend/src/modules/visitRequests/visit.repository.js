@@ -6,8 +6,10 @@ export const create = (data) => {
     })
 }
 
-export const findAll = () => {
+export const findAll = ({ take = 100, skip = 0 } = {}) => {
     return prisma.visitRequest.findMany({
+        take: Math.min(100, Math.max(1, Number(take) || 100)),
+        skip: Math.max(0, Number(skip) || 0),
         orderBy: { created_at: 'desc' },
     })
 }

@@ -4,8 +4,10 @@ export const createProduct = (data) => {
     return prisma.product.create({ data })
 }
 
-export const getAllProducts = () => {
+export const getAllProducts = ({ take = 100, skip = 0 } = {}) => {
     return prisma.product.findMany({
+        take: Math.min(100, Math.max(1, Number(take) || 100)),
+        skip: Math.max(0, Number(skip) || 0),
         include: {
             category: true,
             images: true,

@@ -30,7 +30,7 @@ export const createProduct = async (data, files) => {
     return product
 }
 
-export const getAllProducts = () => repo.getAllProducts()
+export const getAllProducts = (options) => repo.getAllProducts(options)
 
 export const getProductById = async (id) => {
     const product = await repo.getProductById(id)

@@ -1,4 +1,5 @@
 import * as service from './contact.service.js'
+import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createContact = async (req, res) => {
     try {
@@ -18,7 +19,8 @@ export const createContact = async (req, res) => {
 
 export const getAllMessages = async (req, res) => {
     try {
-        const messages = await service.getMessages()
+        const { take, skip } = getPaginationParams(req.query)
+        const messages = await service.getMessages({ take, skip })
 
         res.json(messages)
     } catch (error) {

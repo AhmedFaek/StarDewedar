@@ -1,4 +1,5 @@
 import * as service from './project.service.js'
+import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createProject = async (req, res) => {
     try {
@@ -15,7 +16,8 @@ export const createProject = async (req, res) => {
 }
 export const getProjects = async (req, res, next) => {
     try {
-        const projects = await service.getProjects()
+        const { take, skip } = getPaginationParams(req.query)
+        const projects = await service.getProjects({ take, skip })
         res.json(projects)
     } catch (err) {
         next(err)

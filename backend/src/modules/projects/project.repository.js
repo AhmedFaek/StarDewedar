@@ -4,8 +4,10 @@ export const create = (data) => {
     return prisma.project.create({ data })
 }
 
-export const findAll = () => {
+export const findAll = ({ take = 100, skip = 0 } = {}) => {
     return prisma.project.findMany({
+        take: Math.min(100, Math.max(1, Number(take) || 100)),
+        skip: Math.max(0, Number(skip) || 0),
         include: {
             images: true,
             category: true,

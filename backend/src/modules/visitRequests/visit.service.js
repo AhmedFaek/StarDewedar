@@ -76,7 +76,7 @@ export const sendVisitRequestEmail = async (visitRequest) => {
     }
 };
 
-export const getVisitRequests = () => repo.findAll()
+export const getVisitRequests = (options) => repo.findAll(options)
 
 export const getVisitRequestById = (id) => repo.findById(id)
 

@@ -21,7 +21,7 @@ export const createProject = async (data, files) => {
     return project
 }
 
-export const getProjects = () => repo.findAll()
+export const getProjects = (options) => repo.findAll(options)
 
 export const getProjectById = (id) => repo.findById(id)
 

@@ -1,4 +1,5 @@
 import * as service from './product.service.js'
+import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createProduct = async (req, res, next) => {
     try {
@@ -10,7 +11,8 @@ export const createProduct = async (req, res, next) => {
 }
 
 export const getAllProducts = async (req, res) => {
-    const data = await service.getAllProducts()
+    const { take, skip } = getPaginationParams(req.query)
+    const data = await service.getAllProducts({ take, skip })
     res.json(data)
 }
 

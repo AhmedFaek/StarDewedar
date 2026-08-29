@@ -106,7 +106,7 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
     }
 };
 
-export const getQuoteRequests = () => repo.findAll()
+export const getQuoteRequests = (options) => repo.findAll(options)
 
 export const getQuoteRequestById = (id) => repo.findById(id)
 
