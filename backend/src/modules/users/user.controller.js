@@ -3,6 +3,41 @@ import * as quoteRepo from '../quoteRequests/quote.repository.js'
 import * as visitRepo from '../visitRequests/visit.repository.js'
 
 /**
+ * GET /api/users
+ * Returns all users (admin only). Sensitive fields are excluded via the repository.
+ */
+export const getAllUsers = async (req, res, next) => {
+    try {
+        const users = await userRepo.findAllUsers()
+        res.json(users)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/**
+ * DELETE /api/users/:id
+ * Deletes a user by ID (admin only).
+ */
+export const deleteUser = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        // Prevent admin from deleting themselves
+        if (id === req.user.userId) {
+            return res.status(400).json({ message: 'You cannot delete your own account.' })
+        }
+        await userRepo.deleteUserById(id)
+        res.json({ message: 'User deleted successfully.' })
+    } catch (err) {
+        if (err?.code === 'P2025') {
+            return res.status(404).json({ message: 'User not found.' })
+        }
+        next(err)
+    }
+}
+
+
+/**
  * GET /api/users/me
  * Returns safe profile fields for the authenticated user.
  */

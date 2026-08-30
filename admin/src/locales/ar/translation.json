@@ -25,6 +25,7 @@
     "quotes": "طلبات التسعير",
     "visits": "طلبات الزيارة",
     "messages": "رسائل التواصل",
+    "users": "المستخدمون",
     "adminDashboard": "لوحة الإدارة",
     "logout": "تسجيل الخروج"
   },
@@ -135,6 +136,7 @@
     "title": "المشاريع",
     "subtitle": "دورة حياة العمليات",
     "add_button": "مشروع جديد",
+    "no_projects": "لا توجد مشاريع",
     "delete_confirm": "هل أنت متأكد من حذف هذا المشروع؟",
     "save_error": "خطأ في حفظ المشروع",
     "delete_error": "فشل الحذف",
@@ -265,6 +267,46 @@
       "reply_email": "الرد عبر البريد",
       "reply_whatsapp": "واتساب",
       "close": "إغلاق"
+    }
+  },
+
+  "users": {
+    "title": "المستخدمون",
+    "subtitle": "إدارة المستخدمين",
+    "add_button": "إنشاء مستخدم",
+    "no_users": "لا يوجد مستخدمون",
+    "loading": "جارِ تحميل المستخدمين...",
+    "create_success": "تم إنشاء المستخدم بنجاح",
+    "delete_success": "تم حذف المستخدم بنجاح",
+    "delete_confirm": "هل أنت متأكد من حذف هذا المستخدم؟",
+    "role_admin": "مشرف",
+    "role_customer": "عميل",
+    "table": {
+      "id": "الرقم",
+      "name": "الاسم",
+      "email": "البريد الإلكتروني",
+      "role": "الدور",
+      "company": "الشركة",
+      "created": "تاريخ الإنشاء",
+      "actions": "الإجراءات"
+    },
+    "modal": {
+      "title": "إنشاء مستخدم جديد",
+      "name_label": "الاسم الكامل",
+      "name_placeholder": "مثال: أحمد محمد",
+      "email_label": "البريد الإلكتروني",
+      "email_placeholder": "مثال: user@company.com",
+      "password_label": "كلمة المرور",
+      "password_placeholder": "٨ أحرف على الأقل",
+      "password_hint": "يجب أن تحتوي على حرف كبير وصغير ورقم",
+      "role_label": "دور المستخدم",
+      "phone_label": "رقم الهاتف",
+      "phone_placeholder": "+20 xxx xxx xxxx",
+      "whatsapp_label": "رقم الواتساب",
+      "whatsapp_placeholder": "+20 xxx xxx xxxx",
+      "company_label": "اسم الشركة",
+      "company_placeholder": "مثال: شركة ستار ديودار",
+      "submit": "إنشاء المستخدم"
     }
   }
 }

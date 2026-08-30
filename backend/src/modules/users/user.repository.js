@@ -41,6 +41,12 @@ export const findAllUsers = () => {
     })
 }
 
+export const deleteUserById = (id) => {
+    return prisma.user.delete({
+        where: { id },
+    })
+}
+
 // ── Saved Products ────────────────────────────────────────────────────────────
 
 export const getSavedProducts = (userId) => {

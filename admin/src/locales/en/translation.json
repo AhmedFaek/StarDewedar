@@ -27,6 +27,7 @@
     "quotes": "Quote Requests",
     "visits": "Visit Requests",
     "messages": "Contact Messages",
+    "users": "Users",
     "adminDashboard": "Admin Dashboard",
     "logout": "Log Out"
     },
@@ -133,6 +134,7 @@
     "title": "PROJECTS",
     "subtitle": "Operational Lifecycle",
     "add_button": "New Project",
+    "no_projects": "No projects found",
     "delete_confirm": "Are you sure you want to delete this project?",
     "save_error": "Error saving project",
     "delete_error": "Delete failed",
@@ -263,6 +265,46 @@
       "reply_email": "Reply via Email",
       "reply_whatsapp": "WhatsApp",
       "close": "Close"
+    }
+  },
+
+  "users": {
+    "title": "USERS",
+    "subtitle": "User Management",
+    "add_button": "Create User",
+    "no_users": "No users found",
+    "loading": "Loading users...",
+    "create_success": "User created successfully",
+    "delete_success": "User deleted successfully",
+    "delete_confirm": "Are you sure you want to delete this user?",
+    "role_admin": "Admin",
+    "role_customer": "Customer",
+    "table": {
+      "id": "# ID",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "company": "Company",
+      "created": "Created Date",
+      "actions": "Actions"
+    },
+    "modal": {
+      "title": "Create New User",
+      "name_label": "Full Name",
+      "name_placeholder": "e.g. John Doe",
+      "email_label": "Email Address",
+      "email_placeholder": "e.g. user@company.com",
+      "password_label": "Password",
+      "password_placeholder": "Min 8 characters",
+      "password_hint": "Must contain uppercase, lowercase, and a number",
+      "role_label": "User Role",
+      "phone_label": "Phone Number",
+      "phone_placeholder": "+20 xxx xxx xxxx",
+      "whatsapp_label": "WhatsApp Number",
+      "whatsapp_placeholder": "+20 xxx xxx xxxx",
+      "company_label": "Company Name",
+      "company_placeholder": "e.g. Star Dewedar Co.",
+      "submit": "Create User"
     }
   }
 }

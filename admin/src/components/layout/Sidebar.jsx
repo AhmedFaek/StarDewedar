@@ -16,6 +16,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { id: 'quotes', label: t('sidebar.quotes'), icon: 'request_quote', path: '/quote-requests' },
     { id: 'visits', label: t('sidebar.visits'), icon: 'calendar_today', path: '/visits' },
     { id: 'messages', label: t('sidebar.messages'), icon: 'chat', path: '/messages' },
+    { id: 'users', label: t('sidebar.users'), icon: 'group', path: '/users' },
   ]
 
   const handleLogout = () => {

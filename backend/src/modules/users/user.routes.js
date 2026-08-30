@@ -1,12 +1,22 @@
 import express from 'express'
 import * as controller from './user.controller.js'
 import auth from '../../middleware/auth.middleware.js'
+import { requireRole } from '../../middleware/roles.middleware.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
+import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 
 // All routes require a valid access token
 router.use(auth)
+
+// ── Admin: User Management ───────────────────────────────────────────────────
+
+// GET  /api/users       → list all users (admin only)
+router.get('/', requireRole(ROLES.ADMIN), controller.getAllUsers)
+
+// DELETE /api/users/:id → delete a user (admin only)
+router.delete('/:id', requireRole(ROLES.ADMIN), validateUuidParam('id'), controller.deleteUser)
 
 // ── Profile ──────────────────────────────────────────────────────────────────
 

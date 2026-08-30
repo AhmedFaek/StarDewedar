@@ -10,6 +10,7 @@ import Projects from './pages/Projects'
 import QuoteRequests from './pages/quoteRequests'
 import VisitRequests from './pages/visitRequests'
 import ContactMessagesPage from './pages/contactMessages'
+import Users from './pages/Users'
 import LoginPage from './pages/Login' // The new page we discussed
 
 
@@ -62,6 +63,7 @@ export default function App() {
                     <Route path="/quote-requests" element={<QuoteRequests />} />
                     <Route path="/visits" element={<VisitRequests />} />
                     <Route path="/messages" element={<ContactMessagesPage />} />
+                    <Route path="/users" element={<Users />} />
 
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>

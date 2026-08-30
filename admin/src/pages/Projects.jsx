@@ -123,7 +123,7 @@ export default function Projects() {
             <tbody className="divide-y divide-surface-variant">
               {loading ? (
                 <tr><td colSpan="5" className="p-10 text-center text-secondary font-bold">{t('common.loading')}</td></tr>
-              ) : (
+              ) : displayedData.length > 0 ? (
                 displayedData.map((project) => (
                   <tr key={project.id} className="group hover:bg-surface-container-low transition-colors">
                     <td className="px-8 py-6 text-xs font-mono text-slate-400">
@@ -156,11 +156,13 @@ export default function Projects() {
                     </td>
                   </tr>
                 ))
+              ) : (
+                <tr><td colSpan="5" className="px-8 py-12 text-center text-secondary font-bold uppercase tracking-widest">{t('projects.no_projects')}</td></tr>
               )}
             </tbody>
           </table>
         </div>
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalDisplayed={displayedData.length} totalItems={projectData.length} variant="table" />
+        {projectData.length > 0 && <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} totalDisplayed={displayedData.length} totalItems={projectData.length} variant="table" />}
       </div>
 
       {isModalOpen && (
