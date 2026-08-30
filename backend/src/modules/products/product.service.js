@@ -16,17 +16,23 @@ export const createProduct = async (data, files) => {
     const product = await repo.createProduct(productData)
     const productId = product.id
 
-    // Upload images
-    if (files?.images) {
-        await imageService.uploadImages(productId, files.images)
-    }
+    try {
+        // Upload images
+        if (files?.images) {
+            await imageService.uploadImages(productId, files.images)
+        }
 
-    // Upload catalog
-    if (files?.catalog) {
-        await catalogService.uploadCatalog(productId, files.catalog[0])
-    }
+        // Upload catalog
+        if (files?.catalog) {
+            await catalogService.uploadCatalog(productId, files.catalog[0])
+        }
 
-    return product
+        return product
+    } catch (error) {
+        // Rollback created product if subsequent uploads fail to avoid orphan records
+        await repo.deleteProduct(productId)
+        throw error
+    }
 }
 
 export const getAllProducts = (options) => repo.getAllProducts(options)

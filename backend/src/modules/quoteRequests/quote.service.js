@@ -3,6 +3,7 @@ import * as contactService from '../contactMessages/contact.service.js'
 import { baseEmailTemplate } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
 import cloudinary from '../../config/storage.js'
+import { escapeHtml } from '../../utils/htmlEscaper.js';
 
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -44,15 +45,26 @@ export const createQuoteRequest = async (data, file) => {
 
 export const sendQuoteRequestEmail = async (quoteRequest) => {
     try {
-        const productInfo = quoteRequest.product
-            ? `<p><strong>Product:</strong> ${quoteRequest.product.name_ar}</p>`
-            : `<p><strong>Custom Product:</strong> ${quoteRequest.custom_product_name}</p>`;
+        const firstName = escapeHtml(quoteRequest.first_name)
+        const lastName = escapeHtml(quoteRequest.last_name)
+        const email = escapeHtml(quoteRequest.email)
+        const phone = escapeHtml(quoteRequest.phone)
+        const status = escapeHtml(quoteRequest.status)
+        const details = escapeHtml(quoteRequest.details)
 
-        const fileInfo = quoteRequest.file_url
+        const productNameAr = quoteRequest.product ? escapeHtml(quoteRequest.product.name_ar) : null
+        const customProductName = quoteRequest.custom_product_name ? escapeHtml(quoteRequest.custom_product_name) : null
+
+        const productInfo = quoteRequest.product
+            ? `<p><strong>Product:</strong> ${productNameAr}</p>`
+            : `<p><strong>Custom Product:</strong> ${customProductName}</p>`;
+
+        const fileUrl = quoteRequest.file_url ? escapeHtml(quoteRequest.file_url) : null
+        const fileInfo = fileUrl
             ? `
         <p>
           <strong>File:</strong>
-          <a href="${quoteRequest.file_url}" style="color:#2F2FE4;">
+          <a href="${fileUrl}" style="color:#2F2FE4;">
             Download File
           </a>
         </p>
@@ -61,17 +73,17 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
 
         const content = `
       <div style="margin-bottom:20px;">
-        <p><strong>Name:</strong> ${quoteRequest.first_name} ${quoteRequest.last_name}</p>
+        <p><strong>Name:</strong> ${firstName} ${lastName}</p>
 
         <p>
           <strong>Email:</strong>
-          <a href="mailto:${quoteRequest.email}" style="color:#2F2FE4;">
-            ${quoteRequest.email}
+          <a href="mailto:${email}" style="color:#2F2FE4;">
+            ${email}
           </a>
         </p>
 
-        <p><strong>Phone:</strong> ${quoteRequest.phone}</p>
-        <p><strong>Status:</strong> ${quoteRequest.status}</p>
+        <p><strong>Phone:</strong> ${phone}</p>
+        <p><strong>Status:</strong> ${status}</p>
       </div>
 
       <div style="border-left:4px solid #2F2FE4; padding-left:12px; margin-bottom:20px;">
@@ -80,13 +92,13 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
 
       <div style="background:#f4f6ff; padding:15px; border-radius:8px;">
         <strong>Details:</strong>
-        <p>${quoteRequest.details}</p>
+        <p>${details}</p>
       </div>
 
       ${fileInfo}
 
       <div style="margin-top:25px;">
-        <a href="mailto:${quoteRequest.email}"
+        <a href="mailto:${email}"
           style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
           Reply to Customer
         </a>
@@ -94,7 +106,7 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
     `;
 
         return await sendEmail({
-            subject: `New Quote Request - ${quoteRequest.first_name} ${quoteRequest.last_name}`,
+            subject: `New Quote Request - ${firstName} ${lastName}`,
             html: baseEmailTemplate({
                 title: "New Quote Request 💼",
                 content,
