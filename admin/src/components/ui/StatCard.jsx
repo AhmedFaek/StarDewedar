@@ -53,7 +53,7 @@ export const StatCard = ({
               {trend}
             </span>
           ) : (
-            <span className={`text-xs font-bold tracking-tighter ${valueClasses[variant]}`}>
+            <span className={`text-sm sm:text-base font-bold tracking-tight ${valueClasses[variant]}`}>
               {trend}
             </span>
           )}

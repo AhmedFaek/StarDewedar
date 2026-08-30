@@ -59,9 +59,15 @@
     "total_projects": "Total Projects",
     "quote_requests": "Quote Requests",
     "visit_requests": "Visit Requests",
-    "catalog_items": "catalog items",
-    "active_projects": "active projects",
-    "pending": "PENDING"
+    "contact_messages": "Contact Messages",
+    "total_customers": "Total Customers",
+    "catalog_items": "items",
+    "active_projects": "projects",
+    "received_messages": "received messages",
+    "registered_customers": "registered customers",
+    "pending": "PENDING",
+    "pending_alert_title": "Attention Required",
+    "pending_alert_desc": "You have pending requests requiring review:"
   },
 
   "products": {
@@ -180,7 +186,7 @@
       "subject": "Subject / Product",
       "status": "Status",
       "action": "Action",
-      "review": "Review Details →",
+      "review": "Review Details",
       "general_inquiry": "General Inquiry"
     },
     "status": {
@@ -217,7 +223,7 @@
       "date": "Date",
       "status": "Status",
       "action": "Action",
-      "view": "View Request →"
+      "view": "View Request"
     },
     "status": {
       "pending": "Pending",

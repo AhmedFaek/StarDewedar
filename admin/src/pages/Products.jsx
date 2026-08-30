@@ -145,8 +145,14 @@ export default function ProductsPage() {
                     <td className="px-8 py-6"><span className="block font-bold text-primary font-headline uppercase">{item.name_en}</span><span className="block text-xs text-secondary font-medium">{item.name_ar}</span></td>
                     <td className="px-8 py-6 text-right font-mono font-bold text-primary">{formatCurrency(item.price)}</td>
                     <td className="px-8 py-6 text-right">
-                      <button onClick={() => openEditModal(item)} className="text-tertiary hover:text-primary me-4 uppercase text-xs font-black transition-colors">{t('common.edit')}</button>
-                      <button onClick={() => handleDelete(item.id)} className="text-error uppercase text-xs font-black hover:opacity-70 transition-opacity">{t('common.delete')}</button>
+                      <div className="flex justify-end gap-4">
+                        <button onClick={() => openEditModal(item)} className="text-primary hover:text-tertiary transition-colors flex items-center gap-1 text-xs font-bold font-headline uppercase tracking-widest">
+                          <span className="material-symbols-outlined text-sm">edit</span>{t('common.edit')}
+                        </button>
+                        <button onClick={() => handleDelete(item.id)} className="text-error hover:opacity-70 transition-opacity flex items-center gap-1 text-xs font-bold font-headline uppercase tracking-widest">
+                          <span className="material-symbols-outlined text-sm">delete</span>{t('common.delete')}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )) : (

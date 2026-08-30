@@ -234,91 +234,99 @@ export default function ComparePage() {
           </div>
         ) : (
           <div>
+            {/* Mobile swipe hint */}
+            <div className="flex items-center gap-1.5 text-xs text-outline font-label uppercase tracking-widest sm:hidden mb-3">
+              <span className="material-symbols-outlined text-sm">swipe</span>
+              <span>{i18n.language === 'ar' ? 'اسحب أفقياً للمقارنة' : 'Swipe horizontally to compare'}</span>
+            </div>
+
             {/* ── Columns grid ── */}
-            <div
-              className="grid border border-outline-variant/15 overflow-hidden"
-              style={{ gridTemplateColumns: `180px repeat(${MAX_COMPARE}, 1fr)` }}
-            >
-              {/* ── TOP ROW: label header + product headers ── */}
-              {/* Label column top-left (blank) */}
-              <div className="bg-surface-container-low border-b border-r border-outline-variant/15" />
+            <div className="w-full overflow-x-auto border border-outline-variant/15 bg-surface-container-lowest shadow-sm rounded-sm">
+              <div
+                className="grid min-w-[700px] sm:min-w-full"
+                style={{ gridTemplateColumns: `140px repeat(${MAX_COMPARE}, minmax(210px, 1fr))` }}
+              >
+                {/* ── TOP ROW: label header + product headers ── */}
+                {/* Label column top-left (blank) */}
+                <div className="bg-surface-container-low border-b border-r border-outline-variant/15" />
 
-              {/* Product columns */}
-              {compareList.map((product) => (
-                <div key={product.id} className="border-b border-r border-outline-variant/15 last:border-r-0">
-                  <ProductHeader product={product} onRemove={() => removeFromCompare(product.id)} />
-                </div>
-              ))}
+                {/* Product columns */}
+                {compareList.map((product) => (
+                  <div key={product.id} className="border-b border-r border-outline-variant/15 last:border-r-0">
+                    <ProductHeader product={product} onRemove={() => removeFromCompare(product.id)} />
+                  </div>
+                ))}
 
-              {/* Empty slots */}
-              {Array.from({ length: emptySlots }).map((_, i) => (
-                <div key={`empty-${i}`} className="border-b border-r border-outline-variant/15 last:border-r-0 bg-surface-container-lowest/50">
-                  <EmptySlot
-                    onSelect={(p) => addToCompare(p)}
-                    allProducts={allProducts}
-                    compareList={compareList}
-                  />
-                </div>
-              ))}
+                {/* Empty slots */}
+                {Array.from({ length: emptySlots }).map((_, i) => (
+                  <div key={`empty-${i}`} className="border-b border-r border-outline-variant/15 last:border-r-0 bg-surface-container-lowest/50">
+                    <EmptySlot
+                      onSelect={(p) => addToCompare(p)}
+                      allProducts={allProducts}
+                      compareList={compareList}
+                    />
+                  </div>
+                ))}
 
-              {/* ── DATA ROWS ── */}
-              {ROWS.map((rowDef, rowIdx) => {
-                const values = getValues(rowDef)
-                const similar = allSame(values)
-                if (hideSimilar && similar) return null
+                {/* ── DATA ROWS ── */}
+                {ROWS.map((rowDef, rowIdx) => {
+                  const values = getValues(rowDef)
+                  const similar = allSame(values)
+                  if (hideSimilar && similar) return null
 
-                const isOdd = rowIdx % 2 === 0
+                  const isDiff = !similar && compareList.length >= 2
+                  const isOdd = rowIdx % 2 === 0
 
-                return [
-                  /* Label cell */
-                  <div
-                    key={`label-${rowIdx}`}
-                    className={`flex items-start px-5 py-5 border-b border-r border-outline-variant/15 ${isOdd ? 'bg-surface-container-low' : 'bg-surface'}`}
-                  >
-                    <span className="font-label text-[11px] font-bold uppercase tracking-[0.2em] text-outline leading-tight">
-                      {t(rowDef.key)}
-                    </span>
-                    {similar && (
-                      <span className="ml-2 shrink-0 w-1.5 h-1.5 rounded-full bg-outline/30 mt-1" />
-                    )}
-                  </div>,
-
-                  /* Value cells */
-                  ...compareList.map((product, colIdx) => {
-                    const val = rowDef.get(product, i18n.language)
-                    const isDiff = !similar
-
-                    return (
-                      <div
-                        key={`val-${rowIdx}-${product.id}`}
-                        className={`px-6 py-5 border-b border-r border-outline-variant/15 last:border-r-0 ${isOdd ? 'bg-surface-container-low' : 'bg-surface'} ${isDiff ? 'bg-amber-50/20' : ''}`}
-                      >
-                        <p
-                          className={`font-body text-sm leading-relaxed ${rowDef.highlight ? 'font-black text-xl font-headline text-primary' : ''} ${rowDef.isText ? 'text-secondary text-xs leading-relaxed' : 'text-primary font-semibold'}`}
-                        >
-                          {val}
-                        </p>
-                      </div>
-                    )
-                  }),
-
-                  /* Empty slot cells */
-                  ...Array.from({ length: emptySlots }).map((_, i) => (
+                  return [
+                    /* Label cell */
                     <div
-                      key={`empty-val-${rowIdx}-${i}`}
-                      className={`px-6 py-5 border-b border-r border-outline-variant/15 last:border-r-0 ${isOdd ? 'bg-surface-container-lowest/40' : 'bg-surface-container-lowest/20'}`}
+                      key={`label-${rowIdx}`}
+                      className={`flex items-start px-5 py-5 border-b border-r border-outline-variant/15 ${isDiff ? 'bg-amber-500/10' : (isOdd ? 'bg-surface-container-low' : 'bg-surface')}`}
                     >
-                      <div className="h-4 w-16 bg-outline-variant/10 rounded" />
-                    </div>
-                  )),
-                ]
-              })}
+                      <span className="font-label text-[11px] font-bold uppercase tracking-[0.2em] text-outline leading-tight">
+                        {t(rowDef.key)}
+                      </span>
+                      {similar && (
+                        <span className="ml-2 shrink-0 w-1.5 h-1.5 rounded-full bg-outline/30 mt-1" />
+                      )}
+                    </div>,
+
+                    /* Value cells */
+                    ...compareList.map((product, colIdx) => {
+                      const val = rowDef.get(product, i18n.language)
+
+                      return (
+                        <div
+                          key={`val-${rowIdx}-${product.id}`}
+                          className={`px-6 py-5 border-b border-r border-outline-variant/15 last:border-r-0 ${isDiff ? 'bg-amber-500/10' : (isOdd ? 'bg-surface-container-low' : 'bg-surface')}`}
+                        >
+                          <p
+                            className={`font-body text-sm leading-relaxed ${rowDef.highlight ? 'font-black text-xl font-headline text-primary' : ''} ${rowDef.isText ? 'text-secondary text-xs leading-relaxed' : 'text-primary font-semibold'}`}
+                          >
+                            {val}
+                          </p>
+                        </div>
+                      )
+                    }),
+
+                    /* Empty slot cells */
+                    ...Array.from({ length: emptySlots }).map((_, i) => (
+                      <div
+                        key={`empty-val-${rowIdx}-${i}`}
+                        className={`px-6 py-5 border-b border-r border-outline-variant/15 last:border-r-0 ${isDiff ? 'bg-amber-500/10' : (isOdd ? 'bg-surface-container-lowest/40' : 'bg-surface-container-lowest/20')}`}
+                      >
+                        <div className="h-4 w-16 bg-outline-variant/10 rounded" />
+                      </div>
+                    )),
+                  ]
+                })}
+              </div>
             </div>
 
             {/* ── Legend ── */}
             {!hideSimilar && compareList.length >= 2 && (
               <div className="mt-6 flex items-center gap-3 text-xs text-outline font-label">
-                <div className="w-3 h-3 rounded-sm bg-amber-50/60 border border-amber-200/50" />
+                <div className="w-3.5 h-3.5 rounded-sm bg-amber-500/10 border border-amber-500/30 shrink-0" />
                 <span>{t('compare.page.diffLegend')}</span>
               </div>
             )}

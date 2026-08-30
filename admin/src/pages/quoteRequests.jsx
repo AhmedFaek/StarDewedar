@@ -112,8 +112,12 @@ export default function QuoteRequestsPage() {
                       <Badge className={getStatusVariant(req.status)}>{t(`quotes.status.${req.status}`)}</Badge>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button onClick={() => setSelectedRequest(req)} className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter">
-                        {t('quotes.table.review')}
+                      <button
+                        onClick={() => setSelectedRequest(req)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-variant hover:border-tertiary text-primary hover:text-tertiary font-bold text-xs sm:text-sm transition-colors uppercase tracking-wider"
+                      >
+                        <span>{t('quotes.table.review')}</span>
+                        <span className="material-symbols-outlined text-base rtl:rotate-180">arrow_forward</span>
                       </button>
                     </td>
                   </tr>

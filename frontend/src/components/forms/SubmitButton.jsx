@@ -22,14 +22,18 @@ export default function SubmitButton({
       className={className}
       {...rest}
     >
-      {loading && (
-        <span
-          className="submit-spinner"
-          role="status"
-          aria-label="Loading"
-        />
+      {loading ? (
+        <span className="inline-flex items-center justify-center gap-2">
+          <span
+            className="submit-spinner"
+            role="status"
+            aria-label="Loading"
+          />
+          <span>{loadingText || children}</span>
+        </span>
+      ) : (
+        children
       )}
-      <span>{loading ? (loadingText || children) : children}</span>
     </button>
   )
 }

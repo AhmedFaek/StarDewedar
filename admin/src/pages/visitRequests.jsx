@@ -111,8 +111,12 @@ export default function VisitRequestsPage() {
                       <Badge className={getStatusVariant(visit.status)}>{t(`visits.status.${visit.status}`)}</Badge>
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <button onClick={() => setSelectedVisit(visit)} className="text-xs font-black text-tertiary hover:text-primary transition-colors uppercase tracking-tighter">
-                        {t('visits.table.view')}
+                      <button
+                        onClick={() => setSelectedVisit(visit)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-variant hover:border-tertiary text-primary hover:text-tertiary font-bold text-xs sm:text-sm transition-colors uppercase tracking-wider"
+                      >
+                        <span>{t('visits.table.view')}</span>
+                        <span className="material-symbols-outlined text-base rtl:rotate-180">arrow_forward</span>
                       </button>
                     </td>
                   </tr>

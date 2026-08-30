@@ -153,7 +153,7 @@ export default function RequestVisit() {
                     className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>{t('requestVisit.submitButton')}</span>
-                    <span className="material-symbols-outlined text-xl sm:text-2xl group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
+                    <span className="material-symbols-outlined text-xl sm:text-2xl rtl:rotate-180 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
                   </SubmitButton>
                 </div>
               </form>

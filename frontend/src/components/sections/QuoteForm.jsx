@@ -188,8 +188,8 @@ export default function QuoteForm({ productId = null }) {
               loadingText={t('requestQuote.submitting')}
               className="w-full sm:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t('requestQuote.submitRequest')}
-              <Icon icon="arrow_forward" className="transition-transform group-hover:translate-x-1" />
+              <span>{t('requestQuote.submitRequest')}</span>
+              <Icon icon="arrow_forward" className="transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
             </SubmitButton>
           </div>
         </form>

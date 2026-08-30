@@ -58,9 +58,15 @@
     "total_projects": "إجمالي المشاريع",
     "quote_requests": "طلبات الأسعار",
     "visit_requests": "طلبات الزيارة",
-    "catalog_items": "عنصر في الكتالوج",
-    "active_projects": "مشاريع نشطة",
-    "pending": "قيد الانتظار"
+    "contact_messages": "رسائل التواصل",
+    "total_customers": "إجمالي العملاء",
+    "catalog_items": "عناصر",
+    "active_projects": "مشاريع",
+    "received_messages": "رسائل واردة",
+    "registered_customers": "عملاء مسجلين",
+    "pending": "قيد الانتظار",
+    "pending_alert_title": "تنبيه هام",
+    "pending_alert_desc": "لديك طلبات قيد الانتظار تتطلب المراجعة:"
   },
    "pagination": {
     "displaying": "عرض {{totalDisplayed}} من {{totalItems}} عنصر"
@@ -182,7 +188,7 @@
       "subject": "الموضوع / المنتج",
       "status": "الحالة",
       "action": "إجراء",
-      "review": "مراجعة التفاصيل ←",
+      "review": "مراجعة التفاصيل",
       "general_inquiry": "استفسار عام"
     },
     "status": {
@@ -219,7 +225,7 @@
       "date": "التاريخ",
       "status": "الحالة",
       "action": "إجراء",
-      "view": "عرض الطلب ←"
+      "view": "عرض الطلب"
     },
     "status": {
       "pending": "قيد الانتظار",

@@ -1,13 +1,14 @@
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { useCompare, MAX_COMPARE } from '../../utils/compareContext'
 
 export default function CompareDrawer() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const location = useLocation()
   const { compareList, removeFromCompare, clearCompare } = useCompare()
 
-  if (compareList.length === 0) return null
+  if (location.pathname === '/compare' || compareList.length === 0) return null
 
   const handleCompare = () => {
     navigate('/compare')
