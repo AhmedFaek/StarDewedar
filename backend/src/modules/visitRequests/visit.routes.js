@@ -6,6 +6,7 @@ import { requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
 import { ROLES } from '../../utils/constants.js'
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
 
@@ -40,17 +41,20 @@ router.get('/email/:email', auth,
 // Get single visit request by ID
 router.get('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.getVisitById)
 
 // Update visit request (e.g., change status)
 router.put('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     validate(updateVisitRequestSchema),
     controller.updateVisit)
 
 // Delete visit request
 router.delete('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.deleteVisit)
 
 export default router

@@ -1,6 +1,7 @@
 import express from 'express'
 import * as controller from './user.controller.js'
 import auth from '../../middleware/auth.middleware.js'
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
 
@@ -18,13 +19,13 @@ router.get('/me', controller.getMe)
 router.get('/me/saved-products', controller.getMySavedProducts)
 
 // GET  /api/users/me/saved-products/:productId/check → is this product saved?
-router.get('/me/saved-products/:productId/check', controller.checkSaved)
+router.get('/me/saved-products/:productId/check', validateUuidParam('productId'), controller.checkSaved)
 
 // POST /api/users/me/saved-products/:productId   → save a product
-router.post('/me/saved-products/:productId', controller.saveProduct)
+router.post('/me/saved-products/:productId', validateUuidParam('productId'), controller.saveProduct)
 
 // DELETE /api/users/me/saved-products/:productId → unsave a product
-router.delete('/me/saved-products/:productId', controller.unsaveProduct)
+router.delete('/me/saved-products/:productId', validateUuidParam('productId'), controller.unsaveProduct)
 
 // ── My Requests ───────────────────────────────────────────────────────────────
 

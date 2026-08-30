@@ -6,6 +6,7 @@ import { requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateQuoteRequestSchema } from './quote.validation.js'
 import { ROLES } from '../../utils/constants.js'
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 import upload from '../../middleware/upload.middleware.js'
 
@@ -42,17 +43,20 @@ router.get('/email/:email', auth,
 // Get single quote request by ID
 router.get('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.getQuoteById)
 
 // Update quote request (e.g., change status)
 router.put('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     validate(updateQuoteRequestSchema),
     controller.updateQuote)
 
 // Delete quote request
 router.delete('/:id', auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.deleteQuote)
 
 export default router

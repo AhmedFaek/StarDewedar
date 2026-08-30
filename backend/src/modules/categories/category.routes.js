@@ -11,6 +11,7 @@ import {
 } from './category.validation.js'
 
 import { ROLES } from '../../utils/constants.js'
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
 
@@ -22,7 +23,7 @@ router.get('/', controller.getAllCategories)
 /* =========================
    GET ONE (ALL ROLES)
 ========================= */
-router.get('/:id', controller.getCategoryById)
+router.get('/:id', validateUuidParam(), controller.getCategoryById)
 
 /* =========================
    CREATE (ONLY CO-FOUNDER)
@@ -42,6 +43,7 @@ router.post(
    '/:id',
    auth,
    requireRole(ROLES.ADMIN),
+   validateUuidParam(),
    validate(updateCategorySchema),
    controller.updateCategory
    )
@@ -53,6 +55,7 @@ router.delete(
   '/:id',
   auth,
   requireRole(ROLES.ADMIN),
+  validateUuidParam(),
   controller.deleteCategory
 )
 

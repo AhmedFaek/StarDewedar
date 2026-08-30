@@ -9,6 +9,8 @@ import upload from '../../middleware/upload.middleware.js'
 import { createProductSchema, updateProductSchema } from './product.validation.js'
 import { ROLES } from '../../utils/constants.js'
 
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
+
 const router = express.Router()
 
 /* =========================
@@ -34,7 +36,7 @@ router.get('/', controller.getAllProducts)
 /* =========================
    GET ONE
 ========================= */
-router.get('/:id', controller.getProductById)
+router.get('/:id', validateUuidParam(), controller.getProductById)
 
 /* =========================
    UPDATE
@@ -43,6 +45,7 @@ router.put(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     validate(updateProductSchema),
     controller.updateProduct
 )
@@ -54,6 +57,7 @@ router.delete(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.deleteProduct
 )
 

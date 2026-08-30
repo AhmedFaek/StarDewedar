@@ -99,8 +99,13 @@ export const createUser = async (data) => {
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS)
 
     const user = await userRepo.createUser({
-        ...data,
+        name: data.name,
+        email: data.email,
         password: hashedPassword,
+        role: data.role || ROLES.CUSTOMER,
+        whatsapp_number: data.whatsapp_number ?? null,
+        phone_number: data.phone_number ?? null,
+        company_name: data.company_name ?? null,
     })
 
     // Return without sensitive fields

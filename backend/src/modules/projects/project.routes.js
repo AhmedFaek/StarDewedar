@@ -6,11 +6,12 @@ import upload from '../../middleware/upload.middleware.js'
 import { ROLES } from '../../utils/constants.js'
 import { createProjectSchema, updateProjectSchema } from './project.validation.js'
 import validate from '../../middleware/validation.middleware.js'
+import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
 
 router.get('/', controller.getProjects)
-router.get('/:id', controller.getProjectById)
+router.get('/:id', validateUuidParam(), controller.getProjectById)
 
 router.post(
     '/',
@@ -25,6 +26,7 @@ router.put(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     validate(updateProjectSchema),
     controller.updateProject
 )
@@ -33,6 +35,7 @@ router.delete(
     '/:id',
     auth,
     requireRole(ROLES.ADMIN),
+    validateUuidParam(),
     controller.deleteProject
 )
 
