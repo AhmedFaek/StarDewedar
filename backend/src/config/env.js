@@ -33,4 +33,5 @@ export default {
     yahooEmail: process.env.YAHOO_EMAIL,
     yahooPassword: process.env.YAHOO_PASSWORD,
     frontendUrl: process.env.FRONTEND_URL,
+    nodeEnv: process.env.NODE_ENV || 'development',
 }

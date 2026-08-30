@@ -72,15 +72,34 @@ app.use((err, req, res, next) => {
         return next(err)
     }
 
-    const status = resolveErrorStatus(err)
-    const message = err?.message || 'Something went wrong'
-    const payload = { message }
+    // Always log detailed error server-side for debugging
+    console.error('❌ Server Error:', err)
 
-    if (Array.isArray(err?.errors) && err.errors.length > 0) {
-        payload.errors = err.errors
+    const status = resolveErrorStatus(err)
+    const isProduction = process.env.NODE_ENV === 'production'
+
+    // Operational/Client errors (< 500) keep user-friendly error details
+    if (status < 500) {
+        const payload = { message: err?.message || 'Bad Request' }
+        if (Array.isArray(err?.errors) && err.errors.length > 0) {
+            payload.errors = err.errors
+        }
+        return res.status(status).json(payload)
     }
 
-    res.status(status).json(payload)
+    // 500 Internal Server Errors: Sanitize sensitive details in production
+    if (isProduction) {
+        return res.status(500).json({
+            message: 'Internal Server Error'
+        })
+    }
+
+    // Return detailed error details only in development
+    return res.status(500).json({
+        message: err?.message || 'Internal Server Error',
+        stack: err?.stack,
+        ...(err?.errors ? { errors: err.errors } : {})
+    })
 })
 
 export default app
