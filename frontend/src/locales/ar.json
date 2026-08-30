@@ -280,7 +280,11 @@
     "budget": "الميزانية",
     "timeline": "الجدول الزمني",
     "start": "البداية",
-    "end": "النهاية"
+    "end": "النهاية",
+    "duration": "المدة",
+    "daysCount_one": "يوم واحد",
+    "daysCount_two": "يومان",
+    "daysCount_other": "{{count}} يوم"
   },
 
   "auth": {

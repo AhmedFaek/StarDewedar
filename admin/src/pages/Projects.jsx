@@ -15,6 +15,7 @@ export default function Projects() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedProject, setSelectedProject] = useState(null)
   const [selectedImageCount, setSelectedImageCount] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
 
   const fetchProjects = async () => {
     try {
@@ -77,6 +78,7 @@ export default function Projects() {
 
   const handleSave = async (e) => {
     e.preventDefault()
+    setIsSaving(true)
     const formData = new FormData(e.target)
     try {
       if (selectedProject?.id) {
@@ -89,6 +91,8 @@ export default function Projects() {
       fetchProjects()
     } catch (error) {
       alert(t('projects.save_error'))
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -194,7 +198,7 @@ export default function Projects() {
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Category</label>
                     <select name="category_id" className="w-full border border-surface-variant px-4 py-3 bg-surface-container-low" defaultValue={selectedProject?.category_id}>
                       <option value="">{t('projects.modal.category_placeholder')}</option>
-                      {categories.map(cat => (
+                      {categories.filter(cat => cat.type?.toLowerCase() === 'project').map(cat => (
                         <option key={cat.id} value={cat.id}>{cat.name_ar} ({cat.type})</option>
                       ))}
                     </select>
@@ -263,10 +267,10 @@ export default function Projects() {
               </div>
 
               <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:justify-end sm:gap-4 sm:px-6 lg:px-8 lg:py-6">
-                <button type="button" className="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary" onClick={() => setIsModalOpen(false)}>
+                <button type="button" className="text-xs font-bold uppercase tracking-widest text-secondary hover:text-primary disabled:opacity-50" onClick={() => setIsModalOpen(false)} disabled={isSaving}>
                   {t('projects.modal.discard')}
                 </button>
-                <Button type="submit" variant="tertiary" className="w-full sm:w-auto">{t('projects.modal.submit')}</Button>
+                <Button type="submit" variant="tertiary" disabled={isSaving} className="w-full sm:w-auto">{isSaving ? t('common.saving') : t('projects.modal.submit')}</Button>
               </div>
             </form>
           </div>
