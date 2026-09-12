@@ -59,3 +59,14 @@ export const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required').max(128),
     newPassword: strongPassword,
 })
+
+/* ── Verify Email ──────────────────────────────────────────────────────── */
+export const verifyEmailSchema = z.object({
+    email: z.string().email('Please provide a valid email address').max(254),
+    code: z.string().regex(/^\d{6}$/, 'Verification code must be 6 digits'),
+})
+
+/* ── Resend Verification Code ──────────────────────────────────────────── */
+export const resendVerificationSchema = z.object({
+    email: z.string().email('Please provide a valid email address').max(254),
+})

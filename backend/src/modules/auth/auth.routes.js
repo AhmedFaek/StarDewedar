@@ -12,12 +12,34 @@ import {
     forgotPasswordSchema,
     resetPasswordSchema,
     changePasswordSchema,
+    verifyEmailSchema,
+    resendVerificationSchema,
 } from './auth.validation.js'
 import { ROLES } from '../../utils/constants.js'
 
 const router = express.Router()
 
 /* ─── Rate limiters ──────────────────────────────────────────────────────── */
+
+const verifyEmailLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: 'Too many verification attempts. Please try again later.',
+    },
+})
+
+const resendVerificationLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000, // 1 hour
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: 'Too many verification code requests. Please try again later.',
+    },
+})
 
 const forgotPasswordLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -63,6 +85,22 @@ const registerLimiter = rateLimit({
 
 // Customer self-registration
 router.post('/register', registerLimiter, validate(registerSchema), controller.register)
+
+// Verify email
+router.post(
+    '/verify-email',
+    verifyEmailLimiter,
+    validate(verifyEmailSchema),
+    controller.verifyEmail
+)
+
+// Resend verification code
+router.post(
+    '/resend-verification',
+    resendVerificationLimiter,
+    validate(resendVerificationSchema),
+    controller.resendVerification
+)
 
 // Login (any role)
 router.post('/login', loginLimiter, validate(loginSchema), controller.login)
