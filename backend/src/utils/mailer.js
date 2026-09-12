@@ -15,13 +15,14 @@ export const transporter = nodemailer.createTransport({
 
 /**
  * Send an email using the shared transporter.
- * @param {{ to?: string, subject: string, html: string }} options
+ * @param {{ to?: string, subject: string, html: string, attachments?: Array }} options
  */
-export const sendEmail = async ({ to, subject, html }) => {
+export const sendEmail = async ({ to, subject, html, attachments }) => {
     return await transporter.sendMail({
         from: `"Star Dewedar Website" <${env.yahooEmail}>`,
         to: to || env.yahooEmail,
         subject,
         html,
+        attachments,
     })
 }

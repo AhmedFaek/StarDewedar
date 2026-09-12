@@ -88,3 +88,25 @@ export const changePassword = async (req, res, next) => {
         next(err)
     }
 }
+
+/* POST /api/auth/verify-email  — public */
+export const verifyEmail = async (req, res, next) => {
+    try {
+        const { email, code } = req.body
+        const result = await service.verifyEmail(email, code)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/* POST /api/auth/resend-verification  — public */
+export const resendVerification = async (req, res, next) => {
+    try {
+        const { email } = req.body
+        const result = await service.resendVerificationCode(email)
+        res.json(result)
+    } catch (err) {
+        next(err)
+    }
+}

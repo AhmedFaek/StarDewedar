@@ -16,10 +16,15 @@ model User {
   company_name         String?
   role                 String   // "admin" | "customer"
   hashed_refresh_token   String?
-  reset_password_token   String?
-  reset_password_expires DateTime?
-  created_at             DateTime @default(now())
-  updated_at             DateTime @updatedAt
+  reset_password_token           String?
+  reset_password_expires         DateTime?
+  email_verified                 Boolean   @default(false)
+  email_verification_hash        String?
+  email_verification_expires_at  DateTime?
+  email_verification_attempts    Int       @default(0)
+  email_verification_last_sent   DateTime?
+  created_at                     DateTime  @default(now())
+  updated_at                     DateTime  @updatedAt
 
   saved_products SavedProduct[]
 }

@@ -7,7 +7,7 @@ import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
 
 /**
- * AuthModal - slide-in modal with Login / Register / Forgot Password views.
+ * AuthModal - slide-in modal with Login / Register / Email Verification / Forgot Password views.
  *
  * Props:
  *   isOpen        {boolean}   - controls visibility
@@ -36,6 +36,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const [forgotEmail, setForgotEmail] = useState('')
   const [forgotSent, setForgotSent] = useState(false)
 
+  // Email verification state
+  const [showVerification, setShowVerification] = useState(false)
+  const [verificationEmail, setVerificationEmail] = useState('')
+  const [verificationCode, setVerificationCode] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
+  const [verifyLoading, setVerifyLoading] = useState(false)
+  const [resendLoading, setResendLoading] = useState(false)
+
   const [loginData, setLoginData] = useState({ email: '', password: '' })
   const [regData, setRegData] = useState({
     name: '',
@@ -47,16 +55,21 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     company_name: '',
   })
 
+  // Reset modal state on open
   useEffect(() => {
     if (isOpen) {
       setTab(defaultTab)
       setError('')
       setShowForgotPassword(false)
+      setShowVerification(false)
       setForgotSent(false)
       setForgotEmail('')
+      setVerificationCode('')
+      setResendCooldown(0)
     }
   }, [isOpen, defaultTab])
 
+  // Manage body scroll lock
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden'
@@ -68,6 +81,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     }
   }, [isOpen])
 
+  // Close on Escape key
   useEffect(() => {
     const handler = (e) => {
       if (e.key === 'Escape') onClose()
@@ -75,6 +89,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
+
+  // Cooldown timer for resending verification code
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const timer = setInterval(() => {
+      setResendCooldown((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [resendCooldown])
 
   const handleOverlayClick = (e) => {
     if (e.target === overlayRef.current) onClose()
@@ -95,6 +118,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       onAuthSuccess(res.user)
       onClose()
     },
+    onError: (err) => {
+      if (err?.requiresEmailVerification || err?.data?.requiresEmailVerification) {
+        const email = err.email || err?.data?.email || loginData.email
+        setVerificationEmail(email)
+        setShowVerification(true)
+        setVerificationCode('')
+        setError('')
+        showInfo(t('auth.verification.unverifiedLoginPrompt'))
+        return true // Suppress default toast
+      }
+      setError(getApiErrorMessage(err, { t }))
+      return false
+    },
     t,
   })
 
@@ -113,10 +149,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       if (!payload.company_name) delete payload.company_name
       return api.register(payload)
     },
-    successMessage: t('notifications.registrationSuccess'),
+    successMessage: null, // Don't show login success because email verification is required
     onSuccess: (res) => {
-      onAuthSuccess(res.user)
-      onClose()
+      if (res?.requiresEmailVerification) {
+        setVerificationEmail(res.email || regData.email)
+        setShowVerification(true)
+        setVerificationCode('')
+        setError('')
+        setResendCooldown(60)
+        showInfo(t('auth.verification.codeSentNotification'))
+      } else if (res?.user) {
+        onAuthSuccess(res.user)
+        onClose()
+      }
+    },
+    onError: (err) => {
+      setError(getApiErrorMessage(err, { t }))
+      return false
     },
     t,
   })
@@ -138,12 +187,58 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     await doRegister()
   }
 
+  // ── Verify Email form submission ─────────────────────────────────
+  const handleVerifyEmail = async (e) => {
+    e.preventDefault()
+    setError('')
+    const cleanCode = verificationCode.trim()
+
+    if (cleanCode.length !== 6) {
+      setError(t('auth.verification.codeRequired'))
+      return
+    }
+
+    setVerifyLoading(true)
+    try {
+      const res = await api.verifyEmail(verificationEmail, cleanCode)
+      showSuccess(t('notifications.loginSuccess'))
+      if (res.user) {
+        onAuthSuccess(res.user)
+      }
+      onClose()
+    } catch (err) {
+      setError(getApiErrorMessage(err, { t }))
+    } finally {
+      setVerifyLoading(false)
+    }
+  }
+
+  // ── Resend Verification Code ─────────────────────────────────────
+  const handleResendCode = async () => {
+    if (resendCooldown > 0 || resendLoading) return
+    setError('')
+    setResendLoading(true)
+    try {
+      await api.resendVerification(verificationEmail)
+      showSuccess(t('auth.verification.resendSuccess'))
+      setResendCooldown(60)
+    } catch (err) {
+      setError(getApiErrorMessage(err, { t }))
+    } finally {
+      setResendLoading(false)
+    }
+  }
+
   // ── Forgot password form submission ──────────────────────────────
   const { isSubmitting: forgotLoading, handleSubmit: doForgot } = useFormSubmit({
     onSubmit: () => api.forgotPassword(forgotEmail),
     onSuccess: () => {
       showInfo(t('notifications.forgotPasswordSent'))
       setForgotSent(true)
+    },
+    onError: (err) => {
+      setError(getApiErrorMessage(err, { t }))
+      return false
     },
     t,
   })
@@ -156,13 +251,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
 
   const handleBackToLogin = () => {
     setShowForgotPassword(false)
+    setShowVerification(false)
     setForgotSent(false)
     setForgotEmail('')
+    setVerificationCode('')
     setError('')
+    setTab('login')
   }
 
-  // Determine which loading state is active for disabling UI
-  const loading = loginLoading || regLoading || forgotLoading
+  const handleBackToRegister = () => {
+    setShowVerification(false)
+    setVerificationCode('')
+    setError('')
+    setTab('register')
+  }
 
   if (!isOpen) return null
 
@@ -177,6 +279,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
         className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white shadow-2xl"
         style={{ animation: 'slideUp 0.25s ease' }}
       >
+        {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
           <img src="/logo/logo.png" alt="Star Dewedar" className="h-10 w-auto object-contain" />
           <button
@@ -188,7 +291,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           </button>
         </div>
 
-        {!showForgotPassword && (
+        {/* Tab Navigation (only for standard login/register) */}
+        {!showForgotPassword && !showVerification && (
           <div className="mt-4 flex border-b border-slate-200 px-6 flex-shrink-0">
             {['login', 'register'].map((tabKey) => (
               <button
@@ -208,8 +312,106 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           </div>
         )}
 
+        {/* Content Body */}
         <div className="px-6 py-6 overflow-y-auto flex-1">
-          {showForgotPassword ? (
+          {showVerification ? (
+            /* ── Email Verification View ────────────────────────────── */
+            <div>
+              <button
+                type="button"
+                onClick={handleBackToLogin}
+                className="mb-4 flex items-center gap-1 text-xs font-headline font-bold uppercase tracking-widest text-slate-500 transition-colors hover:text-slate-700"
+              >
+                <span className="material-symbols-outlined text-sm">arrow_back</span>
+                {t('auth.backToLogin')}
+              </button>
+
+              <div className="mb-4 text-center">
+                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow-50 text-yellow-600">
+                  <span className="material-symbols-outlined text-3xl">mark_email_unread</span>
+                </div>
+                <h3 className="font-headline text-base font-bold uppercase tracking-wider text-slate-900">
+                  {t('auth.verification.title')}
+                </h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-slate-600">
+                  {t('auth.verification.subtitle')}
+                </p>
+                <p className="mt-0.5 text-xs font-semibold text-slate-900 break-all">
+                  {verificationEmail}
+                </p>
+              </div>
+
+              <form onSubmit={handleVerifyEmail} className="space-y-4">
+                <div>
+                  <label className="auth-label text-center mb-2">
+                    {t('auth.verification.codeLabel')}
+                  </label>
+                  <input
+                    id="auth-verification-code"
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    required
+                    value={verificationCode}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6)
+                      setVerificationCode(val)
+                      if (error) setError('')
+                    }}
+                    className="auth-input text-center text-2xl font-mono font-bold tracking-[0.4em] py-3"
+                    placeholder="000000"
+                    autoFocus
+                  />
+                  <p className="mt-1.5 text-[11px] text-slate-400 text-center">
+                    {t('auth.verification.expiryNotice')}
+                  </p>
+                </div>
+
+                {error && (
+                  <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-600 rounded">
+                    {error}
+                  </div>
+                )}
+
+                <SubmitButton
+                  id="auth-verify-submit"
+                  loading={verifyLoading}
+                  loadingText={t('auth.verification.verifying')}
+                  disabled={verificationCode.length !== 6}
+                  className="auth-btn-primary inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {t('auth.verification.verifyButton')}
+                </SubmitButton>
+
+                <div className="flex flex-col items-center gap-2 pt-2 text-center text-xs text-slate-500">
+                  <div className="flex items-center gap-1.5 flex-wrap justify-center">
+                    <span>{t('auth.verification.didntReceive')}</span>
+                    <button
+                      type="button"
+                      onClick={handleResendCode}
+                      disabled={resendCooldown > 0 || resendLoading}
+                      className="font-semibold text-yellow-600 hover:text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {resendLoading
+                        ? t('auth.verification.resending')
+                        : resendCooldown > 0
+                        ? t('auth.verification.resendCooldown', { seconds: resendCooldown })
+                        : t('auth.verification.resendCode')}
+                    </button>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleBackToRegister}
+                    className="text-[11px] text-slate-400 hover:text-slate-600 underline transition-colors"
+                  >
+                    {t('auth.verification.wrongEmail')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          ) : showForgotPassword ? (
+            /* ── Forgot Password View ───────────────────────────────── */
             <div>
               <button
                 type="button"
@@ -260,6 +462,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       placeholder="name@company.com"
                     />
                   </div>
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-600 rounded">
+                      {error}
+                    </div>
+                  )}
                   <SubmitButton
                     id="auth-forgot-submit"
                     loading={forgotLoading}
@@ -272,6 +479,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
               )}
             </div>
           ) : (
+            /* ── Login / Register Tabs ──────────────────────────────── */
             <>
               {tab === 'login' && (
                 <form onSubmit={handleLogin} className="space-y-4">
@@ -312,6 +520,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       {t('auth.forgotPassword')}
                     </button>
                   </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-600 rounded">
+                      {error}
+                    </div>
+                  )}
+
                   <SubmitButton
                     id="auth-login-submit"
                     loading={loginLoading}
@@ -403,11 +618,6 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       {regData.confirmPassword.length > 0 && !passwordsMatch && (
                         <p className="mt-1 text-[11px] text-red-500">{t('auth.passwordMismatch')}</p>
                       )}
-                      {error && (
-                        <p className="mt-1 text-xs text-red-600">
-                          {error}
-                        </p>
-                      )}
                     </div>
                     <div>
                       <label className="auth-label">{t('auth.phoneOptional')}</label>
@@ -460,6 +670,13 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       />
                     </div>
                   </div>
+
+                  {error && (
+                    <div className="p-3 bg-red-50 border border-red-200 text-xs text-red-600 rounded">
+                      {error}
+                    </div>
+                  )}
+
                   <SubmitButton
                     id="auth-reg-submit"
                     loading={regLoading}
