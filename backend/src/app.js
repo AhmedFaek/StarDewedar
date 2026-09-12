@@ -84,6 +84,19 @@ app.use((err, req, res, next) => {
         if (Array.isArray(err?.errors) && err.errors.length > 0) {
             payload.errors = err.errors
         }
+        if (err?.requiresEmailVerification) {
+            payload.requiresEmailVerification = true
+            if (err?.email) payload.email = err.email
+        }
+        if (err?.code && typeof err.code === 'string') {
+            payload.code = err.code
+        }
+        if (typeof err?.remaining === 'number') {
+            payload.remaining = err.remaining
+        }
+        if (typeof err?.retryAfter === 'number') {
+            payload.retryAfter = err.retryAfter
+        }
         return res.status(status).json(payload)
     }
 
