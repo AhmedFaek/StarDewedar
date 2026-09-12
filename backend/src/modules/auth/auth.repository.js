@@ -56,3 +56,49 @@ export const changePassword = (userId, hashedPassword) => {
         },
     })
 }
+
+/* ─── Email verification operations ─────────────────────────────────────── */
+
+/**
+ * Store SHA-256 hashed verification code, expiration, and update last sent timestamp.
+ */
+export const saveVerificationCode = (userId, { hashedCode, expiresAt, attempts = 0, lastSent = new Date() }) => {
+    return prisma.user.update({
+        where: { id: userId },
+        data: {
+            email_verification_hash: hashedCode,
+            email_verification_expires_at: expiresAt,
+            email_verification_attempts: attempts,
+            email_verification_last_sent: lastSent,
+        },
+    })
+}
+
+/**
+ * Mark user's email as verified and clear all verification fields.
+ */
+export const clearVerificationFields = (userId) => {
+    return prisma.user.update({
+        where: { id: userId },
+        data: {
+            email_verified: true,
+            email_verification_hash: null,
+            email_verification_expires_at: null,
+            email_verification_attempts: 0,
+            email_verification_last_sent: null,
+        },
+    })
+}
+
+/**
+ * Increment the failed verification attempt count for a user.
+ */
+export const incrementVerificationAttempts = (userId) => {
+    return prisma.user.update({
+        where: { id: userId },
+        data: {
+            email_verification_attempts: { increment: 1 },
+        },
+    })
+}
+
