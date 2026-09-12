@@ -22,7 +22,7 @@ export const resetPasswordEmailTemplate = ({ resetUrl, expiresInMinutes = 15 }) 
                     <tr>
                         <td style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%); padding:32px 40px; text-align:center;">
                             <h1 style="color:#e8b540; margin:0; font-size:28px; font-weight:700; letter-spacing:1px;">
-                                &#9733; Star Dewedar
+                                Star Dewedar
                             </h1>
                         </td>
                     </tr>
