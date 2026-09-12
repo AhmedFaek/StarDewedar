@@ -76,6 +76,11 @@ export const normalizeApiError = (error) => {
       validationErrors: Array.isArray(error.validationErrors) && error.validationErrors.length > 0
         ? error.validationErrors
         : extractValidationMessages(error),
+      code: error.code || error.data?.code,
+      remaining: error.remaining ?? error.data?.remaining,
+      retryAfter: error.retryAfter ?? error.data?.retryAfter,
+      requiresEmailVerification: error.requiresEmailVerification ?? error.data?.requiresEmailVerification,
+      email: error.email || error.data?.email,
       raw: error.raw ?? error,
     }
   }
@@ -89,6 +94,11 @@ export const normalizeApiError = (error) => {
     message,
     status,
     validationErrors,
+    code: error?.code || error?.data?.code,
+    remaining: error?.remaining ?? error?.data?.remaining,
+    retryAfter: error?.retryAfter ?? error?.data?.retryAfter,
+    requiresEmailVerification: error?.requiresEmailVerification ?? error?.data?.requiresEmailVerification,
+    email: error?.email || error?.data?.email,
     raw: error,
   }
 }
@@ -98,17 +108,72 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
   const translate = typeof t === 'function' ? t : null
   const validationErrors = Array.isArray(normalized.validationErrors) ? normalized.validationErrors : []
 
-  const messageFor = (key) => {
+  const messageFor = (key, options = {}) => {
     if (!translate) return fallbackMessage
-    return translate(key, { defaultValue: fallbackMessage })
+    return translate(key, { defaultValue: fallbackMessage, ...options })
   }
 
   const message = toLower(normalized.message)
+  const code = String(normalized.code || '').toUpperCase()
 
+  // 1. Validation errors
   if (validationErrors.length > 0) {
     return validationErrors.join('\n')
   }
 
+  // 2. Authentication & Email Verification domain errors
+  if (code === 'INVALID_VERIFICATION_CODE' || message.includes('invalid verification code')) {
+    const attemptsMatch = normalized.message.match(/(\d+)\s+attempt/i)
+    const remaining = normalized.remaining ?? (attemptsMatch ? parseInt(attemptsMatch[1], 10) : undefined)
+
+    if (remaining !== undefined && remaining > 0) {
+      return messageFor('auth.verification.invalidCodeWithAttempts', { count: remaining })
+    }
+    if (message.includes('maximum') || message.includes('reached') || remaining === 0) {
+      return messageFor('auth.verification.maxAttemptsReached')
+    }
+    return messageFor('auth.verification.invalidCode')
+  }
+
+  if (code === 'MAX_VERIFICATION_ATTEMPTS_EXCEEDED' || message.includes('too many failed attempts')) {
+    return messageFor('auth.verification.maxAttemptsExceeded')
+  }
+
+  if (code === 'VERIFICATION_CODE_EXPIRED' || (message.includes('code') && message.includes('expired'))) {
+    return messageFor('auth.verification.codeExpired')
+  }
+
+  if (code === 'RESEND_COOLDOWN' || (message.includes('wait') && message.includes('second'))) {
+    const secondsMatch = normalized.message.match(/wait\s+(\d+)\s+second/i)
+    const seconds = normalized.retryAfter ?? (secondsMatch ? secondsMatch[1] : 60)
+    return messageFor('auth.verification.resendCooldownError', { seconds })
+  }
+
+  if (code === 'DISPOSABLE_EMAIL_NOT_ALLOWED' || message.includes('disposable') || message.includes('temporary email')) {
+    return messageFor('auth.verification.disposableEmailError')
+  }
+
+  if (code === 'INVALID_EMAIL_DOMAIN' || message.includes('email domain')) {
+    return messageFor('auth.verification.invalidDomainError')
+  }
+
+  if (normalized.requiresEmailVerification || message.includes('verify your email address before logging in') || message.includes('verify your email')) {
+    return messageFor('auth.verification.unverifiedLoginError')
+  }
+
+  if (message.includes('email already exists') || message.includes('already registered')) {
+    return messageFor('auth.emailAlreadyExists')
+  }
+
+  if (message.includes('current password is incorrect') || message.includes('current password')) {
+    return messageFor('auth.currentPasswordIncorrect')
+  }
+
+  if (message.includes('passwords do not match') || message.includes('password mismatch')) {
+    return messageFor('auth.passwordMismatch')
+  }
+
+  // 3. HTTP status-based defaults
   if (normalized.status === 401) {
     if (
       message.includes('invalid credentials') ||
@@ -144,7 +209,6 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
   }
 
   if (normalized.message && normalized.message !== DEFAULT_MESSAGE) {
-    // If the message looks like raw JSON (e.g. Zod stringified errors), show generic error
     const trimmedMsg = normalized.message.trim()
     if (trimmedMsg.startsWith('[') || trimmedMsg.startsWith('{')) {
       return messageFor('notifications.validationError')
@@ -161,6 +225,20 @@ export const createApiError = (response, body) => {
   error.status = response.status
   error.data = body
   error.__normalizedApiError = true
+
+  if (body?.requiresEmailVerification) {
+    error.requiresEmailVerification = true
+    error.email = body.email
+  }
+  if (body?.code) {
+    error.code = body.code
+  }
+  if (body?.remaining !== undefined) {
+    error.remaining = body.remaining
+  }
+  if (body?.retryAfter !== undefined) {
+    error.retryAfter = body.retryAfter
+  }
 
   if (Array.isArray(body?.errors)) {
     error.errors = body.errors

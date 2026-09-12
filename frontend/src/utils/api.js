@@ -135,10 +135,32 @@ export const api = {
   }).then(async (res) => {
     const body = await readResponseBody(res)
     if (!res.ok) throw createApiError(res, body)
-    saveTokens(body.accessToken, body.refreshToken)
-    saveUser(body.user)
+    if (body.accessToken && body.refreshToken) {
+      saveTokens(body.accessToken, body.refreshToken)
+      saveUser(body.user)
+    }
     return body
   }),
+
+  verifyEmail: (email, code) => fetch(`${API_URL}/auth/verify-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, code }),
+  }).then(async (res) => {
+    const body = await readResponseBody(res)
+    if (!res.ok) throw createApiError(res, body)
+    if (body.accessToken && body.refreshToken) {
+      saveTokens(body.accessToken, body.refreshToken)
+      saveUser(body.user)
+    }
+    return body
+  }),
+
+  resendVerification: (email) => fetch(`${API_URL}/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email }),
+  }).then(handleResponse),
 
   login: (email, password) => fetch(`${API_URL}/auth/login`, {
     method: 'POST',
