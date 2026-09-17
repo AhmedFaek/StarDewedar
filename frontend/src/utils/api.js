@@ -214,6 +214,7 @@ export const api = {
 
   getMyQuotes: () => authFetch(`${API_URL}/users/me/quotes`),
   getMyVisits: () => authFetch(`${API_URL}/users/me/visits`),
+  getMyBOQs: () => authFetch(`${API_URL}/users/me/boq`),
 
   getLocalizedField: (obj, field, lang) => {
     if (!obj) return ''
