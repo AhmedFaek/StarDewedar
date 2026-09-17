@@ -122,11 +122,14 @@ export const api = {
     }).then(handleResponse)
   },
 
-  sendVisitRequest: (data) => fetch(`${API_URL}/visits`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  }).then(handleResponse),
+  sendVisitRequest: (data) => {
+    const isFormData = data instanceof FormData
+    return fetch(`${API_URL}/visits`, {
+      method: 'POST',
+      headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+      body: isFormData ? data : JSON.stringify(data),
+    }).then(handleResponse)
+  },
 
   register: (data) => fetch(`${API_URL}/auth/register`, {
     method: 'POST',

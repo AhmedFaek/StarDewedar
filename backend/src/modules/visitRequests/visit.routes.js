@@ -7,6 +7,8 @@ import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
 import { ROLES } from '../../utils/constants.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
+import upload from '../../middleware/upload.middleware.js'
+import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 
 const router = express.Router()
 
@@ -21,7 +23,8 @@ const visitLimiter = rateLimit({
 })
 
 // Create a new visit request
-router.post('/', visitLimiter, controller.createVisit)
+// Flow: rate limiter → multer (parse multipart, single file optional) → Turnstile verify → controller
+router.post('/', visitLimiter, upload.single('file'), verifyTurnstile, controller.createVisit)
 
 // Get all visit requests
 router.get('/', auth,

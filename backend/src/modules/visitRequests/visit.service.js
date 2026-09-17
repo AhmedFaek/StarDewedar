@@ -3,13 +3,33 @@ import * as contactService from '../contactMessages/contact.service.js';
 import { baseEmailTemplate } from '../../utils/email.template.js';
 import { sendEmail } from '../../utils/mailer.js';
 import { escapeHtml } from '../../utils/htmlEscaper.js';
+import cloudinary from '../../config/storage.js';
 
-export const createVisitRequest = async (data) => {
+const uploadToCloudinary = (file) => {
+    return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+            { resource_type: 'auto' },
+            (error, result) => {
+                if (error) return reject(error)
+                resolve(result)
+            }
+        )
+        stream.end(file.buffer)
+    })
+}
+
+export const createVisitRequest = async (data, file) => {
     const visitData = {
         ...data,
         status: 'pending',
         preferred_date: new Date(data.preferred_date),
     };
+
+    // Handle optional file upload
+    if (file) {
+        const result = await uploadToCloudinary(file)
+        visitData.file_url = result.secure_url
+    }
 
     const visitRequest = await repo.create(visitData);
 
@@ -28,6 +48,18 @@ export const sendVisitRequestEmail = async (visitRequest) => {
         const factoryActivity = escapeHtml(visitRequest.factory_activity);
         const address = escapeHtml(visitRequest.address);
         const details = escapeHtml(visitRequest.details);
+
+        const fileUrl = visitRequest.file_url ? escapeHtml(visitRequest.file_url) : null
+        const fileInfo = fileUrl
+            ? `
+        <p>
+          <strong>File:</strong>
+          <a href="${fileUrl}" style="color:#2F2FE4;">
+            Download File
+          </a>
+        </p>
+      `
+            : '';
 
         const content = `
       <div style="margin-bottom:20px;">
@@ -64,6 +96,8 @@ export const sendVisitRequestEmail = async (visitRequest) => {
         <strong>Details:</strong>
         <p>${details}</p>
       </div>
+
+      ${fileInfo}
 
       <div style="margin-top:25px;">
         <a href="mailto:${email}"

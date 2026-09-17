@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Icon from '../shared/Icon'
 import InputField from '../forms/InputField'
@@ -6,6 +6,7 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import SubmitButton from '../forms/SubmitButton'
+import TurnstileWidget from '../forms/TurnstileWidget'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
@@ -28,6 +29,10 @@ export default function QuoteForm({ productId = null }) {
   const [fileName, setFileName] = useState('')
   const [errors, setErrors] = useState({})
   const [fileUploadKey, setFileUploadKey] = useState(0)
+
+  // Turnstile state — null means not yet verified
+  const [turnstileToken, setTurnstileToken] = useState(null)
+  const turnstileRef = useRef(null)
 
   const validate = () => {
     const e = {}
@@ -102,6 +107,12 @@ export default function QuoteForm({ productId = null }) {
     }
   }
 
+  // Reset Turnstile widget (called after success or failure requiring re-verification)
+  const resetTurnstile = () => {
+    setTurnstileToken(null)
+    turnstileRef.current?.reset()
+  }
+
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
       const formDataToSend = new FormData()
@@ -110,6 +121,8 @@ export default function QuoteForm({ productId = null }) {
       formDataToSend.append('phone', formData.phone)
       formDataToSend.append('email', formData.email)
       formDataToSend.append('details', formData.details)
+      // Include the verified Turnstile token
+      formDataToSend.append('turnstileToken', turnstileToken)
 
       if (formData.product_id && formData.product_id !== 'custom') {
         formDataToSend.append('product_id', formData.product_id)
@@ -134,6 +147,14 @@ export default function QuoteForm({ productId = null }) {
       }))
       setFileName('')
       setFileUploadKey((prev) => prev + 1)
+      // Reset Turnstile so a fresh token is required for any subsequent submission
+      resetTurnstile()
+    },
+    onError: () => {
+      // Reset Turnstile on failure so the user must re-verify before retrying
+      resetTurnstile()
+      // Return false so the hook still shows the error toast
+      return false
     },
     t,
   })
@@ -156,6 +177,9 @@ export default function QuoteForm({ productId = null }) {
     })),
     { value: 'custom', label: t('requestQuote.customProduct') },
   ]
+
+  // Submit is allowed only when Turnstile has been verified
+  const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
     <section className="lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
@@ -182,10 +206,25 @@ export default function QuoteForm({ productId = null }) {
           )}
           <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={5} required error={errors.details} />
           <FileUploadField key={fileUploadKey} label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} />
+
+          {/* Cloudflare Turnstile — must be completed before submitting */}
+          <div className="space-y-2">
+            <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
+              {t('turnstile.verifyPrompt')}
+            </p>
+            <TurnstileWidget
+              ref={turnstileRef}
+              onVerify={(token) => setTurnstileToken(token)}
+              onExpire={() => setTurnstileToken(null)}
+              onError={() => setTurnstileToken(null)}
+            />
+          </div>
+
           <div className="pt-4 sm:pt-6">
             <SubmitButton
               loading={isSubmitting}
               loadingText={t('requestQuote.submitting')}
+              disabled={isSubmitDisabled}
               className="w-full sm:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{t('requestQuote.submitRequest')}</span>

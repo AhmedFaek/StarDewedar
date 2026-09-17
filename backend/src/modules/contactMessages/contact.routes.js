@@ -6,6 +6,7 @@ import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
 import { ROLES } from '../../utils/constants.js'
+import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 
 const router = express.Router()
 
@@ -20,7 +21,8 @@ const contactLimiter = rateLimit({
 })
 
 // Public route (website users)
-router.post('/', contactLimiter, validate(createContactSchema), controller.createContact)
+// Flow: rate limiter → Turnstile verify → Zod validation → controller
+router.post('/', contactLimiter, verifyTurnstile, validate(createContactSchema), controller.createContact)
 
 // Admin only (dashboard)
 router.get(

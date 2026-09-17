@@ -190,6 +190,8 @@
     "technicalDetails": "Technical Details & Purpose",
     "technicalDetailsPlaceholder": "DESCRIBE SPECIFIC TECHNICAL ISSUES OR PROJECT SCOPE...",
     "submitButton": "SCHEDULE ENGINEER VISIT",
+    "fileUpload": "Supporting Documents (PDF/JPG/PNG)",
+    "fileSelected": "✓ File selected:",
     "successMsg": "✓ Visit request scheduled successfully. We will contact you soon.",
     "failMsg": "✗ Failed to schedule visit request. Please try again.",
     "errorMsg": "✗ An error occurred. Please try again."
@@ -540,6 +542,12 @@
     "reqLowercase": "At least one lowercase letter",
     "reqNumber": "At least one number",
     "weakPassword": "Password does not meet the security requirements"
+  },
+
+  "turnstile": {
+    "verifyPrompt": "Please complete the security check before submitting",
+    "verifyRequired": "Please complete the security verification before submitting.",
+    "verificationFailed": "Please complete the security verification and try again."
   }
 }
 

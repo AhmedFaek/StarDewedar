@@ -10,6 +10,7 @@ export const createVisitRequestSchema = z.object({
     address: z.string().min(5).max(500),
     preferred_date: z.string().datetime(),
     details: z.string().min(5).max(10000),
+    file_url: z.string().url().max(1000).optional(),
 })
 
 export const updateVisitRequestSchema = z.object({

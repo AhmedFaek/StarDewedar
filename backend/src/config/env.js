@@ -13,6 +13,7 @@ const requiredEnv = [
     'YAHOO_EMAIL',
     'YAHOO_PASSWORD',
     'FRONTEND_URL',
+    'TURNSTILE_SECRET_KEY'
 ]
 
 // Validate required variables
@@ -34,4 +35,5 @@ export default {
     yahooPassword: process.env.YAHOO_PASSWORD,
     frontendUrl: process.env.FRONTEND_URL,
     nodeEnv: process.env.NODE_ENV || 'development',
+    turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
 }
