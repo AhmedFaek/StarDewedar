@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
+import TurnstileWidget from '../components/forms/TurnstileWidget'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
@@ -22,6 +23,10 @@ export default function Contact() {
     message: '',
   })
   const [errors, setErrors] = useState({})
+
+  // Turnstile state — null means not yet verified
+  const [turnstileToken, setTurnstileToken] = useState(null)
+  const turnstileRef = useRef(null)
 
   const validate = () => {
     const e = {}
@@ -65,8 +70,14 @@ export default function Contact() {
       .catch(() => {})
   }, [])
 
+  // Reset Turnstile widget (called after success or failure requiring re-verification)
+  const resetTurnstile = () => {
+    setTurnstileToken(null)
+    turnstileRef.current?.reset()
+  }
+
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
-    onSubmit: () => api.sendContactMessage(formData),
+    onSubmit: () => api.sendContactMessage({ ...formData, turnstileToken }),
     successMessage: t('notifications.contactSuccess'),
     onSuccess: () => {
       setErrors({})
@@ -78,8 +89,12 @@ export default function Contact() {
         whatsapp_number: '',
         message: '',
       })
+      // Reset Turnstile so a fresh token is required for any subsequent submission
+      resetTurnstile()
     },
     onError: (error) => {
+      // Reset Turnstile on failure so the user must re-verify before retrying
+      resetTurnstile()
       // Try to map server-side field errors back to the form
       const serverErrors = error?.errors
       if (Array.isArray(serverErrors) && serverErrors.length > 0) {
@@ -119,6 +134,9 @@ export default function Contact() {
       { label: t('contact.emailLabel'), text: t('contact.emailText'), icon: 'mail' },
     ],
   }
+
+  // Submit is allowed only when Turnstile has been verified
+  const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -199,9 +217,24 @@ export default function Contact() {
                       <span className="text-[11px] text-red-500 font-label">{errors.message}</span>
                     )}
                   </div>
+
+                  {/* Cloudflare Turnstile — must be completed before submitting */}
+                  <div className="space-y-2">
+                    <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
+                      {t('turnstile.verifyPrompt')}
+                    </p>
+                    <TurnstileWidget
+                      ref={turnstileRef}
+                      onVerify={(token) => setTurnstileToken(token)}
+                      onExpire={() => setTurnstileToken(null)}
+                      onError={() => setTurnstileToken(null)}
+                    />
+                  </div>
+
                   <SubmitButton
                     loading={isSubmitting}
                     loadingText={t('contact.transmitting')}
+                    disabled={isSubmitDisabled}
                     className="bg-primary text-white px-12 py-5 font-headline font-bold uppercase text-sm tracking-widest hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center"
                   >
                     {t('contact.transmitInquiry')}
