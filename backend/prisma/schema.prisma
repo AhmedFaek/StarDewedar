@@ -168,6 +168,7 @@ model VisitRequest {
   address          String
   preferred_date   DateTime
   details          String
+  file_url         String?
   status           String
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
