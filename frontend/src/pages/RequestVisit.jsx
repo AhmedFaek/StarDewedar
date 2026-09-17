@@ -1,12 +1,15 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import TextAreaField from '../components/forms/TextAreaField'
+import FileUploadField from '../components/forms/FileUploadField'
 import SubmitButton from '../components/forms/SubmitButton'
+import TurnstileWidget from '../components/forms/TurnstileWidget'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
+import { validateUploadFile } from '../utils/fileValidation'
 import { useFormSubmit } from '../hooks/useFormSubmit.js'
 
 export default function RequestVisit() {
@@ -23,9 +26,30 @@ export default function RequestVisit() {
     preferred_date: new Date().toISOString().split('T')[0],
   })
 
+  const [file, setFile] = useState(null)
+  const [fileUploadKey, setFileUploadKey] = useState(0)
+
+  // Turnstile state — null means not yet verified
+  const [turnstileToken, setTurnstileToken] = useState(null)
+  const turnstileRef = useRef(null)
+
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile) {
+      const { valid } = validateUploadFile(selectedFile, t)
+      if (!valid) {
+        setFile(null)
+        return
+      }
+      setFile(selectedFile)
+    } else {
+      setFile(null)
+    }
   }
 
   useEffect(() => {
@@ -44,13 +68,36 @@ export default function RequestVisit() {
       .catch(() => {})
   }, [])
 
+  // Reset Turnstile widget (called after success or failure requiring re-verification)
+  const resetTurnstile = () => {
+    setTurnstileToken(null)
+    turnstileRef.current?.reset()
+  }
+
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
-      const payload = {
-        ...formData,
-        status: 'PENDING',
-        preferred_date: new Date(formData.preferred_date).toISOString(),
+      // Build FormData so the backend (multer) can parse the multipart body,
+      // and so the Turnstile token and optional file are included.
+      const payload = new FormData()
+      payload.append('factory_name', formData.factory_name)
+      payload.append('factory_activity', formData.factory_activity)
+      payload.append('name', formData.name)
+      payload.append('phone_number', formData.phone_number)
+      if (formData.whatsapp_number) {
+        payload.append('whatsapp_number', formData.whatsapp_number)
       }
+      payload.append('email', formData.email)
+      payload.append('address', formData.address)
+      payload.append('details', formData.details)
+      payload.append('preferred_date', new Date(formData.preferred_date).toISOString())
+      payload.append('status', 'PENDING')
+      // Include the verified Turnstile token
+      payload.append('turnstileToken', turnstileToken)
+      // Attach file if one was selected
+      if (file instanceof File) {
+        payload.append('file', file)
+      }
+
       return api.sendVisitRequest(payload)
     },
     successMessage: t('notifications.visitSuccess'),
@@ -66,6 +113,16 @@ export default function RequestVisit() {
         details: '',
         preferred_date: new Date().toISOString().split('T')[0],
       })
+      setFile(null)
+      setFileUploadKey((prev) => prev + 1)
+      // Reset Turnstile so a fresh token is required for any subsequent submission
+      resetTurnstile()
+    },
+    onError: () => {
+      // Reset Turnstile on failure so the user must re-verify before retrying
+      resetTurnstile()
+      // Return false so the hook still shows the error toast
+      return false
     },
     t,
   })
@@ -74,6 +131,9 @@ export default function RequestVisit() {
     e.preventDefault()
     await submitForm()
   }
+
+  // Submit is allowed only when Turnstile has been verified
+  const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -143,13 +203,34 @@ export default function RequestVisit() {
                     <InputField label={t('requestVisit.physicalAddress')} placeholder="" name="address" value={formData.address} onChange={handleChange} required />
                     <InputField label={t('requestVisit.preferredDate')} type="date" name="preferred_date" value={formData.preferred_date} onChange={handleChange} required />
                     <TextAreaField label={t('requestVisit.technicalDetails')} placeholder={t('requestVisit.technicalDetailsPlaceholder')} name="details" value={formData.details} onChange={handleChange} rows={4} required />
+                    {/* Optional file/document attachment */}
+                    <FileUploadField
+                      key={fileUploadKey}
+                      label={t('requestVisit.fileUpload')}
+                      name="file"
+                      onChange={handleFileChange}
+                    />
                   </div>
                 </div>
 
                 <div className="pt-6 sm:pt-8 space-y-6">
+                  {/* Cloudflare Turnstile — must be completed before submitting */}
+                  <div className="space-y-2">
+                    <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.2em] text-primary">
+                      {t('turnstile.verifyPrompt')}
+                    </p>
+                    <TurnstileWidget
+                      ref={turnstileRef}
+                      onVerify={(token) => setTurnstileToken(token)}
+                      onExpire={() => setTurnstileToken(null)}
+                      onError={() => setTurnstileToken(null)}
+                    />
+                  </div>
+
                   <SubmitButton
                     loading={isSubmitting}
                     loadingText={t('requestQuote.submitting')}
+                    disabled={isSubmitDisabled}
                     className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <span>{t('requestVisit.submitButton')}</span>
