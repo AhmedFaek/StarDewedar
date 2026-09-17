@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button } from '../components'
 import { Pagination } from '../components/ui/Pagination'
@@ -11,10 +12,9 @@ export default function AllRequests() {
   const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
 
-  const [activeTab, setActiveTab] = useState(() => {
-    const tab = new URLSearchParams(window.location.search).get('tab')
-    return ['all', 'visit', 'quote', 'boq'].includes(tab) ? tab : 'all'
-  })
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tabFromQuery = searchParams.get('tab')
+  const activeTab = ['all', 'visit', 'quote', 'boq'].includes(tabFromQuery) ? tabFromQuery : 'all'
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -267,15 +267,16 @@ export default function AllRequests() {
   }
 
   const handleTabChange = (tabId) => {
-    setActiveTab(tabId)
     setCurrentPage(1)
-    const url = new URL(window.location.href)
     if (tabId === 'all') {
-      url.searchParams.delete('tab')
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.delete('tab')
+      setSearchParams(nextParams, { replace: true })
     } else {
-      url.searchParams.set('tab', tabId)
+      const nextParams = new URLSearchParams(searchParams)
+      nextParams.set('tab', tabId)
+      setSearchParams(nextParams, { replace: true })
     }
-    window.history.replaceState({}, '', url.toString())
   }
 
   return (

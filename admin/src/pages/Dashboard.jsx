@@ -25,7 +25,8 @@ export default function Dashboard() {
 
   const pendingQuotes = stats?.newQuotes ?? 0
   const pendingVisits = stats?.newVisits ?? 0
-  const hasPending = !loading && (pendingQuotes > 0 || pendingVisits > 0)
+  const pendingBOQs   = stats?.newBOQs ?? 0
+  const hasPending = !loading && (pendingQuotes > 0 || pendingVisits > 0 || pendingBOQs > 0)
 
   const statCardsData = [
     {
@@ -34,6 +35,7 @@ export default function Dashboard() {
       trend: t('dashboard.catalog_items'),
       icon: 'inventory_2',
       variant: 'default',
+      link: '/products',
     },
     {
       label: t('dashboard.total_projects'),
@@ -41,6 +43,7 @@ export default function Dashboard() {
       trend: t('dashboard.active_projects'),
       icon: 'account_tree',
       variant: 'tertiary',
+      link: '/projects',
     },
     {
       label: t('dashboard.quote_requests'),
@@ -49,6 +52,7 @@ export default function Dashboard() {
       icon: 'request_quote',
       variant: 'default',
       badge: true,
+      link: '/requests?tab=quote',
     },
     {
       label: t('dashboard.visit_requests'),
@@ -57,6 +61,16 @@ export default function Dashboard() {
       icon: 'factory',
       variant: 'gradient',
       badge: true,
+      link: '/requests?tab=visit',
+    },
+    {
+      label: t('dashboard.boq_requests'),
+      value: loading ? '—' : pendingBOQs,
+      trend: t('dashboard.pending'),
+      icon: 'receipt_long',
+      variant: 'default',
+      badge: true,
+      link: '/requests?tab=boq',
     },
     {
       label: t('dashboard.contact_messages'),
@@ -64,6 +78,7 @@ export default function Dashboard() {
       trend: t('dashboard.received_messages'),
       icon: 'chat',
       variant: 'default',
+      link: '/messages',
     },
     {
       label: t('dashboard.total_customers'),
@@ -71,6 +86,7 @@ export default function Dashboard() {
       trend: t('dashboard.registered_customers'),
       icon: 'group',
       variant: 'tertiary',
+      link: '/users',
     },
   ]
 
@@ -96,15 +112,21 @@ export default function Dashboard() {
           </div>
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {pendingQuotes > 0 && (
-              <Link to="/quote-requests" className="px-4 py-2 bg-amber-500 text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors inline-flex items-center gap-1.5">
+              <Link to="/requests?tab=quote" className="px-4 py-2 bg-amber-500 text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors inline-flex items-center gap-1.5 shadow-xs">
                 <span>{t('dashboard.quote_requests')}</span>
                 <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingQuotes}</span>
               </Link>
             )}
             {pendingVisits > 0 && (
-              <Link to="/visits" className="px-4 py-2 bg-primary text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-primary-container transition-colors inline-flex items-center gap-1.5">
+              <Link to="/requests?tab=visit" className="px-4 py-2 bg-primary text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-primary-container transition-colors inline-flex items-center gap-1.5 shadow-xs">
                 <span>{t('dashboard.visit_requests')}</span>
                 <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingVisits}</span>
+              </Link>
+            )}
+            {pendingBOQs > 0 && (
+              <Link to="/requests?tab=boq" className="px-4 py-2 bg-emerald-600 text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 shadow-xs">
+                <span>{t('dashboard.boq_requests')}</span>
+                <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingBOQs}</span>
               </Link>
             )}
           </div>
@@ -112,9 +134,15 @@ export default function Dashboard() {
       )}
 
       <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {statCardsData.map((stat, index) => (
-          <StatCard key={index} {...stat} />
-        ))}
+        {statCardsData.map((stat, index) =>
+          stat.link ? (
+            <Link key={index} to={stat.link} className="block transition-transform hover:scale-[1.01]">
+              <StatCard {...stat} />
+            </Link>
+          ) : (
+            <StatCard key={index} {...stat} />
+          )
+        )}
       </div>
     </div>
   )
