@@ -5,7 +5,7 @@ import { getPaginationParams } from '../../utils/pagination.js'
 export const createVisit = async (req, res) => {
     try {
         const validatedData = createVisitRequestSchema.parse(req.body)
-        const visit = await service.createVisitRequest(validatedData)
+        const visit = await service.createVisitRequest(validatedData, req.file)
         res.status(201).json({
             success: true,
             message: 'Visit request created successfully',
