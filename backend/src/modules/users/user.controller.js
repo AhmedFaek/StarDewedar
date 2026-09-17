@@ -1,6 +1,7 @@
 import * as userRepo from './user.repository.js'
 import * as quoteRepo from '../quoteRequests/quote.repository.js'
 import * as visitRepo from '../visitRequests/visit.repository.js'
+import * as boqRepo from '../boqRequests/boq.repository.js'
 
 /**
  * GET /api/users
@@ -149,6 +150,22 @@ export const getMyVisits = async (req, res, next) => {
         if (!user) return res.status(404).json({ message: 'User not found.' })
         const visits = await visitRepo.findByEmail(user.email)
         res.json(visits)
+    } catch (err) {
+        next(err)
+    }
+}
+
+/**
+ * GET /api/users/me/boq
+ * Returns all BOQ requests submitted by the authenticated user's email.
+ */
+export const getMyBOQs = async (req, res, next) => {
+    try {
+        const { userId } = req.user
+        const user = await userRepo.findUserById(userId)
+        if (!user) return res.status(404).json({ message: 'User not found.' })
+        const boqs = await boqRepo.findByEmail(user.email)
+        res.json(boqs)
     } catch (err) {
         next(err)
     }

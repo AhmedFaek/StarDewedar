@@ -45,4 +45,7 @@ router.get('/me/quotes', controller.getMyQuotes)
 // GET  /api/users/me/visits  → list all visit requests submitted by this user's email
 router.get('/me/visits', controller.getMyVisits)
 
+// GET  /api/users/me/boq     → list all BOQ requests submitted by this user's email
+router.get('/me/boq', controller.getMyBOQs)
+
 export default router
