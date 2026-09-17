@@ -431,25 +431,45 @@
 
   "myRequests": {
     "title": "My Requests",
-    "subtitle": "Your submitted quote and visit requests",
-    "quotes": "Quote Requests",
-    "visits": "Visit Requests",
+    "subtitle": "Your submitted quote, visit and BOQ requests",
+    "quotes": "Quotes",
+    "visits": "Visits",
+    "boqs": "BOQ",
+    "quotesTab": "Quotes",
+    "visitsTab": "Visits",
+    "boqsTab": "BOQ",
     "noQuotes": "No quote requests yet",
     "noVisits": "No visit requests yet",
+    "noBOQs": "No BOQ requests yet",
     "noQuotesDesc": "You haven't submitted any quote requests. Browse our products and request a quote.",
     "noVisitsDesc": "You haven't scheduled any factory visits yet.",
+    "noBOQsDesc": "You haven't submitted any Bill of Quantities (BOQ) requests yet.",
     "requestQuote": "Request a Quote",
     "requestVisit": "Schedule a Visit",
+    "requestBOQ": "Submit BOQ",
     "status": "Status",
+    "statuses": {
+      "pending": "Pending",
+      "contacted": "Contacted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "rejected": "Rejected",
+      "closed": "Closed"
+    },
     "submitted": "Submitted",
     "product": "Product",
     "customProduct": "Custom Product",
     "date": "Date",
     "factory": "Factory",
+    "project": "Project",
+    "projectType": "Project Type",
+    "location": "Location",
     "preferredDate": "Preferred Date",
+    "viewFile": "Download BOQ File",
+    "supportingDocs": "Supporting Documents",
     "loading": "Loading your requests...",
     "error": "Failed to load requests. Please try again.",
-    "retry":"Retry"
+    "retry": "Retry"
   },
 
   "whatsapp": {
@@ -638,6 +658,8 @@
     "projectName": "Project Name",
     "projectLocation": "Project Location / City",
     "projectType": "Project Type",
+    "type": "Project Type",
+    "location": "Location",
     "projectTypePlaceholder": "Select project type...",
     "projectTypes": {
       "industrial": "Industrial Facility",
