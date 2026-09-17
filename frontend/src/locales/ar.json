@@ -4,6 +4,7 @@
     "projects": "المشاريع",
     "about": "من نحن",
     "contact": "تواصل معنا",
+    "request": "تقديم طلب",
     "requestVisit": "طلب زيارة",
     "requestQuote": "طلب عرض سعر"
   },
@@ -13,8 +14,10 @@
     "title1": "توريد وتركيب",
     "title2": "الأنظمة الكهربائية",
     "description": "نقدم حلول كهربائية موثوقة للجهد المنخفض للمشاريع الصناعية والتجارية — من توريد المعدات إلى التركيب الكامل والتحقق النهائي من النظام.",
-    "ctaQuote": "طلب عرض سعر",
+    "ctaQuote": "تقديم طلب",
     "ctaProjects": "عرض المشاريع",
+    "ctaProducts": "عرض المنتجات",
+    "ctaAbout": "من نحن",
     "ctaSiteVisit": "طلب زيارة موقع"
   },
 
@@ -195,6 +198,65 @@
     "successMsg": "✓ تم جدولة طلب الزيارة بنجاح! سنتواصل معك قريباً.",
     "failMsg": "✗ فشل جدولة طلب الزيارة. يرجى المحاولة مرة أخرى.",
     "errorMsg": "✗ حدث خطأ. يرجى المحاولة مرة أخرى."
+  },
+
+  "requestPage": {
+    "heroTitle": "تقديم طلب",
+    "heroDesc": "اختر نوع الطلب أدناه وأدخل بياناتك. سيقوم فريقنا بمراجعة طلبك والرد عليك في أقرب وقت.",
+    "selectLabel": "كيف يمكننا مساعدتك؟",
+    "cards": {
+      "visit": "زيارة موقع",
+      "visitDesc": "طلب تقييم هندسي في الموقع",
+      "quote": "عرض سعر",
+      "quoteDesc": "طلب عرض سعر لمنتج أو مشروع",
+      "boq": "تقديم BOQ",
+      "boqDesc": "تقديم جدول الكميات أو وثائق المشروع"
+    }
+  },
+
+  "requestBOQ": {
+    "heroTitle": "تقديم BOQ",
+    "heroDesc": "ارفع جدول الكميات أو وثائق المشروع للمراجعة. سيحلل فريقنا متطلباتك ويرد عليك في أقرب وقت.",
+    "section1Title": "معلومات العميل",
+    "fullName": "الاسم الكامل",
+    "companyName": "اسم الشركة",
+    "emailAddress": "البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "section2Title": "معلومات المشروع",
+    "projectName": "اسم المشروع",
+    "projectLocation": "موقع المشروع",
+    "projectType": "نوع المشروع",
+    "projectTypePlaceholder": "اختر نوع المشروع",
+    "projectTypes": {
+      "industrial": "مشروع صناعي",
+      "commercial": "مشروع تجاري",
+      "residential": "مشروع سكني",
+      "infrastructure": "مشروع بنية تحتية",
+      "electrical": "مشروع كهربائي",
+      "other": "أخرى"
+    },
+    "section3Title": "BOQ ووثائق المشروع",
+    "boqFile": "ملف BOQ (مطلوب)",
+    "boqFileDesc": "ارفع وثيقة BOQ الخاصة بك (PDF، XLS، XLSX، CSV - الحد الأقصى 20 ميجابايت)",
+    "supportingDocs": "المستندات الداعمة (اختياري)",
+    "supportingDocsDesc": "المخططات والمواصفات ونطاق العمل - حتى 5 ملفات",
+    "additionalRequirements": "متطلبات إضافية",
+    "additionalRequirementsPlaceholder": "صف أي تفاصيل مهمة تتعلق بمشروعك أو BOQ...",
+    "submitButton": "إرسال طلب BOQ",
+    "submitting": "جاري الإرسال...",
+    "successMsg": "تم إرسال طلب الـ BOQ بنجاح. سيقوم فريقنا بمراجعة متطلباتكم والتواصل معكم في أقرب وقت.",
+    "failMsg": "فشل إرسال طلب BOQ. يرجى المحاولة مرة أخرى.",
+    "errorMsg": "حدث خطأ. يرجى المحاولة مرة أخرى.",
+    "validation": {
+      "nameRequired": "الاسم الكامل مطلوب (٢ أحرف على الأقل).",
+      "companyRequired": "اسم الشركة مطلوب.",
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح.",
+      "phoneRequired": "رقم الهاتف مطلوب (١٠ أرقام على الأقل).",
+      "projectNameRequired": "اسم المشروع مطلوب.",
+      "projectLocationRequired": "موقع المشروع مطلوب.",
+      "projectTypeRequired": "يرجى اختيار نوع المشروع.",
+      "boqFileRequired": "يرجى رفع ملف BOQ."
+    }
   },
 
   "requestQuote": {
@@ -463,8 +525,10 @@
   "fileValidation": {
     "tooLarge": "الملف كبير جداً. الحد الأقصى للحجم هو {{max}}.",
     "invalidType": "نوع الملف غير صالح. الأنواع المسموحة: {{types}}.",
+    "boqInvalidType": "نوع الملف غير صالح. الأنواع المسموحة لـ BOQ: {{types}}.",
     "maxSize": "الحد الأقصى للحجم: 10 ميجابايت",
-    "allowedTypes": "المسموح: PDF, JPG, JPEG, PNG"
+    "allowedTypes": "المسموح: PDF, JPG, JPEG, PNG",
+    "boqAllowedTypes": "المسموح: PDF, XLS, XLSX, CSV (الحد الأقصى 20 ميجابايت)"
   },
 
   "auth": {
@@ -548,6 +612,68 @@
     "verifyPrompt": "يرجى إتمام التحقق الأمني قبل الإرسال",
     "verifyRequired": "يرجى إتمام التحقق الأمني قبل إرسال النموذج.",
     "verificationFailed": "يرجى إتمام التحقق الأمني والمحاولة مرة أخرى."
+  },
+
+  "requestPage": {
+    "heroTitle": "تقديم طلب",
+    "heroDesc": "سواء كنت بحاجة إلى استشارة وزيارة ميدانية لمصنعك، أو عرض سعر مخصص لمنتج، أو ترغب في إرسال مقايسة BOQ هندسية كاملة، نحن هنا لمساعدتك.",
+    "selectLabel": "اختر نوع الطلب",
+    "cards": {
+      "visit": "طلب زيارة ميدانية",
+      "visitDesc": "حدد موعداً لزيارة مهندسينا لمصنعك أو منشأتك لمعاينة الموقع وتحديد المتطلبات بدقة.",
+      "quote": "طلب عرض سعر",
+      "quoteDesc": "احصل على عرض أسعار مخصص للمنتجات الجاهزة أو تصنيع المواصفات الخاصة.",
+      "boq": "طلب مقايسة (BOQ)",
+      "boqDesc": "أرسل جدول الكميات والمواصفات (XLS, XLSX, CSV, PDF) لتسعير المشروع بالكامل."
+    }
+  },
+
+  "requestBOQ": {
+    "section1Title": "بيانات العميل",
+    "fullName": "الاسم بالكامل",
+    "companyName": "اسم الشركة / المؤسسة",
+    "emailAddress": "البريد الإلكتروني",
+    "phoneNumber": "رقم الهاتف",
+    "section2Title": "تفاصيل المشروع",
+    "projectName": "اسم المشروع",
+    "projectLocation": "موقع المشروع / المدينة",
+    "projectType": "نوع المشروع",
+    "projectTypePlaceholder": "اختر نوع المشروع...",
+    "projectTypes": {
+      "industrial": "منشأة صناعية / مصنع",
+      "commercial": "مبنى تجاري / إداري",
+      "residential": "مجمع سكني",
+      "infrastructure": "بنية تحتية ومرافق",
+      "electrical": "محطة كهرباء / طاقة",
+      "other": "مشروع هندسي آخر"
+    },
+    "section3Title": "ملف المقايسة والمستندات الداعمة",
+    "boqFile": "ملف المقايسة (BOQ)",
+    "boqFileDesc": "قم برفع ملف جدول الكميات (انقر أو اسحب الملف هنا)",
+    "supportingDocs": "مستندات داعمة (اختياري)",
+    "supportingDocsDesc": "قم برفع المخططات أو المواصفات الفنية أو الملاحظات (حتى 5 ملفات)",
+    "additionalRequirements": "متطلبات وملاحظات إضافية",
+    "additionalRequirementsPlaceholder": "وضح أي معايير خاصة، مواعيد التوريد المطلوبة، تشطيبات حوامل الكابلات، أو متطلبات محددة للمشروع...",
+    "submitting": "جاري إرسال طلب المقايسة...",
+    "submitButton": "إرسال طلب المقايسة",
+    "successMsg": "تم إرسال طلب المقايسة بنجاح! سيقوم فريق المبيعات الهندسية لدينا بمراجعة جدول الكميات والتواصل معكم في أقرب وقت.",
+    "validation": {
+      "nameRequired": "الاسم مطلوب (حرفان على الأقل)",
+      "companyRequired": "اسم الشركة مطلوب (حرفان على الأقل)",
+      "emailInvalid": "يرجى إدخال بريد إلكتروني صحيح",
+      "phoneRequired": "رقم الهاتف مطلوب (10 أرقام على الأقل)",
+      "projectNameRequired": "اسم المشروع مطلوب",
+      "projectLocationRequired": "موقع المشروع مطلوب",
+      "projectTypeRequired": "يرجى اختيار نوع المشروع",
+      "boqFileRequired": "يرجى إرفاق ملف المقايسة (PDF, XLS, XLSX, CSV)"
+    }
+  },
+
+  "fileValidation": {
+    "tooLarge": "حجم الملف كبير جداً. الحد الأقصى هو {{max}}.",
+    "invalidType": "نوع الملف غير مدعوم. الأنواع المسموح بها: {{types}}.",
+    "boqInvalidType": "نوع الملف غير صالح للمقايسة. المسموح: {{types}}.",
+    "boqAllowedTypes": "الصيغ المدعومة: PDF, XLS, XLSX, CSV (بحد أقصى 20 ميجابايت)"
   }
 }
 

@@ -37,8 +37,12 @@ export default function Header() {
     : path.startsWith('/about') ? 'About'
     : path.startsWith('/contact') ? 'Contact'
     : null
-  const currentPage = path.startsWith('/request-quote') ? 'quote'
-    : path.startsWith('/request-visit') ? 'visit'
+  const searchParams = new URLSearchParams(location.search)
+  const reqType = searchParams.get('type')
+  const currentPage = path.startsWith('/request-quote') || (path.startsWith('/request') && reqType === 'quote') ? 'quote'
+    : path.startsWith('/request-visit') || (path.startsWith('/request') && reqType === 'visit') ? 'visit'
+    : path.startsWith('/request') && reqType === 'boq' ? 'boq'
+    : path.startsWith('/request') ? 'request'
     : ''
 
   const navLinks = [
@@ -161,23 +165,13 @@ export default function Header() {
           </button>
 
           <button
-            onClick={() => { setMobileMenuOpen(false); navigate('/request-visit') }}
-            className={`${ctaBase} ${currentPage === 'visit'
-              ? 'bg-slate-900 text-white border-slate-900'
-              : 'border-slate-300 text-slate-900 hover:bg-slate-100'
-              }`}
-          >
-            {t('nav.requestVisit')}
-          </button>
-
-          <button
-            onClick={() => { setMobileMenuOpen(false); navigate('/request-quote') }}
-            className={`${ctaBase} border-transparent ${currentPage === 'quote'
+            onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
+            className={`${ctaBase} border-transparent ${path.startsWith('/request')
               ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
               : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
               }`}
           >
-            {t('nav.requestQuote')}
+            {t('nav.request')}
           </button>
 
           {/* ── Profile icon + dropdown ───────────────────────────────────── */}
@@ -326,18 +320,11 @@ export default function Header() {
                   {i18n.language === 'ar' ? 'English' : 'العربية'}
                 </button>
                 <button
-                  onClick={() => { setMobileMenuOpen(false); navigate('/request-visit') }}
-                  className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all border ${currentPage === 'visit' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-900'
+                  onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
+                  className={`w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${path.startsWith('/request') ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
                     }`}
                 >
-                  {t('nav.requestVisit')}
-                </button>
-                <button
-                  onClick={() => { setMobileMenuOpen(false); navigate('/request-quote') }}
-                  className={`w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${currentPage === 'quote' ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
-                    }`}
-                >
-                  {t('nav.requestQuote')}
+                  {t('nav.request')}
                 </button>
 
                 {/* Mobile auth */}
