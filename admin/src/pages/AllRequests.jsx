@@ -96,6 +96,10 @@ export default function AllRequests() {
     })
 
     boqs.forEach((b) => {
+      const typeKey = b.project_type?.toLowerCase()
+      const localizedType = typeKey
+        ? t(`boq.project_types.${typeKey}`, { defaultValue: b.project_type })
+        : ''
       list.push({
         id: b.id,
         type: 'boq',
@@ -103,7 +107,7 @@ export default function AllRequests() {
         companyName: b.company_name,
         email: b.email,
         phone: b.phone,
-        subject: `${b.project_name || ''} (${b.project_type || ''})`,
+        subject: localizedType ? `${b.project_name || ''} (${localizedType})` : (b.project_name || ''),
         details: b.additional_requirements || '',
         date: b.created_at,
         status: b.status || 'pending',
@@ -589,10 +593,16 @@ export default function AllRequests() {
                     </p>
                     <div className="grid grid-cols-2 gap-4 text-xs text-secondary">
                       <div>
-                        <span className="font-bold text-primary">{t('boq.modal.type_label')}:</span> {selectedRequest.raw.project_type}
+                        <span className="font-bold text-primary">{t('boq.modal.type_label')}:</span>{' '}
+                        {selectedRequest.raw.project_type
+                          ? t(`boq.project_types.${selectedRequest.raw.project_type.toLowerCase()}`, {
+                              defaultValue: selectedRequest.raw.project_type,
+                            })
+                          : '—'}
                       </div>
                       <div>
-                        <span className="font-bold text-primary">{isAr ? 'الموقع' : 'Location'}:</span> {selectedRequest.raw.project_location}
+                        <span className="font-bold text-primary">{t('boq.modal.location_label') || (isAr ? 'الموقع' : 'Location')}:</span>{' '}
+                        {selectedRequest.raw.project_location || '—'}
                       </div>
                     </div>
                   </div>

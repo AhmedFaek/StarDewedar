@@ -333,6 +333,14 @@
       "closed": "مغلق",
       "rejected": "مرفوض"
     },
+    "project_types": {
+      "industrial": "منشأة صناعية / مصنع",
+      "commercial": "مبنى تجاري / إداري",
+      "residential": "مجمع سكني",
+      "infrastructure": "بنية تحتية ومرافق",
+      "electrical": "محطة كهرباء / طاقة",
+      "other": "مشروع هندسي آخر"
+    },
     "table": {
       "customer": "العميل",
       "company": "الشركة",
@@ -349,6 +357,7 @@
       "company_label": "الشركة",
       "project_label": "المشروع",
       "type_label": "نوع المشروع",
+      "location_label": "الموقع",
       "status_label": "الحالة",
       "saving": "جاري الحفظ...",
       "boq_file_label": "ملف BOQ",

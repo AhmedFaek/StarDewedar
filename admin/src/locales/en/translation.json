@@ -331,6 +331,14 @@
       "closed": "Closed",
       "rejected": "Rejected"
     },
+    "project_types": {
+      "industrial": "Industrial Facility",
+      "commercial": "Commercial Building",
+      "residential": "Residential Complex",
+      "infrastructure": "Infrastructure & Utilities",
+      "electrical": "Electrical Substation / Power",
+      "other": "Other Engineering Project"
+    },
     "table": {
       "customer": "Customer",
       "company": "Company",
@@ -347,6 +355,7 @@
       "company_label": "Company",
       "project_label": "Project",
       "type_label": "Project Type",
+      "location_label": "Location",
       "status_label": "Status",
       "saving": "Saving...",
       "boq_file_label": "BOQ File",
