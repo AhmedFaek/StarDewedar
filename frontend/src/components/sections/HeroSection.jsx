@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router-dom'
 
 /**
  * Check if user prefers reduced motion (accessibility).
@@ -10,6 +11,7 @@ const prefersReducedMotion =
 
 export default function HeroSection() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
 
   return (
     <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
@@ -62,33 +64,24 @@ export default function HeroSection() {
 
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 animate-fade-in-up animate-delay-300">
             <button
-              onClick={() => {
-                window.history.pushState({}, '', '/request-quote')
-                window.dispatchEvent(new PopStateEvent('popstate'))
-              }}
+              onClick={() => navigate('/request')}
               className="bg-tertiary-fixed text-on-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white transition-all text-sm"
             >
               {t('hero.ctaQuote')}
             </button>
 
             <button
-              onClick={() => {
-                window.history.pushState({}, '', '/projects')
-                window.dispatchEvent(new PopStateEvent('popstate'))
-              }}
+              onClick={() => navigate('/projects')}
               className="border border-white/30 text-white px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white hover:text-primary transition-all text-sm backdrop-blur-sm"
             >
               {t('hero.ctaProjects')}
             </button>
             
             <button
-              onClick={() => {
-                window.history.pushState({}, '', '/request-visit')
-                window.dispatchEvent(new PopStateEvent('popstate'))
-              }}
+              onClick={() => navigate('/products')}
               className="border border-tertiary-fixed text-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-tertiary-fixed hover:text-primary transition-all text-sm backdrop-blur-sm"
             >
-              {t('hero.ctaSiteVisit', 'Request Site Visit')}
+              {t('hero.ctaProducts')}
             </button>
           </div>
         </div>

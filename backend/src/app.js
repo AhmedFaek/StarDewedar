@@ -7,6 +7,7 @@ import projectRoutes from './modules/projects/project.routes.js'
 import contactRoutes from './modules/contactMessages/contact.routes.js'
 import quoteRoutes from './modules/quoteRequests/quote.routes.js'
 import visitRoutes from './modules/visitRequests/visit.routes.js'
+import boqRoutes from './modules/boqRequests/boq.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import userRoutes from './modules/users/user.routes.js'
 
@@ -59,6 +60,7 @@ app.use('/api/projects', projectRoutes)
 app.use('/api/contact', contactRoutes)
 app.use('/api/quotes', quoteRoutes)
 app.use('/api/visits', visitRoutes)
+app.use('/api/boq', boqRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/users', userRoutes)
 

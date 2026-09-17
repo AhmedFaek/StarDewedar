@@ -184,3 +184,20 @@ model ContactMessage {
   message         String
   created_at      DateTime @default(now())
 }
+
+model BOQRequest {
+  id                      String   @id @default(uuid())
+  name                    String
+  company_name            String
+  email                   String
+  phone                   String
+  project_name            String
+  project_location        String
+  project_type            String
+  boq_file_url            String
+  supporting_docs_urls    String?  // JSON-encoded array of Cloudinary URLs
+  additional_requirements String?
+  status                  String
+  created_at              DateTime @default(now())
+  updated_at              DateTime @updatedAt
+}

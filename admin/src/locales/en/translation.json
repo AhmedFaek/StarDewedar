@@ -24,6 +24,7 @@
     "categories": "Categories",
     "products": "Products",
     "projects": "Projects",
+    "allRequests": "All Requests",
     "quotes": "Quote Requests",
     "visits": "Visit Requests",
     "messages": "Contact Messages",
@@ -59,6 +60,7 @@
     "total_projects": "Total Projects",
     "quote_requests": "Quote Requests",
     "visit_requests": "Visit Requests",
+    "boq_requests": "BOQ Requests",
     "contact_messages": "Contact Messages",
     "total_customers": "Total Customers",
     "catalog_items": "items",
@@ -312,5 +314,73 @@
       "company_placeholder": "e.g. Star Dewedar Co.",
       "submit": "Create User"
     }
+  },
+
+  "boq": {
+    "title": "BOQ REQUESTS",
+    "subtitle": "Bill of Quantities Submissions",
+    "no_boqs": "No BOQ requests found",
+    "delete_confirm": "Are you sure you want to delete this BOQ request?",
+    "delete_error": "Error deleting BOQ request",
+    "status_error": "Error updating status",
+    "status": {
+      "pending": "Pending",
+      "contacted": "Contacted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "closed": "Closed",
+      "rejected": "Rejected"
+    },
+    "table": {
+      "customer": "Customer",
+      "company": "Company",
+      "project": "Project",
+      "type": "Type",
+      "date": "Date",
+      "status": "Status",
+      "action": "Action",
+      "review": "Review"
+    },
+    "modal": {
+      "title": "BOQ Request",
+      "customer_label": "Customer",
+      "company_label": "Company",
+      "project_label": "Project",
+      "type_label": "Project Type",
+      "status_label": "Status",
+      "saving": "Saving...",
+      "boq_file_label": "BOQ File",
+      "boq_file_download": "Download",
+      "supporting_docs_label": "Supporting Documents",
+      "additional_label": "Additional Requirements",
+      "delete": "Delete Request",
+      "close": "Close"
+    }
+  },
+
+  "allRequests": {
+    "title": "ALL REQUESTS",
+    "subtitle": "Unified Request Management",
+    "tabs": {
+      "all": "All",
+      "visit": "Visit",
+      "quote": "Quote",
+      "boq": "BOQ"
+    },
+    "type": {
+      "visit": "Visit",
+      "quote": "Quote",
+      "boq": "BOQ"
+    },
+    "table": {
+      "type": "Type",
+      "customer": "Customer",
+      "contact": "Contact",
+      "subject": "Subject / Project",
+      "date": "Date",
+      "status": "Status",
+      "action": "Action"
+    },
+    "no_requests": "No requests found"
   }
 }

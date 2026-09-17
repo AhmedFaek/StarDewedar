@@ -10,11 +10,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   const navItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: 'dashboard', path: '/' },
+    { id: 'allRequests', label: t('sidebar.allRequests'), icon: 'inbox', path: '/requests' },
     { id: 'categories', label: t('sidebar.categories'), icon: 'category', path: '/categories' },
     { id: 'products', label: t('sidebar.products'), icon: 'inventory_2', path: '/products' },
     { id: 'projects', label: t('sidebar.projects'), icon: 'architecture', path: '/projects' },
-    { id: 'quotes', label: t('sidebar.quotes'), icon: 'request_quote', path: '/quote-requests' },
-    { id: 'visits', label: t('sidebar.visits'), icon: 'calendar_today', path: '/visits' },
     { id: 'messages', label: t('sidebar.messages'), icon: 'chat', path: '/messages' },
     { id: 'users', label: t('sidebar.users'), icon: 'group', path: '/users' },
   ]

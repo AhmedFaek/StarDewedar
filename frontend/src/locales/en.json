@@ -4,6 +4,7 @@
     "projects": "Projects",
     "about": "About",
     "contact": "Contact",
+    "request": "Request",
     "requestVisit": "Request a Visit",
     "requestQuote": "Request a Quote"
   },
@@ -13,8 +14,10 @@
     "title1": "SUPPLYING & INSTALLING",
     "title2": "ELECTRICAL SYSTEMS",
     "description": "We deliver reliable low-voltage electrical solutions for industrial and commercial projects — from equipment supply to full installation and final system validation.",
-    "ctaQuote": "Request a Quote",
+    "ctaQuote": "Make a Request",
     "ctaProjects": "View Projects",
+    "ctaProducts": "View Products",
+    "ctaAbout": "About Us",
     "ctaSiteVisit": "Request Site Visit"
   },
 
@@ -195,6 +198,65 @@
     "successMsg": "✓ Visit request scheduled successfully. We will contact you soon.",
     "failMsg": "✗ Failed to schedule visit request. Please try again.",
     "errorMsg": "✗ An error occurred. Please try again."
+  },
+
+  "requestPage": {
+    "heroTitle": "SUBMIT A REQUEST",
+    "heroDesc": "Choose the type of request below and fill in your details. Our team will review your submission and get back to you promptly.",
+    "selectLabel": "What can we help you with?",
+    "cards": {
+      "visit": "Site Visit",
+      "visitDesc": "Request an on-site engineering assessment",
+      "quote": "Quotation",
+      "quoteDesc": "Request a product or project quotation",
+      "boq": "BOQ Submission",
+      "boqDesc": "Submit your Bill of Quantities or project documents"
+    }
+  },
+
+  "requestBOQ": {
+    "heroTitle": "BOQ SUBMISSION",
+    "heroDesc": "Upload your Bill of Quantities or project documentation for review. Our team will analyze your requirements and respond promptly.",
+    "section1Title": "Customer Information",
+    "fullName": "Full Name",
+    "companyName": "Company Name",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "section2Title": "Project Information",
+    "projectName": "Project Name",
+    "projectLocation": "Project Location",
+    "projectType": "Project Type",
+    "projectTypePlaceholder": "Select project type",
+    "projectTypes": {
+      "industrial": "Industrial Project",
+      "commercial": "Commercial Project",
+      "residential": "Residential Project",
+      "infrastructure": "Infrastructure Project",
+      "electrical": "Electrical Project",
+      "other": "Other"
+    },
+    "section3Title": "BOQ & Project Documents",
+    "boqFile": "BOQ File (Required)",
+    "boqFileDesc": "Upload your BOQ document (PDF, XLS, XLSX, CSV — max 20MB)",
+    "supportingDocs": "Supporting Documents (Optional)",
+    "supportingDocsDesc": "Drawings, specifications, scope of work — up to 5 files",
+    "additionalRequirements": "Additional Requirements",
+    "additionalRequirementsPlaceholder": "Describe any important details about your project or BOQ...",
+    "submitButton": "SUBMIT BOQ REQUEST",
+    "submitting": "Submitting...",
+    "successMsg": "Your BOQ request has been submitted successfully. Our team will review your requirements and get back to you.",
+    "failMsg": "Failed to submit BOQ request. Please try again.",
+    "errorMsg": "An error occurred. Please try again.",
+    "validation": {
+      "nameRequired": "Full name is required (min 2 characters).",
+      "companyRequired": "Company name is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "phoneRequired": "Phone number is required (min 10 digits).",
+      "projectNameRequired": "Project name is required.",
+      "projectLocationRequired": "Project location is required.",
+      "projectTypeRequired": "Please select a project type.",
+      "boqFileRequired": "Please upload your BOQ file."
+    }
   },
 
   "requestQuote": {
@@ -463,8 +525,10 @@
   "fileValidation": {
     "tooLarge": "File is too large. Maximum size is {{max}}.",
     "invalidType": "Invalid file type. Allowed types: {{types}}.",
+    "boqInvalidType": "Invalid file type. Allowed for BOQ: {{types}}.",
     "maxSize": "Maximum size: 10MB",
-    "allowedTypes": "Allowed: PDF, JPG, JPEG, PNG"
+    "allowedTypes": "Allowed: PDF, JPG, JPEG, PNG",
+    "boqAllowedTypes": "Allowed: PDF, XLS, XLSX, CSV (max 20MB)"
   },
 
   "auth": {
@@ -548,6 +612,68 @@
     "verifyPrompt": "Please complete the security check before submitting",
     "verifyRequired": "Please complete the security verification before submitting.",
     "verificationFailed": "Please complete the security verification and try again."
+  },
+
+  "requestPage": {
+    "heroTitle": "MAKE A REQUEST",
+    "heroDesc": "Whether you need an on-site factory consultation, a custom product price quote, or want to submit an engineering BOQ, we are ready to assist.",
+    "selectLabel": "Choose Request Type",
+    "cards": {
+      "visit": "Request Visit",
+      "visitDesc": "Schedule an on-site visit to your factory or facility with our engineering team.",
+      "quote": "Request Quote",
+      "quoteDesc": "Get a customized price quote for standard products or custom fabrication.",
+      "boq": "BOQ Request",
+      "boqDesc": "Submit your Bill of Quantities (XLS, XLSX, CSV, PDF) for full project pricing."
+    }
+  },
+
+  "requestBOQ": {
+    "section1Title": "Customer Information",
+    "fullName": "Full Name",
+    "companyName": "Company / Organization Name",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "section2Title": "Project Details",
+    "projectName": "Project Name",
+    "projectLocation": "Project Location / City",
+    "projectType": "Project Type",
+    "projectTypePlaceholder": "Select project type...",
+    "projectTypes": {
+      "industrial": "Industrial Facility",
+      "commercial": "Commercial Building",
+      "residential": "Residential Complex",
+      "infrastructure": "Infrastructure & Utilities",
+      "electrical": "Electrical Substation / Power",
+      "other": "Other Engineering Project"
+    },
+    "section3Title": "BOQ & Supporting Documents",
+    "boqFile": "BOQ Document",
+    "boqFileDesc": "Upload Bill of Quantities file (Click or Drag)",
+    "supportingDocs": "Supporting Documents (Optional)",
+    "supportingDocsDesc": "Upload drawings, specifications or notes (Up to 5 files)",
+    "additionalRequirements": "Additional Requirements & Specifications",
+    "additionalRequirementsPlaceholder": "Detail any specific standards, delivery timelines, cable tray finishes, or project constraints...",
+    "submitting": "Submitting BOQ Request...",
+    "submitButton": "Submit BOQ Request",
+    "successMsg": "Your BOQ request has been submitted successfully! Our engineering sales team will review your bill of quantities and contact you promptly.",
+    "validation": {
+      "nameRequired": "Full name is required (min 2 characters)",
+      "companyRequired": "Company name is required (min 2 characters)",
+      "emailInvalid": "Please enter a valid email address",
+      "phoneRequired": "Phone number is required (min 10 digits)",
+      "projectNameRequired": "Project name is required",
+      "projectLocationRequired": "Project location is required",
+      "projectTypeRequired": "Please select a project type",
+      "boqFileRequired": "Please upload a BOQ document (PDF, XLS, XLSX, CSV)"
+    }
+  },
+
+  "fileValidation": {
+    "tooLarge": "File is too large. Maximum size is {{max}}.",
+    "invalidType": "Invalid file type. Allowed types: {{types}}.",
+    "boqInvalidType": "Invalid file type for BOQ. Allowed: {{types}}.",
+    "boqAllowedTypes": "Accepted formats: PDF, XLS, XLSX, CSV (Max 20MB)"
   }
 }
 

@@ -7,6 +7,8 @@ export const getStats = async () => {
         totalProjects,
         newQuotes,
         newVisits,
+        newBOQs,
+        totalBOQs,
         totalContactMessages,
         totalCustomers,
     ] = await Promise.all([
@@ -14,6 +16,8 @@ export const getStats = async () => {
         prisma.project.count(),
         prisma.quoteRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
         prisma.visitRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
+        prisma.bOQRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
+        prisma.bOQRequest.count(),
         prisma.contactMessage.count(),
         prisma.user.count({ where: { role: 'customer' } }),
     ])
@@ -23,6 +27,8 @@ export const getStats = async () => {
         totalProjects,
         newQuotes,
         newVisits,
+        newBOQs,
+        totalBOQs,
         totalContactMessages,
         totalCustomers,
     }

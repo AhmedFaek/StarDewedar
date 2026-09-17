@@ -12,7 +12,7 @@ import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 
-export default function QuoteForm({ productId = null }) {
+export default function QuoteForm({ productId = null, visible = true }) {
   const { t, i18n } = useTranslation()
   const [products, setProducts] = useState([])
   const [formData, setFormData] = useState({
@@ -182,7 +182,7 @@ export default function QuoteForm({ productId = null }) {
   const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
-    <section className="lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
+    <section className={`lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="max-w-2xl">
         <header className="mb-8 sm:mb-10 md:mb-12">
           <h2 className="text-2xl sm:text-3xl font-headline font-bold tracking-tight text-primary">

@@ -22,6 +22,7 @@
     "categories": "الفئات",
     "products": "المنتجات",
     "projects": "المشاريع",
+    "allRequests": "جميع الطلبات",
     "quotes": "طلبات التسعير",
     "visits": "طلبات الزيارة",
     "messages": "رسائل التواصل",
@@ -58,6 +59,7 @@
     "total_projects": "إجمالي المشاريع",
     "quote_requests": "طلبات الأسعار",
     "visit_requests": "طلبات الزيارة",
+    "boq_requests": "طلبات المقايسات (BOQ)",
     "contact_messages": "رسائل التواصل",
     "total_customers": "إجمالي العملاء",
     "catalog_items": "عناصر",
@@ -314,5 +316,73 @@
       "company_placeholder": "مثال: شركة ستار ديودار",
       "submit": "إنشاء المستخدم"
     }
+  },
+
+  "boq": {
+    "title": "طلبات BOQ",
+    "subtitle": "جداول الكميات المقدمة",
+    "no_boqs": "لا توجد طلبات BOQ",
+    "delete_confirm": "هل أنت متأكد من حذف طلب BOQ هذا؟",
+    "delete_error": "خطأ في حذف طلب BOQ",
+    "status_error": "خطأ في تحديث الحالة",
+    "status": {
+      "pending": "معلق",
+      "contacted": "تم التواصل",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "closed": "مغلق",
+      "rejected": "مرفوض"
+    },
+    "table": {
+      "customer": "العميل",
+      "company": "الشركة",
+      "project": "المشروع",
+      "type": "النوع",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "action": "إجراء",
+      "review": "مراجعة"
+    },
+    "modal": {
+      "title": "طلب BOQ",
+      "customer_label": "العميل",
+      "company_label": "الشركة",
+      "project_label": "المشروع",
+      "type_label": "نوع المشروع",
+      "status_label": "الحالة",
+      "saving": "جاري الحفظ...",
+      "boq_file_label": "ملف BOQ",
+      "boq_file_download": "تحميل",
+      "supporting_docs_label": "المستندات الداعمة",
+      "additional_label": "متطلبات إضافية",
+      "delete": "حذف الطلب",
+      "close": "إغلاق"
+    }
+  },
+
+  "allRequests": {
+    "title": "جميع الطلبات",
+    "subtitle": "إدارة موحدة للطلبات",
+    "tabs": {
+      "all": "الكل",
+      "visit": "زيارة",
+      "quote": "أسعار",
+      "boq": "BOQ"
+    },
+    "type": {
+      "visit": "زيارة",
+      "quote": "أسعار",
+      "boq": "BOQ"
+    },
+    "table": {
+      "type": "النوع",
+      "customer": "العميل",
+      "contact": "التواصل",
+      "subject": "الموضوع / المشروع",
+      "date": "التاريخ",
+      "status": "الحالة",
+      "action": "إجراء"
+    },
+    "no_requests": "لا توجد طلبات"
   }
 }
