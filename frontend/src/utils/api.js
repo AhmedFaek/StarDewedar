@@ -131,6 +131,14 @@ export const api = {
     }).then(handleResponse)
   },
 
+  sendBOQRequest: (data) => {
+    // Always FormData (multi-file upload)
+    return fetch(`${API_URL}/boq`, {
+      method: 'POST',
+      body: data,
+    }).then(handleResponse)
+  },
+
   register: (data) => fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
