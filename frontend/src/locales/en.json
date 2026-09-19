@@ -342,6 +342,7 @@
     "category": "Category",
     "location": "Location",
     "budget": "Budget",
+    "budgetValue": "CONFIDENTIAL",
     "timeline": "Timeline",
     "start": "Start",
     "end": "End",
