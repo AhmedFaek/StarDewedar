@@ -1,9 +1,9 @@
 import * as repo from './visit.repository.js';
 import * as contactService from '../contactMessages/contact.service.js';
-import { baseEmailTemplate } from '../../utils/email.template.js';
+import { buildNotificationEmail, formatDateTime } from '../../utils/email.template.js';
 import { sendEmail } from '../../utils/mailer.js';
-import { escapeHtml } from '../../utils/htmlEscaper.js';
 import cloudinary from '../../config/storage.js';
+import env from '../../config/env.js';
 
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -40,85 +40,58 @@ export const createVisitRequest = async (data, file) => {
 
 export const sendVisitRequestEmail = async (visitRequest) => {
     try {
-        const name = escapeHtml(visitRequest.name);
-        const email = escapeHtml(visitRequest.email);
-        const phone = escapeHtml(visitRequest.phone_number);
-        const whatsapp = visitRequest.whatsapp_number ? escapeHtml(visitRequest.whatsapp_number) : null;
-        const factoryName = escapeHtml(visitRequest.factory_name);
-        const factoryActivity = escapeHtml(visitRequest.factory_activity);
-        const address = escapeHtml(visitRequest.address);
-        const details = escapeHtml(visitRequest.details);
+        const name = visitRequest.name || 'Valued Customer';
+        const email = visitRequest.email;
+        const phone = visitRequest.phone_number;
+        const whatsapp = visitRequest.whatsapp_number;
+        const factoryName = visitRequest.factory_name;
+        const factoryActivity = visitRequest.factory_activity;
+        const address = visitRequest.address;
+        const details = visitRequest.details;
+        const status = visitRequest.status || 'pending';
 
-        const fileUrl = visitRequest.file_url ? escapeHtml(visitRequest.file_url) : null
-        const fileInfo = fileUrl
-            ? `
-        <p>
-          <strong>File:</strong>
-          <a href="${fileUrl}" style="color:#2F2FE4;">
-            Download File
-          </a>
-        </p>
-      `
-            : '';
+        const preferredDateFormatted = formatDateTime(visitRequest.preferred_date);
 
-        const content = `
-      <div style="margin-bottom:20px;">
-        <p><strong>Name:</strong> ${name}</p>
+        const requestInfo = [
+            factoryName ? { label: 'Factory Name', value: factoryName } : null,
+            factoryActivity ? { label: 'Activity', value: factoryActivity } : null,
+            address ? { label: 'Address', value: address } : null,
+            whatsapp ? { label: 'WhatsApp', value: whatsapp } : null,
+            preferredDateFormatted ? { label: 'Preferred Date', value: preferredDateFormatted } : null,
+        ].filter(Boolean);
 
-        <p>
-          <strong>Email:</strong>
-          <a href="mailto:${email}" style="color:#2F2FE4;">
-            ${email}
-          </a>
-        </p>
+        const attachments = visitRequest.file_url
+            ? [{ label: 'Uploaded Site / Project Document', url: visitRequest.file_url }]
+            : [];
 
-        <p><strong>Phone:</strong> ${phone}</p>
+        const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=visit` : null;
 
-        ${whatsapp
-                ? `<p><strong>WhatsApp:</strong> ${whatsapp}</p>`
-                : ''
-            }
-      </div>
-
-      <div style="border-left:4px solid #2F2FE4; padding-left:12px; margin-bottom:20px;">
-        <p><strong>Factory Name:</strong> ${factoryName}</p>
-        <p><strong>Activity:</strong> ${factoryActivity}</p>
-        <p><strong>Address:</strong> ${address}</p>
-      </div>
-
-      <div style="background:#f4f6ff; padding:15px; border-radius:8px; margin-bottom:20px;">
-        <p><strong>Preferred Date:</strong> ${new Date(
-                visitRequest.preferred_date
-            ).toLocaleString()}</p>
-      </div>
-
-      <div style="background:#f9f9f9; padding:15px; border-radius:8px;">
-        <strong>Details:</strong>
-        <p>${details}</p>
-      </div>
-
-      ${fileInfo}
-
-      <div style="margin-top:25px;">
-        <a href="mailto:${email}"
-          style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
-          Reply to Customer
-        </a>
-      </div>
-    `;
+        const html = buildNotificationEmail({
+            requestType: 'VISIT',
+            customerInfo: {
+                name,
+                email,
+                phone,
+                status,
+            },
+            requestInfo,
+            details,
+            attachments,
+            customerEmail: email,
+            logoUrl: env.logoUrl,
+            adminUrl,
+        });
 
         return await sendEmail({
-            subject: `New Visit Request - ${name}`,
-            html: baseEmailTemplate({
-                title: 'New Visit Request 🏭',
-                content,
-            }),
+            subject: `New Visit Request — ${name} — Star Dewedar`,
+            html,
         });
     } catch (error) {
         console.error('❌ Yahoo SMTP Error:', error);
         throw error;
     }
 };
+
 
 export const getVisitRequests = (options) => repo.findAll(options)
 

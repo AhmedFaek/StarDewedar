@@ -1,8 +1,8 @@
 import * as repo from './boq.repository.js'
-import { baseEmailTemplate } from '../../utils/email.template.js'
+import { buildNotificationEmail } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
-import { escapeHtml } from '../../utils/htmlEscaper.js'
 import cloudinary from '../../config/storage.js'
+import env from '../../config/env.js'
 
 // ── Cloudinary upload helper ──────────────────────────────────────────────────
 
@@ -50,18 +50,16 @@ export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) 
 
 export const sendBOQRequestEmail = async (boqRequest) => {
     try {
-        const name        = escapeHtml(boqRequest.name)
-        const company     = escapeHtml(boqRequest.company_name)
-        const email       = escapeHtml(boqRequest.email)
-        const phone       = escapeHtml(boqRequest.phone)
-        const projectName = escapeHtml(boqRequest.project_name)
-        const projectLoc  = escapeHtml(boqRequest.project_location)
-        const projectType = escapeHtml(boqRequest.project_type)
-        const boqUrl      = escapeHtml(boqRequest.boq_file_url)
-
+        const name        = boqRequest.name || 'Valued Customer'
+        const company     = boqRequest.company_name
+        const email       = boqRequest.email
+        const phone       = boqRequest.phone
+        const projectName = boqRequest.project_name
+        const projectLoc  = boqRequest.project_location
+        const projectType = boqRequest.project_type
+        const boqUrl      = boqRequest.boq_file_url
+        const status      = boqRequest.status || 'pending'
         const additionalReq = boqRequest.additional_requirements
-            ? escapeHtml(boqRequest.additional_requirements)
-            : null
 
         // Parse supporting docs JSON array
         let supportingDocs = []
@@ -71,79 +69,52 @@ export const sendBOQRequestEmail = async (boqRequest) => {
             } catch { /* ignore parse errors */ }
         }
 
-        const supportingDocsHtml = supportingDocs.length > 0
-            ? `
-        <div style="margin-top:12px;">
-          <strong>Supporting Documents (${supportingDocs.length}):</strong>
-          <ul style="margin:8px 0 0; padding-left:20px;">
-            ${supportingDocs.map((url, i) => `
-              <li>
-                <a href="${escapeHtml(url)}" style="color:#2F2FE4;">
-                  Supporting Document ${i + 1}
-                </a>
-              </li>
-            `).join('')}
-          </ul>
-        </div>
-      `
-            : ''
+        const requestInfo = [
+            projectName ? { label: 'Project Name', value: projectName } : null,
+            projectLoc  ? { label: 'Location', value: projectLoc } : null,
+            projectType ? { label: 'Project Type', value: projectType } : null,
+        ].filter(Boolean)
 
-        const content = `
-      <div style="margin-bottom:20px;">
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Company:</strong> ${company}</p>
+        const attachments = [
+            boqUrl ? { label: 'BOQ Main Document', url: boqUrl } : null,
+            ...supportingDocs.map((url, i) => ({
+                label: `Supporting Document ${i + 1}`,
+                url,
+            })),
+        ].filter(Boolean)
 
-        <p>
-          <strong>Email:</strong>
-          <a href="mailto:${email}" style="color:#2F2FE4;">${email}</a>
-        </p>
+        const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=boq` : null
 
-        <p><strong>Phone:</strong> ${phone}</p>
-      </div>
+        const html = buildNotificationEmail({
+            requestType: 'BOQ',
+            customerInfo: {
+                name,
+                company,
+                email,
+                phone,
+                status,
+            },
+            requestInfo,
+            details: additionalReq,
+            detailsTitle: 'Additional Requirements',
+            attachments,
+            customerEmail: email,
+            logoUrl: env.logoUrl,
+            adminUrl,
+        })
 
-      <div style="border-left:4px solid #2F2FE4; padding-left:12px; margin-bottom:20px;">
-        <p><strong>Project Name:</strong> ${projectName}</p>
-        <p><strong>Location:</strong> ${projectLoc}</p>
-        <p><strong>Project Type:</strong> ${projectType}</p>
-      </div>
-
-      ${additionalReq
-            ? `
-        <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px;">
-          <strong>Additional Requirements:</strong>
-          <p>${additionalReq}</p>
-        </div>
-      `
-            : ''}
-
-      <div style="border:1px solid #e2e8f0; border-radius:8px; padding:15px; margin-bottom:20px;">
-        <p><strong>BOQ File:</strong></p>
-        <a href="${boqUrl}" style="display:inline-block; padding:8px 14px; background:#2F2FE4; color:#fff; text-decoration:none; border-radius:4px; margin-top:4px;">
-          Download BOQ File
-        </a>
-        ${supportingDocsHtml}
-      </div>
-
-      <div style="margin-top:25px;">
-        <a href="mailto:${email}"
-          style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
-          Reply to Customer
-        </a>
-      </div>
-    `
+        const subjectCompanyPart = company ? `${company} (${name})` : name
 
         return await sendEmail({
-            subject: `New BOQ Request — ${company} (${name})`,
-            html: baseEmailTemplate({
-                title: 'New BOQ Request 📋',
-                content,
-            }),
+            subject: `New BOQ Request — ${subjectCompanyPart} — Star Dewedar`,
+            html,
         })
     } catch (error) {
         console.error('❌ BOQ Email Error:', error)
         throw error
     }
 }
+
 
 export const getBOQRequests    = (options) => repo.findAll(options)
 export const getBOQRequestById = (id) => repo.findById(id)

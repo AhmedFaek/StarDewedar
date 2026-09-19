@@ -1,9 +1,9 @@
 import * as repo from './quote.repository.js'
 import * as contactService from '../contactMessages/contact.service.js'
-import { baseEmailTemplate } from '../../utils/email.template.js'
+import { buildNotificationEmail } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
 import cloudinary from '../../config/storage.js'
-import { escapeHtml } from '../../utils/htmlEscaper.js';
+import env from '../../config/env.js'
 
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -45,78 +45,54 @@ export const createQuoteRequest = async (data, file) => {
 
 export const sendQuoteRequestEmail = async (quoteRequest) => {
     try {
-        const firstName = escapeHtml(quoteRequest.first_name)
-        const lastName = escapeHtml(quoteRequest.last_name)
-        const email = escapeHtml(quoteRequest.email)
-        const phone = escapeHtml(quoteRequest.phone)
-        const status = escapeHtml(quoteRequest.status)
-        const details = escapeHtml(quoteRequest.details)
+        const firstName = quoteRequest.first_name || ''
+        const lastName = quoteRequest.last_name || ''
+        const fullName = `${firstName} ${lastName}`.trim() || 'Valued Customer'
+        const email = quoteRequest.email
+        const phone = quoteRequest.phone
+        const status = quoteRequest.status || 'pending'
+        const details = quoteRequest.details
 
-        const productNameAr = quoteRequest.product ? escapeHtml(quoteRequest.product.name_ar) : null
-        const customProductName = quoteRequest.custom_product_name ? escapeHtml(quoteRequest.custom_product_name) : null
+        const productName = quoteRequest.product
+            ? (quoteRequest.product.name_ar || quoteRequest.product.name_en)
+            : quoteRequest.custom_product_name
 
-        const productInfo = quoteRequest.product
-            ? `<p><strong>Product:</strong> ${productNameAr}</p>`
-            : `<p><strong>Custom Product:</strong> ${customProductName}</p>`;
+        const requestInfo = [
+            productName ? { label: 'Product', value: productName } : null,
+        ].filter(Boolean)
 
-        const fileUrl = quoteRequest.file_url ? escapeHtml(quoteRequest.file_url) : null
-        const fileInfo = fileUrl
-            ? `
-        <p>
-          <strong>File:</strong>
-          <a href="${fileUrl}" style="color:#2F2FE4;">
-            Download File
-          </a>
-        </p>
-      `
-            : "";
+        const attachments = quoteRequest.file_url
+            ? [{ label: 'Uploaded Spec / Document', url: quoteRequest.file_url }]
+            : []
 
-        const content = `
-      <div style="margin-bottom:20px;">
-        <p><strong>Name:</strong> ${firstName} ${lastName}</p>
+        const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=quote` : null
 
-        <p>
-          <strong>Email:</strong>
-          <a href="mailto:${email}" style="color:#2F2FE4;">
-            ${email}
-          </a>
-        </p>
-
-        <p><strong>Phone:</strong> ${phone}</p>
-        <p><strong>Status:</strong> ${status}</p>
-      </div>
-
-      <div style="border-left:4px solid #2F2FE4; padding-left:12px; margin-bottom:20px;">
-        ${productInfo}
-      </div>
-
-      <div style="background:#f4f6ff; padding:15px; border-radius:8px;">
-        <strong>Details:</strong>
-        <p>${details}</p>
-      </div>
-
-      ${fileInfo}
-
-      <div style="margin-top:25px;">
-        <a href="mailto:${email}"
-          style="display:inline-block;padding:12px 18px;background:#2F2FE4;color:#fff;text-decoration:none;border-radius:6px;">
-          Reply to Customer
-        </a>
-      </div>
-    `;
+        const html = buildNotificationEmail({
+            requestType: 'QUOTE',
+            customerInfo: {
+                name: fullName,
+                email,
+                phone,
+                status,
+            },
+            requestInfo,
+            details,
+            attachments,
+            customerEmail: email,
+            logoUrl: env.logoUrl,
+            adminUrl,
+        })
 
         return await sendEmail({
-            subject: `New Quote Request - ${firstName} ${lastName}`,
-            html: baseEmailTemplate({
-                title: "New Quote Request 💼",
-                content,
-            }),
-        });
+            subject: `New Quote Request — ${fullName} — Star Dewedar`,
+            html,
+        })
     } catch (error) {
         console.error("❌ Yahoo SMTP Error:", error);
         throw error;
     }
 };
+
 
 export const getQuoteRequests = (options) => repo.findAll(options)
 
