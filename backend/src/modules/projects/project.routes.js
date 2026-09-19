@@ -13,6 +13,10 @@ const router = express.Router()
 router.get('/', controller.getProjects)
 router.get('/:id', validateUuidParam(), controller.getProjectById)
 
+// Admin-only routes — return real budget
+router.get('/admin/all', auth, requireRole(ROLES.ADMIN), controller.getProjectsAdmin)
+router.get('/admin/:id', auth, requireRole(ROLES.ADMIN), validateUuidParam(), controller.getProjectByIdAdmin)
+
 router.post(
     '/',
     auth,

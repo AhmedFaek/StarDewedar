@@ -1,10 +1,9 @@
 import { API_BASE_URL } from '../utils/constants'
 import { apiClient, handleApiResponse } from './apiClient'
 
-// GET ALL
+// GET ALL (admin-only route — returns real budget)
 export const getAllProjects = async () => {
-    console.log('Fetching all projects...')
-    const response = await apiClient(`${API_BASE_URL}/projects`, {
+    const response = await apiClient(`${API_BASE_URL}/projects/admin/all`, {
         method: 'GET',
     })
 

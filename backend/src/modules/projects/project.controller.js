@@ -14,7 +14,32 @@ export const createProject = async (req, res) => {
         return res.status(500).json({ message: 'Server error' })
     }
 }
+// Public: budget is stripped from the response
 export const getProjects = async (req, res, next) => {
+    try {
+        const { take, skip } = getPaginationParams(req.query)
+        const projects = await service.getProjects({ take, skip })
+        const sanitized = projects.map(({ budget, ...rest }) => rest)
+        res.json(sanitized)
+    } catch (err) {
+        next(err)
+    }
+}
+
+// Public: budget is stripped from the response
+export const getProjectById = async (req, res, next) => {
+    try {
+        const project = await service.getProjectById(req.params.id)
+        if (!project) return res.status(404).json({ message: 'Project not found' })
+        const { budget, ...rest } = project
+        res.json(rest)
+    } catch (err) {
+        next(err)
+    }
+}
+
+// Admin-only: returns the real budget
+export const getProjectsAdmin = async (req, res, next) => {
     try {
         const { take, skip } = getPaginationParams(req.query)
         const projects = await service.getProjects({ take, skip })
@@ -24,9 +49,11 @@ export const getProjects = async (req, res, next) => {
     }
 }
 
-export const getProjectById = async (req, res, next) => {
+// Admin-only: returns the real budget
+export const getProjectByIdAdmin = async (req, res, next) => {
     try {
         const project = await service.getProjectById(req.params.id)
+        if (!project) return res.status(404).json({ message: 'Project not found' })
         res.json(project)
     } catch (err) {
         next(err)
