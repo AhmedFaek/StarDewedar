@@ -36,4 +36,6 @@ export default {
     frontendUrl: process.env.FRONTEND_URL,
     nodeEnv: process.env.NODE_ENV || 'development',
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
+    adminUrl: process.env.ADMIN_URL || 'http://localhost:3001',
+    logoUrl: process.env.LOGO_URL || 'https://res.cloudinary.com/dqilswvel/image/upload/v1789837369/logo_z7m4wy.png',
 }
