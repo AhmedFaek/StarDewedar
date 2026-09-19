@@ -81,14 +81,11 @@ export default function Contact() {
     successMessage: t('notifications.contactSuccess'),
     onSuccess: () => {
       setErrors({})
-      setFormData({
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone_number: '',
-        whatsapp_number: '',
+      // Only clear the message field — preserve the user's pre-filled personal details
+      setFormData((prev) => ({
+        ...prev,
         message: '',
-      })
+      }))
       // Reset Turnstile so a fresh token is required for any subsequent submission
       resetTurnstile()
     },
