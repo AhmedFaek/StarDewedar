@@ -184,7 +184,7 @@ export default function ProjectDetail() {
                     )}
                     <div className="border-t border-white/10 pt-6">
                       <span className="text-[12px] uppercase text-white/60">{t('projectDetail.budget')}</span>
-                      <p className="text-3xl font-black text-tertiary-fixed">EGP {formatCurrency(project.budget)}</p>
+                      <p className="text-3xl font-black text-tertiary-fixed">{t('projectDetail.budgetValue')}</p>
                     </div>
                   </div>
                 </div>
