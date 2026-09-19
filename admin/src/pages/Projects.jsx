@@ -16,6 +16,17 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState(null)
   const [selectedImageCount, setSelectedImageCount] = useState(0)
   const [isSaving, setIsSaving] = useState(false)
+  const [budgetDisplay, setBudgetDisplay] = useState('')
+
+  // Formats a raw number string into comma-separated display value
+  const formatBudgetInput = (raw) => {
+    const digits = String(raw ?? '').replace(/[^0-9]/g, '')
+    if (!digits) return ''
+    return Number(digits).toLocaleString('en-US')
+  }
+
+  // Raw numeric value extracted from the display string
+  const budgetRaw = budgetDisplay.replace(/,/g, '')
 
   const fetchProjects = async () => {
     try {
@@ -55,12 +66,14 @@ export default function Projects() {
 
   const openAddModal = () => {
     setSelectedProject({ title_en: '', title_ar: '', description_en: '', description_ar: '', client_name: '', budget: '', start_date: '', end_date: '', location_en: '', location_ar: '', category_id: '', images: [] })
+    setBudgetDisplay('')
     setSelectedImageCount(0)
     setIsModalOpen(true)
   }
 
   const openEditModal = (project) => {
     setSelectedProject(project)
+    setBudgetDisplay(formatBudgetInput(project.budget))
     setSelectedImageCount(0)
     setIsModalOpen(true)
   }
@@ -219,7 +232,17 @@ export default function Projects() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.budget_label')}</label>
-                    <input name="budget" type="number" className="w-full border border-surface-variant px-4 py-3 font-mono bg-surface-container-low" defaultValue={selectedProject?.budget} />
+                    {/* Display input — formats with commas as user types */}
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      className="w-full border border-surface-variant px-4 py-3 font-mono bg-surface-container-low"
+                      value={budgetDisplay}
+                      onChange={(e) => setBudgetDisplay(formatBudgetInput(e.target.value))}
+                      placeholder="0"
+                    />
+                    {/* Hidden input carries the raw number for FormData */}
+                    <input type="hidden" name="budget" value={budgetRaw} />
                   </div>
                 </div>
 
