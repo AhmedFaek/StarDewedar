@@ -216,6 +216,34 @@ export const api = {
   getMyVisits: () => authFetch(`${API_URL}/users/me/visits`),
   getMyBOQs: () => authFetch(`${API_URL}/users/me/boq`),
 
+  // ── Support Conversations ──────────────────────────────────────────────────
+  // Customer endpoints
+  createConversation: (data) => authFetch(`${API_URL}/conversations`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  getMyConversations: (params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return authFetch(`${API_URL}/conversations${qs ? `?${qs}` : ''}`)
+  },
+
+  getConversationById: (id) => authFetch(`${API_URL}/conversations/${id}`),
+
+  getConversationMessages: (id, params = {}) => {
+    const qs = new URLSearchParams(params).toString()
+    return authFetch(`${API_URL}/conversations/${id}/messages${qs ? `?${qs}` : ''}`)
+  },
+
+  sendConversationMessage: (id, data) => authFetch(`${API_URL}/conversations/${id}/messages`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  closeConversation: (id) => authFetch(`${API_URL}/conversations/${id}/close`, { method: 'PATCH' }),
+
+  reopenConversation: (id) => authFetch(`${API_URL}/conversations/${id}/reopen`, { method: 'PATCH' }),
+
   getLocalizedField: (obj, field, lang) => {
     if (!obj) return ''
     const fieldName = `${field}_${lang}`

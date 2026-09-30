@@ -27,6 +27,7 @@ model User {
   updated_at                     DateTime  @updatedAt
 
   saved_products SavedProduct[]
+  conversations  Conversation[]
 }
 
 model Category {
@@ -62,6 +63,7 @@ model Product {
   catalogs       ProductCatalog[]
   quote_requests QuoteRequest[]
   saved_by       SavedProduct[]
+  messages       Message[]
 }
 
 model ProductImage {
@@ -200,4 +202,44 @@ model BOQRequest {
   status                  String
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
+}
+
+// ─── Support Messaging ────────────────────────────────────────────────────────
+
+model Conversation {
+  id          String   @id @default(uuid())
+  customer_id String
+  subject     String   @db.VarChar(100)
+  status      String   @default("OPEN")  // "OPEN" | "CLOSED"
+
+  last_message_at          DateTime?
+  last_message_sender_type String?   // "CUSTOMER" | "ADMIN" | "SYSTEM"
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  customer User      @relation(fields: [customer_id], references: [id], onDelete: Cascade)
+  messages  Message[]
+
+  @@index([customer_id])
+  @@index([status])
+  @@index([last_message_at])
+}
+
+model Message {
+  id              String   @id @default(uuid())
+  conversation_id String
+  sender_type     String   // "CUSTOMER" | "ADMIN" | "SYSTEM"
+  sender_id       String?  // userId (null for SYSTEM messages)
+  message_type    String   @default("TEXT")  // "TEXT" | "PRODUCT"
+  content         String?  @db.VarChar(2000)
+  product_id      String?  // populated when message_type = "PRODUCT"
+
+  created_at DateTime @default(now())
+
+  conversation Conversation @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  product      Product?     @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([conversation_id])
+  @@index([created_at])
 }

@@ -9,6 +9,7 @@ import Products from './pages/Products'
 import Projects from './pages/Projects'
 import AllRequests from './pages/AllRequests'
 import ContactMessagesPage from './pages/contactMessages'
+import Conversations from './pages/Conversations'
 import Users from './pages/Users'
 import LoginPage from './pages/Login' // The new page we discussed
 
@@ -62,7 +63,9 @@ export default function App() {
                     <Route path="/requests" element={<AllRequests />} />
                     <Route path="/quote-requests" element={<Navigate to="/requests?tab=quote" replace />} />
                     <Route path="/visits" element={<Navigate to="/requests?tab=visit" replace />} />
-                    <Route path="/messages" element={<ContactMessagesPage />} />
+                    <Route path="/messages" element={<Navigate to="/conversations" replace />} />
+                    <Route path="/contact-messages" element={<ContactMessagesPage />} />
+                    <Route path="/conversations" element={<Conversations />} />
                     <Route path="/users" element={<Users />} />
 
                     <Route path="*" element={<Navigate to="/" replace />} />

@@ -229,6 +229,14 @@ export default function Header() {
                       {t('favourites.mySaved')}
                     </button>
                     <button
+                      id="header-messages-btn"
+                      onClick={() => { setUserMenuOpen(false); navigate('/messages') }}
+                      className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
+                    >
+                      <span className="material-symbols-outlined text-base leading-none text-sky-400">support_agent</span>
+                      {t('messages.title')}
+                    </button>
+                    <button
                       id="header-change-password-btn"
                       onClick={() => { setUserMenuOpen(false); setChangePasswordOpen(true) }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"

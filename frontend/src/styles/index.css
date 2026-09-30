@@ -231,3 +231,52 @@
   margin-inline-end: 0.5em;
   flex-shrink: 0;
 }
+
+/* ─── Floating Support Button Animations ───────────────────────────────────── */
+@keyframes floatWiggle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  15% { transform: scale(1.12) rotate(-9deg); }
+  30% { transform: scale(1.12) rotate(9deg); }
+  45% { transform: scale(1.08) rotate(-6deg); }
+  60% { transform: scale(1.06) rotate(4deg); }
+  75% { transform: scale(1.03) rotate(-2deg); }
+}
+
+@keyframes floatPulseRing {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.85;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+@keyframes bubblePopIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.85) translateY(10px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.02) translateY(-2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.animate-float-wiggle {
+  animation: floatWiggle 1.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.animate-float-pulse-ring {
+  animation: floatPulseRing 1.6s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+}
+
+.animate-bubble-pop-in {
+  animation: bubblePopIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
