@@ -14,7 +14,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { id: 'categories', label: t('sidebar.categories'), icon: 'category', path: '/categories' },
     { id: 'products', label: t('sidebar.products'), icon: 'inventory_2', path: '/products' },
     { id: 'projects', label: t('sidebar.projects'), icon: 'architecture', path: '/projects' },
-    { id: 'messages', label: t('sidebar.messages'), icon: 'chat', path: '/messages' },
+    { id: 'conversations', label: t('sidebar.conversations'), icon: 'support_agent', path: '/conversations' },
+    { id: 'contact-messages', label: t('sidebar.messages'), icon: 'chat', path: '/contact-messages' },
     { id: 'users', label: t('sidebar.users'), icon: 'group', path: '/users' },
   ]
 
