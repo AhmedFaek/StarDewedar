@@ -70,11 +70,23 @@ export const updateLastMessage = (id, senderType) =>
         },
     })
 
+export const updateStatusAndLastMessage = (id, status, senderType) =>
+    prisma.conversation.update({
+        where: { id },
+        data: {
+            status,
+            last_message_at: new Date(),
+            last_message_sender_type: senderType,
+            updated_at: new Date(),
+        },
+    })
+
 /* ─── Admin-only conversation repo ───────────────────────────────────────── */
 
-export const findAll = ({ take, skip, status, search }) => {
+export const findAll = ({ take, skip, status, lastSender, search }) => {
     const where = {}
     if (status) where.status = status
+    if (lastSender) where.last_message_sender_type = lastSender
     if (search) {
         where.OR = [
             { subject: { contains: search, mode: 'insensitive' } },
@@ -108,9 +120,10 @@ export const findAll = ({ take, skip, status, search }) => {
     })
 }
 
-export const countAll = ({ status, search }) => {
+export const countAll = ({ status, lastSender, search }) => {
     const where = {}
     if (status) where.status = status
+    if (lastSender) where.last_message_sender_type = lastSender
     if (search) {
         where.OR = [
             { subject: { contains: search, mode: 'insensitive' } },

@@ -201,9 +201,9 @@ function AdminMessageBubble({ message, t, lang }) {
 
 /* ─── Conversation Detail Panel ───────────────────────────────────────────── */
 
-const CONV_POLL_INTERVAL = 30000
+const CONV_POLL_INTERVAL = 5000 // 5 seconds for active open chat
 
-function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange }) {
+function ConversationDetail({ conversationId, activeConvSync, t, lang, onBack, onConversationUpdate, onStatusChange }) {
   const [conversation, setConversation] = useState(null)
   const [messages, setMessages] = useState([])
   const [loading, setLoading] = useState(true)
@@ -216,9 +216,28 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
   const [showProductPicker, setShowProductPicker] = useState(false)
   const [error, setError] = useState(null)
 
+  const messagesContainerRef = useRef(null)
   const messagesEndRef = useRef(null)
   const pollRef = useRef(null)
   const lastMessageIdRef = useRef(null)
+
+  const onConvUpdateRef = useRef(onConversationUpdate)
+  onConvUpdateRef.current = onConversationUpdate
+
+  const onStatusChangeRef = useRef(onStatusChange)
+  onStatusChangeRef.current = onStatusChange
+
+  const scrollToBottom = (smooth = true) => {
+    setTimeout(() => {
+      if (messagesContainerRef.current) {
+        messagesContainerRef.current.scrollTo({
+          top: messagesContainerRef.current.scrollHeight,
+          behavior: smooth ? 'smooth' : 'auto',
+        })
+      }
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? 'smooth' : 'auto' })
+    }, 50)
+  }
 
   const loadData = useCallback(async () => {
     try {
@@ -226,7 +245,9 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
         convService.getConversationById(conversationId),
         convService.getMessages(conversationId, { limit: 30 }),
       ])
-      setConversation(convRes.data)
+      const convData = convRes.data
+      setConversation(convData)
+      onConvUpdateRef.current?.(convData)
       const { messages: msgs, nextCursor: cursor, hasMore: more } = msgRes.data
       setMessages([...(msgs || [])].reverse())
       setNextCursor(cursor)
@@ -247,20 +268,67 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
   }, [loadData])
 
   useEffect(() => {
-    if (!loading) setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+    if (!loading) scrollToBottom(false)
   }, [loading])
 
-  // Polling
+  // Synchronize immediately if parent list poll detected status change or new message on this conversation
+  useEffect(() => {
+    if (!activeConvSync || activeConvSync.id !== conversationId) return
+    setConversation(prev => {
+      if (!prev) return activeConvSync
+      if (prev.status !== activeConvSync.status || prev.last_message_at !== activeConvSync.last_message_at) {
+        return { ...prev, ...activeConvSync }
+      }
+      return prev
+    })
+    // Immediately pull newest messages
+    convService.getMessages(conversationId, { limit: 30 }).then(res => {
+      const { messages: msgs, conversation: backendConv } = res.data
+      if (backendConv) {
+        setConversation(backendConv)
+        onConvUpdateRef.current?.(backendConv)
+      }
+      const latestId = msgs?.[0]?.id
+      if (latestId && latestId !== lastMessageIdRef.current) {
+        lastMessageIdRef.current = latestId
+        setMessages(prev => {
+          const pageIds = new Set((msgs || []).map(m => m.id))
+          const olderThanPage = prev.filter(m => !pageIds.has(m.id))
+          return [...olderThanPage, ...[...(msgs || [])].reverse()]
+        })
+        scrollToBottom(true)
+      }
+    }).catch(() => {})
+  }, [activeConvSync, conversationId])
+
+  // Active chat polling: updates messages and auto-syncs authoritative conversation status from backend
   useEffect(() => {
     pollRef.current = setInterval(async () => {
       try {
         const res = await convService.getMessages(conversationId, { limit: 30 })
-        const { messages: msgs } = res.data
+        const { messages: msgs, conversation: backendConv } = res.data
+
+        if (backendConv) {
+          setConversation(prev => {
+            if (!prev) return backendConv
+            if (prev.status !== backendConv.status || prev.last_message_at !== backendConv.last_message_at) {
+              return backendConv
+            }
+            return prev
+          })
+          onConvUpdateRef.current?.(backendConv)
+          onStatusChangeRef.current?.(conversationId, backendConv.status)
+        }
+
         const latestId = msgs?.[0]?.id
         if (latestId && latestId !== lastMessageIdRef.current) {
           lastMessageIdRef.current = latestId
-          setMessages([...(msgs || [])].reverse())
-          setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
+          setMessages(prev => {
+            const pageIds = new Set((msgs || []).map(m => m.id))
+            const olderThanPage = prev.filter(m => !pageIds.has(m.id))
+            return [...olderThanPage, ...[...(msgs || [])].reverse()]
+          })
+          scrollToBottom(true)
         }
       } catch { /* silently ignore */ }
     }, CONV_POLL_INTERVAL)
@@ -289,7 +357,14 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
       setMessages(prev => [...prev, newMsg])
       lastMessageIdRef.current = newMsg.id
       setReplyText('')
-      setConversation(prev => prev ? { ...prev, last_message_sender_type: 'ADMIN' } : prev)
+      const updatedMeta = {
+        id: conversationId,
+        status: 'OPEN',
+        last_message_sender_type: 'ADMIN',
+        last_message_at: newMsg.created_at || new Date().toISOString(),
+      }
+      setConversation(prev => prev ? { ...prev, ...updatedMeta } : prev)
+      onConversationUpdate?.(updatedMeta)
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch (err) {
       alert(err.message)
@@ -303,7 +378,14 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
       const newMsg = res.data
       setMessages(prev => [...prev, newMsg])
       lastMessageIdRef.current = newMsg.id
-      setConversation(prev => prev ? { ...prev, last_message_sender_type: 'ADMIN' } : prev)
+      const updatedMeta = {
+        id: conversationId,
+        status: 'OPEN',
+        last_message_sender_type: 'ADMIN',
+        last_message_at: newMsg.created_at || new Date().toISOString(),
+      }
+      setConversation(prev => prev ? { ...prev, ...updatedMeta } : prev)
+      onConversationUpdate?.(updatedMeta)
       setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
     } catch (err) { alert(err.message) }
   }
@@ -313,6 +395,7 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
     try {
       await convService.closeConversation(conversationId)
       setConversation(prev => prev ? { ...prev, status: 'CLOSED' } : prev)
+      onConversationUpdate?.({ id: conversationId, status: 'CLOSED' })
       onStatusChange?.(conversationId, 'CLOSED')
     } catch (err) { alert(err.message) } finally { setActionLoading(false) }
   }
@@ -322,6 +405,7 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
     try {
       await convService.reopenConversation(conversationId)
       setConversation(prev => prev ? { ...prev, status: 'OPEN' } : prev)
+      onConversationUpdate?.({ id: conversationId, status: 'OPEN' })
       onStatusChange?.(conversationId, 'OPEN')
     } catch (err) { alert(err.message) } finally { setActionLoading(false) }
   }
@@ -372,7 +456,7 @@ function ConversationDetail({ conversationId, t, lang, onBack, onStatusChange })
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto bg-slate-50/30 p-4 min-h-0">
+      <div ref={messagesContainerRef} className="flex-1 overflow-y-auto bg-slate-50/30 p-4 min-h-0">
         {error && <div className="text-center py-8 text-sm text-red-600">{error}</div>}
         {loading && (
           <div className="flex justify-center py-16"><span className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin inline-block" /></div>
@@ -498,6 +582,7 @@ export default function AdminConversations() {
   const [loading, setLoading] = useState(true)
   const [pagination, setPagination] = useState({ page: 1, totalPages: 1 })
   const [selectedId, setSelectedId] = useState(null)
+  const [activeConvSync, setActiveConvSync] = useState(null)
   const [filter, setFilter] = useState('ALL') // ALL | OPEN | CLOSED | AWAITING
   const [search, setSearch] = useState('')
   const [searchInput, setSearchInput] = useState('')
@@ -507,6 +592,10 @@ export default function AdminConversations() {
     const params = { page, limit: 20 }
     if (filter === 'OPEN') params.status = 'OPEN'
     if (filter === 'CLOSED') params.status = 'CLOSED'
+    if (filter === 'AWAITING') {
+      params.status = 'OPEN'
+      params.awaiting = 'true'
+    }
     if (search) params.search = search
     return params
   }, [filter, search])
@@ -516,16 +605,22 @@ export default function AdminConversations() {
     try {
       const res = await convService.getAllConversations(buildParams(page))
       let convs = res.conversations || []
-      // Client-side filter for "AWAITING"
       if (filter === 'AWAITING') convs = convs.filter(c => c.last_message_sender_type === 'CUSTOMER' && c.status === 'OPEN')
       setConversations(convs)
       setPagination(res.pagination || { page: 1, totalPages: 1 })
+
+      if (selectedId) {
+        const found = (res.conversations || []).find(c => c.id === selectedId)
+        if (found) {
+          setActiveConvSync(found)
+        }
+      }
     } catch (err) {
       console.error('Failed to load conversations', err)
     } finally {
       if (!silent) setLoading(false)
     }
-  }, [buildParams, filter])
+  }, [buildParams, filter, selectedId])
 
   useEffect(() => { loadList(1) }, [loadList])
 
@@ -540,9 +635,28 @@ export default function AdminConversations() {
     setSearch(searchInput)
   }
 
-  const handleStatusChange = (id, newStatus) => {
+  const handleStatusChange = useCallback((id, newStatus) => {
     setConversations(prev => prev.map(c => c.id === id ? { ...c, status: newStatus } : c))
-  }
+  }, [])
+
+  const handleConversationUpdate = useCallback((patch) => {
+    if (!patch?.id) return
+    setConversations(prev => {
+      const exists = prev.some(c => c.id === patch.id)
+      if (!exists) {
+        const matchesFilter =
+          filter === 'ALL' ||
+          (filter === 'OPEN' && patch.status === 'OPEN') ||
+          (filter === 'CLOSED' && patch.status === 'CLOSED') ||
+          (filter === 'AWAITING' && patch.status === 'OPEN' && patch.last_message_sender_type === 'CUSTOMER')
+        if (matchesFilter && patch.subject) {
+          return [patch, ...prev]
+        }
+        return prev
+      }
+      return prev.map(c => (c.id === patch.id ? { ...c, ...patch } : c))
+    })
+  }, [filter])
 
   const filterLabels = [
     { key: 'ALL', label: t('conversations.filterAll') },
@@ -661,9 +775,11 @@ export default function AdminConversations() {
           <ConversationDetail
             key={selectedId}
             conversationId={selectedId}
+            activeConvSync={activeConvSync}
             t={t}
             lang={lang}
-            onBack={() => setSelectedId(null)}
+            onBack={() => { setSelectedId(null); setActiveConvSync(null) }}
+            onConversationUpdate={handleConversationUpdate}
             onStatusChange={handleStatusChange}
           />
         ) : (

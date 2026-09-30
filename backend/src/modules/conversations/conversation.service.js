@@ -49,15 +49,20 @@ export const getMyConversationById = async (customerId, conversationId) => {
 }
 
 export const getMyMessages = async (customerId, conversationId, query) => {
-    // Ownership check
-    const conversation = await repo.validateConversationExists(conversationId)
-    if (!conversation || conversation.customer_id !== customerId) {
+    // Ownership check & fetch authoritative conversation status
+    const conversation = await repo.findByIdForCustomer(conversationId, customerId)
+    if (!conversation) {
         const err = new Error('Conversation not found')
         err.status = 404
         throw err
     }
 
-    return _getMessagePage(conversationId, query)
+    const page = await _getMessagePage(conversationId, query)
+
+    return {
+        ...page,
+        conversation,
+    }
 }
 
 export const sendMessage = async (customerId, conversationId, data) => {
@@ -81,10 +86,7 @@ export const sendMessage = async (customerId, conversationId, data) => {
         }
     }
 
-    // If CLOSED, auto-reopen before sending
-    if (conversation.status === 'CLOSED') {
-        await repo.updateStatus(conversationId, 'OPEN')
-    }
+    const isClosed = conversation.status === 'CLOSED'
 
     const message = await repo.createMessage(
         conversationId,
@@ -95,7 +97,11 @@ export const sendMessage = async (customerId, conversationId, data) => {
         productId || null
     )
 
-    await repo.updateLastMessage(conversationId, 'CUSTOMER')
+    if (isClosed) {
+        await repo.updateStatusAndLastMessage(conversationId, 'OPEN', 'CUSTOMER')
+    } else {
+        await repo.updateLastMessage(conversationId, 'CUSTOMER')
+    }
 
     return message
 }
@@ -134,15 +140,18 @@ export const reopenConversation = async (customerId, conversationId) => {
 
 export const adminGetConversations = async (query) => {
     const { take, skip, page, limit } = getPaginationParams(query, 20, 100)
-    const { status, search } = query
+    const { status, search, awaiting } = query
 
-    const statusFilter = status && ['OPEN', 'CLOSED'].includes(status.toUpperCase())
-        ? status.toUpperCase()
-        : undefined
+    const isAwaiting = awaiting === 'true' || status?.toUpperCase() === 'AWAITING'
+    const statusFilter = isAwaiting
+        ? 'OPEN'
+        : (status && ['OPEN', 'CLOSED'].includes(status.toUpperCase()) ? status.toUpperCase() : undefined)
+
+    const lastSenderFilter = isAwaiting ? 'CUSTOMER' : undefined
 
     const [conversations, total] = await Promise.all([
-        repo.findAll({ take, skip, status: statusFilter, search }),
-        repo.countAll({ status: statusFilter, search }),
+        repo.findAll({ take, skip, status: statusFilter, lastSender: lastSenderFilter, search }),
+        repo.countAll({ status: statusFilter, lastSender: lastSenderFilter, search }),
     ])
 
     return { conversations, pagination: { page, limit, total, totalPages: Math.ceil(total / limit) } }
@@ -159,13 +168,31 @@ export const adminGetConversationById = async (conversationId) => {
 }
 
 export const adminGetMessages = async (conversationId, query) => {
-    const conversation = await repo.validateConversationExists(conversationId)
+    const page = await _getMessagePage(conversationId, query)
+    let conversation = await repo.findById(conversationId)
     if (!conversation) {
         const err = new Error('Conversation not found')
         err.status = 404
         throw err
     }
-    return _getMessagePage(conversationId, query)
+
+    // Safety check: Keep the backend as the source of truth.
+    // If polling detects that the newest customer message arrived around or after the conversation was closed,
+    // automatically reopen it in the database and return the updated conversation.
+    const latestMessage = page.messages?.[0]
+    if (
+        conversation.status === 'CLOSED' &&
+        latestMessage?.sender_type === 'CUSTOMER' &&
+        new Date(latestMessage.created_at).getTime() >= new Date(conversation.updated_at).getTime() - 2000
+    ) {
+        await repo.updateStatus(conversationId, 'OPEN')
+        conversation = await repo.findById(conversationId)
+    }
+
+    return {
+        ...page,
+        conversation,
+    }
 }
 
 export const adminSendMessage = async (adminId, conversationId, data) => {
