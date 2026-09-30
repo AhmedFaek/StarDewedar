@@ -355,7 +355,7 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
 
 /* ─── Main Page ───────────────────────────────────────────────────────────── */
 
-const POLL_INTERVAL = 30000 // 30 seconds
+const POLL_INTERVAL = 5000 // 5 seconds for responsive sync with admin
 
 export default function ConversationPage() {
   const { id: conversationId } = useParams()
@@ -395,7 +395,10 @@ export default function ConversationPage() {
   const loadMessages = useCallback(async () => {
     try {
       const res = await api.getConversationMessages(conversationId, { limit: 30 })
-      const { messages: msgs, nextCursor: cursor, hasMore: more } = res.data
+      const { messages: msgs, conversation: backendConv, nextCursor: cursor, hasMore: more } = res.data
+      if (backendConv) {
+        setConversation(prev => prev ? { ...prev, ...backendConv } : backendConv)
+      }
       // API returns newest-first; reverse for display (oldest at top)
       setMessages([...(msgs || [])].reverse())
       setNextCursor(cursor)
@@ -421,22 +424,49 @@ export default function ConversationPage() {
     }
   }, [loadingMessages])
 
-  // ── Polling for new messages ─────────────────────────────────────────────
+  // ── Polling for new messages & status updates ────────────────────────────
   useEffect(() => {
     if (!loggedIn) return
-    pollRef.current = setInterval(async () => {
+
+    const poll = async () => {
       try {
         const res = await api.getConversationMessages(conversationId, { limit: 30 })
-        const { messages: msgs } = res.data
+        const { messages: msgs, conversation: backendConv } = res.data
+
+        if (backendConv) {
+          setConversation(prev => {
+            if (!prev) return backendConv
+            if (prev.status !== backendConv.status || prev.last_message_at !== backendConv.last_message_at) {
+              return { ...prev, ...backendConv }
+            }
+            return prev
+          })
+        }
+
         const latestId = msgs?.[0]?.id
         if (latestId && latestId !== lastMessageIdRef.current) {
           lastMessageIdRef.current = latestId
-          setMessages([...(msgs || [])].reverse())
+          setMessages(prev => {
+            const pageIds = new Set((msgs || []).map(m => m.id))
+            const olderThanPage = prev.filter(m => !pageIds.has(m.id))
+            return [...olderThanPage, ...[...(msgs || [])].reverse()]
+          })
           setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
         }
       } catch { /* silently ignore poll errors */ }
-    }, POLL_INTERVAL)
-    return () => clearInterval(pollRef.current)
+    }
+
+    pollRef.current = setInterval(poll, POLL_INTERVAL)
+
+    const handleFocus = () => {
+      poll()
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      clearInterval(pollRef.current)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [loggedIn, conversationId])
 
   // ── Load older messages (cursor-based) ──────────────────────────────────
