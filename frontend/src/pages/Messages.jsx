@@ -35,6 +35,15 @@ function formatRelativeTime(dateStr, lang) {
 
 /* ─── New Conversation Modal ──────────────────────────────────────────────── */
 
+const SUGGESTED_SUBJECTS = [
+  { key: 'productInquiry', defaultEn: 'Product Inquiry' },
+  { key: 'productAvailability', defaultEn: 'Product Availability' },
+  { key: 'technicalQuestion', defaultEn: 'Technical Question' },
+  { key: 'pricingQuote', defaultEn: 'Pricing / Quote Question' },
+  { key: 'installationProject', defaultEn: 'Installation / Project Question' },
+  { key: 'generalInquiry', defaultEn: 'General Inquiry' },
+]
+
 function NewConversationModal({ onClose, onCreate, t }) {
   const [subject, setSubject] = useState('')
   const [content, setContent] = useState('')
@@ -103,6 +112,34 @@ function NewConversationModal({ onClose, onCreate, t }) {
             <label className="block font-headline font-bold text-[11px] uppercase tracking-widest text-slate-700 mb-1.5">
               {t('messages.subject')} <span className="text-red-500">*</span>
             </label>
+
+            {/* Suggested Subject Chips */}
+            <div className="mb-2">
+              <span className="block text-[11px] text-slate-400 font-body mb-1.5">
+                {t('messages.suggestedSubjectsLabel')}
+              </span>
+              <div className="flex flex-wrap gap-1.5">
+                {SUGGESTED_SUBJECTS.map((item) => {
+                  const label = t(`messages.suggestedSubjects.${item.key}`, item.defaultEn)
+                  const isSelected = subject === label
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => setSubject(label)}
+                      className={`px-2.5 py-1 text-[11px] font-body transition-all border ${
+                        isSelected
+                          ? 'bg-primary text-white border-primary shadow-sm font-medium'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-primary/40 hover:bg-slate-100 hover:text-slate-900'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+
             <input
               id="new-conv-subject"
               type="text"
@@ -244,9 +281,49 @@ export default function MessagesPage() {
     }
   }, [t, showError])
 
+  const LIST_POLL_INTERVAL = 15000 // 15 seconds
+
   useEffect(() => {
     if (!loggedIn) { setLoading(false); return }
     loadConversations(1).finally(() => setLoading(false))
+
+    // Background polling to keep status badges & last messages fresh
+    const interval = setInterval(() => {
+      api.getMyConversations({ page: 1, limit: 15 }).then(res => {
+        if (res?.conversations) {
+          setConversations(prev => {
+            const newMap = new Map((res.conversations || []).map(c => [c.id, c]))
+            const updated = prev.map(c => newMap.has(c.id) ? newMap.get(c.id) : c)
+            const existingIds = new Set(prev.map(c => c.id))
+            const brandNew = (res.conversations || []).filter(c => !existingIds.has(c.id))
+            return [...brandNew, ...updated]
+          })
+          if (res.pagination) {
+            setPagination(prev => ({ ...prev, total: res.pagination.total, totalPages: res.pagination.totalPages }))
+          }
+        }
+      }).catch(() => {})
+    }, LIST_POLL_INTERVAL)
+
+    const handleFocus = () => {
+      api.getMyConversations({ page: 1, limit: 15 }).then(res => {
+        if (res?.conversations) {
+          setConversations(prev => {
+            const newMap = new Map((res.conversations || []).map(c => [c.id, c]))
+            const updated = prev.map(c => newMap.has(c.id) ? newMap.get(c.id) : c)
+            const existingIds = new Set(prev.map(c => c.id))
+            const brandNew = (res.conversations || []).filter(c => !existingIds.has(c.id))
+            return [...brandNew, ...updated]
+          })
+        }
+      }).catch(() => {})
+    }
+    window.addEventListener('focus', handleFocus)
+
+    return () => {
+      clearInterval(interval)
+      window.removeEventListener('focus', handleFocus)
+    }
   }, [loggedIn, loadConversations])
 
   const handleLoadMore = async () => {

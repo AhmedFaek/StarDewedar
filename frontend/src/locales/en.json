@@ -702,6 +702,10 @@
   "messages": {
     "title": "Support Messages",
     "subtitle": "Send us a message and our support team will get back to you within 24 hours.",
+    "greetingBubble": "Hi there! How can we help you today?",
+    "supportTeam": "Star Dewedar Support",
+    "onlineNow": "Online now",
+    "startChatPrompt": "Send a message",
     "newConversation": "New Conversation",
     "noConversations": "No conversations yet",
     "noConversationsDesc": "Start a conversation with our support team. We'll respond within 24 hours.",
@@ -743,6 +747,15 @@
     "loadOlderMessages": "Load older messages",
     "subject": "Subject",
     "subjectPlaceholder": "e.g. Question about product pricing",
+    "suggestedSubjectsLabel": "Suggested Subjects",
+    "suggestedSubjects": {
+      "productInquiry": "Product Inquiry",
+      "productAvailability": "Product Availability",
+      "technicalQuestion": "Technical Question",
+      "pricingQuote": "Pricing / Quote Question",
+      "installationProject": "Installation / Project Question",
+      "generalInquiry": "General Inquiry"
+    },
     "firstMessage": "Your Message",
     "firstMessagePlaceholder": "Describe your question or issue...",
     "createConversation": "Send Message",
