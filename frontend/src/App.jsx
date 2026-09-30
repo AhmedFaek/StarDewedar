@@ -32,6 +32,8 @@ const Request = lazy(() => import('./pages/Request'))
 const SavedProducts = lazy(() => import('./pages/SavedProducts'))
 const ComparePage = lazy(() => import('./pages/ComparePage'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const Messages = lazy(() => import('./pages/Messages'))
+const ConversationPage = lazy(() => import('./pages/ConversationPage'))
 
 export default function App() {
   return (
@@ -52,6 +54,8 @@ export default function App() {
             <Route path="/saved-products" element={<SavedProducts />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/messages" element={<Messages />} />
+            <Route path="/messages/:id" element={<ConversationPage />} />
             <Route path="*" element={<Home />} />
           </Routes>
         </Suspense>
