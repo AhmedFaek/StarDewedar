@@ -10,6 +10,7 @@ import visitRoutes from './modules/visitRequests/visit.routes.js'
 import boqRoutes from './modules/boqRequests/boq.routes.js'
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js'
 import userRoutes from './modules/users/user.routes.js'
+import conversationRoutes from './modules/conversations/conversation.routes.js'
 
 const app = express()
 
@@ -63,6 +64,7 @@ app.use('/api/visits', visitRoutes)
 app.use('/api/boq', boqRoutes)
 app.use('/api/dashboard', dashboardRoutes)
 app.use('/api/users', userRoutes)
+app.use('/api/conversations', conversationRoutes)
 
 // Test route
 app.get('/', (req, res) => {
