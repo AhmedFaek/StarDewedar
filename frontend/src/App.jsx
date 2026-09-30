@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { CompareProvider } from './utils/compareContext'
 import CompareDrawer from './components/shared/CompareDrawer'
-import WhatsAppFloat from './components/shared/WhatsAppFloat'
+import SupportMessagesFloat from './components/shared/SupportMessagesFloat'
 import TopProgressBar from './components/shared/TopProgressBar'
 import { NotificationProvider } from './context/NotificationContext'
 import ToastContainer from './components/notifications/ToastContainer'
@@ -60,7 +60,7 @@ export default function App() {
           </Routes>
         </Suspense>
 
-        <WhatsAppFloat />
+        <SupportMessagesFloat />
         <CompareDrawer />
         <ToastContainer />
       </CompareProvider>
