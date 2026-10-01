@@ -1,47 +1,45 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 
-/**
- * Check if user prefers reduced motion (accessibility).
- * Evaluated once at module load — no React state or listeners needed.
- */
-const prefersReducedMotion =
-  typeof window !== 'undefined' &&
-  window.matchMedia('(prefers-reduced-motion: reduce)').matches
-
 export default function HeroSection() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const isRtl = i18n.dir?.() === 'rtl' || i18n.language === 'ar'
+
+  const desktopImage = isRtl ? '/logo/hero_ar.webp' : '/logo/hero_desktop.webp'
+  const mobileImage = isRtl ? '/logo/hero_ar_mobile.webp' : '/logo/hero_mobile.webp'
+  const fallbackImage = isRtl ? '/logo/hero_ar.webp' : '/logo/hero.webp'
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20 bg-primary">
       <div className="absolute inset-0 z-0">
-        {prefersReducedMotion ? (
-          /* Accessibility: static poster for users who prefer reduced motion */
-          <img
-            src="/logo/hero_poster.webp"
-            alt=""
-            className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
+        <picture key={isRtl ? 'ar' : 'en'}>
+          {/* Mobile portrait: focused crop on helmet and 3D architectural SD mark */}
+          <source
+            media="(max-width: 768px)"
+            srcSet={mobileImage}
+            type="image/webp"
           />
-        ) : (
-          <video
-            className="w-full h-full object-cover object-center lg:object-right rtl:lg:object-left brightness-[0.6] sm:brightness-75"
-            autoPlay
-            loop
-            muted
-            playsInline
-            poster="/logo/hero_poster.webp"
-            preload="metadata"
-          >
-            {/* Mobile-first: portrait-cropped video for narrow screens */}
-            <source src="/logo/hero_mobile_portrait.webm" type="video/webm" media="(max-width: 768px)" />
-            <source src="/logo/hero_mobile_portrait.mp4"  type="video/mp4"  media="(max-width: 768px)" />
-            {/* Desktop: full resolution */}
-            <source src="/logo/hero_desktop.webm" type="video/webm" />
-            <source src="/logo/hero_desktop.mp4"  type="video/mp4" />
-          </video>
-        )}
-        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-primary via-primary/70 to-transparent sm:to-transparent"></div>
+          {/* Desktop & widescreen: full 2:1 panoramic render */}
+          <source
+            srcSet={desktopImage}
+            type="image/webp"
+          />
+          <img
+            src={fallbackImage}
+            alt="Star Dewedar General Contracting & Engineering"
+            width={2880}
+            height={1440}
+            fetchPriority="high"
+            loading="eager"
+            decoding="async"
+            className="w-full h-full object-cover object-center sm:object-[68%_center] lg:object-[72%_center] rtl:sm:object-[38%_center] rtl:lg:object-[32%_center] brightness-[0.92] sm:brightness-100 transition-all duration-700"
+          />
+        </picture>
+        {/* Horizontal directional gradient overlay focused strictly under the text side */}
+        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-primary/95 via-primary/70 via-30% to-transparent sm:from-primary/90 sm:via-primary/50 sm:via-35% sm:to-transparent pointer-events-none"></div>
+        {/* Mobile vertical gradient shield */}
+        <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/30 to-transparent sm:hidden pointer-events-none"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-8 relative z-10">
