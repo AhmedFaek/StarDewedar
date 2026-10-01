@@ -621,14 +621,6 @@
     }
   },
 
-  "resetPassword": {
-    "req8Chars": "At least 8 characters",
-    "reqUppercase": "At least one uppercase letter",
-    "reqLowercase": "At least one lowercase letter",
-    "reqNumber": "At least one number",
-    "weakPassword": "Password does not meet the security requirements"
-  },
-
   "turnstile": {
     "verifyPrompt": "Please complete the security check before submitting",
     "verifyRequired": "Please complete the security verification before submitting.",
