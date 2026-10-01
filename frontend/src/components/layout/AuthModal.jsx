@@ -281,7 +281,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       >
         {/* Header */}
         <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
-          <img src="/logo/logo.png" alt="Star Dewedar" className="h-10 w-auto object-contain" />
+          <picture>
+            <source srcSet="/logo/primary_logo.webp" type="image/webp" />
+            <img
+              src="/logo/primary_logo.png"
+              alt="Star Dewedar"
+              width={160}
+              height={37}
+              className="h-8 sm:h-9 w-auto object-contain"
+            />
+          </picture>
           <button
             onClick={onClose}
             className="text-slate-400 transition-colors hover:text-slate-700"
