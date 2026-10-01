@@ -126,14 +126,21 @@ export default function Header() {
     <>
       <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
         {/* Logo */}
-        <button onClick={handleLogoClick}>
-          <img
-            src="/logo/logo.png"
-            alt="Star Dewedar"
-            width={180}
-            height={120}
-            className="h-16 sm:h-20 lg:h-24 w-auto object-contain"
-          />
+        <button
+          onClick={handleLogoClick}
+          className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded transition-opacity hover:opacity-90"
+          aria-label="Star Dewedar Home"
+        >
+          <picture>
+            <source srcSet="/logo/primary_logo.webp" type="image/webp" />
+            <img
+              src="/logo/primary_logo.png"
+              alt="Star Dewedar"
+              width={245}
+              height={56}
+              className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
+            />
+          </picture>
         </button>
 
         {/* Desktop Navigation */}
