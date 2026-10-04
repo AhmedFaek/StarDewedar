@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -254,6 +255,7 @@ function ConversationRow({ conv, onClick, t, lang }) {
 /* ─── Main Page ───────────────────────────────────────────────────────────── */
 
 export default function MessagesPage() {
+  usePrivatePageSeo({ en: 'My Messages', ar: 'رسائلي' })
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const lang = i18n.language

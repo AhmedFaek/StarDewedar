@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
@@ -12,8 +13,37 @@ import { useNotification } from '../hooks/useNotification.js'
 import { useFormSubmit } from '../hooks/useFormSubmit.js'
 
 export default function Contact() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'ar' ? 'ar' : 'en'
   const { showSuccess, showError } = useNotification()
+
+  useEffect(() => {
+    const isAr = lang === 'ar'
+    setPageMeta({
+      title: isAr
+        ? 'تواصل معنا | ستار ديودار'
+        : 'Contact Us | Star Dewedar',
+      description: isAr
+        ? 'تواصل مع شركة ستار ديودار للاستفسارات الفنية وطلبات عروض الأسعار ومشاريع التوريد. البريد الإلكتروني: info@stardewedar.com | هاتف: ‏+20 11 11777478'
+        : 'Contact Star Dewedar Co. for technical inquiries, quote requests, and project consultations. Email: info@stardewedar.com | Phone: +20 11 11777478',
+      canonical: buildUrl('/contact'),
+      ogType: 'website',
+      lang,
+    })
+
+    setJsonLd('contact-page', {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      '@id': buildUrl('/contact#webpage'),
+      name: isAr ? 'تواصل معنا — ستار ديودار' : 'Contact Us — Star Dewedar',
+      url: buildUrl('/contact'),
+      publisher: {
+        '@id': buildUrl('/#organization'),
+      },
+    })
+
+    return () => removeJsonLd('contact-page')
+  }, [lang])
   const [formData, setFormData] = useState({
     first_name: '',
     last_name: '',

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -54,6 +55,34 @@ export default function Projects() {
 
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    const lang = i18n.language === 'ar' ? 'ar' : 'en'
+    const isAr = lang === 'ar'
+
+    setPageMeta({
+      title: isAr ? 'مشاريعنا | ستار ديودار' : 'Projects | Star Dewedar',
+      description: isAr
+        ? 'تصفح محفظة مشاريع شركة ستار ديودار — مشاريع كهربائية صناعية وتجارية منجزة عبر مصر. توريد وتركيب معدات الجهد المنخفض لأكثر من 300 مشروع.'
+        : 'Browse the project portfolio of Star Dewedar Co. — industrial and commercial electrical projects delivered across Egypt. Low-voltage equipment supply and installation for 300+ projects.',
+      canonical: buildUrl('/projects'),
+      ogType: 'website',
+      lang,
+    })
+
+    setJsonLd('projects-page', {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      '@id': buildUrl('/projects#webpage'),
+      name: isAr ? 'مشاريعنا — ستار ديودار' : 'Projects — Star Dewedar',
+      url: buildUrl('/projects'),
+      publisher: {
+        '@id': buildUrl('/#organization'),
+      },
+    })
+
+    return () => removeJsonLd('projects-page')
+  }, [i18n.language])
 
   useEffect(() => {
     setCurrentPage(1)
