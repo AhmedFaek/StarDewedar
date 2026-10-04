@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -45,6 +46,56 @@ export default function Products() {
     }
     fetchData()
   }, [])
+
+  useEffect(() => {
+    const lang = i18n.language === 'ar' ? 'ar' : 'en'
+    const isAr = lang === 'ar'
+
+    // If a category is selected, use its name in the title
+    const activeCategory = categories.find((c) => c.id === selectedCategory)
+    const categoryName = activeCategory
+      ? (isAr ? activeCategory.name_ar : activeCategory.name_en)
+      : null
+
+    const title = categoryName
+      ? (isAr
+          ? `${categoryName} | منتجات ستار ديودار`
+          : `${categoryName} | Star Dewedar Products`)
+      : (isAr ? 'المنتجات | ستار ديودار' : 'Products | Star Dewedar')
+
+    const description = categoryName
+      ? (isAr
+          ? `تصفح منتجات ${categoryName} من شركة ستار ديودار. معدات جهد منخفض عالية الجودة للمشاريع الصناعية والتجارية.`
+          : `Browse ${categoryName} products from Star Dewedar Co. High-quality low-voltage electrical equipment for industrial and commercial projects.`)
+      : (isAr
+          ? 'تصفح كتالوج منتجات شركة ستار ديودار. لوحات توزيع، أنظمة تحكم، ومعدات كهربائية صناعية.'
+          : 'Browse Star Dewedar Co.’s complete product catalog. Distribution panels, control systems, and industrial electrical equipment for every project.')
+
+    const canonicalPath = selectedCategory !== 'all'
+      ? `/products?category=${selectedCategory}`
+      : '/products'
+
+    setPageMeta({
+      title,
+      description,
+      canonical: buildUrl(canonicalPath),
+      ogType: 'website',
+      lang,
+    })
+
+    setJsonLd('products-page', {
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      '@id': buildUrl('/products#webpage'),
+      name: isAr ? 'المنتجات — ستار ديودار' : 'Products — Star Dewedar',
+      url: buildUrl('/products'),
+      publisher: {
+        '@id': buildUrl('/#organization'),
+      },
+    })
+
+    return () => removeJsonLd('products-page')
+  }, [i18n.language, selectedCategory, categories])
 
   const filteredProducts = useMemo(() => {
     return products

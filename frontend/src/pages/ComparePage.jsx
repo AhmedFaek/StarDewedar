@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { useCompare, MAX_COMPARE } from '../utils/compareContext'
@@ -142,6 +143,7 @@ function ProductHeader({ product, onRemove }) {
 
 // ── Main Compare Page ──────────────────────────────────────────────────────────
 export default function ComparePage() {
+  usePrivatePageSeo({ en: 'Compare Products', ar: 'مقارنة المنتجات' })
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { compareList, addToCompare, removeFromCompare, clearCompare } = useCompare()

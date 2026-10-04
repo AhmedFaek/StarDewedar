@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams } from 'react-router-dom'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -358,6 +359,7 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
 const POLL_INTERVAL = 5000 // 5 seconds for responsive sync with admin
 
 export default function ConversationPage() {
+  usePrivatePageSeo({ en: 'Conversation', ar: 'المحادثة' })
   const { id: conversationId } = useParams()
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()

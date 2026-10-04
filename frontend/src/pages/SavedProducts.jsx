@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import ContentLoader from '../components/shared/ContentLoader'
@@ -11,6 +12,7 @@ import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
 
 export default function SavedProducts() {
+  usePrivatePageSeo({ en: 'Saved Products', ar: 'المنتجات المحفوظة' })
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { showError } = useNotification()
