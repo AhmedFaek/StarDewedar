@@ -23,7 +23,14 @@ const formatDate = (date) => {
  * Queries live products, projects, and categories from the database.
  */
 export async function generateSitemapXml() {
-  const baseUrl = (process.env.FRONTEND_URL || 'https://stardewedar.com').replace(/\/$/, '');
+  const configuredUrl = process.env.SITE_URL || process.env.FRONTEND_URL || 'https://stardewedar.com';
+  const isProduction = process.env.NODE_ENV === 'production';
+  // Guard against emitting localhost or invalid protocols in production sitemaps
+  let baseUrl = configuredUrl;
+  if (isProduction && (/localhost|127\.0\.0\.1/.test(baseUrl) || !baseUrl.startsWith('http'))) {
+    baseUrl = 'https://stardewedar.com';
+  }
+  baseUrl = baseUrl.replace(/\/$/, '');
 
   const [products, projects, categories] = await Promise.all([
     prisma.product.findMany({

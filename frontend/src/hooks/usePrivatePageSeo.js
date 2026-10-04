@@ -39,6 +39,12 @@ export function usePrivatePageSeo({ en: titleEn, ar: titleAr }) {
     }
     robotsMeta.setAttribute('content', 'noindex, nofollow')
 
+    // Remove any canonical or og:url link while on private pages
+    const canonicalLink = document.querySelector('link[rel="canonical"]')
+    if (canonicalLink) canonicalLink.remove()
+    const ogUrlMeta = document.querySelector('meta[property="og:url"]')
+    if (ogUrlMeta) ogUrlMeta.remove()
+
     return () => {
       // Restore to indexable when navigating away
       robotsMeta.setAttribute('content', 'index, follow')

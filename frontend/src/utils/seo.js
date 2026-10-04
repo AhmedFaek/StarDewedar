@@ -51,6 +51,7 @@ export function truncate(str, maxLen = 155) {
  * @param {string}  [params.ogType]     - Open Graph type (default: 'website')
  * @param {string}  [params.ogImage]    - Absolute URL to OG image
  * @param {string}  [params.lang]       - Document language ('en' | 'ar')
+ * @param {boolean} [params.noindex]    - If true, sets robots to noindex, nofollow and removes canonical
  */
 export function setPageMeta({
   title,
@@ -59,6 +60,7 @@ export function setPageMeta({
   ogType = 'website',
   ogImage = SITE.defaultOgImage,
   lang = 'en',
+  noindex = false,
 }) {
   // ── Title ─────────────────────────────────────────────────────────────────
   if (title) {
@@ -71,18 +73,32 @@ export function setPageMeta({
     document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }
 
+  // ── Robots ────────────────────────────────────────────────────────────────
+  setMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow')
+
   // ── Meta description ──────────────────────────────────────────────────────
   setMeta('name', 'description', description || '')
 
   // ── Canonical ─────────────────────────────────────────────────────────────
-  setLink('canonical', canonical || buildUrl(window.location.pathname + window.location.search))
+  if (noindex) {
+    const el = document.querySelector('link[rel="canonical"]')
+    if (el) el.remove()
+  } else {
+    setLink('canonical', canonical || buildUrl(window.location.pathname + window.location.search))
+  }
 
   // ── Open Graph ────────────────────────────────────────────────────────────
   setMeta('property', 'og:type', ogType)
   setMeta('property', 'og:site_name', SITE.name)
   setMeta('property', 'og:title', title || '')
   setMeta('property', 'og:description', description || '')
-  setMeta('property', 'og:url', canonical || buildUrl(window.location.pathname + window.location.search))
+
+  if (noindex) {
+    const ogUrlEl = document.querySelector('meta[property="og:url"]')
+    if (ogUrlEl) ogUrlEl.remove()
+  } else {
+    setMeta('property', 'og:url', canonical || buildUrl(window.location.pathname + window.location.search))
+  }
 
   const resolvedOgImage = ogImage
     ? (ogImage.startsWith('http') ? ogImage : buildUrl(ogImage))

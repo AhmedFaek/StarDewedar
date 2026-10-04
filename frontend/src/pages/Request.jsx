@@ -13,7 +13,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import { setPageMeta, buildUrl } from '../utils/seo'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import VisitFormSection from '../components/sections/VisitFormSection'
@@ -88,29 +88,10 @@ function TypeCard({ type, icon, label, description, isActive, onClick }) {
 // ── Main page component ───────────────────────────────────────────────────────
 
 export default function Request() {
-  const { t, i18n } = useTranslation()
-  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+  const { t } = useTranslation()
 
-  // Set noindex — request forms should not appear in search results
-  useEffect(() => {
-    const isAr = lang === 'ar'
-    document.title = isAr
-      ? 'تقديم طلب | ستار ديودار'
-      : 'Submit a Request | Star Dewedar'
-    document.documentElement.lang = lang
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
-    let robotsMeta = document.querySelector('meta[name="robots"]')
-    if (!robotsMeta) {
-      robotsMeta = document.createElement('meta')
-      robotsMeta.setAttribute('name', 'robots')
-      document.head.appendChild(robotsMeta)
-    }
-    robotsMeta.setAttribute('content', 'noindex, nofollow')
-    return () => {
-      // Restore indexable state when leaving this page
-      robotsMeta.setAttribute('content', 'index, follow')
-    }
-  }, [lang])
+  // Apply noindex/nofollow to request hub forms
+  usePrivatePageSeo({ en: 'Submit a Request', ar: 'تقديم طلب' })
 
   // Read initial type from URL query param
   const getInitialType = () => {

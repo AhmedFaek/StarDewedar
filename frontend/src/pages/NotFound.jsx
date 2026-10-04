@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { setPageMeta, buildUrl } from '../utils/seo'
+import { setPageMeta } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 
@@ -24,8 +24,7 @@ export default function NotFound() {
     setPageMeta({
       title,
       description,
-      canonical: buildUrl('/404'),
-      ogType: 'website',
+      noindex: true,
       lang,
     })
 
@@ -41,6 +40,10 @@ export default function NotFound() {
 
     return () => {
       statusMeta.remove()
+      const robotsMeta = document.querySelector('meta[name="robots"]')
+      if (robotsMeta) {
+        robotsMeta.setAttribute('content', 'index, follow')
+      }
     }
   }, [lang])
 

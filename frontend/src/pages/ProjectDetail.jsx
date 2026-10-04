@@ -82,12 +82,12 @@ export default function ProjectDetail() {
 
     const projectSchema = {
       '@context': 'https://schema.org',
-      '@type': 'Project',
+      '@type': 'CreativeWork',
       '@id': buildUrl(`/project-detail?id=${project.id}#project`),
       name: projectTitle,
       description: truncate(projectDesc, 500) || undefined,
       ...(projectImage ? { image: projectImage } : {}),
-      ...(project.client_name ? { client: project.client_name } : {}),
+      ...(project.client_name ? { sponsor: { '@type': 'Organization', name: project.client_name } } : {}),
       ...(categoryLabel ? { about: { '@type': 'Thing', name: categoryLabel } } : {}),
       creator: {
         '@id': buildUrl('/#organization'),

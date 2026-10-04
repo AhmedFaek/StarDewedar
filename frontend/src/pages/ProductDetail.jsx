@@ -70,7 +70,7 @@ export default function ProductDetail() {
           : `Discover ${productName} from Star Dewedar Co. Request a quote or download the datasheet.`
       ),
       canonical: buildUrl(`/product-detail?id=${product.id}`),
-      ogType: 'product',
+      ogType: 'website',
       ogImage: productImage,
       lang,
     })
@@ -98,9 +98,22 @@ export default function ProductDetail() {
         '@type': 'Brand',
         name: 'Star Dewedar',
       },
-      seller: {
-        '@id': buildUrl('/#organization'),
-      },
+      ...(product.price ? {
+        offers: {
+          '@type': 'Offer',
+          price: String(product.price),
+          priceCurrency: 'EGP',
+          availability: 'https://schema.org/InStock',
+          url: buildUrl(`/product-detail?id=${product.id}`),
+          seller: {
+            '@id': buildUrl('/#organization'),
+          },
+        },
+      } : {
+        seller: {
+          '@id': buildUrl('/#organization'),
+        },
+      }),
     }
 
     setJsonLd(`product-${product.id}`, productSchema)
