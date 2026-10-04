@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { StatCard } from '../components/ui/StatCard'
 import { getDashboardStats } from '../services/dashboardService'
+import AnalyticsSection from '../components/ui/AnalyticsSection'
 
 export default function Dashboard() {
   const { t } = useTranslation()
@@ -144,6 +145,9 @@ export default function Dashboard() {
           )
         )}
       </div>
+
+      {/* Analytics section — self-contained, cannot break the rest of the dashboard */}
+      <AnalyticsSection />
     </div>
   )
 }
