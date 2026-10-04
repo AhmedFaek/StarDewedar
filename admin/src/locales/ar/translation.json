@@ -197,6 +197,9 @@
     "status": {
       "pending": "قيد الانتظار",
       "contacted": "تم التواصل",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "rejected": "مرفوض",
       "closed": "مغلق"
     },
     "modal": {
@@ -233,21 +236,29 @@
     "status": {
       "pending": "قيد الانتظار",
       "contacted": "جارِ التنسيق",
+      "in_progress": "قيد التنفيذ",
+      "completed": "مكتمل",
+      "rejected": "مرفوض",
       "closed": "مكتمل / مؤرشف"
     },
     "modal": {
       "title": "تفاصيل الزيارة",
       "subtitle": "عملية: فحص ميداني",
-      "factory_label": "موقع المصنع",
-      "address_label": "العنوان",
-      "status_label": "حالة الفحص",
+      "customer_label": "العميل",
+      "status_label": "إدارة الحالة",
       "saving": "جارِ الحفظ...",
-      "rep_label": "المندوب في الموقع",
+      "factory_label": "موقع المصنع",
+      "address": "العنوان",
+      "address_label": "العنوان",
+      "preferred_date": "التاريخ المفضل",
       "date_label": "التاريخ المفضل للفحص",
       "details_label": "نطاق العمل / التفاصيل",
+      "file_label": "مستند مرفق",
+      "file_download": "تحميل",
+      "rep_label": "المندوب في الموقع",
       "delete": "حذف الطلب",
       "whatsapp": "واتساب",
-      "close": "إغلاق"
+      "close": "إغلاق النافذة"
     },
     "delete_confirm": "هل أنت متأكد من حذف طلب الزيارة هذا؟",
     "delete_error": "فشل حذف الزيارة",

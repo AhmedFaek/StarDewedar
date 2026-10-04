@@ -232,7 +232,7 @@ export default function AllRequests() {
 
       setSelectedRequest((prev) => (prev ? { ...prev, status: newStatus, raw: { ...prev.raw, status: newStatus } } : null))
     } catch (error) {
-      alert(t('quotes.status_error') + ': ' + error.message)
+      alert(t(`${reqItem.type === 'visit' ? 'visits' : reqItem.type === 'boq' ? 'boq' : 'quotes'}.status_error`) + ': ' + error.message)
     } finally {
       setSavingStatus(false)
     }
@@ -261,7 +261,7 @@ export default function AllRequests() {
       }
       setSelectedRequest(null)
     } catch (error) {
-      alert(t('quotes.delete_error') + ': ' + error.message)
+      alert(t(`${reqItem.type === 'visit' ? 'visits' : reqItem.type === 'boq' ? 'boq' : 'quotes'}.delete_error`) + ': ' + error.message)
     }
   }
 
@@ -431,7 +431,7 @@ export default function AllRequests() {
 
                     {/* Date */}
                     <td className="px-6 py-5 whitespace-nowrap text-xs text-secondary font-mono">
-                      {req.date ? formatDate(req.date) : '—'}
+                      {req.date ? formatDate(req.date, isAr ? 'ar' : 'en-US') : '—'}
                     </td>
 
                     {/* Status */}
@@ -514,7 +514,7 @@ export default function AllRequests() {
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">
-                    {t('quotes.modal.customer_label')}
+                    {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.customer_label`)}
                   </label>
                   <p className="font-bold text-primary text-base">{selectedRequest.customerName}</p>
                   {selectedRequest.companyName && (
@@ -532,7 +532,7 @@ export default function AllRequests() {
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block">
-                      {t('quotes.modal.status_label')}
+                      {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.status_label`)}
                     </label>
                     {(() => {
                       const msc = getStatusConfig(selectedRequest.status)
@@ -546,7 +546,7 @@ export default function AllRequests() {
                   </div>
                   {savingStatus && (
                     <span className="text-xs text-tertiary font-normal mb-1 block">
-                      {t('quotes.modal.saving')}
+                      {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.saving`)}
                     </span>
                   )}
                   <select
@@ -556,10 +556,10 @@ export default function AllRequests() {
                     className={`w-full bg-surface-container-low border-2 ${getStatusConfig(selectedRequest.status).border} px-3 py-2 text-sm font-black text-primary focus:outline-none focus:ring-1 focus:ring-tertiary uppercase disabled:opacity-50`}
                   >
                     <option value="pending" className="font-bold text-amber-900 bg-amber-50">
-                      ● {t('quotes.status.pending')}
+                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.pending`)}
                     </option>
                     <option value="contacted" className="font-bold text-sky-900 bg-sky-50">
-                      ● {t('quotes.status.contacted')}
+                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.contacted`)}
                     </option>
                     {selectedRequest.type === 'boq' && (
                       <>
@@ -575,7 +575,7 @@ export default function AllRequests() {
                       </>
                     )}
                     <option value="closed" className="font-bold text-slate-800 bg-slate-100">
-                      ● {t('quotes.status.closed')}
+                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.closed`)}
                     </option>
                   </select>
                 </div>
@@ -584,7 +584,7 @@ export default function AllRequests() {
               {/* Specific Content by Type */}
               {selectedRequest.type === 'boq' && (
                 <>
-                  <div className="p-4 bg-surface-container-low border-l-4 border-emerald-600 space-y-2">
+                  <div className="p-4 bg-surface-container-low border-s-4 border-emerald-600 space-y-2">
                     <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest block mb-1">
                       {t('boq.modal.project_label')}
                     </label>
@@ -671,7 +671,7 @@ export default function AllRequests() {
 
               {selectedRequest.type === 'quote' && (
                 <>
-                  <div className="p-4 bg-surface-container-low border-l-4 border-tertiary">
+                  <div className="p-4 bg-surface-container-low border-s-4 border-tertiary">
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">
                       {t('quotes.modal.product_label')}
                     </label>
@@ -716,19 +716,25 @@ export default function AllRequests() {
 
               {selectedRequest.type === 'visit' && (
                 <>
-                  <div className="p-4 bg-surface-container-low border-l-4 border-blue-600 space-y-2">
+                  <div className="p-4 bg-surface-container-low border-s-4 border-blue-600 space-y-2">
                     <label className="text-[10px] font-bold text-blue-700 uppercase tracking-widest block mb-1">
                       {t('visits.modal.factory_label')}
                     </label>
                     <p className="text-base font-black text-primary uppercase tracking-tight">
-                      {selectedRequest.raw.factory_name} — {selectedRequest.raw.factory_activity}
+                      {[selectedRequest.raw.factory_name, selectedRequest.raw.factory_activity].filter(Boolean).join(' — ') || '—'}
                     </p>
                     <div className="grid grid-cols-2 gap-4 text-xs text-secondary">
                       <div>
-                        <span className="font-bold text-primary">{t('visits.modal.address')}:</span> {selectedRequest.raw.address}
+                        <span className="font-bold text-primary">
+                          {t('visits.modal.address', { defaultValue: t('visits.modal.address_label', { defaultValue: isAr ? 'العنوان' : 'Address' }) })}:
+                        </span>{' '}
+                        {selectedRequest.raw.address || '—'}
                       </div>
                       <div>
-                        <span className="font-bold text-primary">{t('visits.modal.preferred_date')}:</span> {selectedRequest.raw.preferred_date ? formatDate(selectedRequest.raw.preferred_date) : '—'}
+                        <span className="font-bold text-primary">
+                          {t('visits.modal.preferred_date', { defaultValue: t('visits.modal.date_label', { defaultValue: isAr ? 'التاريخ المفضل' : 'Preferred Date' }) })}:
+                        </span>{' '}
+                        {selectedRequest.raw.preferred_date ? formatDate(selectedRequest.raw.preferred_date, isAr ? 'ar' : 'en-US') : '—'}
                       </div>
                     </div>
                   </div>
@@ -748,14 +754,16 @@ export default function AllRequests() {
                     <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
                       <span className="material-symbols-outlined text-blue-700">description</span>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-primary uppercase">{t('visits.modal.file_label')}</p>
+                        <p className="text-xs font-bold text-primary uppercase">
+                          {t('visits.modal.file_label', { defaultValue: t('quotes.modal.file_label', { defaultValue: isAr ? 'مستند مرفق' : 'Attached Document' }) })}
+                        </p>
                       </div>
                       <button
                         type="button"
                         onClick={() => handleFileOpen(selectedRequest.raw.file_url)}
                         className="text-xs font-black text-tertiary hover:underline uppercase"
                       >
-                        {t('visits.modal.file_download')}
+                        {t('visits.modal.file_download', { defaultValue: t('quotes.modal.file_download', { defaultValue: isAr ? 'تحميل' : 'Download' }) })}
                       </button>
                     </div>
                   )}
@@ -770,14 +778,14 @@ export default function AllRequests() {
                 onClick={() => handleDelete(selectedRequest)}
                 className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity"
               >
-                {t('quotes.modal.delete')}
+                {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.delete`)}
               </button>
               <Button
                 variant="secondary"
                 onClick={() => setSelectedRequest(null)}
                 className="w-full sm:w-auto"
               >
-                {t('quotes.modal.close')}
+                {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.close`)}
               </Button>
             </div>
           </div>

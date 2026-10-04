@@ -195,6 +195,9 @@
     "status": {
       "pending": "Pending",
       "contacted": "Contacted",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "rejected": "Rejected",
       "closed": "Closed"
     },
     "modal": {
@@ -231,21 +234,29 @@
     "status": {
       "pending": "Pending",
       "contacted": "In Coordination",
+      "in_progress": "In Progress",
+      "completed": "Completed",
+      "rejected": "Rejected",
       "closed": "Completed / Archived"
     },
     "modal": {
-      "title": "Visit Logistics",
+      "title": "Visit Details",
       "subtitle": "Operation: Field Inspection",
-      "factory_label": "Factory Location",
-      "address_label": "Address",
-      "status_label": "Inspection Status",
+      "customer_label": "Customer",
+      "status_label": "Status Management",
       "saving": "Saving...",
-      "rep_label": "On-site Representative",
+      "factory_label": "Factory Location",
+      "address": "Address",
+      "address_label": "Address",
+      "preferred_date": "Preferred Date",
       "date_label": "Preferred Inspection Date",
       "details_label": "Scope of Work / Details",
+      "file_label": "Attached Document",
+      "file_download": "Download",
+      "rep_label": "On-site Representative",
       "delete": "Delete Request",
       "whatsapp": "WhatsApp",
-      "close": "Close"
+      "close": "Close Window"
     },
     "delete_confirm": "Are you sure you want to delete this visit request?",
     "delete_error": "Failed to delete visit",

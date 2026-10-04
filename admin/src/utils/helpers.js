@@ -19,27 +19,44 @@ export const formatCurrency = (value) => {
  * @param {string|Date} date - Date to format
  * @returns {string} Formatted date string
  */
-export const formatDate = (date) => {
-    return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-    }).format(new Date(date))
+export const formatDate = (date, locale = 'en-US') => {
+    if (!date) return '—'
+    const validLocale = locale === 'ar' ? 'ar-EG' : locale
+    try {
+        const d = new Date(date)
+        if (isNaN(d.getTime())) return String(date)
+        return new Intl.DateTimeFormat(validLocale, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+        }).format(d)
+    } catch {
+        return String(date)
+    }
 }
 
 /**
  * Format date and time
  * @param {string|Date} date - Date to format
+ * @param {string} [locale='en-US'] - Locale for formatting
  * @returns {string} Formatted date and time
  */
-export const formatDateTime = (date) => {
-    return new Intl.DateTimeFormat('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-    }).format(new Date(date))
+export const formatDateTime = (date, locale = 'en-US') => {
+    if (!date) return '—'
+    const validLocale = locale === 'ar' ? 'ar-EG' : locale
+    try {
+        const d = new Date(date)
+        if (isNaN(d.getTime())) return String(date)
+        return new Intl.DateTimeFormat(validLocale, {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        }).format(d)
+    } catch {
+        return String(date)
+    }
 }
 
 /**
