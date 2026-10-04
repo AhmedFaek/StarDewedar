@@ -69,7 +69,19 @@
     "registered_customers": "عملاء مسجلين",
     "pending": "قيد الانتظار",
     "pending_alert_title": "تنبيه هام",
-    "pending_alert_desc": "لديك طلبات قيد الانتظار تتطلب المراجعة:"
+    "pending_alert_desc": "لديك طلبات قيد الانتظار تتطلب المراجعة:",
+    "analytics": {
+      "title": "تحليلات الموقع",
+      "active_visitors": "الزوار النشطون",
+      "today": "اليوم",
+      "this_month": "هذا الشهر",
+      "last_month": "الشهر الماضي",
+      "chart_title": "الزوار — آخر 30 يوماً",
+      "visitors": "زائر",
+      "error": "تعذّر تحميل بيانات التحليلات",
+      "chart_error": "تعذّر تحميل بيانات الرسم البياني",
+      "chart_empty": "لا توجد بيانات للزوار بعد"
+    }
   },
    "pagination": {
     "displaying": "عرض {{totalDisplayed}} من {{totalItems}} عنصر"

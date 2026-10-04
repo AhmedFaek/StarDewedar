@@ -243,3 +243,24 @@ model Message {
   @@index([conversation_id])
   @@index([created_at])
 }
+
+// ─── Website Analytics ────────────────────────────────────────────────────────
+
+model AnalyticsSession {
+  id            String   @id @default(uuid())
+
+  // Anonymous session identifier generated on the client (UUID v4 stored in localStorage)
+  session_id    String   @unique
+
+  // Hashed IP address for abuse prevention only — raw IP is never stored
+  ip_hash       String?
+
+  first_seen_at DateTime @default(now())
+  last_seen_at  DateTime @default(now())
+
+  created_at    DateTime @default(now())
+
+  @@index([session_id])
+  @@index([first_seen_at])
+  @@index([last_seen_at])
+}

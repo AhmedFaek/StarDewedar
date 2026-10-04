@@ -70,7 +70,19 @@
     "registered_customers": "registered customers",
     "pending": "PENDING",
     "pending_alert_title": "Attention Required",
-    "pending_alert_desc": "You have pending requests requiring review:"
+    "pending_alert_desc": "You have pending requests requiring review:",
+    "analytics": {
+      "title": "Website Analytics",
+      "active_visitors": "Active Visitors",
+      "today": "Today",
+      "this_month": "This Month",
+      "last_month": "Last Month",
+      "chart_title": "Visitors — Last 30 Days",
+      "visitors": "visitors",
+      "error": "Could not load analytics data",
+      "chart_error": "Could not load chart data",
+      "chart_empty": "No visitor data yet"
+    }
   },
 
   "products": {
