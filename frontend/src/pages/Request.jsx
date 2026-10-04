@@ -13,6 +13,7 @@
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import VisitFormSection from '../components/sections/VisitFormSection'
@@ -88,6 +89,9 @@ function TypeCard({ type, icon, label, description, isActive, onClick }) {
 
 export default function Request() {
   const { t } = useTranslation()
+
+  // Apply noindex/nofollow to request hub forms
+  usePrivatePageSeo({ en: 'Submit a Request', ar: 'تقديم طلب' })
 
   // Read initial type from URL query param
   const getInitialType = () => {

@@ -34,6 +34,7 @@ const ComparePage = lazy(() => import('./pages/ComparePage'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const Messages = lazy(() => import('./pages/Messages'))
 const ConversationPage = lazy(() => import('./pages/ConversationPage'))
+const NotFound = lazy(() => import('./pages/NotFound'))
 
 export default function App() {
   return (
@@ -56,7 +57,7 @@ export default function App() {
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:id" element={<ConversationPage />} />
-            <Route path="*" element={<Home />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
 

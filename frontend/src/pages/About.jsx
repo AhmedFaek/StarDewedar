@@ -1,10 +1,44 @@
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import AnimatedCounter from '../components/shared/AnimatedCounter'
 
 export default function About() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+
+  useEffect(() => {
+    const isAr = lang === 'ar'
+    setPageMeta({
+      title: isAr
+        ? 'من نحن | ستار ديودار'
+        : 'About Us | Star Dewedar',
+      description: isAr
+        ? 'تعرف على شركة ستار ديودار — شركة رائدة في توريد وتركيب معدات الجهد المنخفض الكهربائية للمشاريع الصناعية والتجارية في مصر. خبرة أكثر من 10 سنوات وأكثر من 300 مشروع.'
+        : 'Learn about Star Dewedar Co. — a leading company specializing in supplying and installing low-voltage electrical equipment for industrial and commercial projects in Egypt. 10+ years of experience, 300+ projects delivered.',
+      canonical: buildUrl('/about'),
+      ogType: 'website',
+      lang,
+    })
+
+    setJsonLd('about-page', {
+      '@context': 'https://schema.org',
+      '@type': 'AboutPage',
+      '@id': buildUrl('/about#webpage'),
+      name: isAr ? 'من نحن — ستار ديودار' : 'About Us — Star Dewedar',
+      url: buildUrl('/about'),
+      description: isAr
+        ? 'شركة ستار ديودار رائدة في توريد وتركيب معدات الجهد المنخفض الكهربائية.'
+        : 'Star Dewedar Co. is a leading company in supplying and installing low-voltage electrical equipment.',
+      publisher: {
+        '@id': buildUrl('/#organization'),
+      },
+    })
+
+    return () => removeJsonLd('about-page')
+  }, [lang])
 
   const stats = [
     { number: '10+', label: t('about.stat1') },

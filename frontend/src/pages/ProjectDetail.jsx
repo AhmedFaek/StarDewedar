@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl, truncate } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -42,6 +43,65 @@ export default function ProjectDetail() {
       .catch(err => console.error('Error fetching project:', err))
       .finally(() => setLoading(false))
   }, [id])
+
+  useEffect(() => {
+    if (!project) return
+
+    const lang = i18n.language === 'ar' ? 'ar' : 'en'
+    const isAr = lang === 'ar'
+    const projectTitle = isAr ? project.title_ar : project.title_en
+    const projectDesc = isAr ? project.description_ar : project.description_en
+    const categoryLabel = isAr ? project.category?.name_ar : project.category?.name_en
+    const projectImage = project.images?.[0]?.image_url || null
+
+    setPageMeta({
+      title: projectTitle
+        ? `${projectTitle} | Star Dewedar`
+        : 'Project | Star Dewedar',
+      description: truncate(projectDesc) || (
+        isAr
+          ? `اكتشف تفاصيل مشروع ${projectTitle} من شركة ستار ديودار.`
+          : `Discover the details of the ${projectTitle} project by Star Dewedar Co.`
+      ),
+      canonical: buildUrl(`/project-detail?id=${project.id}`),
+      ogType: 'article',
+      ogImage: projectImage,
+      lang,
+    })
+
+    const breadcrumb = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: buildUrl('/') },
+        { '@type': 'ListItem', position: 2, name: 'Projects', item: buildUrl('/projects') },
+        ...(categoryLabel ? [{ '@type': 'ListItem', position: 3, name: categoryLabel, item: buildUrl('/projects') }] : []),
+        { '@type': 'ListItem', position: categoryLabel ? 4 : 3, name: projectTitle, item: buildUrl(`/project-detail?id=${project.id}`) },
+      ],
+    }
+
+    const projectSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      '@id': buildUrl(`/project-detail?id=${project.id}#project`),
+      name: projectTitle,
+      description: truncate(projectDesc, 500) || undefined,
+      ...(projectImage ? { image: projectImage } : {}),
+      ...(project.client_name ? { sponsor: { '@type': 'Organization', name: project.client_name } } : {}),
+      ...(categoryLabel ? { about: { '@type': 'Thing', name: categoryLabel } } : {}),
+      creator: {
+        '@id': buildUrl('/#organization'),
+      },
+    }
+
+    setJsonLd(`project-${project.id}`, projectSchema)
+    setJsonLd(`project-${project.id}-breadcrumb`, breadcrumb)
+
+    return () => {
+      removeJsonLd(`project-${project.id}`)
+      removeJsonLd(`project-${project.id}-breadcrumb`)
+    }
+  }, [project, i18n.language])
 
   if (loading) {
     return (

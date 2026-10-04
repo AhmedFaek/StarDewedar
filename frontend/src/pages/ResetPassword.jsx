@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import { api } from '../utils/api.js'
 import Header from '../components/layout/Header.jsx'
 import Footer from '../components/layout/Footer.jsx'
@@ -16,6 +17,7 @@ import { useFormSubmit } from '../hooks/useFormSubmit.js'
  * and the backend validates the token + updates the password.
  */
 export default function ResetPassword() {
+  usePrivatePageSeo({ en: 'Reset Password', ar: 'إعادة تعيين كلمة المرور' })
   const { t } = useTranslation()
   const { showError } = useNotification()
   const [searchParams] = useSearchParams()

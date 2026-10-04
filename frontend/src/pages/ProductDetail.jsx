@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { setPageMeta, setJsonLd, removeJsonLd, buildUrl, truncate } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -48,6 +49,81 @@ export default function ProductDetail() {
       }
     })()
   }, [productId])
+
+  useEffect(() => {
+    if (!product) return
+
+    const lang = i18n.language === 'ar' ? 'ar' : 'en'
+    const isAr = lang === 'ar'
+    const productName = isAr ? product.name_ar : product.name_en
+    const productDesc = isAr ? product.description_ar : product.description_en
+    const categoryLabel = isAr ? product.category?.name_ar : product.category?.name_en
+    const productImage = product.images?.[0]?.image_url || null
+
+    setPageMeta({
+      title: productName
+        ? `${productName} | Star Dewedar`
+        : 'Product | Star Dewedar',
+      description: truncate(productDesc) || (
+        isAr
+          ? `اكتشف ${productName} من شركة ستار ديودار. اطلب عرض سعر أو تنزيل الكتالوج الآن.`
+          : `Discover ${productName} from Star Dewedar Co. Request a quote or download the datasheet.`
+      ),
+      canonical: buildUrl(`/product-detail?id=${product.id}`),
+      ogType: 'website',
+      ogImage: productImage,
+      lang,
+    })
+
+    const breadcrumb = {
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement: [
+        { '@type': 'ListItem', position: 1, name: 'Home', item: buildUrl('/') },
+        { '@type': 'ListItem', position: 2, name: 'Products', item: buildUrl('/products') },
+        ...(categoryLabel ? [{ '@type': 'ListItem', position: 3, name: categoryLabel, item: buildUrl(`/products?category=${product.category_id}`) }] : []),
+        { '@type': 'ListItem', position: categoryLabel ? 4 : 3, name: productName, item: buildUrl(`/product-detail?id=${product.id}`) },
+      ],
+    }
+
+    const productSchema = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      '@id': buildUrl(`/product-detail?id=${product.id}#product`),
+      name: productName,
+      description: truncate(productDesc, 500) || undefined,
+      ...(productImage ? { image: [productImage] } : {}),
+      ...(categoryLabel ? { category: categoryLabel } : {}),
+      brand: {
+        '@type': 'Brand',
+        name: 'Star Dewedar',
+      },
+      ...(product.price ? {
+        offers: {
+          '@type': 'Offer',
+          price: String(product.price),
+          priceCurrency: 'EGP',
+          availability: 'https://schema.org/InStock',
+          url: buildUrl(`/product-detail?id=${product.id}`),
+          seller: {
+            '@id': buildUrl('/#organization'),
+          },
+        },
+      } : {
+        seller: {
+          '@id': buildUrl('/#organization'),
+        },
+      }),
+    }
+
+    setJsonLd(`product-${product.id}`, productSchema)
+    setJsonLd(`product-${product.id}-breadcrumb`, breadcrumb)
+
+    return () => {
+      removeJsonLd(`product-${product.id}`)
+      removeJsonLd(`product-${product.id}-breadcrumb`)
+    }
+  }, [product, i18n.language])
 
   if (loading) {
     return (

@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /messages
+Disallow: /saved-products
+Disallow: /compare
+Disallow: /reset-password
+Disallow: /request
+Disallow: /api/
+
+Sitemap: https://stardewedar.com/sitemap.xml
