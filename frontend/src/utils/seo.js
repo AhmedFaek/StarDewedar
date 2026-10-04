@@ -12,8 +12,8 @@ export const SITE = {
   name: 'Star Dewedar',
   url: import.meta.env.VITE_SITE_URL || 'https://stardewedar.com',
   defaultLocale: 'en',
-  /** Default OG image — points to the logo until a dedicated social-share image is created */
-  defaultOgImage: '/logo/logo.webp',
+  /** Default OG social share image */
+  defaultOgImage: '/images/og-share.jpg',
 }
 
 /**
