@@ -1,4 +1,4 @@
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { CompareProvider } from './utils/compareContext'
 import CompareDrawer from './components/shared/CompareDrawer'
@@ -6,6 +6,7 @@ import SupportMessagesFloat from './components/shared/SupportMessagesFloat'
 import TopProgressBar from './components/shared/TopProgressBar'
 import { NotificationProvider } from './context/NotificationContext'
 import ToastContainer from './components/notifications/ToastContainer'
+import { initAnalytics } from './utils/analytics'
 
 function RedirectQuote() {
   const location = useLocation()
@@ -37,6 +38,12 @@ const ConversationPage = lazy(() => import('./pages/ConversationPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 export default function App() {
+  // Silently initialize analytics tracking — this never affects the UI
+  useEffect(() => {
+    const cleanup = initAnalytics()
+    return cleanup
+  }, [])
+
   return (
     <NotificationProvider>
       <CompareProvider>
