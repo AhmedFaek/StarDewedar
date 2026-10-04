@@ -7,6 +7,7 @@ import { requireRole } from '../../middleware/roles.middleware.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { ROLES } from '../../utils/constants.js'
 import rateLimit from 'express-rate-limit'
+import { adminRouter as analyticsAdminRouter } from '../analytics/analytics.routes.js'
 
 const router = express.Router()
 
@@ -21,6 +22,10 @@ const adminReplyLimiter = rateLimit({
 
 // All dashboard routes require admin authentication
 router.use(auth, requireRole(ROLES.ADMIN))
+
+/* ─── Analytics ──────────────────────────────────────────────────────────── */
+
+router.use('/analytics', analyticsAdminRouter)
 
 /* ─── Stats ─────────────────────────────────────────────────────────────── */
 
