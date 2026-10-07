@@ -216,12 +216,47 @@ export const verifyEmail = async (email, code) => {
         throw err
     }
 
-    // If already verified, allow login
+    // 1. If already verified, do NOT generate tokens.
+    // Never allow verify-email to act as a login backdoor for anyone who knows the email.
     if (user.email_verified) {
+        return {
+            success: true,
+            alreadyVerified: true,
+            message: 'Email is already verified. Please log in.',
+        }
+    }
+
+    // 2. Pre-check: if attempts are already exhausted
+    if (user.email_verification_attempts >= 5) {
+        const err = new Error('Too many failed attempts. Please request a new verification code.')
+        err.status = 429
+        err.code = 'MAX_VERIFICATION_ATTEMPTS_EXCEEDED'
+        throw err
+    }
+
+    // 3. Pre-check: if code has expired
+    const now = new Date()
+    if (!user.email_verification_expires_at || now > new Date(user.email_verification_expires_at)) {
+        const err = new Error('Verification code has expired. Please request a new code.')
+        err.status = 400
+        err.code = 'VERIFICATION_CODE_EXPIRED'
+        throw err
+    }
+
+    // 4. Hash submitted code
+    const hashedCode = hashVerificationCode(code.trim())
+
+    // 5. Atomically verify and consume the verification code in the database.
+    // The database condition guarantees that only ONE concurrent request can consume this code.
+    const affectedRows = await authRepo.consumeVerificationCode(user.id, hashedCode, now)
+
+    // 6. If consume succeeded (affectedRows === 1), issue tokens and return success
+    if (affectedRows === 1) {
         const tokens = generateTokens(user)
         await storeHashedRefreshToken(user.id, tokens.refreshToken)
+
         return {
-            message: 'Email is already verified.',
+            message: 'Email verified successfully.',
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
             user: {
@@ -236,59 +271,45 @@ export const verifyEmail = async (email, code) => {
         }
     }
 
-    // Rate limiting attempts (max 5 failed attempts)
-    if (user.email_verification_attempts >= 5) {
-        const err = new Error('Too many failed attempts. Please request a new verification code.')
-        err.status = 429
-        err.code = 'MAX_VERIFICATION_ATTEMPTS_EXCEEDED'
-        throw err
+    // 7. Atomic consume failed (affectedRows === 0).
+    // Concurrency check: see if another concurrent request just verified the account.
+    const latestUser = await userRepo.findUserById(user.id)
+    if (latestUser?.email_verified) {
+        return {
+            success: true,
+            alreadyVerified: true,
+            message: 'Email is already verified. Please log in.',
+        }
     }
 
-    // Check expiration
-    if (!user.email_verification_expires_at || new Date() > new Date(user.email_verification_expires_at)) {
+    // Check if code expired between initial read and atomic consume attempt
+    if (!latestUser?.email_verification_expires_at || now > new Date(latestUser.email_verification_expires_at)) {
         const err = new Error('Verification code has expired. Please request a new code.')
         err.status = 400
         err.code = 'VERIFICATION_CODE_EXPIRED'
         throw err
     }
 
-    // Compare hash
-    const hashedCode = hashVerificationCode(code.trim())
-    if (!user.email_verification_hash || user.email_verification_hash !== hashedCode) {
-        await authRepo.incrementVerificationAttempts(user.id)
-        const remaining = Math.max(0, 4 - user.email_verification_attempts)
-        const err = new Error(
-            remaining > 0
-                ? `Invalid verification code. ${remaining} attempt(s) remaining.`
-                : 'Invalid verification code. Maximum attempts reached. Please request a new code.'
-        )
-        err.status = 400
-        err.code = 'INVALID_VERIFICATION_CODE'
-        err.remaining = remaining
+    // The code was incorrect: atomically increment failed attempts in DB (enforcing attempts < 5)
+    const incResult = await authRepo.incrementVerificationAttemptsIfAllowed(user.id, 5)
+
+    if (!incResult.allowed) {
+        const err = new Error('Too many failed attempts. Please request a new verification code.')
+        err.status = 429
+        err.code = 'MAX_VERIFICATION_ATTEMPTS_EXCEEDED'
         throw err
     }
 
-    // Code matches! Clear fields and mark verified
-    await authRepo.clearVerificationFields(user.id)
-
-    // Issue tokens for auto-login
-    const tokens = generateTokens(user)
-    await storeHashedRefreshToken(user.id, tokens.refreshToken)
-
-    return {
-        message: 'Email verified successfully.',
-        accessToken: tokens.accessToken,
-        refreshToken: tokens.refreshToken,
-        user: {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            role: user.role,
-            phone_number: user.phone_number,
-            whatsapp_number: user.whatsapp_number,
-            company_name: user.company_name,
-        },
-    }
+    const remaining = Math.max(0, 5 - incResult.attempts)
+    const err = new Error(
+        remaining > 0
+            ? `Invalid verification code. ${remaining} attempt(s) remaining.`
+            : 'Invalid verification code. Maximum attempts reached. Please request a new code.'
+    )
+    err.status = 400
+    err.code = 'INVALID_VERIFICATION_CODE'
+    err.remaining = remaining
+    throw err
 }
 
 /**
@@ -314,22 +335,35 @@ export const resendVerificationCode = async (email) => {
         }
     }
 
-    // 60-second cooldown check
-    if (user.email_verification_last_sent) {
-        const elapsedSeconds = Math.floor(
-            (Date.now() - new Date(user.email_verification_last_sent).getTime()) / 1000
-        )
-        if (elapsedSeconds < RESEND_COOLDOWN_SECONDS) {
-            const waitSeconds = RESEND_COOLDOWN_SECONDS - elapsedSeconds
-            const err = new Error(`Please wait ${waitSeconds} seconds before requesting a new code.`)
-            err.status = 429
-            err.code = 'RESEND_COOLDOWN'
-            err.retryAfter = waitSeconds
-            throw err
+    // Atomically acquire resend cooldown slot in database
+    const now = new Date()
+    const acquired = await authRepo.acquireVerificationResendCooldown(user.id, now, RESEND_COOLDOWN_SECONDS)
+
+    if (!acquired) {
+        // Check if user was verified in the meantime
+        const latestUser = await userRepo.findUserById(user.id)
+        if (latestUser?.email_verified) {
+            return {
+                message: 'This email is already verified. You can log in directly.',
+                alreadyVerified: true,
+            }
         }
+
+        // Cooldown still active — calculate retryAfter from the actual last_sent timestamp
+        const lastSentDate = latestUser?.email_verification_last_sent || user.email_verification_last_sent
+        const elapsedSeconds = lastSentDate
+            ? Math.floor((now.getTime() - new Date(lastSentDate).getTime()) / 1000)
+            : 0
+        const waitSeconds = Math.max(1, RESEND_COOLDOWN_SECONDS - elapsedSeconds)
+
+        const err = new Error(`Please wait ${waitSeconds} seconds before requesting a new code.`)
+        err.status = 429
+        err.code = 'RESEND_COOLDOWN'
+        err.retryAfter = waitSeconds
+        throw err
     }
 
-    // Generate new code
+    // Cooldown acquired! Only the winning request generates and stores the new verification code.
     const verificationCode = generateVerificationCode()
     const hashedCode = hashVerificationCode(verificationCode)
     const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
@@ -338,7 +372,7 @@ export const resendVerificationCode = async (email) => {
         hashedCode,
         expiresAt,
         attempts: 0,
-        lastSent: new Date(),
+        lastSent: now,
     })
 
     // Send email
@@ -357,6 +391,12 @@ export const resendVerificationCode = async (email) => {
         })
     } catch (err) {
         console.error('[auth.service] Failed to send resend-verification email:', err.message)
+        // Reset cooldown timestamp so the user is not stuck waiting 60s when email sending failed
+        await authRepo.resetVerificationResendCooldown(user.id, user.email_verification_last_sent).catch(() => {})
+        const sendErr = new Error('Failed to send verification email. Please try again.')
+        sendErr.status = 500
+        sendErr.code = 'EMAIL_SEND_FAILED'
+        throw sendErr
     }
 
     return {
