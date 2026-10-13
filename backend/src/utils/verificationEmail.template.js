@@ -1,30 +1,15 @@
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const LOGO_PATH = path.resolve(__dirname, '../assets/logo.png');
-
-/**
- * Returns the inline attachments for the verification email.
- */
-export const getVerificationEmailAttachments = () => [
-  {
-    filename: 'logo.png',
-    path: LOGO_PATH,
-    cid: 'stardewedar-logo',
-  },
-];
+import env from '../config/env.js'
 
 /**
  * Professional HTML email template for email verification code.
  * Matches Star Dewedar branding (navy #1a1a2e, gold #e8b540).
- * 
+ *
  * @param {{ code: string, name?: string, expiresInMinutes?: number }} opts
  * @returns {string} Full HTML document
  */
 export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 }) => {
-  const greeting = name ? `Hello ${name},` : 'Hello,';
+  const greeting = name ? `Hello ${name},` : 'Hello,'
+  const logoUrl = env.logoUrl
   return `
 <!DOCTYPE html>
 <html lang="en">
@@ -45,7 +30,7 @@ export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 })
                             <table align="center" cellpadding="0" cellspacing="0" style="margin:0 auto 14px auto;">
                                 <tr>
                                     <td align="center" style="background-color:#ffffff; padding:10px 24px; border-radius:12px; display:inline-block; box-shadow:0 3px 10px rgba(0,0,0,0.15);">
-                                        <img src="cid:stardewedar-logo" alt="Star Dewedar" width="210" style="display:block; max-height:68px; width:auto; border:0;" />
+                                        <img src="${logoUrl}" alt="Star Dewedar" width="210" style="display:block; max-height:68px; width:auto; border:0;" />
                                     </td>
                                 </tr>
                             </table>
@@ -115,5 +100,5 @@ export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 })
     </table>
 </body>
 </html>
-  `.trim();
-};
+  `.trim()
+}

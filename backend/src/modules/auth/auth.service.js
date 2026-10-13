@@ -5,7 +5,7 @@ import * as userRepo from '../users/user.repository.js'
 import * as authRepo from './auth.repository.js'
 import { sendEmail } from '../../utils/mailer.js'
 import { resetPasswordEmailTemplate } from '../../utils/resetPasswordEmail.template.js'
-import { verificationEmailTemplate, getVerificationEmailAttachments } from '../../utils/verificationEmail.template.js'
+import { verificationEmailTemplate } from '../../utils/verificationEmail.template.js'
 import { validateCustomerEmail, normalizeEmail } from '../../utils/emailValidation.service.js'
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
@@ -66,6 +66,64 @@ const generateVerificationCode = () => {
     return crypto.randomInt(100000, 1000000).toString()
 }
 
+const sendVerificationCodeEmail = async (user, verificationCode, subject) => {
+    const html = verificationEmailTemplate({
+        code: verificationCode,
+        name: user.name,
+        expiresInMinutes: VERIFICATION_CODE_EXPIRY_MINUTES,
+    })
+
+    await sendEmail({
+        to: user.email,
+        subject,
+        html,
+    })
+}
+
+/**
+ * Generate a fresh verification code, persist it, and email it.
+ * Respects the 60-second resend cooldown.
+ */
+const issueAndSendVerificationCode = async (user, { subject } = {}) => {
+    const now = new Date()
+
+    const acquired = await authRepo.acquireVerificationResendCooldown(
+        user.id,
+        now,
+        RESEND_COOLDOWN_SECONDS
+    )
+    if (!acquired) {
+        const err = new Error('Please wait before requesting a new code.')
+        err.status = 429
+        err.code = 'RESEND_COOLDOWN'
+        throw err
+    }
+
+    const verificationCode = generateVerificationCode()
+    const hashedCode = hashVerificationCode(verificationCode)
+    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
+
+    await authRepo.saveVerificationCode(user.id, {
+        hashedCode,
+        expiresAt,
+        attempts: 0,
+        lastSent: now,
+    })
+
+    try {
+        await sendVerificationCodeEmail(
+            user,
+            verificationCode,
+            subject || 'Star Dewedar — Email Verification Code'
+        )
+    } catch (err) {
+        await authRepo.resetVerificationResendCooldown(user.id, user.email_verification_last_sent).catch(() => {})
+        throw err
+    }
+
+    return verificationCode
+}
+
 /* ─── Public service methods ─────────────────────────────────────────────── */
 
 /**
@@ -112,22 +170,17 @@ export const register = async (data) => {
         email_verification_last_sent: new Date(),
     })
 
-    // 6. Send branded verification email
-    const html = verificationEmailTemplate({
-        code: verificationCode,
-        name: user.name,
-        expiresInMinutes: VERIFICATION_CODE_EXPIRY_MINUTES,
-    })
-
+    // 6. Send branded verification email (must not hang registration forever)
     try {
-        await sendEmail({
-            to: user.email,
-            subject: 'Star Dewedar — Verify Your Email Address',
-            html,
-            attachments: getVerificationEmailAttachments(),
-        })
+        await sendVerificationCodeEmail(
+            user,
+            verificationCode,
+            'Star Dewedar — Verify Your Email Address'
+        )
     } catch (err) {
         console.error('[auth.service] Failed to send verification email on register:', err.message)
+        // Allow immediate resend / login-triggered send if SMTP failed
+        await authRepo.resetVerificationResendCooldown(user.id, null).catch(() => {})
     }
 
     return {
@@ -176,8 +229,23 @@ export const login = async (email, password) => {
     const isMatch = await bcrypt.compare(password, user.password)
     if (!isMatch) throw new Error('Invalid credentials')
 
-    // Block unverified customer accounts
+    // Block unverified customer accounts. Send a code only when none is pending
+    // (failed first send or expired) so we do not invalidate a code already in the inbox.
     if (user.role === ROLES.CUSTOMER && !user.email_verified) {
+        const codeExpired = !user.email_verification_expires_at
+            || new Date() > new Date(user.email_verification_expires_at)
+        const needsNewCode = !user.email_verification_last_sent || codeExpired
+
+        if (needsNewCode) {
+            issueAndSendVerificationCode(user, {
+                subject: 'Star Dewedar — Email Verification Code',
+            }).catch((sendErr) => {
+                if (sendErr.code !== 'RESEND_COOLDOWN') {
+                    console.error('[auth.service] Failed to send verification email on unverified login:', sendErr.message)
+                }
+            })
+        }
+
         const err = new Error('Please verify your email address before logging in.')
         err.status = 403
         err.requiresEmailVerification = true
@@ -335,11 +403,13 @@ export const resendVerificationCode = async (email) => {
         }
     }
 
-    // Atomically acquire resend cooldown slot in database
     const now = new Date()
-    const acquired = await authRepo.acquireVerificationResendCooldown(user.id, now, RESEND_COOLDOWN_SECONDS)
 
-    if (!acquired) {
+    try {
+        await issueAndSendVerificationCode(user, {
+            subject: 'Star Dewedar — Email Verification Code',
+        })
+    } catch (err) {
         // Check if user was verified in the meantime
         const latestUser = await userRepo.findUserById(user.id)
         if (latestUser?.email_verified) {
@@ -349,50 +419,21 @@ export const resendVerificationCode = async (email) => {
             }
         }
 
-        // Cooldown still active — calculate retryAfter from the actual last_sent timestamp
-        const lastSentDate = latestUser?.email_verification_last_sent || user.email_verification_last_sent
-        const elapsedSeconds = lastSentDate
-            ? Math.floor((now.getTime() - new Date(lastSentDate).getTime()) / 1000)
-            : 0
-        const waitSeconds = Math.max(1, RESEND_COOLDOWN_SECONDS - elapsedSeconds)
+        if (err.code === 'RESEND_COOLDOWN') {
+            const lastSentDate = latestUser?.email_verification_last_sent || user.email_verification_last_sent
+            const elapsedSeconds = lastSentDate
+                ? Math.floor((now.getTime() - new Date(lastSentDate).getTime()) / 1000)
+                : 0
+            const waitSeconds = Math.max(1, RESEND_COOLDOWN_SECONDS - elapsedSeconds)
 
-        const err = new Error(`Please wait ${waitSeconds} seconds before requesting a new code.`)
-        err.status = 429
-        err.code = 'RESEND_COOLDOWN'
-        err.retryAfter = waitSeconds
-        throw err
-    }
+            const cooldownErr = new Error(`Please wait ${waitSeconds} seconds before requesting a new code.`)
+            cooldownErr.status = 429
+            cooldownErr.code = 'RESEND_COOLDOWN'
+            cooldownErr.retryAfter = waitSeconds
+            throw cooldownErr
+        }
 
-    // Cooldown acquired! Only the winning request generates and stores the new verification code.
-    const verificationCode = generateVerificationCode()
-    const hashedCode = hashVerificationCode(verificationCode)
-    const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
-
-    await authRepo.saveVerificationCode(user.id, {
-        hashedCode,
-        expiresAt,
-        attempts: 0,
-        lastSent: now,
-    })
-
-    // Send email
-    const html = verificationEmailTemplate({
-        code: verificationCode,
-        name: user.name,
-        expiresInMinutes: VERIFICATION_CODE_EXPIRY_MINUTES,
-    })
-
-    try {
-        await sendEmail({
-            to: user.email,
-            subject: 'Star Dewedar — Email Verification Code',
-            html,
-            attachments: getVerificationEmailAttachments(),
-        })
-    } catch (err) {
         console.error('[auth.service] Failed to send resend-verification email:', err.message)
-        // Reset cooldown timestamp so the user is not stuck waiting 60s when email sending failed
-        await authRepo.resetVerificationResendCooldown(user.id, user.email_verification_last_sent).catch(() => {})
         const sendErr = new Error('Failed to send verification email. Please try again.')
         sendErr.status = 500
         sendErr.code = 'EMAIL_SEND_FAILED'
