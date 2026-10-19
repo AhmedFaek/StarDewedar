@@ -108,13 +108,13 @@ export const BOTTOM_NAV_ITEMS = [
 
 // Color Tokens (for reference)
 export const COLORS = {
-    PRIMARY: '#000e24',
-    PRIMARY_CONTAINER: '#00234b',
-    TERTIARY: '#6a5f00',
-    TERTIARY_FIXED: '#f9e454',
-    SECONDARY: '#5d5e61',
-    SURFACE: '#f7f9fc',
-    SURFACE_CONTAINER_LOW: '#f2f4f7',
+    PRIMARY: '#1B75BA',
+    PRIMARY_CONTAINER: '#145D94',
+    TERTIARY: '#1B75BA',
+    TERTIARY_FIXED: '#DCEBF7',
+    SECONDARY: '#5D6D7E',
+    SURFACE: '#F3F6F9',
+    SURFACE_CONTAINER_LOW: '#F3F6F9',
     SURFACE_CONTAINER_LOWEST: '#ffffff',
     ERROR: '#ba1a1a',
     SUCCESS: '#006e1c', // Implied from design system

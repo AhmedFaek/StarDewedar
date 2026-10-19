@@ -241,7 +241,7 @@ export default function ProductDetail() {
               <span className="inline-block bg-primary/10 text-primary px-3 py-1 font-label text-[10px] font-bold tracking-[0.2em] uppercase">
                 {categoryName}
               </span>
-              <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-none text-primary uppercase italic">
+              <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-none text-on-surface uppercase italic">
                 {name}
               </h1>
               <p className="text-secondary/80 leading-relaxed font-body text-lg max-w-xl">{description}</p>
@@ -249,7 +249,7 @@ export default function ProductDetail() {
             <div className="space-y-6">
               <div>
                 <p className="text-tertiary font-label text-[14px] tracking-widest uppercase font-black mb-1">{t('productDetail.pricePoint')}</p>
-                <p className="text-4xl font-headline font-black text-primary">
+                <p className="text-4xl font-headline font-black text-on-surface">
                   EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
                 </p>
               </div>
@@ -291,7 +291,7 @@ export default function ProductDetail() {
 
         {relatedProducts.length > 0 && (
           <section className="pt-20 border-t border-outline-variant/15">
-            <h2 className="text-3xl font-headline font-black text-primary uppercase italic mb-12">{t('productDetail.relatedProducts')}</h2>
+            <h2 className="text-3xl font-headline font-black text-on-surface uppercase italic mb-12">{t('productDetail.relatedProducts')}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {relatedProducts.map((item) => (
                 <div key={item.id} onClick={() => navigateToProduct(item.id)} className="group cursor-pointer">
@@ -301,7 +301,7 @@ export default function ProductDetail() {
                   <p className="text-[9px] font-bold tracking-widest uppercase text-tertiary mb-1">
                     {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
                   </p>
-                  <h3 className="text-lg font-headline font-bold text-primary leading-tight group-hover:text-primary/70 transition-colors uppercase">
+                  <h3 className="text-lg font-headline font-bold text-on-surface leading-tight group-hover:text-primary transition-colors uppercase">
                     {i18n.language === 'ar' ? item.name_ar : item.name_en}
                   </h3>
                   <p className="text-sm font-body mt-2 text-secondary font-bold">

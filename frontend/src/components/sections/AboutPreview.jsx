@@ -11,7 +11,7 @@ export default function AboutPreview() {
 
           {/* Left */}
           <div className="md:col-span-7">
-            <h2 className="font-headline text-4xl md:text-6xl font-black tracking-tighter text-primary mb-8">
+            <h2 className="font-headline text-4xl md:text-6xl font-black tracking-tighter text-on-surface mb-8">
               {t('aboutPreview.title1')}
               <br />{t('aboutPreview.title2')}
             </h2>
@@ -22,7 +22,7 @@ export default function AboutPreview() {
 
             <div className="grid grid-cols-2 gap-6 sm:gap-12 border-t border-outline-variant/15 pt-8">
               <div>
-                <div className="font-headline text-4xl font-black text-primary">
+                <div className="font-headline text-4xl font-black text-on-surface">
                   <AnimatedCounter value="10+" />
                 </div>
                 <div className="font-label uppercase text-sm tracking-widest text-outline">
@@ -31,7 +31,7 @@ export default function AboutPreview() {
               </div>
 
               <div>
-                <div className="font-headline text-4xl font-black text-primary">
+                <div className="font-headline text-4xl font-black text-on-surface">
                   <AnimatedCounter value="300+" />
                 </div>
                 <div className="font-label uppercase text-sm tracking-widest text-outline">

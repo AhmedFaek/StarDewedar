@@ -40,7 +40,7 @@ function QuoteCard({ quote, lang, t }) {
   )
 
   return (
-    <div className="border border-slate-100 bg-white hover:border-yellow-300 hover:shadow-xs transition-all duration-200 p-3">
+    <div className="border border-slate-100 bg-white hover:border-primary hover:shadow-xs transition-all duration-200 p-3">
       <div className="flex items-start justify-between gap-2 mb-1.5">
         <p className="text-xs font-bold text-slate-900 leading-snug line-clamp-2 flex-1">
           {productName}
@@ -91,7 +91,7 @@ function VisitCard({ visit, lang, t }) {
           <span className="material-symbols-outlined text-[13px] leading-none text-slate-400">calendar_today</span>
           {t('myRequests.submitted')}: {date}
         </span>
-        <span className="flex items-center gap-1 text-[11px] text-amber-600 font-bold">
+        <span className="flex items-center gap-1 text-[11px] text-primary font-bold">
           <span className="material-symbols-outlined text-[13px] leading-none">event</span>
           {t('myRequests.preferredDate')}: {preferred}
         </span>
@@ -208,7 +208,7 @@ function EmptyState({ icon, text, desc, ctaLabel, onCta }) {
       <p className="text-[11px] text-slate-400 leading-relaxed mb-3.5 max-w-[220px]">{desc}</p>
       <button
         onClick={onCta}
-        className="font-headline font-bold uppercase text-xs tracking-wider px-4 py-2 bg-slate-900 text-white hover:bg-yellow-400 hover:text-slate-900 transition-colors shadow-xs"
+        className="font-headline font-bold uppercase text-xs tracking-wider px-4 py-2 bg-primary text-white hover:bg-primary-dark transition-colors shadow-xs"
       >
         {ctaLabel}
       </button>
@@ -333,7 +333,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center justify-center gap-1.5 py-2.5 px-2 text-xs font-bold uppercase tracking-wider transition-colors whitespace-nowrap ${
                 activeTab === tab.key
-                  ? 'text-slate-950 border-b-2 border-yellow-400 bg-slate-50'
+                  ? 'text-primary border-b-2 border-primary bg-slate-50'
                   : 'text-slate-500 hover:text-slate-800 border-b-2 border-transparent'
               }`}
             >
@@ -341,7 +341,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
               <span className="font-headline">{tab.label}</span>
               {tab.count > 0 && (
                 <span className={`inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[9px] font-bold rounded-full shrink-0 ${
-                  activeTab === tab.key ? 'bg-yellow-400 text-slate-950' : 'bg-slate-200 text-slate-700'
+                  activeTab === tab.key ? 'bg-primary text-white' : 'bg-slate-200 text-slate-700'
                 }`}>
                   {tab.count}
                 </span>
@@ -354,7 +354,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
         <div className="flex-1 overflow-y-auto">
           {loading ? (
             <div className="flex flex-col items-center justify-center py-16 gap-3">
-              <div className="w-8 h-8 border-2 border-slate-200 border-t-yellow-400 rounded-full animate-spin" />
+              <div className="w-8 h-8 border-2 border-slate-200 border-t-primary rounded-full animate-spin" />
               <p className="text-xs text-slate-400 font-bold uppercase tracking-widest">{t('myRequests.loading')}</p>
             </div>
           ) : error ? (
@@ -434,7 +434,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
             </div>
             <button
               onClick={() => goTo('/request?type=boq')}
-              className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-yellow-400 text-slate-950 hover:bg-yellow-300 font-headline transition-colors shadow-xs"
+              className="w-full flex items-center justify-center gap-1.5 py-2.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider bg-primary text-white hover:bg-primary-dark font-headline transition-colors shadow-xs"
             >
               <span className="material-symbols-outlined text-base leading-none">receipt_long</span>
               {t('myRequests.requestBOQ')}

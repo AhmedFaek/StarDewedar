@@ -10,6 +10,12 @@ import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
 
+const getUserInitials = (name) => {
+  const nameParts = name?.trim().split(/\s+/).filter(Boolean) ?? []
+  if (nameParts.length === 0) return '?'
+  return `${nameParts[0][0]}${nameParts.length > 1 ? nameParts[nameParts.length - 1][0] : ''}`.toUpperCase()
+}
+
 export default function Header() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -128,7 +134,7 @@ export default function Header() {
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-400 rounded transition-opacity hover:opacity-90"
+          className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded transition-opacity hover:opacity-90"
           aria-label="Star Dewedar Home"
         >
           <picture>
@@ -151,8 +157,8 @@ export default function Header() {
               href={`#${link.key.toLowerCase()}`}
               onClick={() => handleNavClick(link.key)}
               className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${activeLink === link.key && !currentPage
-                ? 'text-slate-950 border-b-2 border-yellow-400'
-                : 'text-slate-600 border-b-2 border-transparent hover:text-yellow-500'
+                ? 'text-primary border-b-2 border-primary'
+                : 'text-slate-600 border-b-2 border-transparent hover:text-primary'
                 }`}
             >
               {link.label}
@@ -174,8 +180,8 @@ export default function Header() {
           <button
             onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
             className={`${ctaBase} border-transparent ${path.startsWith('/request')
-              ? 'bg-tertiary text-white hover:bg-tertiary-fixedDim'
-              : 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-white hover:border-tertiary-fixed'
+              ? 'bg-primary-dark text-white hover:bg-primary'
+              : 'bg-primary text-white hover:bg-primary-dark'
               }`}
           >
             {t('nav.request')}
@@ -187,20 +193,25 @@ export default function Header() {
               id="header-profile-btn"
               onClick={() => setUserMenuOpen(o => !o)}
               aria-label="Account"
+              aria-haspopup="menu"
+              aria-expanded={userMenuOpen}
               title={user ? user.name : t('auth.login')}
               className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-all border ${
                 user
-                  ? 'bg-yellow-400 border-yellow-400 hover:bg-yellow-300'
+                  ? 'bg-primary border-primary hover:bg-primary-dark'
                   : 'bg-transparent border-slate-300 text-slate-600 hover:bg-slate-100'
               }`}
             >
               {user ? (
-                <span className="text-slate-900 text-sm font-black leading-none">
-                  {user.name?.charAt(0).toUpperCase() ?? '?'}
+                <span className="text-white text-sm font-black leading-none">
+                  {getUserInitials(user.name)}
                 </span>
               ) : (
                 <span className="material-symbols-outlined text-[20px] leading-none">person</span>
               )}
+              <span className="material-symbols-outlined absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary shadow-sm text-[14px] leading-none">
+                expand_more
+              </span>
             </button>
 
             {/* Dropdown */}
@@ -210,8 +221,8 @@ export default function Header() {
                   /* ── Logged-in dropdown ── */
                   <>
                     <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-400 text-slate-900 text-xs font-black shrink-0">
-                        {user.name?.charAt(0).toUpperCase()}
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-xs font-black shrink-0">
+                        {getUserInitials(user.name)}
                       </span>
                       <div className="overflow-hidden">
                         <p className="text-xs font-bold text-slate-900 truncate">{user.name}</p>
@@ -223,7 +234,7 @@ export default function Header() {
                       onClick={() => { setUserMenuOpen(false); setRequestsPanelOpen(true) }}
                       className="w-full flex items-center gap-2 px-4 py-3 text-left text-xs font-headline font-bold uppercase tracking-widest text-slate-700 hover:bg-slate-50 transition-colors border-b border-slate-100"
                     >
-                      <span className="material-symbols-outlined text-base leading-none text-yellow-500">request_quote</span>
+                      <span className="material-symbols-outlined text-base leading-none text-primary">request_quote</span>
                       {t('myRequests.title')}
                     </button>
                     <button
@@ -318,8 +329,8 @@ export default function Header() {
                   href={`#${link.key.toLowerCase()}`}
                   onClick={() => handleNavClick(link.key)}
                   className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${activeLink === link.key && !currentPage
-                    ? 'text-yellow-500'
-                    : 'text-slate-600 hover:text-slate-950'
+                    ? 'text-primary'
+                    : 'text-slate-600 hover:text-primary'
                     }`}
                 >
                   {link.label}
@@ -336,7 +347,7 @@ export default function Header() {
                 </button>
                 <button
                   onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
-                  className={`w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${path.startsWith('/request') ? 'bg-tertiary text-white' : 'bg-tertiary-fixed text-on-tertiary-fixed'
+                  className={`w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${path.startsWith('/request') ? 'bg-primary-dark text-white' : 'bg-primary text-white'
                     }`}
                 >
                   {t('nav.request')}
@@ -346,8 +357,8 @@ export default function Header() {
                 {user ? (
                   <div className="border-t border-slate-200 pt-2 space-y-1">
                     <div className="flex items-center gap-3 px-4 py-3">
-                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-yellow-400 text-slate-900 text-xs font-black shrink-0">
-                        {user.name?.charAt(0).toUpperCase()}
+                      <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-primary text-white text-xs font-black shrink-0">
+                        {getUserInitials(user.name)}
                       </span>
                       <div>
                         <p className="text-xs font-bold text-slate-900">{user.name}</p>
@@ -359,7 +370,7 @@ export default function Header() {
                       onClick={() => { setMobileMenuOpen(false); setRequestsPanelOpen(true) }}
                       className="w-full flex items-center gap-2 text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest text-slate-700 bg-slate-50 hover:bg-slate-100 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-base leading-none text-yellow-500">request_quote</span>
+                      <span className="material-symbols-outlined text-base leading-none text-primary">request_quote</span>
                       {t('myRequests.title')}
                     </button>
                     <button

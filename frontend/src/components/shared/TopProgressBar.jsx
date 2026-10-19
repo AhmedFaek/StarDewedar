@@ -37,7 +37,7 @@ export default function TopProgressBar() {
           style={{
             height: '100%',
             width: '100%',
-            background: 'linear-gradient(90deg, #f5c518 0%, #e8a200 40%, #f5c518 80%, #ffe066 100%)',
+            background: 'linear-gradient(90deg, #1B75BA 0%, #358FD6 40%, #94C5EB 80%, #1B75BA 100%)',
             backgroundSize: '200% 100%',
             animation: 'topbar-slide 0.8s cubic-bezier(0.4,0,0.2,1) forwards, topbar-shimmer 1.2s ease-in-out infinite',
           }}

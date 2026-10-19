@@ -17,7 +17,7 @@ export default function SuccessPartners() {
           <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-s mb-4 block">
             {t('successPartners.badge')}
           </span>
-          <h2 className="text-primary font-headline text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight mb-6">
+          <h2 className="text-on-surface font-headline text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight mb-6">
             {t('successPartners.title')}
           </h2>
           <p className="text-on-surface-variant max-w-2xl mx-auto text-base sm:text-lg font-body leading-relaxed">

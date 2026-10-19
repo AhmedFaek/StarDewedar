@@ -53,12 +53,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white border border-surface-variant shadow-2xl overflow-hidden">
         
         {/* Header Block */}
-        <div className="bg-primary p-8 text-white">
-          <span className="text-[10px] font-bold tracking-[0.3em] uppercase opacity-70 block mb-2">
+        <div className="bg-primary-fixed p-8 text-on-surface border-b border-outline-variant/40">
+          <span className="text-[10px] font-bold tracking-[0.3em] uppercase text-secondary block mb-2">
             System Authorization
           </span>
-          <h1 className="text-4xl font-black font-headline tracking-tighter">
-            ADMIN LOGIN<span className="text-tertiary">.</span>
+            <h1 className="text-4xl font-black font-headline tracking-tighter text-on-surface">
+            ADMIN LOGIN<span className="text-primary">.</span>
           </h1>
         </div>
 
@@ -72,7 +72,7 @@ export default function LoginPage() {
           )}
 
           <div>
-            <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
               Access Email
             </label>
             <input 
@@ -87,7 +87,7 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">
+            <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
               Password
             </label>
             <input 
@@ -101,9 +101,9 @@ export default function LoginPage() {
             />
           </div>
 
-          <Button 
+          <Button
             type="submit" 
-            variant="tertiary" 
+            variant="primary"
             disabled={loading}
             className="w-full py-4 text-sm font-black tracking-[0.2em] disabled:opacity-50 disabled:cursor-not-allowed"
           >

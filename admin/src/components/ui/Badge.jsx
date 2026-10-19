@@ -11,7 +11,7 @@ export const Badge = ({
     error: 'bg-error text-white',
     success: 'bg-green-600 text-white',
     warning: 'bg-amber-400 text-amber-950',
-    urgent: 'bg-tertiary text-white',
+    urgent: 'bg-primary text-white',
     custom: '',
   }
 

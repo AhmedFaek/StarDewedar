@@ -50,7 +50,7 @@ function ProductsSkeleton() {
   return (
     <div className="pt-32">
       {/* Hero bar */}
-      <div className="w-full h-64 md:h-72 bg-primary/90 px-8 md:px-16 flex flex-col justify-center gap-5">
+      <div className="w-full h-64 md:h-72 bg-deep-blue/90 px-8 md:px-16 flex flex-col justify-center gap-5">
         <Sk w="140px" h="12px" dark />
         <Sk w="55%" h="56px" dark />
         <Sk w="35%" h="16px" dark />
@@ -100,7 +100,7 @@ function ProjectsSkeleton() {
             <Sk w="65%" h="16px" />
           </div>
           <div className="md:col-span-4 h-[280px] md:h-auto bg-slate-200">
-            <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #1a2236 0%, #243050 100%)' }}>
+            <div className="w-full h-full" style={{ background: 'linear-gradient(180deg, #1B75BA 0%, #358FD6 100%)' }}>
               <div className="h-full p-8 flex flex-col justify-end gap-3">
                 <Sk w="100px" h="10px" dark />
                 <Sk w="75%" h="30px" dark />
@@ -163,7 +163,7 @@ function DetailSkeleton() {
   return (
     <div className="pt-20">
       {/* Hero */}
-      <div className="relative w-full h-[500px] bg-primary flex flex-col justify-end px-8 pb-16 max-w-7xl mx-auto">
+      <div className="relative w-full h-[500px] bg-deep-blue flex flex-col justify-end px-8 pb-16 max-w-7xl mx-auto">
         <div className="space-y-5">
           <Sk w="120px" h="28px" dark />
           <Sk w="65%" h="68px" dark />
@@ -190,7 +190,7 @@ function DetailSkeleton() {
           </div>
           {/* Right sidebar */}
           <div className="lg:col-span-4 space-y-5">
-            <div className="bg-primary p-8 space-y-6">
+            <div className="bg-deep-blue p-8 space-y-6">
               <Sk w="100px" h="12px" dark />
               {['Client','Category','Budget'].map(f => (
                 <div key={f} className="space-y-2">

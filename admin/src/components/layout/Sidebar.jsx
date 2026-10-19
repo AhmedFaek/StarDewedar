@@ -32,7 +32,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <aside
-      className={`fixed inset-y-0 z-50 flex h-screen w-64 flex-col bg-primary shadow-2xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:shadow-none ${
+      className={`fixed inset-y-0 z-50 flex h-screen w-64 flex-col bg-white border-r border-outline-variant/40 shadow-xl transition-transform duration-300 ease-in-out lg:translate-x-0 lg:shadow-none ${
         isAr ? 'right-0' : 'left-0'
       } ${
         isOpen
@@ -45,10 +45,10 @@ export const Sidebar = ({ isOpen, onClose }) => {
       {/* Branding */}
       <div className="flex items-start justify-between gap-4 px-6 py-6 lg:py-8">
         <div>
-          <h1 className="font-headline text-xl font-black tracking-tighter text-white">
+          <h1 className="font-headline text-xl font-black tracking-tighter text-on-surface">
             STAR DEWEDAR
           </h1>
-          <p className="mt-1 font-headline text-xs font-bold uppercase tracking-widest text-slate-500">
+          <p className="mt-1 font-headline text-xs font-bold uppercase tracking-widest text-secondary">
             Admin Dashboard
           </p>
         </div>
@@ -56,7 +56,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           type="button"
           aria-label="Close sidebar"
           onClick={onClose}
-          className="text-slate-400 transition-colors hover:text-white lg:hidden"
+          className="text-secondary transition-colors hover:text-primary lg:hidden"
         >
           <span className="material-symbols-outlined">close</span>
         </button>
@@ -71,8 +71,8 @@ export const Sidebar = ({ isOpen, onClose }) => {
             onClick={onClose}
             className={`flex items-center gap-3 rounded-md px-3 py-3 font-headline text-xs font-bold uppercase tracking-widest transition-smooth sm:px-4 ${
               isActive(item.path)
-                ? 'text-tertiary-fixed bg-primary-container border-r-4 border-tertiary-fixed'
-                : 'text-slate-400 hover:text-white hover:bg-primary-container'
+                ? 'text-primary bg-primary-fixed border-r-4 rtl:border-r-0 rtl:border-l-4 border-primary shadow-sm'
+                : 'text-on-surface-variant hover:text-primary hover:bg-surface-container-low'
             }`}
           >
             <span className="material-symbols-outlined text-lg">{item.icon}</span>
@@ -86,13 +86,13 @@ export const Sidebar = ({ isOpen, onClose }) => {
 
         {/* Language Switcher */}
         <div className="px-3 py-2 sm:px-4">
-          <LanguageSwitcher className="text-slate-400 hover:text-white" />
+          <LanguageSwitcher className="text-on-surface-variant hover:text-primary" />
         </div>
 
         {/* Logout */}
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-md px-3 py-3 font-headline text-xs font-bold uppercase tracking-widest text-slate-400 transition-smooth hover:bg-primary-container hover:text-white sm:px-4"
+          className="flex w-full items-center gap-3 rounded-md px-3 py-3 font-headline text-xs font-bold uppercase tracking-widest text-on-surface-variant transition-smooth hover:bg-surface-container-low hover:text-primary sm:px-4"
         >
           <span className="material-symbols-outlined text-lg">logout</span>
           {t('sidebar.logout')}

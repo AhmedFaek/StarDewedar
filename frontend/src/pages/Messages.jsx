@@ -211,7 +211,7 @@ function ConversationRow({ conv, onClick, t, lang }) {
   return (
     <button
       onClick={() => onClick(conv.id)}
-      className="w-full text-left border border-slate-100 hover:border-yellow-300 hover:shadow-sm bg-white transition-all duration-200 p-4 group"
+      className="w-full text-left border border-slate-100 hover:border-primary/40 hover:shadow-sm bg-white transition-all duration-200 p-4 group"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
@@ -243,7 +243,7 @@ function ConversationRow({ conv, onClick, t, lang }) {
               {formatRelativeTime(conv.last_message_at, lang)}
             </span>
           )}
-          <span className="material-symbols-outlined text-slate-300 group-hover:text-yellow-400 transition-colors text-lg">
+          <span className="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors text-lg">
             chevron_right
           </span>
         </div>
@@ -353,11 +353,11 @@ export default function MessagesPage() {
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <span className="material-symbols-outlined text-primary text-2xl">support_agent</span>
-                <h1 className="text-3xl md:text-4xl font-headline font-black tracking-tighter text-primary uppercase">
+                <h1 className="text-3xl md:text-4xl font-headline font-black tracking-tighter text-on-surface uppercase">
                   {t('messages.title')}
                 </h1>
               </div>
-              <p className="text-sm text-slate-500 font-body max-w-xl">
+              <p className="text-base sm:text-lg text-slate-600 font-body max-w-xl leading-relaxed">
                 {t('messages.subtitle')}
               </p>
             </div>

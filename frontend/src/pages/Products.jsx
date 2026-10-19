@@ -126,7 +126,7 @@ export default function Products() {
 
           <>
             {/* Hero */}
-            <header className="relative w-full h-64 md:h-[409px] flex items-center px-4 sm:px-8 md:px-16 overflow-hidden bg-primary">
+            <header className="relative w-full h-64 md:h-[409px] flex items-center px-4 sm:px-8 md:px-16 overflow-hidden bg-deep-blue">
               <div className="absolute inset-0 opacity-40">
                 <img alt="Industrial component" className="w-full h-full object-cover object-center" src="/images/products_hero.webp" />
               </div>
@@ -203,14 +203,14 @@ export default function Products() {
                         <span className="text-tertiary font-label text-[10px] tracking-widest uppercase font-black mb-2">
                           {i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en}
                         </span>
-                        <h3 className="text-2xl font-headline font-bold text-primary mb-3 tracking-tight">
+                        <h3 className="text-2xl font-headline font-bold text-on-surface mb-3 tracking-tight">
                           {i18n.language === 'ar' ? product.name_ar : product.name_en}
                         </h3>
                         <p className="text-secondary text-sm font-body leading-relaxed mb-8 line-clamp-3">
                           {i18n.language === 'ar' ? product.description_ar : product.description_en}
                         </p>
                         <div className="mt-auto pt-4 border-t border-outline-variant/10 flex justify-between items-center">
-                          <span className="text-primary font-headline font-black text-base">
+                          <span className="text-on-surface font-headline font-black text-base">
                             EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A'}
                           </span>
                           <button onClick={() => navigate(`/product-detail?id=${product.id}`)} className="group/btn flex items-center gap-2 text-primary font-label text-xs uppercase tracking-widest font-bold hover:text-tertiary transition-colors">

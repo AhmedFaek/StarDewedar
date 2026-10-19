@@ -14,7 +14,7 @@ export const Pagination = ({
   const isTableVariant = variant === 'table'
 
   const containerClasses = isTableVariant
-    ? 'bg-primary px-4 py-4 text-white sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8'
+    ? 'bg-surface-container-low px-4 py-4 text-on-surface sm:flex sm:items-center sm:justify-between sm:px-6 lg:px-8 border-t border-outline-variant/40'
     : 'flex gap-1'
 
   return (
@@ -37,7 +37,7 @@ export const Pagination = ({
           disabled={currentPage === 1}
           className={`w-${isTableVariant ? '10' : '8'} h-${isTableVariant ? '10' : '8'} flex items-center justify-center ${
             isTableVariant
-              ? 'bg-white bg-opacity-10 hover:bg-tertiary hover:text-primary transition-all disabled:opacity-50'
+              ? 'bg-white border border-outline-variant/50 hover:bg-primary hover:text-white transition-all disabled:opacity-50'
               : 'border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors disabled:opacity-50'
           }`}
         >
@@ -54,10 +54,10 @@ export const Pagination = ({
             className={`w-${isTableVariant ? '10' : '8'} h-${isTableVariant ? '10' : '8'} flex items-center justify-center font-bold text-xs font-headline ${
               currentPage === page
                 ? isTableVariant
-                  ? 'bg-tertiary-fixed text-primary'
+                  ? 'bg-primary text-white shadow-xs'
                   : 'border border-primary bg-primary text-white'
                 : isTableVariant
-                ? 'bg-white bg-opacity-10 hover:bg-tertiary hover:text-primary transition-all'
+                ? 'bg-white border border-outline-variant/50 hover:bg-primary hover:text-white transition-all'
                 : 'border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors'
             }`}
           >
@@ -71,7 +71,7 @@ export const Pagination = ({
           disabled={currentPage === totalPages}
           className={`w-${isTableVariant ? '10' : '8'} h-${isTableVariant ? '10' : '8'} flex items-center justify-center ${
             isTableVariant
-              ? 'bg-white bg-opacity-10 hover:bg-tertiary hover:text-primary transition-all disabled:opacity-50'
+              ? 'bg-white border border-outline-variant/50 hover:bg-primary hover:text-white transition-all disabled:opacity-50'
               : 'border border-outline-variant border-opacity-30 text-secondary hover:bg-white transition-colors disabled:opacity-50'
           }`}
         >

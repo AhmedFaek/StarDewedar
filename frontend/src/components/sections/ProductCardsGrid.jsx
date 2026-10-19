@@ -62,7 +62,7 @@ export default function ProductCardsGrid() {
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-end mb-12 md:mb-16 gap-6 sm:gap-8">
           <div>
-            <h2 className="font-headline text-3xl sm:text-4xl font-bold tracking-tighter text-primary uppercase">
+            <h2 className="font-headline text-3xl sm:text-4xl font-bold tracking-tighter text-on-surface uppercase">
               {t('productCards.sectionTitle')}
             </h2>
             <p className="text-outline mt-2 uppercase text-xs tracking-widest font-label">

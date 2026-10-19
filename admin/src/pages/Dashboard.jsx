@@ -94,7 +94,7 @@ export default function Dashboard() {
   return (
     <div>
       <div className="mb-8 sm:mb-10 lg:mb-12">
-        <h2 className="text-3xl font-black font-headline tracking-tighter text-primary uppercase leading-none sm:text-4xl lg:text-5xl">
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface uppercase leading-none sm:text-4xl lg:text-5xl">
           {t('dashboard.title')}
         </h2>
       </div>

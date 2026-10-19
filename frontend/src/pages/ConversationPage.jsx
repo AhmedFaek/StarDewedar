@@ -194,7 +194,7 @@ function ProductCard({ product, t, lang, navigate }) {
       )}
       <div className="p-3">
         {catName && (
-          <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-yellow-600 mb-1">
+          <p className="text-[10px] font-headline font-bold uppercase tracking-widest text-primary mb-1">
             {catName}
           </p>
         )}
@@ -202,7 +202,7 @@ function ProductCard({ product, t, lang, navigate }) {
         {desc && <p className="text-[11px] text-slate-500 font-body line-clamp-2 mt-1">{desc}</p>}
         <button
           onClick={() => navigate(`/product-detail?id=${product.id}`)}
-          className="mt-2 inline-flex items-center gap-1 text-[11px] font-headline font-bold uppercase tracking-widest text-primary hover:text-yellow-600 transition-colors"
+          className="mt-2 inline-flex items-center gap-1 text-[11px] font-headline font-bold uppercase tracking-widest text-primary hover:text-primary-dark transition-colors"
         >
           {t('messages.viewProduct')}
           <span className="material-symbols-outlined text-[13px]">arrow_forward</span>
@@ -231,15 +231,15 @@ function MessageBubble({ message, currentUserId, t, lang, navigate }) {
   }
 
   return (
-    <div className={`flex flex-col mb-4 ${isOwn ? 'items-end' : 'items-start'}`}>
+    <div className={`flex flex-col mb-5 ${isOwn ? 'items-end' : 'items-start'}`}>
       {/* Sender label */}
-      <span className="text-[10px] font-headline font-bold uppercase tracking-widest text-slate-400 mb-1 px-1">
+      <span className="text-[11px] font-headline font-bold uppercase tracking-widest text-slate-500 mb-1.5 px-1">
         {isOwn ? t('messages.you') : t('messages.support')}
       </span>
 
       {/* Bubble */}
       <div
-        className={`px-4 py-3 max-w-sm shadow-sm ${
+        className={`px-4 py-3.5 max-w-[85%] sm:max-w-[75%] lg:max-w-[65%] rounded-md shadow-sm ${
           isOwn
             ? 'bg-primary text-white'
             : 'bg-white border border-slate-200 text-slate-900'
@@ -253,14 +253,14 @@ function MessageBubble({ message, currentUserId, t, lang, navigate }) {
             <ProductCard product={message.product} t={t} lang={lang} navigate={navigate} />
           </div>
         ) : (
-          <p className="text-sm font-body leading-relaxed whitespace-pre-wrap break-words">
+          <p className="text-base font-body leading-relaxed whitespace-pre-wrap break-words">
             {escapeHtml(message.content)}
           </p>
         )}
       </div>
 
       {/* Timestamp */}
-      <span className={`text-[10px] text-slate-400 mt-1 px-1 font-mono`}>
+      <span className="text-[11px] text-slate-500 mt-1.5 px-1 font-mono">
         {formatTime(message.created_at, lang)}
       </span>
     </div>
@@ -269,7 +269,7 @@ function MessageBubble({ message, currentUserId, t, lang, navigate }) {
 
 /* ─── Message Input Bar ───────────────────────────────────────────────────── */
 
-function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowProductPicker }) {
+function MessageInputBar({ conversationId, t, onMessageSent, onShowProductPicker }) {
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
   const textareaRef = useRef(null)
@@ -301,14 +301,8 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
   }
 
   return (
-    <div className="border-t border-slate-100 bg-white p-4">
-      {isClosed && (
-        <div className="mb-3 px-3 py-2 bg-amber-50 border border-amber-100 text-xs font-body text-amber-700 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[15px] shrink-0">info</span>
-          {t('messages.reopenPrompt')}
-        </div>
-      )}
-      <div className="flex gap-2 items-end">
+    <div className="border-t border-outline-variant/40 bg-white p-4 sm:p-5">
+      <div className="flex gap-2 sm:gap-3 items-end">
         <div className="flex-1 relative">
           <textarea
             id="message-input"
@@ -317,12 +311,12 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
             onChange={(e) => setContent(e.target.value)}
             onKeyDown={handleKeyDown}
             maxLength={2000}
-            rows={2}
+            rows={3}
             placeholder={t('messages.typeMessage')}
             disabled={sending}
-            className="w-full border border-slate-200 px-3 py-2.5 text-sm font-body text-slate-900 placeholder:text-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+            className="w-full min-h-14 border border-slate-300 px-4 py-3 text-base font-body text-slate-900 placeholder:text-slate-500 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-colors resize-y"
           />
-          <span className="absolute bottom-2 right-2 text-[10px] text-slate-300 font-mono">
+          <span className="absolute bottom-2 right-3 text-[11px] text-slate-400 font-mono">
             {content.length}/2000
           </span>
         </div>
@@ -332,7 +326,8 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
             onClick={onShowProductPicker}
             disabled={sending}
             title={t('messages.shareProduct')}
-            className="p-2.5 border border-slate-200 text-slate-500 hover:border-primary hover:text-primary transition-colors disabled:opacity-40"
+            aria-label={t('messages.shareProduct')}
+            className="h-11 w-11 shrink-0 border border-slate-300 text-slate-600 hover:border-primary hover:bg-primary-fixed hover:text-primary transition-colors disabled:opacity-40"
           >
             <span className="material-symbols-outlined text-[18px] leading-none">inventory_2</span>
           </button>
@@ -340,7 +335,9 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
             id="send-message-btn"
             onClick={handleSend}
             disabled={sending || !content.trim()}
-            className="px-4 py-2.5 bg-primary text-white font-headline font-bold uppercase text-[11px] tracking-widest hover:bg-primary/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1"
+            aria-label={t('messages.send')}
+            title={t('messages.send')}
+            className="h-11 w-11 shrink-0 bg-primary text-white font-headline font-bold hover:bg-primary-dark transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
           >
             {sending ? (
               <span className="inline-block w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -353,8 +350,6 @@ function MessageInputBar({ conversationId, isClosed, t, onMessageSent, onShowPro
     </div>
   )
 }
-
-/* ─── Main Page ───────────────────────────────────────────────────────────── */
 
 const POLL_INTERVAL = 5000 // 5 seconds for responsive sync with admin
 
@@ -606,7 +601,6 @@ export default function ConversationPage() {
                       {t('messages.statusOpen')}
                     </span>
                   )}
-                  <p className="text-[10px] text-slate-400 font-body">{t('messages.subtitle')}</p>
                 </div>
               </div>
               {/* Actions */}
@@ -616,7 +610,7 @@ export default function ConversationPage() {
                     id="reopen-conversation-btn"
                     onClick={handleReopen}
                     disabled={actionLoading}
-                    className="flex items-center gap-1 px-3 py-1.5 border border-emerald-200 text-emerald-700 text-[11px] font-headline font-bold uppercase tracking-widest hover:bg-emerald-50 transition-colors disabled:opacity-50"
+                    className="flex min-h-10 items-center gap-1.5 px-4 py-2 border border-emerald-200 text-emerald-700 text-xs font-headline font-bold uppercase tracking-widest hover:bg-emerald-50 transition-colors disabled:opacity-50"
                   >
                     <span className="material-symbols-outlined text-[13px]">lock_open</span>
                     {t('messages.reopen')}
@@ -626,7 +620,7 @@ export default function ConversationPage() {
                     id="close-conversation-btn"
                     onClick={handleClose}
                     disabled={actionLoading}
-                    className="flex items-center gap-1 px-3 py-1.5 border border-slate-200 text-slate-500 text-[11px] font-headline font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors disabled:opacity-50"
+                    className="flex min-h-10 items-center gap-1.5 px-4 py-2 border border-slate-200 text-slate-600 text-xs font-headline font-bold uppercase tracking-widest hover:bg-slate-50 transition-colors disabled:opacity-50"
                   >
                     <span className="material-symbols-outlined text-[13px]">do_not_disturb</span>
                     {t('messages.close')}
@@ -637,8 +631,8 @@ export default function ConversationPage() {
 
             {/* Closed banner */}
             {isClosed && (
-              <div className="mb-4 px-4 py-3 bg-slate-50 border border-slate-200 flex items-center gap-2 text-sm text-slate-600 font-body">
-                <span className="material-symbols-outlined text-slate-400 text-[18px]">lock</span>
+              <div className="mb-4 px-4 py-3.5 bg-slate-50 border border-slate-200 flex items-start gap-3 text-sm text-slate-700 font-body leading-relaxed">
+                <span className="material-symbols-outlined text-slate-500 text-[18px] shrink-0">lock</span>
                 <span>
                   <strong>{t('messages.closedBanner')}</strong>{' '}
                   {t('messages.reopenPrompt')}
@@ -647,14 +641,14 @@ export default function ConversationPage() {
             )}
 
             {/* Messages area */}
-            <div className="flex-grow overflow-y-auto bg-slate-50/50 border border-slate-100 p-4 mb-0 min-h-64">
+            <div className="flex-grow overflow-y-auto bg-slate-50/70 border border-slate-200 p-4 sm:p-6 mb-0 min-h-[320px] max-h-[65vh]">
               {/* Load older */}
               {hasMore && (
                 <div className="text-center mb-4">
                   <button
                     onClick={handleLoadOlder}
                     disabled={loadingOlder}
-                    className="inline-flex items-center gap-2 text-[11px] font-headline font-bold uppercase tracking-widest text-slate-500 hover:text-primary border border-slate-200 px-4 py-1.5 transition-colors disabled:opacity-50"
+                    className="inline-flex min-h-10 items-center gap-2 text-xs font-headline font-bold uppercase tracking-widest text-slate-600 hover:text-primary border border-slate-300 bg-white px-4 py-2 transition-colors disabled:opacity-50"
                   >
                     {loadingOlder ? (
                       <span className="w-3 h-3 border-2 border-current border-t-transparent rounded-full animate-spin inline-block" />
@@ -698,7 +692,6 @@ export default function ConversationPage() {
             {/* Input bar */}
             <MessageInputBar
               conversationId={conversationId}
-              isClosed={isClosed}
               t={t}
               onMessageSent={handleMessageSent}
               onShowProductPicker={() => setShowProductPicker(true)}

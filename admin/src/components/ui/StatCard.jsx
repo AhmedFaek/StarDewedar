@@ -10,31 +10,31 @@ export const StatCard = ({
   
   const variantClasses = {
     default: 'bg-surface-container-lowest',
-    tertiary: 'bg-tertiary-fixed',
+    tertiary: 'bg-primary text-white shadow-xs',
     gradient: 'voltage-gradient'
   }
 
   const labelClasses = {
     default: 'text-secondary',
-    tertiary: 'text-on-tertiary-fixed',
+    tertiary: 'text-white/80',
     gradient: 'text-on-primary-container'
   }
 
   const valueClasses = {
-    default: 'text-primary',
-    tertiary: 'text-on-tertiary-fixed',
+    default: 'text-on-surface',
+    tertiary: 'text-white',
     gradient: 'text-white'
   }
 
   const trendClasses = {
-    default: 'text-tertiary',
-    tertiary: 'bg-on-tertiary-fixed text-tertiary-fixed text-xs px-2 py-0.5 font-bold',
+    default: 'text-on-surface-variant',
+    tertiary: 'bg-white/20 text-white text-xs px-2 py-0.5 font-bold',
     gradient: 'text-on-primary-container'
   }
 
   const iconColor = {
     default: 'text-surface-container opacity-50',
-    tertiary: 'text-on-tertiary-fixed opacity-5',
+    tertiary: 'text-white opacity-10',
     gradient: 'text-white opacity-5'
   }
 

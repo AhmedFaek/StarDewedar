@@ -228,7 +228,7 @@ export default function BOQFormSection({ visible = true }) {
   const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
-    <div className={visible ? '' : 'hidden'} aria-hidden={!visible}>
+    <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
         <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12 max-w-3xl">
 
@@ -447,7 +447,7 @@ export default function BOQFormSection({ visible = true }) {
               loading={isSubmitting}
               loadingText={t('requestBOQ.submitting')}
               disabled={isSubmitDisabled}
-              className="w-full sm:w-auto bg-tertiary-fixed text-on-tertiary-fixed font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-tertiary transition-all hover:text-white group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto bg-primary text-white font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-primary-dark transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{t('requestBOQ.submitButton')}</span>
               <Icon icon="arrow_forward" className="transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />

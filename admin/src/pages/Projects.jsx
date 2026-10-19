@@ -116,8 +116,8 @@ export default function Projects() {
           <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">
             {t('projects.subtitle')}
           </span>
-          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">
-            {t('projects.title')}<span className="text-tertiary">.</span>
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface leading-none sm:text-4xl lg:text-5xl">
+            {t('projects.title')}<span className="text-on-surface">.</span>
           </h2>
         </div>
         <Button variant="tertiary" size="lg" icon="account_tree" onClick={openAddModal} className="w-full sm:w-auto">
@@ -147,22 +147,22 @@ export default function Projects() {
                       PRJ-{String(project.id).slice(0, 5).toUpperCase()}
                     </td>
                     <td className="px-8 py-6">
-                      <span className="block font-bold text-primary uppercase">{project.title_en}</span>
+                      <span className="block font-bold text-on-surface uppercase">{project.title_en}</span>
                       <span className="block text-sm text-secondary">{project.title_ar}</span>
                       <span className="text-sm text-secondary uppercase mt-1 block">{project.client_name}</span>
                       <div className="text-[13px] text-tertiary uppercase mt-1">{project.location_en}</div>
                     </td>
                     <td className="px-8 py-6">
-                      <div className="text-sm text-primary">{formatDate(project.start_date)}</div>
+                      <div className="text-sm text-on-surface">{formatDate(project.start_date)}</div>
                       <div className="text-[12px] text-tertiary font-bold uppercase">
                         {t('projects.table.timeline_to')} {formatDate(project.end_date)}
                       </div>
                     </td>
-                    <td className="px-8 py-6 text-right font-mono font-bold text-primary">
+                    <td className="px-8 py-6 text-right font-mono font-bold text-on-surface">
                       {formatCurrency(project.budget)}
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-4">
+                      <div className="row-actions flex justify-end gap-4">
                         <button onClick={() => openEditModal(project)} className="text-primary hover:text-tertiary transition-colors flex items-center gap-1 text-xs font-bold font-headline uppercase tracking-widest">
                           <span className="material-symbols-outlined text-sm">edit</span>{t('common.edit')}
                         </button>
@@ -197,15 +197,15 @@ export default function Projects() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Title (EN)</label>
-                    <input name="title_en" className="w-full border border-surface-variant px-4 py-3 uppercase font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_en} required />
+                    <input name="title_en" className="w-full border border-surface-variant px-4 py-3 uppercase font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_en} placeholder="e.g. Solar Power Integration" required />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">العنوان (AR)</label>
-                    <input name="title_ar" className="w-full border border-surface-variant px-4 py-3 font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_ar} required />
+                    <input name="title_ar" className="w-full border border-surface-variant px-4 py-3 font-bold focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.title_ar} placeholder="مثال: دمج الطاقة الشمسية" required />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">{t('projects.modal.client_label')}</label>
-                    <input name="client_name" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.client_name} />
+                    <input name="client_name" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.client_name} placeholder="e.g. GreenTech Industries" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Category</label>
@@ -221,11 +221,11 @@ export default function Projects() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">Location (EN)</label>
-                    <input name="location_en" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_en} />
+                    <input name="location_en" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_en} placeholder="e.g. 6th of October City" />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase mb-1 block">الموقع (AR)</label>
-                    <input name="location_ar" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_ar} />
+                    <input name="location_ar" className="w-full border border-surface-variant px-4 py-3 focus:outline-none focus:border-tertiary bg-surface-container-low" defaultValue={selectedProject?.location_ar} placeholder="مثال: مدينة السادس من أكتوبر" />
                   </div>
                 </div>
 
@@ -239,7 +239,7 @@ export default function Projects() {
                       className="w-full border border-surface-variant px-4 py-3 font-mono bg-surface-container-low"
                       value={budgetDisplay}
                       onChange={(e) => setBudgetDisplay(formatBudgetInput(e.target.value))}
-                      placeholder="0"
+                      placeholder="e.g. 1,500,000"
                     />
                     {/* Hidden input carries the raw number for FormData */}
                     <input type="hidden" name="budget" value={budgetRaw} />

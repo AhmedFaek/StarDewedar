@@ -4,7 +4,7 @@ A premium industrial design system frontend built with React, Vite, and Tailwind
 
 ## 🎨 Design System
 This frontend implements the **Industrial Precision** design system, featuring:
-- Deep navy (#000e24) primary color with electric yellow accents
+- Primary blue (#1B75BA) with white and light-neutral surfaces
 - Sharp edges (0px border-radius) for structural integrity
 - Space Grotesk + Inter typography
 - Tonal layering for depth and hierarchy

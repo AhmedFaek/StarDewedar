@@ -7,7 +7,8 @@ import { formatCurrency } from '../utils/helpers'
 import * as categoryService from '../services/categoryService'
 
 export default function ProductsPage() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+  const isAr = i18n.language === 'ar'
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -20,6 +21,13 @@ export default function ProductsPage() {
   const [formData, setFormData] = useState({ name_en: '', name_ar: '', description_en: '', description_ar: '', price: '', category_id: '' })
   const [catalogs, setCatalogs] = useState([])
   const [images, setImages] = useState([])
+
+  const formatPriceInput = (raw) => {
+    const digits = String(raw ?? '').replace(/[^0-9]/g, '')
+    return digits ? Number(digits).toLocaleString('en-US') : ''
+  }
+
+  const priceRaw = formData.price.replace(/,/g, '')
 
   useEffect(() => { fetchProducts(); fetchCategories() }, [])
 
@@ -60,7 +68,7 @@ export default function ProductsPage() {
 
   const openEditModal = (product) => {
     setSelectedProduct(product)
-    setFormData({ name_en: product.name_en || '', name_ar: product.name_ar || '', description_en: product.description_en || '', description_ar: product.description_ar || '', price: product.price || '', category_id: product.category_id || '' })
+    setFormData({ name_en: product.name_en || '', name_ar: product.name_ar || '', description_en: product.description_en || '', description_ar: product.description_ar || '', price: formatPriceInput(product.price), category_id: product.category_id || '' })
     setCatalogs([])
     setImages([])
     setIsModalOpen(true)
@@ -72,7 +80,7 @@ export default function ProductsPage() {
     setIsSaving(true)
     try {
       if (selectedProduct?.id) {
-        await productService.updateProduct(selectedProduct.id, formData)
+        await productService.updateProduct(selectedProduct.id, { ...formData, price: priceRaw })
         setSuccess(t('products.save_success'))
       } else {
         const formDataObj = new FormData()
@@ -80,7 +88,7 @@ export default function ProductsPage() {
         formDataObj.append('name_ar', formData.name_ar)
         formDataObj.append('description_en', formData.description_en)
         formDataObj.append('description_ar', formData.description_ar)
-        formDataObj.append('price', formData.price)
+        formDataObj.append('price', priceRaw)
         formDataObj.append('category_id', formData.category_id)
         images.forEach(img => formDataObj.append('images', img))
         if (catalogs.length > 0) formDataObj.append('catalog', catalogs[0])
@@ -119,7 +127,7 @@ export default function ProductsPage() {
       <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between lg:mb-12">
         <div>
           <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('products.subtitle')}</span>
-          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('products.title')}.</h2>
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface leading-none sm:text-4xl lg:text-5xl">{t('products.title')}<span className="text-on-surface">.</span></h2>
         </div>
         <Button variant="tertiary" size="lg" icon="add_box" onClick={openAddModal} disabled={loading} className="w-full sm:w-auto">{t('products.add_button')}</Button>
       </div>
@@ -142,10 +150,10 @@ export default function ProductsPage() {
                 {displayedData.length > 0 ? displayedData.map((item) => (
                   <tr key={item.id} className="hover:bg-surface-container-low transition-colors group">
                     <td className="px-8 py-6 text-xs font-mono text-slate-400">#{String(item.id).slice(0, 5)}</td>
-                    <td className="px-8 py-6"><span className="block font-bold text-primary font-headline uppercase">{item.name_en}</span><span className="block text-xs text-secondary font-medium">{item.name_ar}</span></td>
-                    <td className="px-8 py-6 text-right font-mono font-bold text-primary">{formatCurrency(item.price)}</td>
+                    <td className="px-8 py-6"><span className="block font-bold text-on-surface font-headline uppercase">{item.name_en}</span><span className="block text-xs text-secondary font-medium">{item.name_ar}</span></td>
+                    <td className="px-8 py-6 text-right font-mono font-bold text-on-surface">{formatCurrency(item.price)}</td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-4">
+                      <div className="row-actions flex justify-end gap-4">
                         <button onClick={() => openEditModal(item)} className="text-primary hover:text-tertiary transition-colors flex items-center gap-1 text-xs font-bold font-headline uppercase tracking-widest">
                           <span className="material-symbols-outlined text-sm">edit</span>{t('common.edit')}
                         </button>
@@ -170,8 +178,8 @@ export default function ProductsPage() {
           <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
             <form onSubmit={handleSave}>
               <div className="sticky top-0 z-10 flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">
-                  {selectedProduct?.id ? t('products.modal.edit_title') : t('products.modal.add_title')}<span className="text-tertiary">.</span>
+                <h3 className="text-xl font-black font-headline tracking-tighter text-on-surface uppercase sm:text-2xl">
+                  {selectedProduct?.id ? t('products.modal.edit_title') : t('products.modal.add_title')}<span className="text-on-surface">.</span>
                 </h3>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-secondary hover:text-primary transition-colors" disabled={isSaving}><span className="material-symbols-outlined">close</span></button>
               </div>
@@ -179,22 +187,22 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Name (EN)</label>
-                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase" value={formData.name_en} onChange={(e) => setFormData({ ...formData, name_en: e.target.value })} placeholder="Product name in English" required disabled={isSaving} />
+                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-tertiary uppercase" value={formData.name_en} onChange={(e) => setFormData({ ...formData, name_en: e.target.value })} placeholder="Product name in English" required disabled={isSaving} />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">الاسم (AR)</label>
-                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} placeholder="اسم المنتج بالعربية" required disabled={isSaving} />
+                    <input className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-tertiary" value={formData.name_ar} onChange={(e) => setFormData({ ...formData, name_ar: e.target.value })} placeholder="اسم المنتج بالعربية" required disabled={isSaving} />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('products.modal.price_label')}</label>
-                    <input type="number" className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-mono focus:outline-none focus:border-tertiary" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} placeholder="0.00" disabled={isSaving} />
+                    <input type="text" inputMode="numeric" className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-mono focus:outline-none focus:border-tertiary" value={formData.price} onChange={(e) => setFormData({ ...formData, price: formatPriceInput(e.target.value) })} placeholder="0" disabled={isSaving} />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('products.modal.category_label')}</label>
-                    <select className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold text-xs focus:outline-none focus:border-tertiary uppercase" value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })} required disabled={isSaving}>
+                    <select className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold text-xs focus:outline-none focus:border-tertiary uppercase" value={formData.category_id} onChange={(e) => setFormData({ ...formData, category_id: e.target.value })} required disabled={isSaving}>
                       <option value="" disabled>{t('products.modal.category_placeholder')}</option>
                       <optgroup label={t('categories.modal.type_product')}>
-                        {categories.filter(c => c.type === 'product').map(cat => <option key={cat.id} value={cat.id}>{cat.name_ar}</option>)}
+                        {categories.filter(c => c.type === 'product').map(cat => <option key={cat.id} value={cat.id}>{isAr ? cat.name_ar || cat.name_en : cat.name_en || cat.name_ar}</option>)}
                       </optgroup>
                     </select>
                   </div>
@@ -202,11 +210,11 @@ export default function ProductsPage() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">Description (EN)</label>
-                    <textarea className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary focus:outline-none focus:border-tertiary resize-none" value={formData.description_en} onChange={(e) => setFormData({ ...formData, description_en: e.target.value })} placeholder="Product description in English" rows="3" disabled={isSaving} />
+                    <textarea className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface placeholder:text-secondary focus:outline-none focus:border-tertiary resize-none" value={formData.description_en} onChange={(e) => setFormData({ ...formData, description_en: e.target.value })} placeholder="Product description in English" rows="3" disabled={isSaving} />
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">الوصف (AR)</label>
-                    <textarea className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary focus:outline-none focus:border-tertiary resize-none" value={formData.description_ar} onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} placeholder="وصف المنتج بالعربية" rows="3" disabled={isSaving} />
+                    <textarea className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface placeholder:text-secondary focus:outline-none focus:border-tertiary resize-none" value={formData.description_ar} onChange={(e) => setFormData({ ...formData, description_ar: e.target.value })} placeholder="وصف المنتج بالعربية" rows="3" disabled={isSaving} />
                   </div>
                 </div>
                 {!selectedProduct?.id && (

@@ -69,23 +69,23 @@ export default function About() {
       <Header />
       <main className="flex-grow pt-20">
         {/* HERO */}
-        <section className="relative h-[500px] bg-primary overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary to-primary_container opacity-90"></div>
+        <section className="relative h-[500px] bg-surface-container-low overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-white to-primary-fixed opacity-90"></div>
           <div className="relative h-full flex flex-col justify-end px-6 md:px-16 pb-16 animate-fade-in-up">
-            <span className="text-tertiary-fixed font-label text-xs uppercase tracking-widest mb-4">{t('about.badge')}</span>
-            <h1 className="font-headline text-5xl md:text-7xl font-black text-white leading-none">
+            <span className="text-primary font-label text-xs uppercase tracking-widest mb-4">{t('about.badge')}</span>
+            <h1 className="font-headline text-5xl md:text-7xl font-black text-on-surface leading-none">
               {t('about.heroTitle1')}<br />{t('about.heroTitle2')}
             </h1>
-            <p className="text-white/70 max-w-xl mt-6 text-lg">{t('about.heroDesc')}</p>
+            <p className="text-on-surface-variant max-w-xl mt-6 text-lg">{t('about.heroDesc')}</p>
           </div>
         </section>
 
         {/* STATS */}
-        <section className="py-16 bg-primary-container text-white">
+        <section className="py-16 bg-primary-fixed text-on-surface">
           <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 px-6">
             {stats.map((stat, i) => (
               <div key={i} className="text-center animate-fade-in-up" style={{ animationDelay: `${i * 120}ms` }}>
-                <h2 className="text-4xl font-black text-tertiary-fixed">
+                <h2 className="text-4xl font-black text-on-surface">
                   <AnimatedCounter value={stat.number} />
                 </h2>
                 <p className="text-sm uppercase tracking-widest">{stat.label}</p>
@@ -98,12 +98,12 @@ export default function About() {
         <section className="py-24 px-6 md:px-16 max-w-7xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
             <div>
-              <h2 className="font-headline text-4xl font-black text-primary mb-6 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.whoWeAre')}</h2>
+              <h2 className="font-headline text-4xl font-black text-on-surface mb-6 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.whoWeAre')}</h2>
               <p className="text-on-surface-variant mb-6 leading-relaxed">{t('about.whoWeAreP1')}</p>
               <p className="text-on-surface-variant leading-relaxed">{t('about.whoWeAreP2')}</p>
             </div>
             <div className="bg-surface-container-low p-8">
-              <h3 className="font-headline text-xl font-bold mb-6 text-primary">{t('about.howWeWork')}</h3>
+              <h3 className="font-headline text-xl font-bold mb-6 text-on-surface">{t('about.howWeWork')}</h3>
               <ul className="space-y-4">
                 {workflow.map((step, i) => (
                   <li key={i} className="flex gap-4 items-start">
@@ -119,11 +119,11 @@ export default function About() {
         {/* STRENGTHS */}
         <section className="py-24 bg-surface-container-low px-6 md:px-16">
           <div className="max-w-7xl mx-auto">
-            <h2 className="font-headline text-4xl font-black text-primary mb-12 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.whyChooseUs')}</h2>
+            <h2 className="font-headline text-4xl font-black text-on-surface mb-12 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.whyChooseUs')}</h2>
             <div className="grid md:grid-cols-3 gap-8">
               {strengths.map((item, i) => (
                 <div key={i} className="bg-white p-8">
-                  <h3 className="font-headline text-xl font-bold mb-4 text-primary">{item.title}</h3>
+                  <h3 className="font-headline text-xl font-bold mb-4 text-on-surface">{item.title}</h3>
                   <p className="text-on-surface-variant">{item.description}</p>
                 </div>
               ))}
@@ -133,11 +133,11 @@ export default function About() {
 
         {/* EXPERTISE */}
         <section className="py-24 px-6 md:px-16 max-w-7xl mx-auto">
-          <h2 className="font-headline text-4xl font-black text-primary mb-12 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.ourExpertise')}</h2>
+          <h2 className="font-headline text-4xl font-black text-on-surface mb-12 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('about.ourExpertise')}</h2>
           <div className="grid md:grid-cols-2 gap-8">
             {expertise.map((area, i) => (
               <div key={i} className="border border-outline-variant/30 p-8">
-                <h3 className="font-headline text-2xl font-bold mb-6 text-primary">{area.category}</h3>
+                <h3 className="font-headline text-2xl font-bold mb-6 text-on-surface">{area.category}</h3>
                 <ul className="space-y-2">
                   {area.items.map((item, j) => (
                     <li key={j} className="flex gap-2 items-center">
@@ -152,9 +152,9 @@ export default function About() {
         </section>
 
         {/* CTA */}
-        <section className="py-24 bg-primary text-center px-6">
-          <h2 className="text-4xl font-black text-white mb-6">{t('about.ctaTitle')}</h2>
-          <p className="text-white/70 mb-8 max-w-xl mx-auto">{t('about.ctaDesc')}</p>
+        <section className="py-24 bg-surface-container-low text-center px-6">
+          <h2 className="text-4xl font-black text-on-surface mb-6">{t('about.ctaTitle')}</h2>
+          <p className="text-on-surface-variant mb-8 max-w-xl mx-auto">{t('about.ctaDesc')}</p>
         </section>
       </main>
       <Footer />
