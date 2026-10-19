@@ -12,7 +12,7 @@ export const TableCard = ({
     <Card>
       {/* Header */}
       <div className="px-8 py-6 border-b border-outline-variant border-opacity-10 flex justify-between items-center">
-        <h3 className="font-headline font-black text-xl uppercase tracking-tight text-primary">
+        <h3 className="font-headline font-black text-xl uppercase tracking-tight text-on-surface">
           {title}
         </h3>
       </div>
@@ -49,7 +49,7 @@ export const TableCard = ({
                 ))}
                 {actions && (
                   <td className="px-8 py-5 text-right">
-                    <button className="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button className="row-actions material-symbols-outlined text-secondary">
                       more_vert
                     </button>
                   </td>

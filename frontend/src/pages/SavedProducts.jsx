@@ -60,7 +60,7 @@ export default function SavedProducts() {
               style={{ fontVariationSettings: "'FILL' 1" }}>
               favorite
             </span>
-            <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter text-primary uppercase">
+            <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter text-on-surface uppercase">
               {t('favourites.myFavourites')}
             </h1>
           </div>
@@ -153,14 +153,14 @@ export default function SavedProducts() {
                       <span className="text-tertiary font-label text-[10px] tracking-widest uppercase font-black mb-2">
                         {catName}
                       </span>
-                      <h3 className="text-xl font-headline font-bold text-primary mb-2 tracking-tight">
+                      <h3 className="text-xl font-headline font-bold text-on-surface mb-2 tracking-tight">
                         {name}
                       </h3>
                       <p className="text-secondary text-sm font-body leading-relaxed mb-6 line-clamp-2">
                         {desc}
                       </p>
                       <div className="mt-auto pt-4 border-t border-outline-variant/10 flex justify-between items-center">
-                        <span className="text-primary font-headline font-black text-sm">
+                        <span className="text-on-surface font-headline font-black text-sm">
                           EGP {product.price
                             ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                             : 'N/A'}

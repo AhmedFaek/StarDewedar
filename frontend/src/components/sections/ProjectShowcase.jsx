@@ -64,7 +64,7 @@ export default function ProjectShowcase() {
   return (
     <section className="bg-surface py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-8">
-        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-primary mb-12 md:mb-16 uppercase">
+        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-on-surface mb-12 md:mb-16 uppercase">
           {t('projectShowcase.title1')} <br />
           {t('projectShowcase.title2')}
         </h2>
@@ -86,10 +86,10 @@ export default function ProjectShowcase() {
                     alt={title}
                     loading="lazy"
                 />
-                {!layout.featured && (<div className="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-all"></div>)}
-                <div className={`absolute bottom-0 left-0 w-full p-6 sm:p-8 md:p-10 bg-gradient-to-t from-primary/90 to-transparent transition-all ${layout.featured ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
+                {!layout.featured && (<div className="absolute inset-0 bg-deep-blue/20 group-hover:bg-transparent transition-all"></div>)}
+                <div className={`absolute bottom-0 left-0 w-full p-6 sm:p-8 md:p-10 bg-gradient-to-t from-deep-blue/90 to-transparent transition-all ${layout.featured ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   <h4 className="font-headline text-lg sm:text-2xl md:text-3xl font-bold text-white mb-2">{title}</h4>
-                  <p className="text-tertiary-fixed font-label uppercase text-xs tracking-widest">{categoryName}</p>
+                  <p className="text-primary-light font-label uppercase text-xs tracking-widest">{categoryName}</p>
                 </div>
               </div>
             )

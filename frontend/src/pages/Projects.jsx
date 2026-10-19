@@ -139,7 +139,7 @@ export default function Projects() {
               <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-6">
                 {t('projects.badge')}
               </span>
-              <h1 className="text-primary font-headline text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8">
+              <h1 className="text-on-surface font-headline text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8">
                 {t('projects.heroTitle1')}
                 <br />
                 {t('projects.heroTitle2')}
@@ -173,7 +173,7 @@ export default function Projects() {
         <section className="px-4 sm:px-8 md:px-16 mb-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant/30 pb-6 sm:pb-8 gap-6 sm:gap-8">
             <div>
-              <h2 className="text-primary font-headline text-2xl sm:text-3xl font-bold tracking-tight mb-2">
+              <h2 className="text-on-surface font-headline text-2xl sm:text-3xl font-bold tracking-tight mb-2">
                 {t('projects.projectArchives')}
               </h2>
               <p className="text-secondary text-xs sm:text-sm font-label uppercase tracking-widest">
@@ -226,10 +226,10 @@ export default function Projects() {
                       alt={title}
                       src={project.images?.[0]?.image_url || 'https://via.placeholder.com/800x450'}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-primary via-primary/30 to-transparent opacity-90"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-deep-blue via-deep-blue/30 to-transparent opacity-90"></div>
                     <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
                       <div className="mb-4 flex flex-wrap items-center gap-2">
-                        <span className="bg-tertiary-fixed px-3 py-1 text-[10px] font-headline font-bold uppercase tracking-[0.18em] text-on-tertiary-fixed">
+                        <span className="bg-primary px-3 py-1 text-[10px] font-headline font-bold uppercase tracking-[0.18em] text-white">
                           {categoryName}
                         </span>
                         {location && (
@@ -254,7 +254,7 @@ export default function Projects() {
                         <p className="mb-1 text-[10px] font-label font-bold uppercase tracking-[0.18em] text-secondary">
                           {t('projects.client')}
                         </p>
-                        <p className="text-sm font-headline font-bold text-primary">
+                        <p className="text-sm font-headline font-bold text-on-surface">
                           {project.client_name || (i18n.language === 'ar' ? 'غير محدد' : 'N/A')}
                         </p>
                       </div>
@@ -262,7 +262,7 @@ export default function Projects() {
                         <p className="mb-1 text-[10px] font-label font-bold uppercase tracking-[0.18em] text-secondary">
                           {t('projectDetail.budget')}
                         </p>
-                        <p className="text-sm font-headline font-bold text-primary">
+                        <p className="text-sm font-headline font-bold text-on-surface">
                           {formatCurrency(project.budget)}
                         </p>
                       </div>
@@ -345,7 +345,7 @@ export default function Projects() {
             </div>
             <button
               onClick={() => navigate('/contact')}
-              className="bg-tertiary-fixed text-black px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
+              className="bg-white text-deep-blue px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
             >
               {t('ctaBanner.button')}
             </button>

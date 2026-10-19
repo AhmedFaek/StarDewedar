@@ -15,10 +15,10 @@ export const Button = ({
   }
 
   const variantClasses = {
-    primary: 'bg-primary text-on-primary hover:bg-primary-container',
+    primary: 'bg-primary text-white hover:bg-[#15639E] shadow-xs',
     secondary: 'bg-secondary text-on-secondary hover:bg-on-surface-variant',
-    tertiary: 'bg-tertiary-fixed text-on-tertiary-fixed hover:bg-tertiary-fixed-dim',
-    outline: 'border border-outline text-primary hover:bg-surface-container-low',
+    tertiary: 'bg-primary text-white hover:bg-[#15639E] shadow-xs',
+    outline: 'border border-primary text-primary hover:bg-surface-container-low',
     ghost: 'text-primary hover:bg-surface-container-low',
   }
 

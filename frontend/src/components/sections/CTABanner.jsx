@@ -4,9 +4,9 @@ export default function CTABanner() {
   const { t } = useTranslation()
 
   return (
-    <section className="bg-tertiary-fixed py-16 sm:py-20 overflow-hidden relative">
+    <section className="bg-primary py-16 sm:py-20 overflow-hidden relative">
       <div className="container mx-auto px-4 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-8 md:gap-12 relative z-10">
-        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-on-tertiary-fixed uppercase max-w-2xl">
+        <h2 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold tracking-tighter text-white uppercase max-w-2xl">
           {t('ctaBanner.title')}
         </h2>
         <button 
@@ -14,7 +14,7 @@ export default function CTABanner() {
             window.history.pushState({}, '', '/contact')
             window.dispatchEvent(new PopStateEvent('popstate'))
           }}
-          className="bg-primary text-white px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary/90 transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
+          className="bg-white text-primary px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary-fixed hover:text-primary-dark transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
         >
           {t('ctaBanner.button')}
         </button>

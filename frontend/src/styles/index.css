@@ -65,11 +65,11 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    @apply font-space-grotesk tracking-tighter;
+    @apply font-space-grotesk tracking-tighter text-deep-blue;
   }
 
   body {
-    @apply bg-surface;
+    @apply bg-surface text-on-surface;
     overflow-x: hidden;
     overflow-y: auto;
     margin: 0;
@@ -80,30 +80,30 @@
 @layer components {
   /* Button Variants */
   .btn-primary {
-    @apply px-8 py-4 bg-primary text-surfaceContainerLowest rounded-none font-inter font-semibold transition-all hover:bg-primary-light;
+    @apply px-8 py-4 bg-primary text-white rounded-none font-inter font-semibold transition-all hover:bg-primary-dark shadow-xs;
   }
 
   .btn-secondary {
-    @apply px-8 py-4 bg-transparent border-2 border-primary text-primary rounded-none font-inter font-semibold transition-all hover:bg-surfaceContainerLow;
+    @apply px-8 py-4 bg-transparent border-2 border-primary text-primary rounded-none font-inter font-semibold transition-all hover:bg-primary hover:text-white;
   }
 
   .btn-tertiary {
-    @apply px-8 py-4 bg-tertiary-fixed text-on-tertiary-fixed rounded-none font-inter font-semibold transition-colors hover:bg-tertiary-fixedDim;
+    @apply px-8 py-4 bg-primary text-white rounded-none font-inter font-semibold transition-colors hover:bg-primary-dark;
   }
 
   /* Card */
   .card {
-    @apply bg-surfaceContainerLowest p-8 space-y-4 rounded-none;
+    @apply bg-surface-container-lowest p-8 space-y-4 rounded-none;
   }
 
   /* Input */
   .input-field {
-    @apply w-full bg-surfaceContainerLow border-b-2 border-outline px-4 py-3 font-inter text-onSurface focus:border-tertiary-fixed focus:outline-none transition-colors;
+    @apply w-full bg-surface-container-low border-b-2 border-outline px-4 py-3 font-inter text-on-surface focus:border-primary focus:outline-none transition-colors;
   }
 
   /* Gradients */
   .voltage-gradient {
-    @apply bg-gradient-to-br from-primary to-primary-container;
+    @apply bg-gradient-to-br from-primary to-primary-light;
   }
 }
 
@@ -119,11 +119,11 @@
   }
 
   .gradient-voltage {
-    @apply bg-gradient-to-r from-primary to-primary-container;
+    @apply bg-gradient-to-r from-primary to-primary-light;
   }
 
   .voltage-gradient {
-    background: linear-gradient(135deg, #000e24 0%, #00234b 100%);
+    background: linear-gradient(135deg, #1B75BA 0%, #358FD6 100%);
   }
 
   .typography-display-lg {

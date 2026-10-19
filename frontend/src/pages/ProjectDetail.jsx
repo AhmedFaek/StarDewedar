@@ -184,7 +184,7 @@ export default function ProjectDetail() {
       <Header />
       <main className="flex-grow pt-20">
         {/* HERO */}
-        <section className="relative h-[600px] bg-primary overflow-hidden">
+        <section className="relative h-[600px] bg-deep-blue overflow-hidden">
           {project.images?.[0] && (
             <img
               src={project.images[0].image_url}
@@ -193,9 +193,9 @@ export default function ProjectDetail() {
               onClick={() => openLightbox(0)}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-transparent pointer-events-none"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-deep-blue via-transparent to-transparent pointer-events-none"></div>
           <div className="relative h-full flex flex-col justify-end px-8 pb-20 max-w-7xl mx-auto pointer-events-none">
-            <span className="bg-tertiary-fixed text-black px-3 py-1 text-[10px] uppercase tracking-widest w-fit mb-6">{categoryName}</span>
+            <span className="bg-primary text-white px-3 py-1 text-[10px] uppercase tracking-widest w-fit mb-6">{categoryName}</span>
             <h1 className="text-white font-headline text-6xl md:text-8xl font-black tracking-tight mb-6">{title}</h1>
           </div>
         </section>
@@ -225,26 +225,26 @@ export default function ProjectDetail() {
             {/* RIGHT */}
             <div className="lg:col-span-4 space-y-6">
               <div className="sticky top-32 space-y-6">
-                <div className="bg-primary text-white p-8">
+                <div className="bg-surface-container-low text-on-surface p-8 border border-outline-variant/40">
                   <h3 className="text-sm uppercase tracking-[0.3em] mb-6">{t('projectDetail.projectInfo')}</h3>
                   <div className="space-y-6">
                     <div>
-                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.client')}</span>
+                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.client')}</span>
                       <p className="text-xl font-bold">{project.client_name || 'N/A'}</p>
                     </div>
                     <div>
-                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.category')}</span>
+                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.category')}</span>
                       <p className="text-xl font-bold">{categoryName}</p>
                     </div>
                     {location && (
                       <div>
-                        <span className="text-[12px] uppercase text-white/60">{t('projectDetail.location')}</span>
+                        <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.location')}</span>
                         <p className="text-xl font-bold">{location}</p>
                       </div>
                     )}
-                    <div className="border-t border-white/10 pt-6">
-                      <span className="text-[12px] uppercase text-white/60">{t('projectDetail.budget')}</span>
-                      <p className="text-3xl font-black text-tertiary-fixed">{t('projectDetail.budgetValue')}</p>
+                    <div className="border-t border-outline-variant/50 pt-6">
+                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.budget')}</span>
+                      <p className="text-3xl font-black text-on-surface">{t('projectDetail.budgetValue')}</p>
                     </div>
                   </div>
                 </div>

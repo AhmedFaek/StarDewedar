@@ -80,7 +80,7 @@ function AdminProductPicker({ t, lang, onSelect, onClose }) {
       <div className="bg-white w-full max-w-2xl max-h-[80vh] flex flex-col shadow-2xl">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 shrink-0">
           <div>
-            <h3 className="font-headline font-black text-primary text-sm uppercase tracking-tight">
+            <h3 className="font-headline font-black text-on-surface text-sm uppercase tracking-tight">
               {t('conversations.shareProductTitle')}
             </h3>
             <p className="text-xs text-slate-400 mt-0.5">{t('conversations.shareProductDesc')}</p>
@@ -152,7 +152,7 @@ function ProductCard({ product, t, lang }) {
     <div className="mt-2 border border-slate-200 bg-white overflow-hidden max-w-xs w-full">
       {img && <div className="aspect-[16/9] overflow-hidden bg-slate-100"><img src={img} alt={name} className="w-full h-full object-cover" /></div>}
       <div className="p-3">
-        {catName && <p className="text-[10px] font-bold uppercase tracking-widest text-yellow-600 mb-1">{catName}</p>}
+        {catName && <p className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1">{catName}</p>}
         <p className="font-bold text-sm text-slate-900 truncate">{name}</p>
         {desc && <p className="text-[11px] text-slate-500 line-clamp-2 mt-1">{desc}</p>}
       </div>
@@ -424,7 +424,7 @@ function ConversationDetail({ conversationId, activeConvSync, t, lang, onBack, o
         ) : conversation ? (
           <>
             <div className="flex-1 min-w-0">
-              <h2 className="font-headline font-black text-primary text-sm truncate">{conversation.subject}</h2>
+              <h2 className="font-headline font-black text-on-surface text-sm truncate">{conversation.subject}</h2>
               <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                 <span className="text-[10px] text-slate-400">{conversation.customer?.name}</span>
                 <span className="text-[10px] text-slate-300">·</span>
@@ -673,7 +673,7 @@ export default function AdminConversations() {
 
         {/* Header */}
         <div className="px-4 py-4 border-b border-slate-100 shrink-0">
-          <h1 className="font-headline font-black text-primary text-base uppercase tracking-tight mb-1">
+          <h1 className="font-headline font-black text-on-surface text-base uppercase tracking-tight mb-1">
             {t('conversations.title')}
           </h1>
           <p className="text-[11px] text-slate-400">{t('conversations.subtitle')}</p>

@@ -78,7 +78,7 @@ function EmptySlot({ onSelect, lang, allProducts, compareList }) {
                 ) : (
                   <div className="w-10 h-10 bg-surface-container-high shrink-0" />
                 )}
-                <span className="font-headline text-sm font-bold text-primary leading-tight group-hover:text-primary/70 transition-colors">
+                <span className="font-headline text-sm font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">
                   {name}
                 </span>
               </button>
@@ -123,7 +123,7 @@ function ProductHeader({ product, onRemove }) {
 
       {/* Name */}
       <div className="text-center">
-        <h3 className="font-headline font-black text-base sm:text-lg text-primary uppercase leading-tight">{name}</h3>
+        <h3 className="font-headline font-black text-base sm:text-lg text-on-surface uppercase leading-tight">{name}</h3>
         <p className="text-[10px] text-outline font-label tracking-widest uppercase mt-1">
           {i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en}
         </p>
@@ -185,7 +185,7 @@ export default function ComparePage() {
             {t('compare.page.badge')}
           </p>
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-headline font-black tracking-tighter text-primary uppercase">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-headline font-black tracking-tighter text-on-surface uppercase">
               {title}
             </h1>
 
@@ -225,7 +225,7 @@ export default function ComparePage() {
           /* ── Empty state ── */
           <div className="flex flex-col items-center justify-center py-32 gap-6 text-center">
             <span className="material-symbols-outlined text-7xl text-outline/30">compare_arrows</span>
-            <h2 className="text-2xl font-headline font-bold text-primary">{t('compare.page.empty')}</h2>
+            <h2 className="text-2xl font-headline font-bold text-on-surface">{t('compare.page.empty')}</h2>
             <p className="text-secondary max-w-sm">{t('compare.page.emptyDesc')}</p>
             <button
               onClick={() => navigate('/products')}

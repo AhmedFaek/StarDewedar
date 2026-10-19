@@ -312,7 +312,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                 }}
                 className={`flex-1 border-b-2 py-3 font-headline text-xs font-bold uppercase tracking-widest transition-all
                   ${tab === tabKey
-                    ? 'border-yellow-400 text-slate-900'
+                    ? 'border-primary text-slate-900'
                     : 'border-transparent text-slate-400 hover:text-slate-600'}`}
               >
                 {tabKey === 'login' ? t('auth.login') : t('auth.register')}
@@ -336,7 +336,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
               </button>
 
               <div className="mb-4 text-center">
-                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow-50 text-yellow-600">
+                <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed text-primary">
                   <span className="material-symbols-outlined text-3xl">mark_email_unread</span>
                 </div>
                 <h3 className="font-headline text-base font-bold uppercase tracking-wider text-slate-900">
@@ -400,7 +400,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       type="button"
                       onClick={handleResendCode}
                       disabled={resendCooldown > 0 || resendLoading}
-                      className="font-semibold text-yellow-600 hover:text-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="font-semibold text-primary hover:text-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       {resendLoading
                         ? t('auth.verification.resending')
@@ -449,8 +449,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
               ) : (
                 <form onSubmit={handleForgotPassword} className="space-y-4">
                   <div className="mb-2 text-center">
-                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-yellow-50">
-                      <span className="material-symbols-outlined text-3xl text-yellow-500">lock_reset</span>
+                    <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-full bg-primary-fixed">
+                      <span className="material-symbols-outlined text-3xl text-primary">lock_reset</span>
                     </div>
                     <h3 className="font-headline text-sm font-bold uppercase tracking-wider text-slate-900">
                       {t('auth.forgotPasswordTitle')}
@@ -524,7 +524,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         setShowForgotPassword(true)
                         setError('')
                       }}
-                      className="text-xs font-semibold text-yellow-600 transition-colors hover:text-yellow-700"
+                      className="text-xs font-semibold text-primary transition-colors hover:text-primary-dark"
                     >
                       {t('auth.forgotPassword')}
                     </button>
@@ -552,7 +552,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         setTab('register')
                         setError('')
                       }}
-                      className="font-semibold text-yellow-600 underline hover:text-yellow-700"
+                      className="font-semibold text-primary underline hover:text-primary-dark"
                     >
                       {t('auth.registerHere')}
                     </button>
@@ -703,7 +703,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         setTab('login')
                         setError('')
                       }}
-                      className="font-semibold text-yellow-600 underline hover:text-yellow-700"
+                      className="font-semibold text-primary underline hover:text-primary-dark"
                     >
                       {t('auth.loginHere')}
                     </button>
@@ -740,11 +740,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           outline: none;
           transition: border-color 0.2s;
         }
-        .auth-input:focus { border-color: #eab308; background: #fff; }
+        .auth-input:focus { border-color: #1B75BA; background: #fff; }
         .auth-btn-primary {
           width: 100%;
           padding: 12px;
-          background: #0f172a;
+          background: #1B75BA;
           color: #fff;
           font-family: var(--font-headline, sans-serif);
           font-weight: 700;
@@ -755,7 +755,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
           cursor: pointer;
           transition: background 0.2s, opacity 0.2s;
         }
-        .auth-btn-primary:hover:not(:disabled) { background: #1e293b; }
+        .auth-btn-primary:hover:not(:disabled) { background: #145D94; }
         .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>
     </div>

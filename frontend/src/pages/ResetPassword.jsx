@@ -93,7 +93,7 @@ export default function ResetPassword() {
           <div className="bg-white shadow-ambient overflow-hidden">
 
             {/* Top accent bar */}
-            <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #000e24 0%, #e8b540 50%, #000e24 100%)' }} />
+            <div className="h-1.5 w-full" style={{ background: 'linear-gradient(90deg, #1B75BA 0%, #358FD6 50%, #1B75BA 100%)' }} />
 
             <div className="px-8 py-10">
 
@@ -123,8 +123,8 @@ export default function ResetPassword() {
                 /* ── Reset form ────────────────────────────────────────── */
                 <>
                   <div className="text-center mb-6">
-                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-yellow-50 mb-4">
-                      <span className="material-symbols-outlined text-4xl text-yellow-500">lock_reset</span>
+                    <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-fixed mb-4">
+                      <span className="material-symbols-outlined text-4xl text-primary">lock_reset</span>
                     </div>
                     <h1 className="text-lg font-bold text-slate-900 font-headline uppercase tracking-wider">
                       {t('resetPassword.title')}
@@ -153,7 +153,7 @@ export default function ResetPassword() {
                         required
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-3 py-2.5 border border-slate-300 text-sm text-slate-900 bg-slate-50 focus:border-yellow-400 focus:bg-white outline-none transition-colors"
+                        className="w-full px-3 py-2.5 border border-slate-300 text-sm text-slate-900 bg-slate-50 focus:border-primary focus:bg-white outline-none transition-colors"
                         placeholder="••••••••"
                         disabled={!token}
                       />
@@ -185,7 +185,7 @@ export default function ResetPassword() {
                             ? passwordsMatch
                               ? 'border-green-400 focus:border-green-400'
                               : 'border-red-300 focus:border-red-400'
-                            : 'border-slate-300 focus:border-yellow-400'
+                            : 'border-slate-300 focus:border-primary'
                         }`}
                         placeholder="••••••••"
                         disabled={!token}

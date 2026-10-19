@@ -218,6 +218,10 @@
   "requestBOQ": {
     "heroTitle": "BOQ SUBMISSION",
     "heroDesc": "Upload your Bill of Quantities or project documentation for review. Our team will analyze your requirements and respond promptly.",
+    "sidebarBadge": "BILL OF QUANTITIES",
+    "sidebarTitle1": "Precision in Every",
+    "sidebarTitle2": "PROJECT DETAIL.",
+    "sidebarDesc": "Submit your BOQ requirements for a detailed review of quantities, materials, and project specifications. Our engineering team will assess your submission to help you plan with clarity and confidence.",
     "section1Title": "Customer Information",
     "fullName": "Full Name",
     "companyName": "Company Name",
@@ -643,6 +647,10 @@
   },
 
   "requestBOQ": {
+    "sidebarBadge": "BILL OF QUANTITIES",
+    "sidebarTitle1": "Precision in Every",
+    "sidebarTitle2": "PROJECT DETAIL.",
+    "sidebarDesc": "Submit your BOQ requirements for a detailed review of quantities, materials, and project specifications. Our engineering team will assess your submission to help you plan with clarity and confidence.",
     "section1Title": "Customer Information",
     "fullName": "Full Name",
     "companyName": "Company / Organization Name",

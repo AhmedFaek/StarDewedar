@@ -66,11 +66,11 @@ admin/
 The dashboard follows the ELECTRO-GRID design system with:
 
 ### Colors
-- **Primary:** `#000e24` (Deep Navy - Foundation)
-- **Primary Container:** `#00234b` (Darker Navy)
-- **Tertiary:** `#6a5f00` (Electric Yellow)
-- **Tertiary Fixed:** `#f9e454` (Bright Yellow)
-- **Secondary:** `#5d5e61` (Steel Grey)
+- **Primary:** `#1B75BA` (Brand Blue)
+- **Primary Container:** `#145D94` (Dark Blue)
+- **Tertiary:** `#1B75BA` (Brand Blue)
+- **Tertiary Fixed:** `#DCEBF7` (Light Blue)
+- **Secondary:** `#5D6D7E` (Steel Grey)
 
 ### Typography
 - **Headlines:** Space Grotesk (Geometric, engineered feel)

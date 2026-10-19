@@ -11,7 +11,7 @@ export default function HeroSection() {
   const fallbackImage = isRtl ? '/logo/hero_ar.webp' : '/logo/hero.webp'
 
   return (
-    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20 bg-primary">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden pt-16 sm:pt-20 bg-deep-blue">
       <div className="absolute inset-0 z-0">
         <picture key={isRtl ? 'ar' : 'en'}>
           {/* Mobile portrait: focused crop on helmet and 3D architectural SD mark */}
@@ -37,9 +37,9 @@ export default function HeroSection() {
           />
         </picture>
         {/* Horizontal directional gradient overlay focused strictly under the text side */}
-        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-primary/95 via-primary/70 via-30% to-transparent sm:from-primary/90 sm:via-primary/50 sm:via-35% sm:to-transparent pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-deep-blue/95 via-deep-blue/70 via-30% to-transparent sm:from-deep-blue/90 sm:via-deep-blue/50 sm:via-35% sm:to-transparent pointer-events-none"></div>
         {/* Mobile vertical gradient shield */}
-        <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/30 to-transparent sm:hidden pointer-events-none"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-deep-blue/85 via-deep-blue/30 to-transparent sm:hidden pointer-events-none"></div>
       </div>
 
       <div className="container mx-auto px-4 sm:px-8 relative z-10">
@@ -63,7 +63,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row flex-wrap gap-4 animate-fade-in-up animate-delay-300">
             <button
               onClick={() => navigate('/request')}
-              className="bg-tertiary-fixed text-on-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white transition-all text-sm"
+              className="bg-tertiary-fixed text-on-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-white hover:text-primary-dark transition-all text-sm"
             >
               {t('hero.ctaQuote')}
             </button>
@@ -77,7 +77,7 @@ export default function HeroSection() {
             
             <button
               onClick={() => navigate('/products')}
-              className="border border-tertiary-fixed text-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-tertiary-fixed hover:text-primary transition-all text-sm backdrop-blur-sm"
+              className="border border-tertiary-fixed text-tertiary-fixed px-8 py-5 font-headline font-bold uppercase tracking-widest hover:bg-tertiary-fixed hover:text-white transition-all text-sm backdrop-blur-sm"
             >
               {t('hero.ctaProducts')}
             </button>

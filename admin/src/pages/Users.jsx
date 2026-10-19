@@ -104,14 +104,14 @@ export default function Users() {
   return (
     <div className="max-w-full relative">
       {error && <div className="mb-6 p-4 bg-error-container border border-error text-on-error-container rounded"><p className="text-sm font-medium">{error}</p></div>}
-      {success && <div className="mb-6 p-4 bg-tertiary-fixed border border-tertiary text-on-tertiary-fixed rounded"><p className="text-sm font-medium">{success}</p></div>}
+      {success && <div className="mb-6 p-4 bg-primary/10 border border-primary text-primary rounded"><p className="text-sm font-medium">{success}</p></div>}
 
       <div className="mb-8 flex flex-col gap-4 sm:mb-10 sm:flex-row sm:items-end sm:justify-between lg:mb-12">
         <div>
-          <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">{t('users.subtitle')}</span>
-          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">{t('users.title')}<span className="text-tertiary">.</span></h2>
+          <span className="text-secondary font-bold tracking-widest text-xs uppercase mb-2 block">{t('users.subtitle')}</span>
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface leading-none sm:text-4xl lg:text-5xl">{t('users.title')}<span className="text-on-surface">.</span></h2>
         </div>
-        <Button variant="tertiary" size="lg" icon="person_add" onClick={openAddModal} disabled={loading} className="w-full sm:w-auto">{t('users.add_button')}</Button>
+        <Button variant="primary" size="lg" icon="person_add" onClick={openAddModal} disabled={loading} className="w-full sm:w-auto">{t('users.add_button')}</Button>
       </div>
 
       {loading && !users.length ? (
@@ -136,7 +136,7 @@ export default function Users() {
                   <tr key={user.id} className="group hover:bg-surface-container-low transition-colors">
                     <td className="px-8 py-6 text-xs font-mono text-slate-400">#{String(user.id).slice(0, 6).padStart(3, '0')}</td>
                     <td className="px-8 py-6">
-                      <span className="block font-bold text-primary font-headline tracking-tight">{user.name}</span>
+                      <span className="block font-bold text-on-surface font-headline tracking-tight">{user.name}</span>
                       {user.phone_number && <span className="block text-xs text-secondary font-medium">{user.phone_number}</span>}
                     </td>
                     <td className="px-8 py-6 text-sm text-secondary font-medium">{user.email}</td>
@@ -150,7 +150,7 @@ export default function Users() {
                       {new Date(user.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </td>
                     <td className="px-8 py-6 text-right">
-                      <div className="flex justify-end gap-4">
+                      <div className="row-actions flex justify-end gap-4">
                         <button onClick={() => handleDelete(user.id)} className="text-error hover:opacity-70 transition-opacity flex items-center gap-1 text-xs font-bold font-headline uppercase tracking-widest">
                           <span className="material-symbols-outlined text-sm">delete</span>{t('common.delete')}
                         </button>
@@ -173,17 +173,17 @@ export default function Users() {
           <div className="bg-surface-container-lowest border border-surface-variant w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
             <form onSubmit={handleSave}>
               <div className="flex items-center justify-between border-b border-surface-variant bg-surface-container-low px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6">
-                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">
-                  {t('users.modal.title')}<span className="text-tertiary">.</span>
+                <h3 className="text-xl font-black font-headline tracking-tighter text-on-surface uppercase sm:text-2xl">
+                  {t('users.modal.title')}<span className="text-on-surface">.</span>
                 </h3>
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-secondary hover:text-primary transition-colors"><span className="material-symbols-outlined">close</span></button>
               </div>
               <div className="space-y-5 p-4 sm:p-6 lg:p-8">
                 {/* Name */}
                 <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.name_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.name_label')}</label>
                   <input
-                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary"
+                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     placeholder={t('users.modal.name_placeholder')}
@@ -196,10 +196,10 @@ export default function Users() {
 
                 {/* Email */}
                 <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.email_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.email_label')}</label>
                   <input
                     type="email"
-                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary"
+                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     placeholder={t('users.modal.email_placeholder')}
@@ -210,11 +210,11 @@ export default function Users() {
 
                 {/* Password */}
                 <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.password_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.password_label')}</label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary pr-12"
+                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary pr-12"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       placeholder={t('users.modal.password_placeholder')}
@@ -236,11 +236,11 @@ export default function Users() {
 
                 {/* Role */}
                 <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.role_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.role_label')}</label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary uppercase"
+                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold focus:outline-none focus:border-primary uppercase"
                     disabled={isSaving}
                   >
                     <option value="customer">{t('users.role_customer')}</option>
@@ -251,9 +251,9 @@ export default function Users() {
                 {/* Phone & WhatsApp */}
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div>
-                    <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.phone_label')}</label>
+                    <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.phone_label')}</label>
                     <input
-                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary"
+                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                       value={formData.phone_number}
                       onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
                       placeholder={t('users.modal.phone_placeholder')}
@@ -262,9 +262,9 @@ export default function Users() {
                     />
                   </div>
                   <div>
-                    <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.whatsapp_label')}</label>
+                    <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.whatsapp_label')}</label>
                     <input
-                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary"
+                      className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                       value={formData.whatsapp_number}
                       onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
                       placeholder={t('users.modal.whatsapp_placeholder')}
@@ -276,9 +276,9 @@ export default function Users() {
 
                 {/* Company Name */}
                 <div>
-                  <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">{t('users.modal.company_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.company_label')}</label>
                   <input
-                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-primary font-bold focus:outline-none focus:border-tertiary"
+                    className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                     value={formData.company_name}
                     onChange={(e) => setFormData({ ...formData, company_name: e.target.value })}
                     placeholder={t('users.modal.company_placeholder')}
@@ -289,7 +289,7 @@ export default function Users() {
               </div>
               <div className="flex flex-col-reverse gap-3 border-t border-surface-variant bg-surface-container-low px-4 py-4 sm:flex-row sm:justify-end sm:gap-4 sm:px-6 lg:px-8 lg:py-6">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-xs font-bold uppercase tracking-widest text-secondary px-6 hover:text-primary disabled:opacity-50" disabled={isSaving}>{t('common.cancel')}</button>
-                <Button type="submit" variant="tertiary" disabled={isSaving} className="w-full sm:w-auto">
+                <Button type="submit" variant="primary" disabled={isSaving} className="w-full sm:w-auto">
                   {isSaving ? t('common.saving') : t('users.modal.submit')}
                 </Button>
               </div>

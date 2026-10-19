@@ -38,7 +38,7 @@ export const Table = ({
               ))}
               {actions && (
                 <td className="px-8 py-5 text-right">
-                  <button className="material-symbols-outlined text-secondary opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button className="row-actions material-symbols-outlined text-secondary">
                     more_vert
                   </button>
                 </td>

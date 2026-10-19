@@ -61,7 +61,7 @@ function AnalyticsStatCard({ label, value, icon, loading, isActive }) {
                     {isActive && (
                         <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_6px_2px_rgba(52,211,153,0.5)] shrink-0 mb-0.5 animate-pulse" />
                     )}
-                    <span className={`text-4xl font-black font-headline tracking-tighter ${isActive ? 'text-white' : 'text-primary'}`}>
+                    <span className={`text-4xl font-black font-headline tracking-tighter ${isActive ? 'text-white' : 'text-on-surface'}`}>
                         {loading ? '—' : value?.toLocaleString() ?? '—'}
                     </span>
                 </div>
@@ -166,7 +166,7 @@ export default function AnalyticsSection() {
             {/* Section header */}
             <div className="mb-6 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 flex-1">
-                    <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase">
+                    <h3 className="text-xl font-black font-headline tracking-tighter text-on-surface uppercase">
                         {t('dashboard.analytics.title')}
                     </h3>
                     <div className="flex-1 h-px bg-outline-variant" />
@@ -230,8 +230,8 @@ export default function AnalyticsSection() {
                             >
                                 <defs>
                                     <linearGradient id="analyticsGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="5%" stopColor="#000e24" stopOpacity={0.15} />
-                                        <stop offset="95%" stopColor="#000e24" stopOpacity={0} />
+                                        <stop offset="5%" stopColor="#1B75BA" stopOpacity={0.25} />
+                                        <stop offset="95%" stopColor="#1B75BA" stopOpacity={0} />
                                     </linearGradient>
                                 </defs>
                                 <CartesianGrid
@@ -266,11 +266,11 @@ export default function AnalyticsSection() {
                                 <Area
                                     type="monotone"
                                     dataKey="visitors"
-                                    stroke="#000e24"
+                                    stroke="#1B75BA"
                                     strokeWidth={2}
                                     fill="url(#analyticsGradient)"
                                     dot={false}
-                                    activeDot={{ r: 4, fill: '#000e24', strokeWidth: 0 }}
+                                    activeDot={{ r: 4, fill: '#1B75BA', strokeWidth: 0 }}
                                 />
                             </AreaChart>
                         </ResponsiveContainer>

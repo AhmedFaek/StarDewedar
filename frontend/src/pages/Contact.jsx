@@ -187,7 +187,7 @@ export default function Contact() {
                 <span className="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
                   {t('contact.badge')}
                 </span>
-                <h1 className="text-5xl md:text-7xl font-headline font-black tracking-tighter leading-none text-primary uppercase">
+                <h1 className="text-5xl md:text-7xl font-headline font-black tracking-tighter leading-none text-on-surface uppercase">
                   {t('contact.heroTitle1')}<br />{t('contact.heroTitle2')}
                 </h1>
               </div>
@@ -202,7 +202,7 @@ export default function Contact() {
           <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 border-t border-outline-variant/15">
               <div className="lg:col-span-7 py-16 lg:pe-20 lg:border-e border-outline-variant/15">
-                <h2 className="text-3xl font-headline font-bold uppercase tracking-tight mb-12 text-primary">
+                <h2 className="text-3xl font-headline font-bold uppercase tracking-tight mb-12 text-on-surface">
                   {t('contact.formTitle')}
                 </h2>
                 <form onSubmit={handleSubmit} className="space-y-8">
@@ -244,7 +244,7 @@ export default function Contact() {
                         if (errors.message) setErrors((prev) => ({ ...prev, message: '' }))
                       }}
                       rows={4}
-                      className={`w-full bg-surface-container-low border-0 border-b-2 focus:ring-0 px-0 py-3 text-primary transition-colors font-body resize-none ${
+                      className={`w-full bg-surface-container-low border-0 border-b-2 focus:ring-0 px-0 py-3 text-on-surface transition-colors font-body resize-none ${
                         errors.message
                           ? 'border-red-500 focus:border-red-500'
                           : 'border-outline-variant focus:border-tertiary'
@@ -288,7 +288,7 @@ export default function Contact() {
                       <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">{item.icon}</span>
                       <div>
                         <h4 className="text-[12px] font-bold uppercase tracking-wider text-outline mb-1">{item.label}</h4>
-                        <p className="text-lg font-headline font-bold text-primary leading-tight">{item.text}</p>
+                        <p className="text-lg font-headline font-bold text-on-surface leading-tight">{item.text}</p>
                       </div>
                     </div>
                   ))}
@@ -306,7 +306,7 @@ export default function Contact() {
                       <div className="space-y-4">
                         {accountants.map((acc, idx) => (
                           <div key={idx} className="space-y-1">
-                            <p className="text-sm font-headline font-bold text-primary">
+                            <p className="text-sm font-headline font-bold text-on-surface">
                               {acc.name}
                             </p>
                             <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
@@ -352,10 +352,10 @@ export default function Contact() {
 
         <section className="relative w-full h-[500px] bg-surface-container-high border-t border-outline-variant/15 overflow-hidden">
           <div className="absolute top-8 left-4 sm:left-8 md:left-16 z-10">
-            <div className="bg-primary/95 backdrop-blur-md p-6 shadow-2xl border border-white/10 max-w-sm">
-              <h3 className="text-white font-headline font-black text-xl mb-2 uppercase">{t('contact.visitOffice')}</h3>
-              <p className="text-white/70 text-[9px] font-label tracking-widest uppercase mb-6">{t('contact.coordinates')}</p>
-              <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 bg-white text-primary px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-tertiary-fixed transition-all">
+            <div className="bg-white/95 backdrop-blur-md p-6 shadow-2xl border border-outline-variant/50 max-w-sm">
+              <h3 className="text-on-surface font-headline font-black text-xl mb-2 uppercase">{t('contact.visitOffice')}</h3>
+              <p className="text-on-surface-variant text-[9px] font-label tracking-widest uppercase mb-6">{t('contact.coordinates')}</p>
+              <a href={directionsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-3 bg-primary text-white px-6 py-3 text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-primary-dark transition-all">
                 {t('contact.getDirections')}
                 <span className="material-symbols-outlined text-sm">navigation</span>
               </a>

@@ -291,8 +291,8 @@ export default function AllRequests() {
           <span className="text-tertiary font-bold tracking-widest text-xs uppercase mb-2 block">
             {t('allRequests.subtitle')}
           </span>
-          <h2 className="text-3xl font-black font-headline tracking-tighter text-primary leading-none sm:text-4xl lg:text-5xl">
-            {t('allRequests.title')}<span className="text-tertiary">.</span>
+          <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface leading-none sm:text-4xl lg:text-5xl">
+            {t('allRequests.title')}<span className="text-on-surface">.</span>
           </h2>
         </div>
 
@@ -307,7 +307,7 @@ export default function AllRequests() {
                 setCurrentPage(1)
               }}
               placeholder={isAr ? 'بحث في الطلبات...' : 'Search requests...'}
-              className="w-full bg-surface-container-lowest border border-surface-variant px-4 py-2.5 pl-10 rtl:pl-4 rtl:pr-10 text-sm font-medium text-primary focus:outline-none focus:border-tertiary"
+              className="w-full bg-surface-container-lowest border border-surface-variant px-4 py-2.5 pl-10 rtl:pl-4 rtl:pr-10 text-sm font-medium text-on-surface focus:outline-none focus:border-tertiary"
             />
             <span className="material-symbols-outlined absolute left-3 rtl:left-auto rtl:right-3 top-2.5 text-slate-400 text-lg">
               search
@@ -355,8 +355,8 @@ export default function AllRequests() {
 
       {/* Table Card */}
       <div className="bg-surface-container-lowest border border-surface-variant overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-left rtl:text-right border-collapse">
+        <div className="requests-table-wrap overflow-x-auto [container-type:inline-size] [container-name:requests-table]">
+          <table className="requests-table w-full text-left rtl:text-right border-collapse">
             <thead>
               <tr className="bg-surface-container-low border-b border-surface-variant">
                 <th className="px-6 py-5 text-xs font-bold uppercase tracking-widest text-secondary">
@@ -399,29 +399,29 @@ export default function AllRequests() {
                 displayedData.map((req) => (
                   <tr key={`${req.type}-${req.id}`} className="hover:bg-surface-container-low transition-colors group">
                     {/* Type Badge */}
-                    <td className="px-6 py-5 whitespace-nowrap">
+                    <td data-label={t('allRequests.table.type')} className="px-6 py-5 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${getTypeBadge(req.type)}`}>
                         {t(`allRequests.type.${req.type}`)}
                       </span>
                     </td>
 
                     {/* Customer */}
-                    <td className="px-6 py-5">
-                      <span className="block font-bold text-primary text-sm">{req.customerName}</span>
+                    <td data-label={t('allRequests.table.customer')} className="px-6 py-5">
+                      <span className="block font-bold text-on-surface text-sm">{req.customerName}</span>
                       {req.companyName && (
                         <span className="block text-xs text-secondary font-medium">{req.companyName}</span>
                       )}
                     </td>
 
                     {/* Contact */}
-                    <td className="px-6 py-5">
-                      <span className="block text-sm sm:text-base font-extrabold text-primary font-mono tracking-tight">{req.phone}</span>
+                    <td data-label={t('allRequests.table.contact')} className="px-6 py-5">
+                      <span className="block text-sm sm:text-base font-extrabold text-on-surface font-mono tracking-tight">{req.phone}</span>
                       <span className="text-xs text-slate-400 font-mono">{req.email}</span>
                     </td>
 
                     {/* Subject / Project */}
-                    <td className="px-6 py-5 max-w-xs">
-                      <span className="block font-bold text-primary text-xs uppercase tracking-tight truncate">
+                    <td data-label={t('allRequests.table.subject')} className="px-6 py-5 max-w-xs">
+                      <span className="block font-bold text-on-surface text-xs uppercase tracking-tight truncate">
                         {req.subject}
                       </span>
                       {req.details && (
@@ -430,12 +430,12 @@ export default function AllRequests() {
                     </td>
 
                     {/* Date */}
-                    <td className="px-6 py-5 whitespace-nowrap text-xs text-secondary font-mono">
+                    <td data-label={t('allRequests.table.date')} className="px-6 py-5 whitespace-nowrap text-xs text-secondary font-mono">
                       {req.date ? formatDate(req.date, isAr ? 'ar' : 'en-US') : '—'}
                     </td>
 
                     {/* Status */}
-                    <td className="px-6 py-5 text-center whitespace-nowrap">
+                    <td data-label={t('allRequests.table.status')} className="px-6 py-5 text-center whitespace-nowrap">
                       {(() => {
                         const sc = getStatusConfig(req.status)
                         return (
@@ -448,11 +448,11 @@ export default function AllRequests() {
                     </td>
 
                     {/* Action */}
-                    <td className="px-6 py-5 text-right rtl:text-left whitespace-nowrap">
+                    <td data-label={t('allRequests.table.action')} className="px-6 py-5 text-right rtl:text-left whitespace-nowrap">
                       <button
                         type="button"
                         onClick={() => setSelectedRequest(req)}
-                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-variant hover:border-tertiary text-primary hover:text-tertiary font-bold text-xs transition-colors uppercase tracking-wider"
+                        className="row-actions inline-flex items-center gap-1.5 px-3.5 py-2 bg-surface-container-low border border-surface-variant hover:border-tertiary text-primary hover:text-tertiary font-bold text-xs transition-colors uppercase tracking-wider"
                       >
                         <span>{t('quotes.table.review')}</span>
                         <span className="material-symbols-outlined text-base rtl:rotate-180">arrow_forward</span>
@@ -490,7 +490,7 @@ export default function AllRequests() {
                     ID: {selectedRequest.id}
                   </span>
                 </div>
-                <h3 className="text-xl font-black font-headline tracking-tighter text-primary uppercase sm:text-2xl">
+                <h3 className="text-xl font-black font-headline tracking-tighter text-on-surface uppercase sm:text-2xl">
                   {selectedRequest.type === 'boq'
                     ? t('boq.modal.title')
                     : selectedRequest.type === 'visit'
@@ -516,12 +516,12 @@ export default function AllRequests() {
                   <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">
                     {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.customer_label`)}
                   </label>
-                  <p className="font-bold text-primary text-base">{selectedRequest.customerName}</p>
+                  <p className="font-bold text-on-surface text-base">{selectedRequest.customerName}</p>
                   {selectedRequest.companyName && (
                     <p className="text-xs text-secondary font-semibold">{selectedRequest.companyName}</p>
                   )}
                   <p className="text-xs text-secondary font-mono mt-1">{selectedRequest.email}</p>
-                  <p className="text-base sm:text-lg font-extrabold text-primary font-mono tracking-tight mt-1">{selectedRequest.phone}</p>
+                  <p className="text-base sm:text-lg font-extrabold text-on-surface font-mono tracking-tight mt-1">{selectedRequest.phone}</p>
                   {selectedRequest.raw.whatsapp_number && (
                     <p className="text-sm font-bold text-emerald-600 font-mono mt-0.5">
                       WA: {selectedRequest.raw.whatsapp_number}
@@ -553,7 +553,7 @@ export default function AllRequests() {
                     value={selectedRequest.status}
                     onChange={(e) => handleStatusChange(selectedRequest, e.target.value)}
                     disabled={savingStatus}
-                    className={`w-full bg-surface-container-low border-2 ${getStatusConfig(selectedRequest.status).border} px-3 py-2 text-sm font-black text-primary focus:outline-none focus:ring-1 focus:ring-tertiary uppercase disabled:opacity-50`}
+                    className={`w-full bg-surface-container-low border-2 ${getStatusConfig(selectedRequest.status).border} px-3 py-2 text-sm font-black text-on-surface focus:outline-none focus:ring-1 focus:ring-tertiary uppercase disabled:opacity-50`}
                   >
                     <option value="pending" className="font-bold text-amber-900 bg-amber-50">
                       ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.pending`)}
@@ -588,12 +588,12 @@ export default function AllRequests() {
                     <label className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest block mb-1">
                       {t('boq.modal.project_label')}
                     </label>
-                    <p className="text-base font-black text-primary uppercase tracking-tight">
+                    <p className="text-base font-black text-on-surface uppercase tracking-tight">
                       {selectedRequest.raw.project_name}
                     </p>
                     <div className="grid grid-cols-2 gap-4 text-xs text-secondary">
                       <div>
-                        <span className="font-bold text-primary">{t('boq.modal.type_label')}:</span>{' '}
+                        <span className="font-bold text-on-surface">{t('boq.modal.type_label')}:</span>{' '}
                         {selectedRequest.raw.project_type
                           ? t(`boq.project_types.${selectedRequest.raw.project_type.toLowerCase()}`, {
                               defaultValue: selectedRequest.raw.project_type,
@@ -601,7 +601,7 @@ export default function AllRequests() {
                           : '—'}
                       </div>
                       <div>
-                        <span className="font-bold text-primary">{t('boq.modal.location_label') || (isAr ? 'الموقع' : 'Location')}:</span>{' '}
+                        <span className="font-bold text-on-surface">{t('boq.modal.location_label') || (isAr ? 'الموقع' : 'Location')}:</span>{' '}
                         {selectedRequest.raw.project_location || '—'}
                       </div>
                     </div>
@@ -623,7 +623,7 @@ export default function AllRequests() {
                     <div className="flex items-center gap-4 p-3 border border-dashed border-emerald-300 bg-emerald-50/50">
                       <span className="material-symbols-outlined text-emerald-700">description</span>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-primary uppercase">{t('boq.modal.boq_file_label')}</p>
+                        <p className="text-xs font-bold text-on-surface uppercase">{t('boq.modal.boq_file_label')}</p>
                       </div>
                       <button
                         type="button"
@@ -675,7 +675,7 @@ export default function AllRequests() {
                     <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-1">
                       {t('quotes.modal.product_label')}
                     </label>
-                    <p className="text-lg font-black text-primary uppercase tracking-tight">
+                    <p className="text-lg font-black text-on-surface uppercase tracking-tight">
                       {selectedRequest.raw.custom_product_name || selectedRequest.raw.product?.name_ar || selectedRequest.raw.product?.name_en || t('quotes.modal.product_default')}
                     </p>
                     {selectedRequest.raw.product_id && (
@@ -700,7 +700,7 @@ export default function AllRequests() {
                     <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
                       <span className="material-symbols-outlined text-tertiary">description</span>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-primary uppercase">{t('quotes.modal.file_label')}</p>
+                        <p className="text-xs font-bold text-on-surface uppercase">{t('quotes.modal.file_label')}</p>
                       </div>
                       <button
                         type="button"
@@ -720,18 +720,18 @@ export default function AllRequests() {
                     <label className="text-[10px] font-bold text-blue-700 uppercase tracking-widest block mb-1">
                       {t('visits.modal.factory_label')}
                     </label>
-                    <p className="text-base font-black text-primary uppercase tracking-tight">
+                    <p className="text-base font-black text-on-surface uppercase tracking-tight">
                       {[selectedRequest.raw.factory_name, selectedRequest.raw.factory_activity].filter(Boolean).join(' — ') || '—'}
                     </p>
                     <div className="grid grid-cols-2 gap-4 text-xs text-secondary">
                       <div>
-                        <span className="font-bold text-primary">
+                        <span className="font-bold text-on-surface">
                           {t('visits.modal.address', { defaultValue: t('visits.modal.address_label', { defaultValue: isAr ? 'العنوان' : 'Address' }) })}:
                         </span>{' '}
                         {selectedRequest.raw.address || '—'}
                       </div>
                       <div>
-                        <span className="font-bold text-primary">
+                        <span className="font-bold text-on-surface">
                           {t('visits.modal.preferred_date', { defaultValue: t('visits.modal.date_label', { defaultValue: isAr ? 'التاريخ المفضل' : 'Preferred Date' }) })}:
                         </span>{' '}
                         {selectedRequest.raw.preferred_date ? formatDate(selectedRequest.raw.preferred_date, isAr ? 'ar' : 'en-US') : '—'}
@@ -754,7 +754,7 @@ export default function AllRequests() {
                     <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
                       <span className="material-symbols-outlined text-blue-700">description</span>
                       <div className="flex-1">
-                        <p className="text-xs font-bold text-primary uppercase">
+                        <p className="text-xs font-bold text-on-surface uppercase">
                           {t('visits.modal.file_label', { defaultValue: t('quotes.modal.file_label', { defaultValue: isAr ? 'مستند مرفق' : 'Attached Document' }) })}
                         </p>
                       </div>

@@ -133,7 +133,7 @@ export default function SupportMessagesFloat() {
           {/* Header: Agent Avatar + Support Title + Online Indicator + Close Button */}
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2 min-w-0">
-              <div className="relative w-6 h-6 rounded-full bg-[#000e24] flex items-center justify-center text-white shrink-0">
+              <div className="relative w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
                 <span
                   className="material-symbols-outlined text-[15px] leading-none"
                   style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
@@ -209,10 +209,10 @@ export default function SupportMessagesFloat() {
             width: '56px',
             height: '56px',
             borderRadius: '50%',
-            background: hovered ? '#00234b' : '#000e24',
+            background: hovered ? '#145D94' : '#1B75BA',
             boxShadow: hovered
-              ? '0 8px 28px rgba(0,14,36,0.55)'
-              : '0 4px 18px rgba(0,14,36,0.38)',
+              ? '0 8px 28px rgba(27,117,186,0.55)'
+              : '0 4px 18px rgba(27,117,186,0.38)',
             border: '1.5px solid rgba(255,255,255,0.18)',
             transition: 'background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease',
             transform: hovered ? 'scale(1.08)' : 'scale(1)',
@@ -230,7 +230,7 @@ export default function SupportMessagesFloat() {
 
           {/* Active online green badge */}
           <span
-            className={`absolute top-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-[#000e24] shadow-sm flex items-center justify-center
+            className={`absolute top-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-primary shadow-sm flex items-center justify-center
               ${isRTL ? 'left-0.5' : 'right-0.5'}`}
           >
             <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />

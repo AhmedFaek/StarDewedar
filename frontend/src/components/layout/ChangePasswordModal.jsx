@@ -120,7 +120,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
       >
         <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-yellow-500">lock</span>
+            <span className="material-symbols-outlined text-primary">lock</span>
             <h2 className="font-headline text-sm font-bold uppercase tracking-wider text-slate-900">
               {t('auth.changePassword')}
             </h2>
@@ -260,11 +260,11 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           outline: none;
           transition: border-color 0.2s;
         }
-        .auth-input:focus { border-color: #eab308; background: #fff; }
+        .auth-input:focus { border-color: #1B75BA; background: #fff; }
         .auth-btn-primary {
           width: 100%;
           padding: 12px;
-          background: #0f172a;
+          background: #1B75BA;
           color: #fff;
           font-family: var(--font-headline, sans-serif);
           font-weight: 700;
@@ -275,7 +275,7 @@ export default function ChangePasswordModal({ isOpen, onClose, onSuccess }) {
           cursor: pointer;
           transition: background 0.2s, opacity 0.2s;
         }
-        .auth-btn-primary:hover:not(:disabled) { background: #1e293b; }
+        .auth-btn-primary:hover:not(:disabled) { background: #145D94; }
         .auth-btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
       `}</style>
     </div>

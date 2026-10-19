@@ -70,7 +70,7 @@ function TypeCard({ type, icon, label, description, isActive, onClick }) {
         {icon}
       </span>
       <div>
-        <p className={`font-headline font-black text-base sm:text-lg uppercase tracking-tight leading-tight ${isActive ? 'text-white' : 'text-primary'}`}>
+        <p className={`font-headline font-black text-base sm:text-lg uppercase tracking-tight leading-tight ${isActive ? 'text-white' : 'text-on-surface'}`}>
           {label}
         </p>
         <p className={`text-xs sm:text-sm mt-1 leading-relaxed ${isActive ? 'text-white/80' : 'text-secondary'}`}>
@@ -131,7 +131,7 @@ export default function Request() {
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-12 sm:mb-16">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end">
             <div>
-              <h1 className="font-headline font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter text-primary leading-[0.9] mb-6 sm:mb-8">
+              <h1 className="font-headline font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter text-on-surface leading-[0.9] mb-6 sm:mb-8">
                 {t('requestPage.heroTitle')}
               </h1>
               <div className="h-1 w-20 sm:w-32 bg-tertiary-fixed mb-6 sm:mb-8" />
@@ -181,7 +181,12 @@ export default function Request() {
             </div>
           </div>
 
-          <BOQFormSection visible={activeType === 'boq'} />
+          <div className={activeType === 'boq' ? '' : 'hidden'} aria-hidden={activeType !== 'boq'}>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-0 overflow-hidden shadow-2xl">
+              <QuoteSidebar variant="boq" />
+              <BOQFormSection visible={activeType === 'boq'} />
+            </div>
+          </div>
 
           {/* Empty state — show when no type selected */}
           {!activeType && (
