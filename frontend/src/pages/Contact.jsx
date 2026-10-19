@@ -24,8 +24,8 @@ export default function Contact() {
         ? 'تواصل معنا | ستار ديودار'
         : 'Contact Us | Star Dewedar',
       description: isAr
-        ? 'تواصل مع شركة ستار ديودار للاستفسارات الفنية وطلبات عروض الأسعار ومشاريع التوريد. البريد الإلكتروني: info@stardewedar.com | هاتف: ‏+20 11 11777478'
-        : 'Contact Star Dewedar Co. for technical inquiries, quote requests, and project consultations. Email: info@stardewedar.com | Phone: +20 11 11777478',
+        ? 'تواصل مع شركة ستار ديودار للاستفسارات الفنية وطلبات عروض الأسعار ومشاريع التوريد. البريد الإلكتروني: info@stardewedar.com | قسم الحسابات: 01003196400 / 01080065750'
+        : 'Contact Star Dewedar Co. for technical inquiries, quote requests, and project consultations. Email: info@stardewedar.com | Accounting: +20 100 319 6400 / +20 108 006 5750',
       canonical: buildUrl('/contact'),
       ogType: 'website',
       lang,
@@ -155,12 +155,23 @@ export default function Contact() {
       { label: t('contact.factoryAddress'), text: t('contact.factoryAddressText'), icon: 'factory' },
       { label: t('contact.storeAddress'), text: t('contact.storeAddressText'), icon: 'store' },
     ],
-    lines: [
-      { label: t('contact.phoneLabel'), text: t('contact.phoneText'), icon: 'call' },
-      { label: t('contact.whatsappLabel'), text: t('contact.whatsappText'), icon: 'chat' },
-      { label: t('contact.emailLabel'), text: t('contact.emailText'), icon: 'mail' },
-    ],
   }
+
+  const accountants = [
+    {
+      name: t('contact.accountant1Name'),
+      phones: [
+        { display: '+20 100 319 6400', tel: '+201003196400' },
+        { display: '+20 100 987 3999', tel: '+201009873999' },
+      ],
+    },
+    {
+      name: t('contact.accountant2Name'),
+      phones: [
+        { display: '+20 108 006 5750', tel: '+201080065750' },
+      ],
+    },
+  ]
 
   // Submit is allowed only when Turnstile has been verified
   const isSubmitDisabled = isSubmitting || !turnstileToken
@@ -284,15 +295,55 @@ export default function Contact() {
                 </div>
                 <div className="space-y-8 pt-8 border-t border-outline-variant/15">
                   <h3 className="text-[11px] font-bold tracking-[0.3em] uppercase text-tertiary">{t('contact.directLines')}</h3>
-                  {contactInfo.lines.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-5 group">
-                      <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">{item.icon}</span>
-                      <div>
-                        <h4 className="text-[12px] font-bold uppercase tracking-wider text-outline mb-0.5">{item.label}</h4>
-                        <p className="text-xl font-body font-semibold text-primary">{item.text}</p>
+
+                  {/* Accounting Department */}
+                  <div className="flex gap-5 group items-start">
+                    <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors mt-0.5">call</span>
+                    <div className="flex-1">
+                      <h4 className="text-[12px] font-bold uppercase tracking-wider text-outline mb-2">
+                        {t('contact.accountingDept')}
+                      </h4>
+                      <div className="space-y-4">
+                        {accountants.map((acc, idx) => (
+                          <div key={idx} className="space-y-1">
+                            <p className="text-sm font-headline font-bold text-primary">
+                              {acc.name}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                              {acc.phones.map((phone, pIdx) => (
+                                <span key={pIdx} className="inline-flex items-center gap-3">
+                                  {pIdx > 0 && (
+                                    <span className="text-outline-variant/50 hidden sm:inline" aria-hidden="true">•</span>
+                                  )}
+                                  <a
+                                    href={`tel:${phone.tel}`}
+                                    dir="ltr"
+                                    className="text-base font-body font-semibold text-primary hover:text-tertiary transition-colors"
+                                  >
+                                    {phone.display}
+                                  </a>
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-                  ))}
+                  </div>
+
+                  {/* Email */}
+                  <div className="flex items-center gap-5 group">
+                    <span className="material-symbols-outlined text-outline group-hover:text-primary transition-colors">mail</span>
+                    <div>
+                      <h4 className="text-[12px] font-bold uppercase tracking-wider text-outline mb-0.5">{t('contact.emailLabel')}</h4>
+                      <a
+                        href={`mailto:${t('contact.emailText')}`}
+                        className="text-xl font-body font-semibold text-primary hover:text-tertiary transition-colors"
+                      >
+                        {t('contact.emailText')}
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
