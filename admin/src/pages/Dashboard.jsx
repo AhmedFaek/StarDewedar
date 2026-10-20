@@ -29,124 +29,202 @@ export default function Dashboard() {
   const pendingBOQs   = stats?.newBOQs ?? 0
   const hasPending = !loading && (pendingQuotes > 0 || pendingVisits > 0 || pendingBOQs > 0)
 
-  const statCardsData = [
-    {
-      label: t('dashboard.total_products'),
-      value: loading ? '—' : stats?.totalProducts ?? 0,
-      trend: t('dashboard.catalog_items'),
-      icon: 'inventory_2',
-      variant: 'default',
-      link: '/products',
-    },
-    {
-      label: t('dashboard.total_projects'),
-      value: loading ? '—' : stats?.totalProjects ?? 0,
-      trend: t('dashboard.active_projects'),
-      icon: 'account_tree',
-      variant: 'tertiary',
-      link: '/projects',
-    },
+  // Request & Action Cards (Semantic Category: Amber)
+  const requestCards = [
     {
       label: t('dashboard.quote_requests'),
       value: loading ? '—' : pendingQuotes,
-      trend: t('dashboard.pending'),
       icon: 'request_quote',
-      variant: 'default',
-      badge: true,
+      accent: 'amber',
+      statusType: 'pending',
+      pendingCount: pendingQuotes,
+      isClickable: true,
       link: '/requests?tab=quote',
+      loading,
     },
     {
       label: t('dashboard.visit_requests'),
       value: loading ? '—' : pendingVisits,
-      trend: t('dashboard.pending'),
       icon: 'factory',
-      variant: 'gradient',
-      badge: true,
+      accent: 'amber',
+      statusType: 'pending',
+      pendingCount: pendingVisits,
+      isClickable: true,
       link: '/requests?tab=visit',
+      loading,
     },
     {
       label: t('dashboard.boq_requests'),
       value: loading ? '—' : pendingBOQs,
-      trend: t('dashboard.pending'),
       icon: 'receipt_long',
-      variant: 'default',
-      badge: true,
+      accent: 'amber',
+      statusType: 'pending',
+      pendingCount: pendingBOQs,
+      isClickable: true,
       link: '/requests?tab=boq',
+      loading,
+    },
+  ]
+
+  // Core Overview & Operations Cards (Semantic Categories: Blue & Indigo)
+  const overviewCards = [
+    {
+      label: t('dashboard.total_products'),
+      value: loading ? '—' : stats?.totalProducts ?? 0,
+      subtitle: t('dashboard.catalog_sub', 'Active items in catalog'),
+      icon: 'inventory_2',
+      accent: 'blue',
+      isClickable: true,
+      link: '/products',
+      loading,
+    },
+    {
+      label: t('dashboard.total_projects'),
+      value: loading ? '—' : stats?.totalProjects ?? 0,
+      subtitle: t('dashboard.projects_sub', 'Published portfolio projects'),
+      icon: 'account_tree',
+      accent: 'blue',
+      isClickable: true,
+      link: '/projects',
+      loading,
     },
     {
       label: t('dashboard.contact_messages'),
       value: loading ? '—' : stats?.totalContactMessages ?? 0,
-      trend: t('dashboard.received_messages'),
+      subtitle: t('dashboard.messages_sub', 'Direct inquiries received'),
       icon: 'chat',
-      variant: 'default',
+      accent: 'indigo',
+      isClickable: true,
       link: '/messages',
+      loading,
     },
     {
       label: t('dashboard.total_customers'),
       value: loading ? '—' : stats?.totalCustomers ?? 0,
-      trend: t('dashboard.registered_customers'),
+      subtitle: t('dashboard.customers_sub', 'Registered client accounts'),
       icon: 'group',
-      variant: 'tertiary',
+      accent: 'indigo',
+      isClickable: true,
       link: '/users',
+      loading,
     },
   ]
 
   return (
     <div>
-      <div className="mb-8 sm:mb-10 lg:mb-12">
-        <h2 className="text-3xl font-black font-headline tracking-tighter text-on-surface uppercase leading-none sm:text-4xl lg:text-5xl">
+      {/* Page Header */}
+      <div className="mb-8 sm:mb-10">
+        <h2 className="text-3xl font-black font-headline tracking-tighter text-slate-900 uppercase leading-none sm:text-4xl lg:text-5xl">
           {t('dashboard.title')}
         </h2>
+        <p className="mt-2 text-sm text-slate-500 font-medium max-w-2xl">
+          {t('dashboard.subtitle', 'Real-time summary of store operations, customer requests, and website performance')}
+        </p>
       </div>
 
       {/* Alert banner for pending requests */}
       {hasPending && (
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-amber-500/10 border-l-4 rtl:border-l-0 rtl:border-r-4 border-amber-500 p-5 sm:p-6 text-primary shadow-sm">
-          <div className="flex items-center gap-3">
-            <span className="material-symbols-outlined text-amber-600 text-3xl shrink-0">warning</span>
+        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl border border-amber-200/90 bg-amber-50/70 p-5 sm:p-6 text-slate-800 shadow-xs">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-amber-500 text-white shadow-xs">
+              <span className="material-symbols-outlined text-2xl select-none">priority_high</span>
+            </div>
             <div>
-              <h4 className="font-headline font-bold text-sm uppercase tracking-wider text-amber-900">{t('dashboard.pending_alert_title')}</h4>
-              <p className="text-xs sm:text-sm text-secondary mt-0.5">
+              <h4 className="font-headline font-bold text-sm uppercase tracking-wider text-amber-950">
+                {t('dashboard.pending_alert_title')}
+              </h4>
+              <p className="text-xs sm:text-sm text-slate-600 mt-0.5">
                 {t('dashboard.pending_alert_desc')}
               </p>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-2 shrink-0">
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
             {pendingQuotes > 0 && (
-              <Link to="/requests?tab=quote" className="px-4 py-2 bg-amber-500 text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-amber-600 transition-colors inline-flex items-center gap-1.5 shadow-xs">
+              <Link
+                to="/requests?tab=quote"
+                className="inline-flex items-center gap-2 rounded-lg bg-amber-500 px-3.5 py-2 text-xs font-bold font-headline uppercase tracking-wider text-white shadow-xs transition-colors hover:bg-amber-600"
+              >
                 <span>{t('dashboard.quote_requests')}</span>
-                <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingQuotes}</span>
+                <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-black">{pendingQuotes}</span>
               </Link>
             )}
             {pendingVisits > 0 && (
-              <Link to="/requests?tab=visit" className="px-4 py-2 bg-primary text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-primary-container transition-colors inline-flex items-center gap-1.5 shadow-xs">
+              <Link
+                to="/requests?tab=visit"
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-3.5 py-2 text-xs font-bold font-headline uppercase tracking-wider text-white shadow-xs transition-colors hover:bg-primary-container"
+              >
                 <span>{t('dashboard.visit_requests')}</span>
-                <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingVisits}</span>
+                <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-black">{pendingVisits}</span>
               </Link>
             )}
             {pendingBOQs > 0 && (
-              <Link to="/requests?tab=boq" className="px-4 py-2 bg-emerald-600 text-white font-headline text-xs font-bold uppercase tracking-widest hover:bg-emerald-700 transition-colors inline-flex items-center gap-1.5 shadow-xs">
+              <Link
+                to="/requests?tab=boq"
+                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-bold font-headline uppercase tracking-wider text-white shadow-xs transition-colors hover:bg-emerald-700"
+              >
                 <span>{t('dashboard.boq_requests')}</span>
-                <span className="bg-white/20 px-2 py-0.5 text-[10px]">{pendingBOQs}</span>
+                <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-black">{pendingBOQs}</span>
               </Link>
             )}
           </div>
         </div>
       )}
 
-      <div className="mb-12 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {statCardsData.map((stat, index) =>
-          stat.link ? (
-            <Link key={index} to={stat.link} className="block transition-transform hover:scale-[1.01]">
+      {/* Section 1: Pending Inquiries & Requests */}
+      <div className="mb-10">
+        <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-amber-50 text-amber-600 border border-amber-200/80">
+              <span className="material-symbols-outlined text-base">notifications_active</span>
+            </span>
+            <div>
+              <h3 className="text-base font-black font-headline tracking-tight text-slate-900 uppercase">
+                {t('dashboard.section_requests', 'Pending Inquiries & Requests')}
+              </h3>
+            </div>
+          </div>
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+            {t('dashboard.section_requests_desc', 'Customer actions requiring prompt review')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {requestCards.map((stat, index) => (
+            <Link key={index} to={stat.link} className="block group">
               <StatCard {...stat} />
             </Link>
-          ) : (
-            <StatCard key={index} {...stat} />
-          )
-        )}
+          ))}
+        </div>
       </div>
 
-      {/* Analytics section — self-contained, cannot break the rest of the dashboard */}
+      {/* Section 2: Catalog & Operations Overview */}
+      <div className="mb-12">
+        <div className="mb-4 flex items-center justify-between gap-3 border-b border-slate-200 pb-2.5">
+          <div className="flex items-center gap-2.5">
+            <span className="flex h-7 w-7 items-center justify-center rounded-md bg-blue-50 text-primary border border-blue-200/80">
+              <span className="material-symbols-outlined text-base">dashboard_customize</span>
+            </span>
+            <div>
+              <h3 className="text-base font-black font-headline tracking-tight text-slate-900 uppercase">
+                {t('dashboard.section_overview', 'Catalog & Operations')}
+              </h3>
+            </div>
+          </div>
+          <span className="text-xs text-slate-400 font-medium hidden sm:inline">
+            {t('dashboard.section_overview_desc', 'Core business metrics and client engagement')}
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {overviewCards.map((stat, index) => (
+            <Link key={index} to={stat.link} className="block group">
+              <StatCard {...stat} />
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Section 3: Website Analytics */}
       <AnalyticsSection />
     </div>
   )
