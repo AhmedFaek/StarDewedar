@@ -6,7 +6,7 @@ import { Pagination } from '../components/ui/Pagination'
 import * as userService from '../services/userService'
 
 export default function Users() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const [users, setUsers] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(false)
@@ -26,6 +26,11 @@ export default function Users() {
   })
 
   useEffect(() => { fetchUsers() }, [])
+
+  const roleLabel = (role) => {
+    const key = `users.role_${role}`
+    return i18n.exists(key) ? t(key) : role
+  }
 
   const fetchUsers = async () => {
     setLoading(true)
@@ -141,8 +146,8 @@ export default function Users() {
                     </td>
                     <td className="px-8 py-6 text-sm text-secondary font-medium">{user.email}</td>
                     <td className="px-8 py-6">
-                      <Badge className={user.role === 'admin' ? 'bg-[#c62828] text-white font-black' : 'bg-[#e8eaf6] text-[#1a237e] font-bold'}>
-                        {user.role === 'admin' ? t('users.role_admin') : t('users.role_customer')}
+                      <Badge className={user.role === 'customer' ? 'bg-[#e8eaf6] text-[#1a237e] font-bold' : 'bg-[#c62828] text-white font-black'}>
+                        {roleLabel(user.role)}
                       </Badge>
                     </td>
                     <td className="px-8 py-6 text-sm text-secondary font-medium">{user.company_name || '—'}</td>
@@ -244,7 +249,9 @@ export default function Users() {
                     disabled={isSaving}
                   >
                     <option value="customer">{t('users.role_customer')}</option>
-                    <option value="admin">{t('users.role_admin')}</option>
+                    <option value="catalog_manager">{t('users.role_catalog_manager')}</option>
+                    <option value="sales_support_manager">{t('users.role_sales_support_manager')}</option>
+                    <option value="super_admin">{t('users.role_super_admin')}</option>
                   </select>
                 </div>
 

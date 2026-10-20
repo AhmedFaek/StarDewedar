@@ -15,6 +15,11 @@
     "error": "حدث خطأ ما",
     "success": "تمت العملية بنجاح"
   },
+  "access_denied": {
+    "title": "الوصول مرفوض",
+    "message": "دورك لا يملك صلاحية عرض هذه الصفحة.",
+    "back": "العودة إلى لوحتي"
+  },
 
   
   "sidebar": {
@@ -312,6 +317,9 @@
     "delete_success": "تم حذف المستخدم بنجاح",
     "delete_confirm": "هل أنت متأكد من حذف هذا المستخدم؟",
     "role_admin": "مشرف",
+    "role_super_admin": "مشرف عام",
+    "role_catalog_manager": "مدير الكتالوج",
+    "role_sales_support_manager": "مدير المبيعات والدعم",
     "role_customer": "عميل",
     "table": {
       "id": "الرقم",
