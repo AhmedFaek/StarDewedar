@@ -3,16 +3,18 @@ import { useTranslation } from 'react-i18next'
 
 export const TopAppBar = ({ onMenuClick }) => {
   const user = getCurrentUser()
-  const { i18n } = useTranslation()
+  const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
   
-  // Format role for display (e.g., "CO_FOUNDER" -> "Co-Founder")
+  // Translated role label (e.g. "catalog_manager" -> "Catalog Manager" / "مدير الكتالوج")
   const formatRole = (role) => {
     if (!role) return 'User'
+    const key = `users.role_${role}`
+    if (i18n.exists(key)) return t(key)
     return role
       .split('_')
-      .map(word => word.charAt(0) + word.slice(1).toLowerCase())
-      .join('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ')
   }
 
   return (
