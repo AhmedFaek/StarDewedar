@@ -4,8 +4,8 @@ import * as controller from './contact.controller.js'
 import { createContactSchema } from './contact.validation.js'
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
-import { ROLES } from '../../utils/constants.js'
+import { requirePermission } from '../../middleware/roles.middleware.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 
 const router = express.Router()
@@ -28,7 +28,7 @@ router.post('/', contactLimiter, verifyTurnstile, validate(createContactSchema),
 router.get(
     '/',
     auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.SUPPORT_MANAGE),
     controller.getAllMessages
 )
 

@@ -14,7 +14,7 @@ model User {
   whatsapp_number      String?
   phone_number         String?
   company_name         String?
-  role                 String   // "admin" | "customer"
+  role                 String   // "super_admin" | "catalog_manager" | "sales_support_manager" | "customer"
   hashed_refresh_token   String?
   reset_password_token           String?
   reset_password_expires         DateTime?

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { ROLES } from '../../utils/constants.js'
+import { ROLES, ADMIN_ROLES } from '../../utils/constants.js'
 
 /* ─── Shared: strong password rule ───────────────────────────────────────── */
 
@@ -29,7 +29,7 @@ export const createUserSchema = z.object({
     whatsapp_number: z.string().max(30).optional(),
     phone_number: z.string().max(30).optional(),
     company_name: z.string().max(150).optional(),
-    role: z.enum([ROLES.ADMIN, ROLES.CUSTOMER]),
+    role: z.enum([...ADMIN_ROLES, ROLES.CUSTOMER]),
 })
 
 /* ── Login ──────────────────────────────────────────────────────────────── */

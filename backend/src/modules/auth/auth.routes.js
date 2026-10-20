@@ -3,7 +3,7 @@ import rateLimit from 'express-rate-limit'
 import * as controller from './auth.controller.js'
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
+import { requirePermission } from '../../middleware/roles.middleware.js'
 import {
     registerSchema,
     createUserSchema,
@@ -15,7 +15,7 @@ import {
     verifyEmailSchema,
     resendVerificationSchema,
 } from './auth.validation.js'
-import { ROLES } from '../../utils/constants.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 
 const router = express.Router()
 
@@ -137,11 +137,11 @@ router.post(
     controller.changePassword
 )
 
-// Create a user (admin only)
+// Create a user (super admin only)
 router.post(
     '/create-user',
     auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.USERS_MANAGE),
     validate(createUserSchema),
     controller.createUser
 )

@@ -2,10 +2,10 @@ import express from 'express'
 import rateLimit from 'express-rate-limit'
 import * as controller from './visit.controller.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
+import { requirePermission } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
-import { ROLES } from '../../utils/constants.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import upload from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
@@ -28,35 +28,35 @@ router.post('/', visitLimiter, upload.single('file'), verifyTurnstile, controlle
 
 // Get all visit requests
 router.get('/', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     controller.getVisits)
 
 // Get visit requests by status
 router.get('/status/:status', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     controller.getVisitsByStatus)
 
 // Get visit requests by email
 router.get('/email/:email', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     controller.getVisitsByEmail)
 
 // Get single visit request by ID
 router.get('/:id', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     validateUuidParam(),
     controller.getVisitById)
 
 // Update visit request (e.g., change status)
 router.put('/:id', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     validateUuidParam(),
     validate(updateVisitRequestSchema),
     controller.updateVisit)
 
 // Delete visit request
 router.delete('/:id', auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
     validateUuidParam(),
     controller.deleteVisit)
 

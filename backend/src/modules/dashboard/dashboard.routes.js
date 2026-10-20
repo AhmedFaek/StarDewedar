@@ -3,9 +3,10 @@ import express from 'express'
 import * as controller from './dashboard.controller.js'
 import * as convController from '../conversations/conversation.controller.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
+import { requireRole, requirePermission } from '../../middleware/roles.middleware.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
-import { ROLES } from '../../utils/constants.js'
+import { ADMIN_ROLES } from '../../utils/constants.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 import rateLimit from 'express-rate-limit'
 import { adminRouter as analyticsAdminRouter } from '../analytics/analytics.routes.js'
 
@@ -20,18 +21,21 @@ const adminReplyLimiter = rateLimit({
     message: { message: 'Too many messages sent. Please slow down.' },
 })
 
-// All dashboard routes require admin authentication
-router.use(auth, requireRole(ROLES.ADMIN))
+// All dashboard routes require an authenticated admin-type user; each area
+// below additionally requires its own permission.
+router.use(auth, requireRole(...ADMIN_ROLES))
 
 /* ─── Analytics ──────────────────────────────────────────────────────────── */
 
-router.use('/analytics', analyticsAdminRouter)
+router.use('/analytics', requirePermission(PERMISSIONS.ANALYTICS_VIEW), analyticsAdminRouter)
 
 /* ─── Stats ─────────────────────────────────────────────────────────────── */
 
-router.get('/stats', controller.getStats)
+router.get('/stats', requirePermission(PERMISSIONS.DASHBOARD_VIEW), controller.getStats)
 
 /* ─── Admin: Conversations ────────────────────────────────────────────────── */
+
+router.use('/conversations', requirePermission(PERMISSIONS.SUPPORT_MANAGE))
 
 // GET    /api/dashboard/conversations
 router.get('/conversations', convController.adminGetConversations)
