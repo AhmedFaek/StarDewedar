@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { MainLayout } from './components'
-import { ProtectedRoute } from './components/ProtectedRoute' // Your new wrapper
+import { ProtectedRoute, RequirePermission } from './components/ProtectedRoute'
+import { PERMISSIONS, getHomePath } from './utils/permissions'
+import { getDecodedToken } from './utils/auth'
 
 // Pages
 import Dashboard from './pages/Dashboard'
@@ -40,6 +42,14 @@ function AppWrapper({ children }) {
   return children
 }
 
+const guard = (permission, element, options) => (
+  <RequirePermission permission={permission} {...options}>{element}</RequirePermission>
+)
+
+function HomeFallback() {
+  return <Navigate to={getHomePath(getDecodedToken()?.role) || '/login'} replace />
+}
+
 export default function App() {
   return (
     <AppWrapper>
@@ -56,19 +66,19 @@ export default function App() {
               <ProtectedRoute>
                 <MainLayout>
                   <Routes>
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/categories" element={<Categories />} />
-                    <Route path="/products" element={<Products />} />
-                    <Route path="/projects" element={<Projects />} />
-                    <Route path="/requests" element={<AllRequests />} />
+                    <Route path="/" element={guard(PERMISSIONS.DASHBOARD_VIEW, <Dashboard />, { redirectIfDenied: true })} />
+                    <Route path="/categories" element={guard(PERMISSIONS.CATALOG_MANAGE, <Categories />)} />
+                    <Route path="/products" element={guard(PERMISSIONS.CATALOG_MANAGE, <Products />)} />
+                    <Route path="/projects" element={guard(PERMISSIONS.PROJECTS_MANAGE, <Projects />)} />
+                    <Route path="/requests" element={guard(PERMISSIONS.REQUESTS_MANAGE, <AllRequests />)} />
                     <Route path="/quote-requests" element={<Navigate to="/requests?tab=quote" replace />} />
                     <Route path="/visits" element={<Navigate to="/requests?tab=visit" replace />} />
                     <Route path="/messages" element={<Navigate to="/conversations" replace />} />
-                    <Route path="/contact-messages" element={<ContactMessagesPage />} />
-                    <Route path="/conversations" element={<Conversations />} />
-                    <Route path="/users" element={<Users />} />
+                    <Route path="/contact-messages" element={guard(PERMISSIONS.SUPPORT_MANAGE, <ContactMessagesPage />)} />
+                    <Route path="/conversations" element={guard(PERMISSIONS.SUPPORT_MANAGE, <Conversations />)} />
+                    <Route path="/users" element={guard(PERMISSIONS.USERS_MANAGE, <Users />)} />
 
-                    <Route path="*" element={<Navigate to="/" replace />} />
+                    <Route path="*" element={<HomeFallback />} />
                   </Routes>
                 </MainLayout>
               </ProtectedRoute>

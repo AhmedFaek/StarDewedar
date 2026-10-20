@@ -26,7 +26,9 @@ export const HTTP_STATUS = {
 
 // User Roles
 export const USER_ROLES = {
-    ADMIN: 'admin',
+    SUPER_ADMIN: 'super_admin',
+    CATALOG_MANAGER: 'catalog_manager',
+    SALES_SUPPORT_MANAGER: 'sales_support_manager',
     CUSTOMER: 'customer',
 }
 

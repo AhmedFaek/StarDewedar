@@ -1,12 +1,16 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import LanguageSwitcher from '../ui/LanguageSwitcher'
 import { useTranslation } from 'react-i18next'
+import { getDecodedToken } from '../../utils/auth'
+import { canAccessPath } from '../../utils/permissions'
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const { t, i18n } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const isAr = i18n.language === 'ar'
+
+  const role = getDecodedToken()?.role
 
   const navItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: 'dashboard', path: '/' },
@@ -17,7 +21,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
     { id: 'conversations', label: t('sidebar.conversations'), icon: 'support_agent', path: '/conversations' },
     { id: 'contact-messages', label: t('sidebar.messages'), icon: 'chat', path: '/contact-messages' },
     { id: 'users', label: t('sidebar.users'), icon: 'group', path: '/users' },
-  ]
+  ].filter((item) => canAccessPath(role, item.path))
 
   const handleLogout = () => {
     // Clear tokens from localStorage

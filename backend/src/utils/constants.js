@@ -1,7 +1,16 @@
 export const ROLES = {
-    ADMIN: 'admin',
+    SUPER_ADMIN: 'super_admin',
+    CATALOG_MANAGER: 'catalog_manager',
+    SALES_SUPPORT_MANAGER: 'sales_support_manager',
     CUSTOMER: 'customer',
 }
+
+/** Every role that may sign in to the admin dashboard. */
+export const ADMIN_ROLES = [
+    ROLES.SUPER_ADMIN,
+    ROLES.CATALOG_MANAGER,
+    ROLES.SALES_SUPPORT_MANAGER,
+]
 
 // ─── Analytics ────────────────────────────────────────────────────────────────
 

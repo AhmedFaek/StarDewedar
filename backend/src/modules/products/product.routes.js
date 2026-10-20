@@ -2,12 +2,12 @@ import express from 'express'
 import * as controller from './product.controller.js'
 
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
+import { requirePermission } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import upload from '../../middleware/upload.middleware.js'
 
 import { createProductSchema, updateProductSchema } from './product.validation.js'
-import { ROLES } from '../../utils/constants.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
@@ -19,7 +19,7 @@ const router = express.Router()
 router.post(
     '/',
     auth,
-   requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.CATALOG_MANAGE),
     upload.fields([
         { name: 'images', maxCount: 5 },
         { name: 'catalog', maxCount: 1 },
@@ -44,7 +44,7 @@ router.get('/:id', validateUuidParam(), controller.getProductById)
 router.put(
     '/:id',
     auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.CATALOG_MANAGE),
     validateUuidParam(),
     validate(updateProductSchema),
     controller.updateProduct
@@ -56,7 +56,7 @@ router.put(
 router.delete(
     '/:id',
     auth,
-    requireRole(ROLES.ADMIN),
+    requirePermission(PERMISSIONS.CATALOG_MANAGE),
     validateUuidParam(),
     controller.deleteProduct
 )

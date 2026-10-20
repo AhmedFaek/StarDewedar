@@ -3,14 +3,14 @@ import * as controller from './category.controller.js'
 
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requireRole } from '../../middleware/roles.middleware.js'
+import { requirePermission } from '../../middleware/roles.middleware.js'
 
 import {
   createCategorySchema,
   updateCategorySchema,
 } from './category.validation.js'
 
-import { ROLES } from '../../utils/constants.js'
+import { PERMISSIONS } from '../../utils/permissions.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
@@ -31,7 +31,7 @@ router.get('/:id', validateUuidParam(), controller.getCategoryById)
 router.post(
   '/',
   auth,
-  requireRole(ROLES.ADMIN),
+  requirePermission(PERMISSIONS.CATALOG_MANAGE),
   validate(createCategorySchema),
   controller.createCategory
 )
@@ -42,7 +42,7 @@ router.post(
    router.put(
    '/:id',
    auth,
-   requireRole(ROLES.ADMIN),
+   requirePermission(PERMISSIONS.CATALOG_MANAGE),
    validateUuidParam(),
    validate(updateCategorySchema),
    controller.updateCategory
@@ -54,7 +54,7 @@ router.post(
 router.delete(
   '/:id',
   auth,
-  requireRole(ROLES.ADMIN),
+  requirePermission(PERMISSIONS.CATALOG_MANAGE),
   validateUuidParam(),
   controller.deleteCategory
 )

@@ -48,7 +48,7 @@ router.post('/heartbeat', heartbeatLimiter, validateHeartbeat, controller.heartb
 
 /* ─── Admin routes ───────────────────────────────────────────────────────── */
 // Mounted at /api/dashboard/analytics via dashboard router.
-// Auth + requireRole(ADMIN) is applied by the parent dashboard router — do NOT duplicate it here.
+// Auth + requirePermission(ANALYTICS_VIEW) is applied by the parent dashboard router — do NOT duplicate it here.
 
 const adminRouter = express.Router()
 
