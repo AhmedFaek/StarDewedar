@@ -131,13 +131,13 @@ export default function Request() {
         <section className="max-w-7xl mx-auto px-4 sm:px-8 mb-12 sm:mb-16">
           <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-end">
             <div>
-              <h1 className="font-headline font-black text-4xl sm:text-5xl md:text-6xl lg:text-7xl tracking-tighter text-on-surface leading-[0.9] mb-6 sm:mb-8">
+              <h1 className="font-headline font-black text-3xl sm:text-4xl md:text-5xl lg:text-6xl tracking-tight text-on-surface leading-tight mb-4 sm:mb-6">
                 {t('requestPage.heroTitle')}
               </h1>
-              <div className="h-1 w-20 sm:w-32 bg-tertiary-fixed mb-6 sm:mb-8" />
+              <div className="h-1 w-20 sm:w-32 bg-tertiary-fixed mb-4 sm:mb-6" />
             </div>
             <div className="pb-2 sm:pb-4">
-              <p className="text-secondary text-base sm:text-lg lg:text-xl leading-relaxed max-w-lg">
+              <p className="text-secondary text-sm sm:text-base lg:text-lg leading-relaxed max-w-lg">
                 {t('requestPage.heroDesc')}
               </p>
             </div>

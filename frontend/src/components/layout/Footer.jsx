@@ -61,7 +61,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="sm:col-span-2 lg:col-span-4 border-t border-outline-variant/40 pt-8 sm:pt-12 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
         <p className="text-on-surface-variant text-xs sm:text-sm font-body text-center md:text-left">
-          {t('footer.copyright')}
+          {t('footer.copyright', { year: new Date().getFullYear() })}
         </p>
         <div className="flex gap-6">
           <a className="text-on-surface-variant hover:text-primary transition-all" href="#">

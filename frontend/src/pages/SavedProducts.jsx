@@ -60,7 +60,7 @@ export default function SavedProducts() {
               style={{ fontVariationSettings: "'FILL' 1" }}>
               favorite
             </span>
-            <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter text-on-surface uppercase">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-headline font-black tracking-tight text-on-surface uppercase">
               {t('favourites.myFavourites')}
             </h1>
           </div>
@@ -136,7 +136,7 @@ export default function SavedProducts() {
                       <img
                         src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'}
                         alt={name}
-                        className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
                       {/* Favourite toggle — always visible since we're on the saved page */}
                       <div className="absolute top-3 right-3">

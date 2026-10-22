@@ -107,7 +107,7 @@ export default function SupportMessagesFloat() {
 
   return (
     <div
-      className={`fixed z-[199] w-[56px] h-[56px] pointer-events-none transition-[bottom] duration-300 ease-out
+      className={`fixed z-[199] w-[44px] h-[44px] pointer-events-none transition-[bottom] duration-300 ease-out
         ${isRTL ? 'left-4 sm:left-7' : 'right-4 sm:right-7'}`}
       style={{
         bottom: `${bottomOffset}px`,
@@ -119,36 +119,32 @@ export default function SupportMessagesFloat() {
           onClick={handleBubbleClick}
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
-          className={`pointer-events-auto absolute bottom-[68px] w-[270px] sm:w-[290px] bg-white rounded-2xl p-3.5 sm:p-4 shadow-[0_12px_36px_rgba(0,14,36,0.18)] border border-slate-100 cursor-pointer select-none transition-all duration-300 animate-bubble-pop-in group hover:shadow-[0_16px_40px_rgba(0,14,36,0.24)] hover:border-slate-200
+          className={`pointer-events-auto absolute bottom-[54px] w-[230px] sm:w-[245px] bg-white rounded-xl p-3 shadow-[0_10px_30px_rgba(0,14,36,0.16)] border border-slate-100 cursor-pointer select-none transition-all duration-300 animate-bubble-pop-in group hover:shadow-[0_14px_34px_rgba(0,14,36,0.22)] hover:border-slate-200
             ${isRTL ? 'left-0' : 'right-0'}`}
           role="alert"
           aria-live="polite"
         >
           {/* Arrow pointing to floating button */}
           <span
-            className={`absolute -bottom-1.5 w-3.5 h-3.5 bg-white border-b border-slate-100 transform rotate-45
-              ${isRTL ? 'left-[19px] border-l' : 'right-[19px] border-r'}`}
+            className={`absolute -bottom-1.5 w-3 h-3 bg-white border-b border-slate-100 transform rotate-45
+              ${isRTL ? 'left-[16px] border-l' : 'right-[16px] border-r'}`}
           />
 
           {/* Header: Agent Avatar + Support Title + Online Indicator + Close Button */}
-          <div className="flex items-center justify-between gap-2 mb-2">
-            <div className="flex items-center gap-2 min-w-0">
-              <div className="relative w-6 h-6 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
+          <div className="flex items-center justify-between gap-1.5 mb-1.5">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <div className="relative w-5 h-5 rounded-full bg-primary flex items-center justify-center text-white shrink-0">
                 <span
-                  className="material-symbols-outlined text-[15px] leading-none"
+                  className="material-symbols-outlined text-[13px] leading-none"
                   style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
                 >
                   support_agent
                 </span>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 ring-2 ring-white" />
+                <span className="absolute -bottom-0.5 -right-0.5 w-1.5 h-1.5 rounded-full bg-emerald-500 ring-1 ring-white" />
               </div>
               <div className="min-w-0">
-                <p className="text-[11px] font-headline font-bold text-slate-900 leading-tight truncate">
+                <p className="text-[10px] rtl:text-[10.5px] font-headline font-bold text-slate-900 leading-tight truncate">
                   {t('messages.supportTeam')}
-                </p>
-                <p className="text-[9px] text-emerald-600 font-semibold flex items-center gap-1 leading-tight">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse inline-block" />
-                  {t('messages.onlineNow')}
                 </p>
               </div>
             </div>
@@ -157,29 +153,29 @@ export default function SupportMessagesFloat() {
             <button
               id="dismiss-support-bubble-btn"
               onClick={handleDismiss}
-              className="text-slate-300 hover:text-slate-600 transition-colors p-1 -mr-1 -mt-1 rounded-full hover:bg-slate-50"
+              className="text-slate-300 hover:text-slate-600 transition-colors p-0.5 -mr-0.5 -mt-0.5 rounded-full hover:bg-slate-50"
               aria-label="Close"
               title="Dismiss"
             >
-              <span className="material-symbols-outlined text-[16px] leading-none block">close</span>
+              <span className="material-symbols-outlined text-[14px] leading-none block">close</span>
             </button>
           </div>
 
           {/* Greeting message text requested by user */}
-          <p className="text-[13px] text-slate-800 font-medium leading-snug font-body">
+          <p className="text-[11px] rtl:text-[10.5px] rtl:leading-relaxed text-slate-700 font-medium leading-snug font-body">
             {t('messages.greetingBubble')}
           </p>
 
           {/* Bottom call to action hint */}
-          <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-primary font-headline font-bold">
+          <div className="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[10px] rtl:text-[9.5px] text-primary font-headline font-bold">
             <span className="group-hover:underline flex items-center gap-1">
               {t('messages.startChatPrompt')}
-              <span className="material-symbols-outlined text-[13px] leading-none transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
+              <span className="material-symbols-outlined text-[11px] rtl:text-[11px] leading-none transition-transform group-hover:translate-x-0.5 rtl:group-hover:-translate-x-0.5">
                 {isRTL ? 'arrow_back' : 'arrow_forward'}
               </span>
             </span>
-            <span className="text-[10px] text-slate-400 font-normal font-mono">
-              24h reply
+            <span className="text-[9px] rtl:text-[9px] text-slate-400 font-normal font-mono">
+              {isRTL ? 'خلال 24 ساعة' : '24h reply'}
             </span>
           </div>
         </div>
@@ -192,7 +188,7 @@ export default function SupportMessagesFloat() {
         aria-label={t('messages.title')}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
-        className="pointer-events-auto relative flex items-center justify-center w-[56px] h-[56px] no-underline focus:outline-none"
+        className="pointer-events-auto relative flex items-center justify-center w-[44px] h-[44px] no-underline focus:outline-none"
       >
         {/* Animated radar pulse ring when attention triggers */}
         {isAnimating && (
@@ -206,22 +202,22 @@ export default function SupportMessagesFloat() {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '56px',
-            height: '56px',
+            width: '44px',
+            height: '44px',
             borderRadius: '50%',
             background: hovered ? '#145D94' : '#1B75BA',
             boxShadow: hovered
-              ? '0 8px 28px rgba(27,117,186,0.55)'
-              : '0 4px 18px rgba(27,117,186,0.38)',
-            border: '1.5px solid rgba(255,255,255,0.18)',
+              ? '0 6px 20px rgba(27,117,186,0.50)'
+              : '0 3px 14px rgba(27,117,186,0.35)',
+            border: '1px solid rgba(255,255,255,0.22)',
             transition: 'background 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease',
-            transform: hovered ? 'scale(1.08)' : 'scale(1)',
+            transform: hovered ? 'scale(1.06)' : 'scale(1)',
             flexShrink: 0,
             position: 'relative',
           }}
         >
           <span
-            className="material-symbols-outlined text-[28px] text-white select-none"
+            className="material-symbols-outlined text-[22px] text-white select-none"
             style={{ fontVariationSettings: "'FILL' 1, 'wght' 400" }}
             aria-hidden="true"
           >
@@ -230,10 +226,10 @@ export default function SupportMessagesFloat() {
 
           {/* Active online green badge */}
           <span
-            className={`absolute top-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-primary shadow-sm flex items-center justify-center
+            className={`absolute top-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border border-primary shadow-xs flex items-center justify-center
               ${isRTL ? 'left-0.5' : 'right-0.5'}`}
           >
-            <span className="w-1.5 h-1.5 bg-white rounded-full animate-ping" />
+            <span className="w-1 h-1 bg-white rounded-full animate-ping" />
           </span>
         </span>
       </Link>

@@ -15,9 +15,16 @@ import { useNotification } from '../../hooks/useNotification.js'
  *   className   {string}   — extra wrapper classes
  *   onLoginRequired {fn}  — called when guest taps the button (optional)
  */
-export default function FavouriteButton({ productId, size = 'md', className = '', onUnsaved }) {
+export default function FavouriteButton({
+  productId,
+  size = 'md',
+  className = '',
+  onUnsaved,
+  showLabel = false,
+  allowGuestPrompt = false,
+}) {
   const { t } = useTranslation()
-  const { showSuccess, showError } = useNotification()
+  const { showSuccess, showError, showWarning } = useNotification()
   const loggedIn = isLoggedIn()
 
   const [saved, setSaved] = useState(false)
@@ -39,11 +46,15 @@ export default function FavouriteButton({ productId, size = 'md', className = ''
       .finally(() => setChecked(true))
   }, [productId, loggedIn])
 
-  if (!loggedIn) return null
-  if (!checked) return null // don't flash until we know the state
+  if (!loggedIn && !allowGuestPrompt) return null
+  if (loggedIn && !checked) return null // don't flash until we know the state
 
   const handleToggle = async (e) => {
     e.stopPropagation()
+    if (!loggedIn) {
+      showWarning(t('favourites.loginDesc') || t('notifications.loginRequired'))
+      return
+    }
     if (loading) return
     const next = !saved
     setSaved(next) // optimistic
@@ -72,10 +83,10 @@ export default function FavouriteButton({ productId, size = 'md', className = ''
       aria-label={saved ? t('favourites.remove') : t('favourites.save')}
       title={saved ? t('favourites.remove') : t('favourites.save')}
       className={`
-        ${btnSize} flex items-center justify-center rounded-full
+        ${showLabel ? 'px-4 py-2.5' : btnSize} flex items-center justify-center rounded-full
         transition-all duration-200 disabled:opacity-60
         ${saved
-          ? 'bg-red-50 text-red-500 hover:bg-red-100'
+          ? 'bg-red-50 text-red-500 hover:bg-red-100 border border-red-200/60'
           : 'bg-white/80 backdrop-blur-sm text-slate-400 hover:text-red-400 hover:bg-red-50 shadow-sm border border-slate-200/60'}
         ${className}
       `}
@@ -92,6 +103,11 @@ export default function FavouriteButton({ productId, size = 'md', className = ''
       >
         favorite
       </span>
+      {showLabel && (
+        <span className="truncate">
+          {saved ? t('favourites.remove') : t('favourites.save')}
+        </span>
+      )}
     </button>
   )
 }

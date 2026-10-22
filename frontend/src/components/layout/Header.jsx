@@ -126,15 +126,15 @@ export default function Header() {
 
   // ── Shared button classes ─────────────────────────────────────────────────
 
-  const ctaBase = 'font-headline font-bold uppercase text-[10px] lg:text-xs px-4 py-2 tracking-widest transition-all border'
+  const ctaBase = 'font-headline font-bold uppercase text-[10px] lg:text-[11px] px-3.5 py-2 tracking-wider transition-all border focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none'
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 py-4 bg-slate-50/80 backdrop-blur-md z-50">
+      <header className="fixed top-0 left-0 w-full flex justify-between items-center px-4 sm:px-8 h-[60px] sm:h-[66px] bg-white border-b border-slate-100 shadow-[0_2px_10px_rgba(16,42,67,0.03)] z-50 transition-all">
         {/* Logo */}
         <button
           onClick={handleLogoClick}
-          className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded transition-opacity hover:opacity-90"
+          className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-none transition-opacity hover:opacity-90"
           aria-label="Star Dewedar Home"
         >
           <picture>
@@ -144,21 +144,21 @@ export default function Header() {
               alt="Star Dewedar"
               width={245}
               height={56}
-              className="h-10 sm:h-12 lg:h-14 w-auto object-contain"
+              className="h-8 sm:h-9 w-auto object-contain"
             />
           </picture>
         </button>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex space-x-6 rtl:space-x-reverse">
+        <nav className="hidden md:flex space-x-6 lg:space-x-8 rtl:space-x-reverse items-center">
           {navLinks.map((link) => (
             <a
               key={link.key}
               href={`#${link.key.toLowerCase()}`}
               onClick={() => handleNavClick(link.key)}
-              className={`font-headline tracking-tight font-bold uppercase text-sm transition-colors duration-300 pb-1 ${activeLink === link.key && !currentPage
+              className={`font-headline tracking-tight font-bold uppercase text-xs lg:text-[13px] transition-colors duration-200 pb-0.5 ${activeLink === link.key && !currentPage
                 ? 'text-primary border-b-2 border-primary'
-                : 'text-slate-600 border-b-2 border-transparent hover:text-primary'
+                : 'text-deep-blue/80 border-b-2 border-transparent hover:text-primary hover:border-primary/30'
                 }`}
             >
               {link.label}
@@ -171,7 +171,7 @@ export default function Header() {
           {/* Language Switcher */}
           <button
             onClick={toggleLanguage}
-            className="font-headline font-bold uppercase text-[10px] lg:text-xs px-3 py-2 tracking-widest transition-all border border-slate-300 text-slate-900 hover:bg-slate-100"
+            className="font-headline font-bold uppercase text-[10px] lg:text-[11px] px-2.5 py-1.5 tracking-wider transition-all border border-slate-200 text-deep-blue hover:bg-slate-50 hover:text-primary hover:border-primary/40 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none rounded-none"
             aria-label="Switch language"
           >
             {i18n.language === 'ar' ? 'EN' : 'AR'}
@@ -179,10 +179,10 @@ export default function Header() {
 
           <button
             onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
-            className={`${ctaBase} border-transparent ${path.startsWith('/request')
-              ? 'bg-primary-dark text-white hover:bg-primary'
-              : 'bg-primary text-white hover:bg-primary-dark'
-              }`}
+            className={`${ctaBase} ${path.startsWith('/request')
+              ? 'bg-primary-dark border-primary-dark text-white'
+              : 'bg-primary border-primary text-white hover:bg-primary-dark hover:border-primary-dark shadow-xs'
+              } rounded-none`}
           >
             {t('nav.request')}
           </button>
@@ -196,20 +196,20 @@ export default function Header() {
               aria-haspopup="menu"
               aria-expanded={userMenuOpen}
               title={user ? user.name : t('auth.login')}
-              className={`relative flex items-center justify-center w-9 h-9 rounded-full transition-all border ${
+              className={`relative flex items-center justify-center w-8 h-8 rounded-full transition-all border focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
                 user
                   ? 'bg-primary border-primary hover:bg-primary-dark'
-                  : 'bg-transparent border-slate-300 text-slate-600 hover:bg-slate-100'
+                  : 'bg-transparent border-slate-200 text-deep-blue hover:bg-slate-50 hover:border-primary hover:text-primary'
               }`}
             >
               {user ? (
-                <span className="text-white text-sm font-black leading-none">
+                <span className="text-white text-xs font-black leading-none">
                   {getUserInitials(user.name)}
                 </span>
               ) : (
-                <span className="material-symbols-outlined text-[20px] leading-none">person</span>
+                <span className="material-symbols-outlined text-[18px] leading-none">person</span>
               )}
-              <span className="material-symbols-outlined absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-white text-primary shadow-sm text-[14px] leading-none">
+              <span className="material-symbols-outlined absolute -bottom-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-white text-primary shadow-xs text-[12px] leading-none">
                 expand_more
               </span>
             </button>
@@ -311,7 +311,7 @@ export default function Header() {
         {/* Mobile Menu Button */}
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="md:hidden text-slate-950 hover:opacity-70 transition-opacity"
+          className="md:hidden text-deep-blue hover:text-primary transition-colors p-1.5 focus-visible:ring-2 focus-visible:ring-primary rounded-none"
           aria-label="Toggle menu"
         >
           <span className="material-symbols-outlined text-2xl">
@@ -321,7 +321,7 @@ export default function Header() {
 
         {/* Mobile Menu Overlay */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-slate-50 shadow-lg md:hidden border-b border-slate-200">
+          <div className="absolute top-full left-0 right-0 bg-white shadow-xl md:hidden border-b border-slate-100 animate-fadeIn">
             <div className="px-4 py-4 space-y-3">
               {navLinks.map((link) => (
                 <a
@@ -330,7 +330,7 @@ export default function Header() {
                   onClick={() => handleNavClick(link.key)}
                   className={`block py-2 font-headline font-bold uppercase text-sm transition-colors ${activeLink === link.key && !currentPage
                     ? 'text-primary'
-                    : 'text-slate-600 hover:text-primary'
+                    : 'text-deep-blue hover:text-primary'
                     }`}
                 >
                   {link.label}
@@ -341,14 +341,14 @@ export default function Header() {
                 {/* Mobile Language Switcher */}
                 <button
                   onClick={toggleLanguage}
-                  className="w-full text-left py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all bg-slate-200 text-slate-900"
+                  className="w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all bg-slate-100 text-deep-blue hover:bg-slate-200 rounded-none"
                 >
                   {i18n.language === 'ar' ? 'English' : 'العربية'}
                 </button>
                 <button
                   onClick={() => { setMobileMenuOpen(false); navigate('/request') }}
-                  className={`w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${path.startsWith('/request') ? 'bg-primary-dark text-white' : 'bg-primary text-white'
-                    }`}
+                  className={`w-full text-left rtl:text-right py-3 px-4 font-headline font-bold uppercase text-xs tracking-widest transition-all ${path.startsWith('/request') ? 'bg-primary-dark text-white' : 'bg-primary text-white hover:bg-primary-dark'
+                    } rounded-none shadow-xs`}
                 >
                   {t('nav.request')}
                 </button>

@@ -187,12 +187,12 @@ export default function Contact() {
                 <span className="inline-block px-3 py-1 bg-primary text-white text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
                   {t('contact.badge')}
                 </span>
-                <h1 className="text-5xl md:text-7xl font-headline font-black tracking-tighter leading-none text-on-surface uppercase">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-headline font-black tracking-tight leading-tight text-on-surface uppercase">
                   {t('contact.heroTitle1')}<br />{t('contact.heroTitle2')}
                 </h1>
               </div>
               <div className="pb-2">
-                <p className="text-xl text-secondary max-w-md leading-relaxed">{t('contact.heroDesc')}</p>
+                <p className="text-sm sm:text-base lg:text-lg text-secondary max-w-md leading-relaxed">{t('contact.heroDesc')}</p>
               </div>
             </div>
           </div>

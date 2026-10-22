@@ -20,11 +20,11 @@ export default function Home() {
     const isAr = lang === 'ar'
     setPageMeta({
       title: isAr
-        ? 'ستار ديودار | حلول كهربائية وهندسة'
-        : 'Star Dewedar | Electrical Solutions & Engineering',
+        ? 'ستار ديودار | مقاولات عامة وأعمال هندسية'
+        : 'Star Dewedar | General Contracting & Engineering',
       description: isAr
-        ? 'شركة ستار ديودار متخصصة في توريد وتركيب معدات الجهد المنخفض الكهربائية للمشاريع الصناعية والتجارية في مصر. لوحات توزيع، أنظمة تحكم، وتركيبات كهربائية.'
-        : 'Star Dewedar Co. specializes in supplying and installing low-voltage electrical equipment for industrial and commercial projects in Egypt. Panels, switchgear, control systems, and full installation.',
+        ? 'شركة ستار ديودار للمقاولات العامة والأعمال الهندسية — رائدة في المقاولات المدنية، تنفيذ المشروعات المتكاملة، والأنظمة الكهربائية للمشروعات الصناعية والتجارية.'
+        : 'Star Dewedar is a general contracting and engineering company delivering civil contracting, turnkey project execution, and specialized electrical systems for industrial and commercial projects.',
       canonical: buildUrl('/'),
       ogType: 'website',
       lang,

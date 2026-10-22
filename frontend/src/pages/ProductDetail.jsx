@@ -191,97 +191,144 @@ export default function ProductDetail() {
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
       <Header />
       <main className="flex-grow pt-32 pb-20 px-4 sm:px-8 max-w-screen-2xl mx-auto w-full">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start mb-20">
+          {/* Main Visuals Column */}
           <div className="lg:col-span-7 grid grid-cols-6 gap-4">
             <div
-              className="col-span-6 bg-surface-container-low aspect-[16/10] relative overflow-hidden cursor-crosshair group border border-outline-variant/10"
+              className="col-span-6 bg-white aspect-[16/10] relative overflow-hidden cursor-crosshair group border border-slate-200/80 shadow-xs p-6 sm:p-8 flex items-center justify-center"
               onMouseEnter={handleMouseEnter}
               onMouseMove={handleMouseMove}
               onMouseLeave={() => setShowMagnifier(false)}
             >
-              <img alt={name} className="w-full h-full object-cover" src={activeImage || 'https://via.placeholder.com/800x500'} />
+              <img
+                alt={name}
+                className="w-full h-full object-contain select-none"
+                src={activeImage || 'https://via.placeholder.com/800x500'}
+              />
               {showMagnifier && (
                 <div
                   style={{
                     position: 'absolute',
                     pointerEvents: 'none',
-                    height: '250px',
-                    width: '250px',
-                    top: `${coords.y - 125}px`,
-                    left: `${coords.x - 125}px`,
+                    height: '240px',
+                    width: '240px',
+                    top: `${coords.y - 120}px`,
+                    left: `${coords.x - 120}px`,
                     backgroundImage: `url('${activeImage}')`,
                     backgroundRepeat: 'no-repeat',
-                    backgroundSize: `${imgSize.width * 2.5}px ${imgSize.height * 2.5}px`,
-                    backgroundPosition: `${-coords.x * 2.5 + 125}px ${-coords.y * 2.5 + 125}px`,
-                    border: '1px solid rgba(255,255,255,0.2)',
-                    boxShadow: '0 20px 50px rgba(0,0,0,0.5)',
+                    backgroundSize: `${imgSize.width * 2}px ${imgSize.height * 2}px`,
+                    backgroundPosition: `${-coords.x * 2 + 120}px ${-coords.y * 2 + 120}px`,
+                    border: '1px solid rgba(27,117,186,0.3)',
+                    boxShadow: '0 12px 36px rgba(0,0,0,0.22)',
                     borderRadius: '2px',
+                    backgroundColor: '#fff',
                     zIndex: 10,
                   }}
                 />
               )}
             </div>
-            <div className="col-span-6 flex flex-wrap gap-4">
-              {allImages.map((image, idx) => (
-                <button
-                  key={idx}
-                  className={`w-20 h-20 bg-surface-container-low overflow-hidden border-2 transition-all ${
-                    activeImage === image ? 'border-primary' : 'border-transparent opacity-60 hover:opacity-100'
-                  }`}
-                  onClick={() => setActiveImage(image)}
-                >
-                  <img src={image} alt={`Thumb ${idx}`} className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
+
+            {/* Thumbnails */}
+            {allImages.length > 1 && (
+              <div className="col-span-6 flex flex-wrap gap-3">
+                {allImages.map((image, idx) => (
+                  <button
+                    key={idx}
+                    className={`w-16 h-16 sm:w-20 sm:h-20 bg-white p-1.5 overflow-hidden border transition-all ${
+                      activeImage === image
+                        ? 'border-primary ring-1 ring-primary/30 shadow-xs'
+                        : 'border-slate-200/80 opacity-70 hover:opacity-100 hover:border-slate-300'
+                    }`}
+                    onClick={() => setActiveImage(image)}
+                  >
+                    <img src={image} alt={`Thumb ${idx}`} className="w-full h-full object-contain" />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="lg:col-span-5 space-y-10 lg:sticky lg:top-32">
-            <div className="space-y-4">
-              <span className="inline-block bg-primary/10 text-primary px-3 py-1 font-label text-[10px] font-bold tracking-[0.2em] uppercase">
-                {categoryName}
-              </span>
-              <h1 className="text-4xl md:text-5xl font-headline font-black tracking-tighter leading-none text-on-surface uppercase italic">
+          {/* Details & Actions Column */}
+          <div className="lg:col-span-5 space-y-8 lg:sticky lg:top-32">
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <span className="inline-flex items-center bg-primary/10 text-primary px-3 py-1 font-label text-[10px] font-bold tracking-[0.2em] uppercase leading-none">
+                  {categoryName}
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-[1.85rem] font-headline font-black tracking-tight leading-snug text-deep-blue uppercase">
                 {name}
               </h1>
-              <p className="text-secondary/80 leading-relaxed font-body text-lg max-w-xl">{description}</p>
+              <p className="text-slate-600 leading-relaxed font-body text-sm sm:text-base max-w-xl">
+                {description}
+              </p>
             </div>
-            <div className="space-y-6">
+
+            <div className="space-y-6 pt-1 border-t border-slate-100">
               <div>
-                <p className="text-tertiary font-label text-[14px] tracking-widest uppercase font-black mb-1">{t('productDetail.pricePoint')}</p>
-                <p className="text-4xl font-headline font-black text-on-surface">
-                  EGP {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
+                <p className="text-slate-400 font-label text-[11px] tracking-widest uppercase font-bold mb-1.5">
+                  {t('productDetail.pricePoint')}
                 </p>
-              </div>
-              <div className="flex flex-col gap-3">
-                <button onClick={() => navigate(`/request-quote?productId=${product.id}`)} className="w-full bg-primary text-white py-5 text-xs font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-primary/90 transition-all">
-                  {t('productDetail.requestQuote')}
-                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
-                </button>
-
-                <button
-                  onClick={handleCompareClick}
-                  className={`w-full py-4 text-[10px] font-headline font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 border transition-all ${
-                    isInCompare(product.id)
-                      ? 'bg-primary/10 border-primary text-primary'
-                      : 'border-outline-variant text-secondary hover:border-primary hover:text-primary hover:bg-surface-container-high'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-l">
-                    {isInCompare(product.id) ? 'check_circle' : 'compare_arrows'}
+                <div className="flex items-baseline gap-2">
+                  <span className="text-xs sm:text-sm font-bold text-slate-500 font-headline uppercase tracking-wider">
+                    {i18n.language === 'ar' ? 'ج.م' : 'EGP'}
                   </span>
-                  {isInCompare(product.id) ? t('compare.button.alreadyIn') : t('compare.button.add')}
+                  <span className="text-2xl sm:text-3xl font-headline font-black text-deep-blue tracking-tight">
+                    {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Action Buttons Consolidated */}
+              <div className="flex flex-col gap-2.5">
+                {/* Primary CTA: Request a Quote */}
+                <button
+                  onClick={() => navigate(`/request-quote?productId=${product.id}`)}
+                  className="w-full bg-primary text-white py-3.5 px-6 text-xs font-headline font-bold uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-primary-dark shadow-xs transition-all group"
+                >
+                  <span>{t('productDetail.requestQuote')}</span>
+                  <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180">
+                    arrow_forward
+                  </span>
                 </button>
 
-                <FavouriteButton
-                  productId={product.id}
-                  size="md"
-                  className="!w-full !h-auto !rounded-none py-4 px-6 border border-outline-variant !bg-transparent hover:!bg-surface-container-high text-sm font-headline font-bold uppercase tracking-widest gap-3 flex-row"
-                />
+                {/* Secondary Actions Side-by-Side: Compare & Favorite */}
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={handleCompareClick}
+                    className={`w-full py-3 px-3 text-[11px] font-headline font-bold uppercase tracking-wider flex items-center justify-center gap-2 border transition-all ${
+                      isInCompare(product.id)
+                        ? 'bg-primary/10 border-primary text-primary shadow-xs'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-primary hover:text-primary hover:bg-slate-50'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      {isInCompare(product.id) ? 'check_circle' : 'compare_arrows'}
+                    </span>
+                    <span className="truncate">
+                      {isInCompare(product.id) ? t('compare.button.alreadyIn') : t('compare.button.add')}
+                    </span>
+                  </button>
+
+                  <FavouriteButton
+                    productId={product.id}
+                    size="sm"
+                    showLabel={true}
+                    allowGuestPrompt={true}
+                    className="!w-full !h-auto !rounded-none py-3 px-3 border border-slate-200 !bg-white hover:!bg-slate-50 text-slate-700 hover:text-red-500 font-headline text-[11px] font-bold uppercase tracking-wider gap-2 flex-row transition-all shadow-none"
+                  />
+                </div>
+
+                {/* Datasheet Download */}
                 {product.catalogs?.[0] && (
-                  <a href={product.catalogs[0].file_url} target="_blank" rel="noopener noreferrer" className="w-full border border-outline-variant text-primary py-4 text-[10px] font-headline font-bold uppercase tracking-[0.15em] flex items-center justify-center gap-3 hover:bg-surface-container-high transition-all">
+                  <a
+                    href={product.catalogs[0].file_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full border border-slate-200 bg-white text-slate-700 hover:text-primary hover:border-primary hover:bg-slate-50 py-2.5 px-4 text-[11px] font-headline font-bold uppercase tracking-wider flex items-center justify-center gap-2 transition-all mt-0.5"
+                  >
                     <span className="material-symbols-outlined text-base">download</span>
-                    {t('productDetail.dataSheet')}
+                    <span>{t('productDetail.dataSheet')}</span>
                   </a>
                 )}
               </div>
@@ -290,23 +337,46 @@ export default function ProductDetail() {
         </div>
 
         {relatedProducts.length > 0 && (
-          <section className="pt-20 border-t border-outline-variant/15">
-            <h2 className="text-3xl font-headline font-black text-on-surface uppercase italic mb-12">{t('productDetail.relatedProducts')}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <section className="pt-16 border-t border-slate-200/80">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <p className="text-[11px] font-bold tracking-widest uppercase text-primary font-label mb-1">
+                  {i18n.language === 'ar' ? 'تشكيلة مماثلة' : 'Engineered Systems'}
+                </p>
+                <h2 className="text-2xl font-headline font-black text-deep-blue uppercase tracking-tight">
+                  {t('productDetail.relatedProducts')}
+                </h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {relatedProducts.map((item) => (
-                <div key={item.id} onClick={() => navigateToProduct(item.id)} className="group cursor-pointer">
-                  <div className="aspect-[4/3] bg-surface-container-low overflow-hidden mb-5 border border-outline-variant/10">
-                    <img src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} alt={i18n.language === 'ar' ? item.name_ar : item.name_en} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700" />
+                <div
+                  key={item.id}
+                  onClick={() => navigateToProduct(item.id)}
+                  className="group cursor-pointer bg-white border border-slate-200/80 p-4 transition-all duration-300 hover:shadow-md hover:border-primary/40 flex flex-col"
+                >
+                  <div className="aspect-[4/3] bg-slate-50 overflow-hidden mb-4 p-4 flex items-center justify-center">
+                    <img
+                      src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'}
+                      alt={i18n.language === 'ar' ? item.name_ar : item.name_en}
+                      loading="lazy"
+                      className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                  <p className="text-[9px] font-bold tracking-widest uppercase text-tertiary mb-1">
+                  <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-1 font-label">
                     {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
                   </p>
-                  <h3 className="text-lg font-headline font-bold text-on-surface leading-tight group-hover:text-primary transition-colors uppercase">
+                  <h3 className="text-sm font-headline font-bold text-deep-blue leading-snug group-hover:text-primary transition-colors uppercase line-clamp-2 min-h-[2.5rem]">
                     {i18n.language === 'ar' ? item.name_ar : item.name_en}
                   </h3>
-                  <p className="text-sm font-body mt-2 text-secondary font-bold">
-                    EGP {item.price ? Number(item.price).toLocaleString('en-EG') : 'N/A'}
-                  </p>
+                  <div className="mt-3 pt-3 border-t border-slate-100 flex items-baseline gap-1.5">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase">
+                      {i18n.language === 'ar' ? 'ج.م' : 'EGP'}
+                    </span>
+                    <span className="text-sm font-headline font-black text-deep-blue">
+                      {item.price ? Number(item.price).toLocaleString('en-EG') : 'N/A'}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>
@@ -317,3 +387,4 @@ export default function ProductDetail() {
     </div>
   )
 }
+

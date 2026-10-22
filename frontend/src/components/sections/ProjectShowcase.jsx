@@ -64,7 +64,7 @@ export default function ProjectShowcase() {
   return (
     <section className="bg-surface py-16 md:py-24">
       <div className="container mx-auto px-4 sm:px-8">
-        <h2 className="font-headline text-4xl sm:text-5xl md:text-7xl font-bold tracking-tighter text-on-surface mb-12 md:mb-16 uppercase">
+        <h2 className="font-headline text-xl sm:text-2xl md:text-3xl lg:text-[2rem] font-bold tracking-tight leading-snug text-deep-blue mb-6 sm:mb-10 uppercase">
           {t('projectShowcase.title1')} <br />
           {t('projectShowcase.title2')}
         </h2>
