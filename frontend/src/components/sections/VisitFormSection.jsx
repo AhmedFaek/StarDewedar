@@ -15,6 +15,7 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SubmitButton from '../forms/SubmitButton'
 import TurnstileWidget from '../forms/TurnstileWidget'
+import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
@@ -134,85 +135,172 @@ export default function VisitFormSection({ visible = true }) {
   const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
-    <div className={visible ? '' : 'hidden'} aria-hidden={!visible}>
-      <div className="bg-surface-container-low grid md:grid-cols-12 gap-0 overflow-hidden rounded-lg">
-        <div className="md:col-span-4 relative h-48 md:h-full min-h-[400px]">
-          <img
-            alt="Industrial Infrastructure"
-            className="absolute inset-0 w-full h-full object-cover"
-            src="/images/visit_hero.webp"
-          />
-          <div className="absolute inset-0 bg-primary/40" />
-        </div>
-
-        <div className="md:col-span-8 p-6 sm:p-8 md:p-12 lg:p-16 bg-white">
-          <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12">
-            {/* Section 1 — Facility Information */}
-            <div>
-              <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">01</span>
-                <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section1Title')}</h2>
-              </div>
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-                <InputField label={t('requestVisit.factoryName')} placeholder={t('requestVisit.factoryNamePlaceholder')} name="factory_name" value={formData.factory_name} onChange={handleChange} required />
-                <InputField label={t('requestVisit.factoryActivity')} placeholder={t('requestVisit.factoryActivityPlaceholder')} name="factory_activity" value={formData.factory_activity} onChange={handleChange} required />
-              </div>
+    <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
+      <div className="bg-white p-6 sm:p-8 lg:p-10">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
+          {/* Section 1 — Facility Information */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                01
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
+                {t('requestVisit.section1Title')}
+              </h3>
             </div>
-
-            {/* Section 2 — Contact Information */}
-            <div>
-              <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">02</span>
-                <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section2Title')}</h2>
-              </div>
-              <div className="grid md:grid-cols-2 gap-6 sm:gap-8">
-                <InputField label={t('requestVisit.firstName')} placeholder="" name="name" value={formData.name} onChange={handleChange} required />
-                <InputField label={t('requestVisit.phoneNumber')} type="tel" placeholder="" name="phone_number" value={formData.phone_number} onChange={handleChange} required />
-                <InputField label={t('requestVisit.whatsappNumber')} type="tel" placeholder="" name="whatsapp_number" value={formData.whatsapp_number} onChange={handleChange} />
-                <InputField label={t('requestVisit.emailAddress')} type="email" placeholder="" name="email" value={formData.email} onChange={handleChange} required />
-              </div>
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+              <InputField
+                label={t('requestVisit.factoryName')}
+                placeholder={t('requestVisit.factoryNamePlaceholder')}
+                name="factory_name"
+                value={formData.factory_name}
+                onChange={handleChange}
+                required
+                variant="bordered"
+              />
+              <InputField
+                label={t('requestVisit.factoryActivity')}
+                placeholder={t('requestVisit.factoryActivityPlaceholder')}
+                name="factory_activity"
+                value={formData.factory_activity}
+                onChange={handleChange}
+                required
+                variant="bordered"
+              />
             </div>
+          </div>
 
-            {/* Section 3 — Visit Details */}
-            <div>
-              <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-                <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">03</span>
-                <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('requestVisit.section3Title')}</h2>
-              </div>
-              <div className="space-y-6 sm:space-y-8">
-                <InputField label={t('requestVisit.physicalAddress')} placeholder="" name="address" value={formData.address} onChange={handleChange} required />
-                <InputField label={t('requestVisit.preferredDate')} type="date" name="preferred_date" value={formData.preferred_date} onChange={handleChange} required />
-                <TextAreaField label={t('requestVisit.technicalDetails')} placeholder={t('requestVisit.technicalDetailsPlaceholder')} name="details" value={formData.details} onChange={handleChange} rows={4} required />
-                <FileUploadField key={fileUploadKey} label={t('requestVisit.fileUpload')} name="file" onChange={handleFileChange} />
-              </div>
+          {/* Section 2 — Contact Information */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                02
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
+                {t('requestVisit.section2Title')}
+              </h3>
             </div>
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+              <InputField
+                label={t('requestVisit.firstName')}
+                placeholder="Ahmed Khaled"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                variant="bordered"
+              />
+              <InputField
+                label={t('requestVisit.phoneNumber')}
+                type="tel"
+                placeholder="(+20) 01234567890"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                required
+                variant="bordered"
+              />
+              <InputField
+                label={t('requestVisit.whatsappNumber')}
+                type="tel"
+                placeholder="(+20) 01012345678"
+                name="whatsapp_number"
+                value={formData.whatsapp_number}
+                onChange={handleChange}
+                variant="bordered"
+              />
+              <InputField
+                label={t('requestVisit.emailAddress')}
+                type="email"
+                placeholder="name@company.com"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                variant="bordered"
+              />
+            </div>
+          </div>
 
-            {/* Turnstile + Submit */}
-            <div className="pt-6 sm:pt-8 space-y-6">
-              <div className="space-y-2">
-                <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.2em] text-primary">
-                  {t('turnstile.verifyPrompt')}
-                </p>
-                <TurnstileWidget
-                  ref={turnstileRef}
-                  onVerify={(token) => setTurnstileToken(token)}
-                  onExpire={() => setTurnstileToken(null)}
-                  onError={() => setTurnstileToken(null)}
+          {/* Section 3 — Visit Details */}
+          <div>
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                03
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
+                {t('requestVisit.section3Title')}
+              </h3>
+            </div>
+            <div className="space-y-4 sm:space-y-5">
+              <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
+                <InputField
+                  label={t('requestVisit.physicalAddress')}
+                  placeholder="Cairo / Alexandria Desert Road..."
+                  name="address"
+                  value={formData.address}
+                  onChange={handleChange}
+                  required
+                  variant="bordered"
+                />
+                <InputField
+                  label={t('requestVisit.preferredDate')}
+                  type="date"
+                  name="preferred_date"
+                  value={formData.preferred_date}
+                  onChange={handleChange}
+                  required
+                  variant="bordered"
                 />
               </div>
+              <TextAreaField
+                label={t('requestVisit.technicalDetails')}
+                placeholder={t('requestVisit.technicalDetailsPlaceholder')}
+                name="details"
+                value={formData.details}
+                onChange={handleChange}
+                rows={3}
+                required
+              />
+              <FileUploadField
+                key={fileUploadKey}
+                label={t('requestVisit.fileUpload')}
+                name="file"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
 
+          {/* Turnstile + Submit */}
+          <div className="pt-2 space-y-4">
+            <div className="space-y-1.5">
+              <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
+                {t('turnstile.verifyPrompt')}
+              </p>
+              <TurnstileWidget
+                ref={turnstileRef}
+                onVerify={(token) => setTurnstileToken(token)}
+                onExpire={() => setTurnstileToken(null)}
+                onError={() => setTurnstileToken(null)}
+              />
+            </div>
+
+            <div className="pt-2">
               <SubmitButton
                 loading={isSubmitting}
                 loadingText={t('requestQuote.submitting')}
                 disabled={isSubmitDisabled}
-                className="w-full py-4 sm:py-6 bg-gradient-to-r from-primary to-primary-container text-white font-headline font-black text-lg sm:text-xl tracking-tighter transition-transform active:scale-[0.98] hover:shadow-lg flex justify-between items-center px-6 sm:px-8 group disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto h-11 sm:h-12 px-7 sm:px-8 rounded-xl bg-primary hover:bg-primary-dark text-white font-headline font-bold uppercase tracking-wider text-xs sm:text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2.5 group disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <span>{t('requestVisit.submitButton')}</span>
-                <span className="material-symbols-outlined text-xl sm:text-2xl rtl:rotate-180 group-hover:translate-x-2 rtl:group-hover:-translate-x-2 transition-transform">arrow_forward</span>
+                <Icon
+                  icon="arrow_forward"
+                  className="text-base transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1"
+                />
               </SubmitButton>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   )

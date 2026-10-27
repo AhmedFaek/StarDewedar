@@ -229,18 +229,20 @@ export default function BOQFormSection({ visible = true }) {
 
   return (
     <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
-      <div className="bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16">
-        <form onSubmit={handleSubmit} className="space-y-10 sm:space-y-12 max-w-3xl">
+      <div className="bg-white p-6 sm:p-8 lg:p-10">
+        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
 
           {/* ─── Section 1: Customer Information ─────────────────────────── */}
           <div>
-            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">01</span>
-              <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                01
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
                 {t('requestBOQ.section1Title')}
-              </h2>
+              </h3>
             </div>
-            <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
               <InputField
                 label={t('requestBOQ.fullName')}
                 name="name"
@@ -248,6 +250,7 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.name}
+                variant="bordered"
               />
               <InputField
                 label={t('requestBOQ.companyName')}
@@ -256,6 +259,7 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.company_name}
+                variant="bordered"
               />
               <InputField
                 label={t('requestBOQ.emailAddress')}
@@ -265,6 +269,7 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.email}
+                variant="bordered"
               />
               <InputField
                 label={t('requestBOQ.phoneNumber')}
@@ -274,19 +279,22 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.phone}
+                variant="bordered"
               />
             </div>
           </div>
 
           {/* ─── Section 2: Project Information ──────────────────────────── */}
           <div>
-            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">02</span>
-              <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                02
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
                 {t('requestBOQ.section2Title')}
-              </h2>
+              </h3>
             </div>
-            <div className="grid sm:grid-cols-2 gap-6 sm:gap-8">
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-5">
               <InputField
                 label={t('requestBOQ.projectName')}
                 name="project_name"
@@ -294,6 +302,7 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.project_name}
+                variant="bordered"
               />
               <InputField
                 label={t('requestBOQ.projectLocation')}
@@ -302,6 +311,7 @@ export default function BOQFormSection({ visible = true }) {
                 onChange={handleChange}
                 required
                 error={errors.project_location}
+                variant="bordered"
               />
               <div className="sm:col-span-2">
                 <SelectField
@@ -313,108 +323,116 @@ export default function BOQFormSection({ visible = true }) {
                   placeholder={t('requestBOQ.projectTypePlaceholder')}
                   error={errors.project_type}
                 />
-                {errors.project_type && (
-                  <p className="mt-1 text-xs text-red-500 font-medium">{errors.project_type}</p>
-                )}
               </div>
             </div>
           </div>
 
           {/* ─── Section 3: BOQ & Supporting Documents ────────────────────── */}
           <div>
-            <div className="flex items-center gap-3 sm:gap-4 mb-6 sm:mb-8">
-              <span className="bg-primary text-white font-headline px-2 sm:px-3 py-1 text-xs sm:text-sm font-bold">03</span>
-              <h2 className="font-label text-[9px] sm:text-xs font-bold uppercase tracking-[0.2em] text-primary">
+            <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
+              <span className="w-6 h-6 rounded-lg bg-primary/10 text-primary font-headline text-xs font-bold flex items-center justify-center">
+                03
+              </span>
+              <h3 className="font-headline text-xs sm:text-sm font-bold uppercase tracking-wider text-deep-blue">
                 {t('requestBOQ.section3Title')}
-              </h2>
+              </h3>
             </div>
-            <div className="space-y-6 sm:space-y-8">
-              {/* BOQ File — Required */}
-              <div className="flex flex-col">
-                <label className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary mb-2 sm:mb-3">
-                  {t('requestBOQ.boqFile')} <span className="text-red-500">*</span>
-                </label>
-                <div className="relative group">
-                  <input
-                    key={boqUploadKey}
-                    type="file"
-                    name="boq_file"
-                    accept={BOQ_ACCEPT}
-                    onChange={handleBOQFileChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    aria-label={t('requestBOQ.boqFile')}
-                    aria-required="true"
-                  />
-                  <div className={`border-2 border-dashed bg-surface-container-low p-6 sm:p-8 flex flex-col items-center justify-center transition-all group-hover:bg-surface-variant ${
-                    (boqFileError || errors.boq_file)
-                      ? 'border-red-400 group-hover:border-red-500'
-                      : 'border-outline-variant group-hover:border-primary'
-                  }`}>
-                    <Icon icon="upload_file" className="text-3xl sm:text-4xl text-secondary group-hover:text-primary mb-2" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-secondary text-center">
-                      {t('requestBOQ.boqFileDesc')}
-                    </p>
-                    <p className="text-[9px] sm:text-[10px] text-secondary/60 mt-1">
-                      {t('fileValidation.boqAllowedTypes')}
-                    </p>
-                  </div>
-                </div>
-                {boqFileName && !boqFileError && (
-                  <p className="mt-2 text-xs font-semibold text-green-600 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">check_circle</span>
-                    {boqFileName}
-                  </p>
-                )}
-                {(boqFileError || errors.boq_file) && (
-                  <p className="mt-2 text-xs text-red-500 font-medium flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">error</span>
-                    {boqFileError || errors.boq_file}
-                  </p>
-                )}
-              </div>
-
-              {/* Supporting Documents — Optional */}
-              <div className="flex flex-col">
-                <label className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary mb-2 sm:mb-3">
-                  {t('requestBOQ.supportingDocs')}
-                </label>
-                <div className="relative group">
-                  <input
-                    key={supportingUploadKey}
-                    type="file"
-                    name="supporting_docs"
-                    accept={BOQ_ACCEPT}
-                    multiple
-                    onChange={handleSupportingFilesChange}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                    aria-label={t('requestBOQ.supportingDocs')}
-                  />
-                  <div className="border-2 border-dashed bg-surface-container-low p-6 sm:p-8 flex flex-col items-center justify-center transition-all group-hover:bg-surface-variant border-outline-variant group-hover:border-primary">
-                    <Icon icon="folder_open" className="text-3xl sm:text-4xl text-secondary group-hover:text-primary mb-2" />
-                    <p className="text-xs font-bold uppercase tracking-widest text-secondary text-center">
-                      {t('requestBOQ.supportingDocsDesc')}
-                    </p>
-                    <p className="text-[9px] sm:text-[10px] text-secondary/60 mt-1">
-                      {t('fileValidation.boqAllowedTypes')}
-                    </p>
-                  </div>
-                </div>
-                {supportingFiles.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {supportingFiles.map((f, i) => (
-                      <p key={i} className="text-xs font-semibold text-green-600 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-sm">check_circle</span>
-                        {f.name}
+            <div className="space-y-4 sm:space-y-5">
+              {/* Dual-column File Upload Zone */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                {/* BOQ File — Required */}
+                <div className="flex flex-col">
+                  <label className="font-headline font-bold uppercase text-[11px] sm:text-xs rtl:text-[11px] rtl:font-semibold tracking-wider text-slate-700 mb-1.5 flex items-center justify-between">
+                    <span>
+                      {t('requestBOQ.boqFile')} <span className="text-red-500">*</span>
+                    </span>
+                  </label>
+                  <div className="relative group flex-1">
+                    <input
+                      key={boqUploadKey}
+                      type="file"
+                      name="boq_file"
+                      accept={BOQ_ACCEPT}
+                      onChange={handleBOQFileChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      aria-label={t('requestBOQ.boqFile')}
+                      aria-required="true"
+                    />
+                    <div className={`h-full min-h-[120px] rounded-xl border-2 border-dashed p-4 flex flex-col items-center justify-center text-center transition-all ${
+                      (boqFileError || errors.boq_file)
+                        ? 'border-red-300 bg-red-50/30 group-hover:border-red-400'
+                        : 'border-slate-200 bg-slate-50/60 group-hover:border-primary group-hover:bg-primary/5'
+                    }`}>
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform">
+                        <Icon icon="upload_file" className="text-lg" />
+                      </div>
+                      <p className="text-xs rtl:text-[11px] sm:rtl:text-[11.5px] font-headline font-bold rtl:font-medium uppercase tracking-wider text-deep-blue leading-relaxed">
+                        {t('requestBOQ.boqFileDesc')}
                       </p>
-                    ))}
+                      <p className="text-[10px] rtl:text-[9.5px] text-slate-400 mt-0.5 font-body leading-normal">
+                        {t('fileValidation.boqAllowedTypes')}
+                      </p>
+                    </div>
                   </div>
-                )}
-                {supportingFileErrors.map((err, i) => (
-                  <p key={i} className="mt-1 text-xs text-red-500 font-medium flex items-center gap-1">
-                    <span className="material-symbols-outlined text-sm">error</span>
-                    {err}
-                  </p>
-                ))}
+                  {boqFileName && !boqFileError && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium self-start">
+                      <span className="material-symbols-outlined text-sm">check_circle</span>
+                      <span className="truncate max-w-xs">{boqFileName}</span>
+                    </div>
+                  )}
+                  {(boqFileError || errors.boq_file) && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-medium self-start">
+                      <span className="material-symbols-outlined text-sm">error</span>
+                      <span>{boqFileError || errors.boq_file}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Supporting Documents — Optional */}
+                <div className="flex flex-col">
+                  <label className="font-headline font-bold uppercase text-[11px] sm:text-xs rtl:text-[11px] rtl:font-semibold tracking-wider text-slate-700 mb-1.5">
+                    {t('requestBOQ.supportingDocs')}
+                  </label>
+                  <div className="relative group flex-1">
+                    <input
+                      key={supportingUploadKey}
+                      type="file"
+                      name="supporting_docs"
+                      accept={BOQ_ACCEPT}
+                      multiple
+                      onChange={handleSupportingFilesChange}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                      aria-label={t('requestBOQ.supportingDocs')}
+                    />
+                    <div className="h-full min-h-[120px] rounded-xl border-2 border-dashed border-slate-200 bg-slate-50/60 p-4 flex flex-col items-center justify-center text-center transition-all group-hover:border-primary group-hover:bg-primary/5">
+                      <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center mb-1.5 group-hover:scale-105 transition-transform">
+                        <Icon icon="folder_open" className="text-lg" />
+                      </div>
+                      <p className="text-xs rtl:text-[11px] sm:rtl:text-[11.5px] font-headline font-bold rtl:font-medium uppercase tracking-wider text-deep-blue leading-relaxed">
+                        {t('requestBOQ.supportingDocsDesc')}
+                      </p>
+                      <p className="text-[10px] rtl:text-[9.5px] text-slate-400 mt-0.5 font-body leading-normal">
+                        {t('fileValidation.boqAllowedTypes')}
+                      </p>
+                    </div>
+                  </div>
+                  {supportingFiles.length > 0 && (
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      {supportingFiles.map((f, i) => (
+                        <div key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium">
+                          <span className="material-symbols-outlined text-xs">check_circle</span>
+                          <span className="truncate max-w-[140px]">{f.name}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {supportingFileErrors.map((err, i) => (
+                    <div key={i} className="mt-1.5 inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-[11px] font-medium self-start">
+                      <span className="material-symbols-outlined text-xs">error</span>
+                      <span>{err}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Additional Requirements */}
@@ -424,15 +442,15 @@ export default function BOQFormSection({ visible = true }) {
                 placeholder={t('requestBOQ.additionalRequirementsPlaceholder')}
                 value={formData.additional_requirements}
                 onChange={handleChange}
-                rows={5}
+                rows={3}
               />
             </div>
           </div>
 
           {/* ─── Turnstile + Submit ───────────────────────────────────────── */}
-          <div className="pt-6 sm:pt-8 space-y-6">
-            <div className="space-y-2">
-              <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
+          <div className="pt-2 space-y-4">
+            <div className="space-y-1.5">
+              <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
                 {t('turnstile.verifyPrompt')}
               </p>
               <TurnstileWidget
@@ -443,15 +461,17 @@ export default function BOQFormSection({ visible = true }) {
               />
             </div>
 
-            <SubmitButton
-              loading={isSubmitting}
-              loadingText={t('requestBOQ.submitting')}
-              disabled={isSubmitDisabled}
-              className="w-full sm:w-auto bg-primary text-white font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-primary-dark transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <span>{t('requestBOQ.submitButton')}</span>
-              <Icon icon="arrow_forward" className="transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
-            </SubmitButton>
+            <div className="pt-2">
+              <SubmitButton
+                loading={isSubmitting}
+                loadingText={t('requestBOQ.submitting')}
+                disabled={isSubmitDisabled}
+                className="w-full sm:w-auto h-11 sm:h-12 px-7 sm:px-8 rounded-xl bg-primary hover:bg-primary-dark text-white font-headline font-bold uppercase tracking-wider text-xs sm:text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2.5 group disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>{t('requestBOQ.submitButton')}</span>
+                <Icon icon="arrow_forward" className="text-base transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+              </SubmitButton>
+            </div>
           </div>
         </form>
       </div>
