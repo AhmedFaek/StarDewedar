@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
@@ -11,13 +11,38 @@ import FavouriteButton from '../components/shared/FavouriteButton'
 export default function Products() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all')
   const [searchTerm, setSearchTerm] = useState('')
   const [maxPrice, setMaxPrice] = useState(1000000)
   const [sortBy, setSortBy] = useState('featured')
   const [loading, setLoading] = useState(true)
+
+  // Auto-sync selectedCategory whenever URL ?category= changes or categories load
+  useEffect(() => {
+    const catParam = searchParams.get('category')
+    if (catParam) {
+      if (catParam === 'all') {
+        setSelectedCategory('all')
+      } else {
+        const match = categories.find(
+          (c) =>
+            String(c.id) === String(catParam) ||
+            (c.name_en && c.name_en.toLowerCase() === catParam.toLowerCase()) ||
+            (c.name_ar && c.name_ar.toLowerCase() === catParam.toLowerCase())
+        )
+        if (match) {
+          setSelectedCategory(match.id)
+        } else {
+          setSelectedCategory(catParam)
+        }
+      }
+    } else {
+      setSelectedCategory('all')
+    }
+  }, [searchParams, categories])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,13 +122,31 @@ export default function Products() {
     return () => removeJsonLd('products-page')
   }, [i18n.language, selectedCategory, categories])
 
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId)
+    const newParams = new URLSearchParams(searchParams)
+    if (catId === 'all') {
+      newParams.delete('category')
+    } else {
+      newParams.set('category', catId)
+    }
+    setSearchParams(newParams, { replace: true })
+  }
+
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
         const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
         const categoryId = product.category?.id || product.category_id || ''
+        const categoryNameEn = product.category?.name_en || ''
+        const categoryNameAr = product.category?.name_ar || ''
         
-        const matchesCategory = selectedCategory === 'all' || categoryId === selectedCategory
+        const matchesCategory =
+          selectedCategory === 'all' ||
+          String(categoryId) === String(selectedCategory) ||
+          categoryNameEn.toLowerCase() === String(selectedCategory).toLowerCase() ||
+          categoryNameAr.toLowerCase() === String(selectedCategory).toLowerCase()
+
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesPrice = product.price ? Number(product.price) <= maxPrice : true
 
@@ -145,7 +188,7 @@ export default function Products() {
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
                   <button
                     key="all-products"
-                    onClick={() => setSelectedCategory('all')}
+                    onClick={() => handleCategorySelect('all')}
                     className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
                       selectedCategory === 'all'
                         ? 'bg-primary border-primary text-white shadow-xs'
@@ -157,9 +200,9 @@ export default function Products() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
+                      onClick={() => handleCategorySelect(category.id)}
                       className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
-                        selectedCategory === category.id
+                        String(selectedCategory) === String(category.id)
                           ? 'bg-primary border-primary text-white shadow-xs'
                           : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                       }`}

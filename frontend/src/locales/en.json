@@ -6,7 +6,18 @@
     "contact": "Contact",
     "request": "Request",
     "requestVisit": "Request a Visit",
-    "requestQuote": "Request a Quote"
+    "requestQuote": "Get Started",
+    "getStarted": "Get Started",
+    "viewAllProducts": "View All Products",
+    "viewAllProjects": "View All Projects",
+    "categories": "Categories",
+    "featured": "Featured",
+    "search": "Search",
+    "searchProducts": "Search products...",
+    "searchPlaceholder": "Search products by name or category...",
+    "quickSearch": "Quick Search",
+    "noProductsFound": "No products found",
+    "homeLabel": "Star Dewedar Home"
   },
 
   "hero": {
@@ -87,7 +98,28 @@
     "contact": "Contact",
     "headquarters": "Headquarters: Tanta, EG",
     "email": "info@stardewedar.com",
-    "copyright": "© {{year}} Star Dewedar. General Contracting & Engineering."
+    "copyright": "© {{year}} Star Dewedar. General Contracting & Engineering.",
+    "share": {
+      "title": "Share Page",
+      "copyLink": "Copy Link",
+      "copied": "Link Copied!",
+      "whatsapp": "WhatsApp",
+      "email": "Email",
+      "emailSubject": "Star Dewedar - Engineering & Contracting",
+      "emailBody": "Take a look at this page from Star Dewedar:"
+    },
+    "quickLinks": {
+      "title": "Quick Help & Services",
+      "subtitle": "Direct access to our engineering desk",
+      "contact": "Contact Us",
+      "contactDesc": "Reach our engineering and support team",
+      "quote": "Request a Quote",
+      "quoteDesc": "Product and custom fabrication pricing",
+      "boq": "Request a BOQ",
+      "boqDesc": "Upload Bill of Quantities for project pricing",
+      "visit": "Request a Site Visit",
+      "visitDesc": "Schedule on-site technical inspection"
+    }
   },
 
   "about": {
@@ -177,98 +209,45 @@
     "heroDesc": "Our engineering team provides comprehensive on-site technical evaluations for civil project feasibility, facility requirements, and electrical distribution infrastructure.",
     "voltagePro": "TECHNICAL FIELD CONSULTATION",
     "certifiedDiv": "Engineering Consultation Division",
+    "sidebarBadge": "ON-SITE ASSESSMENT",
+    "sidebarTitle1": "Engineering",
+    "sidebarTitle2": "AT YOUR FACILITY.",
+    "sidebarDesc": "Schedule a direct consultation with our engineering team at your facility. We inspect site conditions, analyze technical specifications, and provide comprehensive solutions.",
+    "benefit1": "On-Site Infrastructure Assessment",
+    "benefit2": "Load & Power Distribution Review",
+    "benefit3": "Actionable Engineering Report",
     "section1Title": "Facility Information",
-    "factoryName": "Site Name",
-    "factoryNamePlaceholder": "E.G. NORTHERN STEEL WORKS",
-    "factoryActivity": "Site Activity",
-    "factoryActivityPlaceholder": "E.G. HEAVY MANUFACTURING",
+    "factoryName": "Site / Facility Name",
+    "factoryNamePlaceholder": "e.g. Northern Industrial Works",
+    "factoryActivity": "Site Activity / Industry",
+    "factoryActivityPlaceholder": "e.g. Heavy Manufacturing, Logistics",
     "section2Title": "Primary Contact",
-    "firstName": "First Name",
+    "firstName": "Full Name",
     "lastName": "Last Name",
     "phoneNumber": "Phone Number",
-    "whatsappNumber": "WhatsApp Number",
+    "whatsappNumber": "WhatsApp Number (Optional)",
     "emailAddress": "Email Address",
-    "section3Title": "Visit Logistics",
-    "physicalAddress": "Physical Address (Google Maps Link Optional)",
-    "preferredDate": "Preferred Date",
-    "technicalDetails": "Technical Details & Purpose",
-    "technicalDetailsPlaceholder": "DESCRIBE SPECIFIC TECHNICAL ISSUES OR PROJECT SCOPE...",
-    "submitButton": "SCHEDULE ENGINEER VISIT",
-    "fileUpload": "Supporting Documents (PDF/JPG/PNG)",
+    "section3Title": "Visit Logistics & Details",
+    "physicalAddress": "Physical Address / Location",
+    "preferredDate": "Preferred Inspection Date",
+    "technicalDetails": "Technical Details & Scope",
+    "technicalDetailsPlaceholder": "Describe site conditions, current issues, or specific systems to assess...",
+    "submitButton": "Schedule Site Visit",
+    "fileUpload": "Supporting Documents (Optional)",
     "fileSelected": "✓ File selected:",
     "successMsg": "✓ Visit request scheduled successfully. We will contact you soon.",
     "failMsg": "✗ Failed to schedule visit request. Please try again.",
     "errorMsg": "✗ An error occurred. Please try again."
   },
 
-  "requestPage": {
-    "heroTitle": "SUBMIT A REQUEST",
-    "heroDesc": "Choose the type of request below and fill in your details. Our team will review your submission and get back to you promptly.",
-    "selectLabel": "What can we help you with?",
-    "cards": {
-      "visit": "Site Visit",
-      "visitDesc": "Request an on-site engineering assessment",
-      "quote": "Quotation",
-      "quoteDesc": "Request a product or project quotation",
-      "boq": "BOQ Submission",
-      "boqDesc": "Submit your Bill of Quantities or project documents"
-    }
-  },
-
-  "requestBOQ": {
-    "heroTitle": "BOQ SUBMISSION",
-    "heroDesc": "Upload your Bill of Quantities or project documentation for review. Our team will analyze your requirements and respond promptly.",
-    "sidebarBadge": "BILL OF QUANTITIES",
-    "sidebarTitle1": "Precision in Every",
-    "sidebarTitle2": "PROJECT DETAIL.",
-    "sidebarDesc": "Submit your BOQ requirements for a detailed review of quantities, materials, and project specifications. Our engineering team will assess your submission to help you plan with clarity and confidence.",
-    "section1Title": "Customer Information",
-    "fullName": "Full Name",
-    "companyName": "Company Name",
-    "emailAddress": "Email Address",
-    "phoneNumber": "Phone Number",
-    "section2Title": "Project Information",
-    "projectName": "Project Name",
-    "projectLocation": "Project Location",
-    "projectType": "Project Type",
-    "projectTypePlaceholder": "Select project type",
-    "projectTypes": {
-      "industrial": "Industrial Project",
-      "commercial": "Commercial Project",
-      "residential": "Residential Project",
-      "infrastructure": "Infrastructure Project",
-      "electrical": "Electrical Project",
-      "other": "Other"
-    },
-    "section3Title": "BOQ & Project Documents",
-    "boqFile": "BOQ File (Required)",
-    "boqFileDesc": "Upload your BOQ document (PDF, XLS, XLSX, CSV — max 20MB)",
-    "supportingDocs": "Supporting Documents (Optional)",
-    "supportingDocsDesc": "Drawings, specifications, scope of work — up to 5 files",
-    "additionalRequirements": "Additional Requirements",
-    "additionalRequirementsPlaceholder": "Describe any important details about your project or BOQ...",
-    "submitButton": "SUBMIT BOQ REQUEST",
-    "submitting": "Submitting...",
-    "successMsg": "Your BOQ request has been submitted successfully. Our team will review your requirements and get back to you.",
-    "failMsg": "Failed to submit BOQ request. Please try again.",
-    "errorMsg": "An error occurred. Please try again.",
-    "validation": {
-      "nameRequired": "Full name is required (min 2 characters).",
-      "companyRequired": "Company name is required.",
-      "emailInvalid": "Please enter a valid email address.",
-      "phoneRequired": "Phone number is required (min 10 digits).",
-      "projectNameRequired": "Project name is required.",
-      "projectLocationRequired": "Project location is required.",
-      "projectTypeRequired": "Please select a project type.",
-      "boqFileRequired": "Please upload your BOQ file."
-    }
-  },
-
   "requestQuote": {
-    "sidebarBadge": "Requesting Precision",
+    "sidebarBadge": "PRECISION QUOTATION",
     "sidebarTitle1": "ENGINEERING",
     "sidebarTitle2": "THE FUTURE.",
     "sidebarDesc": "Submit your technical specifications for a comprehensive architectural and electrical evaluation. Our lead engineers review every proposal within 24 hours.",
+    "benefit1": "24-Hour Review Turnaround",
+    "benefit2": "Certified Engineering Standards",
+    "benefit3": "Direct Technical Consultation",
     "formTitle": "Project Specification Form",
     "firstName": "First Name",
     "lastName": "Last Name",
@@ -552,10 +531,12 @@
   "fileValidation": {
     "tooLarge": "File is too large. Maximum size is {{max}}.",
     "invalidType": "Invalid file type. Allowed types: {{types}}.",
-    "boqInvalidType": "Invalid file type. Allowed for BOQ: {{types}}.",
+    "boqInvalidType": "Invalid file type for BOQ. Allowed: {{types}}.",
     "maxSize": "Maximum size: 10MB",
     "allowedTypes": "Allowed: PDF, JPG, JPEG, PNG",
-    "boqAllowedTypes": "Allowed: PDF, XLS, XLSX, CSV (max 20MB)"
+    "boqAllowedTypes": "Accepted formats: PDF, XLS, XLSX, CSV (Max 20MB)",
+    "dropOrBrowse": "Drop files here or click to browse",
+    "selectedFile": "Selected file:"
   },
 
   "auth": {
@@ -634,9 +615,13 @@
   },
 
   "requestPage": {
+    "portalBadge": "SDC Engineering Portal",
     "heroTitle": "MAKE A REQUEST",
-    "heroDesc": "Whether you need an on-site factory consultation, a custom product price quote, or want to submit an engineering BOQ, we are ready to assist.",
+    "heroDesc": "Whether you need an on-site factory consultation, a custom product price quote, or want to submit an engineering BOQ, our team is ready to assist.",
     "selectLabel": "Choose Request Type",
+    "activeBadge": "Active",
+    "needAssistance": "Need immediate assistance?",
+    "contactOurTeam": "Contact our engineering desk",
     "cards": {
       "visit": "Request Visit",
       "visitDesc": "Schedule an on-site visit to your factory or facility with our engineering team.",
@@ -652,6 +637,9 @@
     "sidebarTitle1": "Precision in Every",
     "sidebarTitle2": "PROJECT DETAIL.",
     "sidebarDesc": "Submit your BOQ requirements for a detailed review of quantities, materials, and project specifications. Our engineering team will assess your submission to help you plan with clarity and confidence.",
+    "benefit1": "Itemized Cost & Material Analysis",
+    "benefit2": "Engineering Compliance Verification",
+    "benefit3": "Dedicated Estimation Team",
     "section1Title": "Customer Information",
     "fullName": "Full Name",
     "companyName": "Company / Organization Name",
@@ -692,13 +680,6 @@
       "projectTypeRequired": "Please select a project type",
       "boqFileRequired": "Please upload a BOQ document (PDF, XLS, XLSX, CSV)"
     }
-  },
-
-  "fileValidation": {
-    "tooLarge": "File is too large. Maximum size is {{max}}.",
-    "invalidType": "Invalid file type. Allowed types: {{types}}.",
-    "boqInvalidType": "Invalid file type for BOQ. Allowed: {{types}}.",
-    "boqAllowedTypes": "Accepted formats: PDF, XLS, XLSX, CSV (Max 20MB)"
   },
 
   "messages": {

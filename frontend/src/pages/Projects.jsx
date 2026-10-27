@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
@@ -10,13 +10,44 @@ import ContentLoader from '../components/shared/ContentLoader'
 export default function Projects() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [projects, setProjects] = useState([])
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState(() => searchParams.get('category') || 'all')
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0)
   const [categories, setCategories] = useState(['all'])
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const itemsPerPage = 6
+
+  // Sync activeFilter from URL ?category= parameter
+  useEffect(() => {
+    const catParam = searchParams.get('category')
+    if (catParam) {
+      if (catParam === 'all') {
+        setActiveFilter('all')
+      } else {
+        const decoded = decodeURIComponent(catParam).trim().toLowerCase()
+        const match = categories.find((c) => c.toLowerCase() === decoded)
+        if (match) {
+          setActiveFilter(match)
+        } else {
+          const projMatch = projects.find(
+            (p) =>
+              String(p.category?.id) === String(catParam) ||
+              (p.category?.name_en && p.category.name_en.toLowerCase() === decoded) ||
+              (p.category?.name_ar && p.category.name_ar.toLowerCase() === decoded)
+          )
+          if (projMatch && projMatch.category?.name_en) {
+            setActiveFilter(projMatch.category.name_en)
+          } else {
+            setActiveFilter(catParam)
+          }
+        }
+      }
+    } else {
+      setActiveFilter('all')
+    }
+  }, [searchParams, categories, projects])
 
   const services = [
     t('projects.service1'),
@@ -107,10 +138,26 @@ export default function Projects() {
     return 'h-60 sm:h-64'
   }
 
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter)
+    const newParams = new URLSearchParams(searchParams)
+    if (filter === 'all') {
+      newParams.delete('category')
+    } else {
+      newParams.set('category', filter)
+    }
+    setSearchParams(newParams, { replace: true })
+  }
+
   const filteredProjects = useMemo(() => {
-    return activeFilter === 'all'
-      ? projects
-      : projects.filter((project) => project.category?.name_en === activeFilter)
+    if (activeFilter === 'all') return projects
+    const filterLower = activeFilter.toLowerCase()
+    return projects.filter(
+      (project) =>
+        project.category?.name_en?.toLowerCase() === filterLower ||
+        project.category?.name_ar?.toLowerCase() === filterLower ||
+        String(project.category?.id) === String(activeFilter)
+    )
   }, [projects, activeFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage))
@@ -184,9 +231,9 @@ export default function Projects() {
               {categories.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
+                  onClick={() => handleFilterChange(filter)}
                   className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
-                    activeFilter === filter
+                    activeFilter.toLowerCase() === filter.toLowerCase()
                       ? 'bg-primary border-primary text-white shadow-xs'
                       : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                   }`}
