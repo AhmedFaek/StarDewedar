@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
@@ -10,13 +10,44 @@ import ContentLoader from '../components/shared/ContentLoader'
 export default function Projects() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [projects, setProjects] = useState([])
-  const [activeFilter, setActiveFilter] = useState('all')
+  const [activeFilter, setActiveFilter] = useState(() => searchParams.get('category') || 'all')
   const [currentServiceIndex, setCurrentServiceIndex] = useState(0)
   const [categories, setCategories] = useState(['all'])
   const [currentPage, setCurrentPage] = useState(1)
   const [loading, setLoading] = useState(true)
   const itemsPerPage = 6
+
+  // Sync activeFilter from URL ?category= parameter
+  useEffect(() => {
+    const catParam = searchParams.get('category')
+    if (catParam) {
+      if (catParam === 'all') {
+        setActiveFilter('all')
+      } else {
+        const decoded = decodeURIComponent(catParam).trim().toLowerCase()
+        const match = categories.find((c) => c.toLowerCase() === decoded)
+        if (match) {
+          setActiveFilter(match)
+        } else {
+          const projMatch = projects.find(
+            (p) =>
+              String(p.category?.id) === String(catParam) ||
+              (p.category?.name_en && p.category.name_en.toLowerCase() === decoded) ||
+              (p.category?.name_ar && p.category.name_ar.toLowerCase() === decoded)
+          )
+          if (projMatch && projMatch.category?.name_en) {
+            setActiveFilter(projMatch.category.name_en)
+          } else {
+            setActiveFilter(catParam)
+          }
+        }
+      }
+    } else {
+      setActiveFilter('all')
+    }
+  }, [searchParams, categories, projects])
 
   const services = [
     t('projects.service1'),
@@ -107,10 +138,26 @@ export default function Projects() {
     return 'h-60 sm:h-64'
   }
 
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter)
+    const newParams = new URLSearchParams(searchParams)
+    if (filter === 'all') {
+      newParams.delete('category')
+    } else {
+      newParams.set('category', filter)
+    }
+    setSearchParams(newParams, { replace: true })
+  }
+
   const filteredProjects = useMemo(() => {
-    return activeFilter === 'all'
-      ? projects
-      : projects.filter((project) => project.category?.name_en === activeFilter)
+    if (activeFilter === 'all') return projects
+    const filterLower = activeFilter.toLowerCase()
+    return projects.filter(
+      (project) =>
+        project.category?.name_en?.toLowerCase() === filterLower ||
+        project.category?.name_ar?.toLowerCase() === filterLower ||
+        String(project.category?.id) === String(activeFilter)
+    )
   }, [projects, activeFilter])
 
   const totalPages = Math.max(1, Math.ceil(filteredProjects.length / itemsPerPage))
@@ -139,12 +186,12 @@ export default function Projects() {
               <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-6">
                 {t('projects.badge')}
               </span>
-              <h1 className="text-on-surface font-headline text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8">
+              <h1 className="text-on-surface font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
                 {t('projects.heroTitle1')}
                 <br />
                 {t('projects.heroTitle2')}
               </h1>
-              <p className="text-on-surface-variant max-w-xl text-lg leading-relaxed font-body">
+              <p className="text-on-surface-variant max-w-xl text-sm sm:text-base lg:text-lg leading-relaxed font-body">
                 {t('projects.heroDesc')}
               </p>
             </div>
@@ -170,25 +217,25 @@ export default function Projects() {
           </div>
         </section>
 
-        <section className="px-4 sm:px-8 md:px-16 mb-16">
-          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant/30 pb-6 sm:pb-8 gap-6 sm:gap-8">
+        <section className="px-4 sm:px-8 md:px-16 mb-12 sm:mb-16">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-outline-variant/20 pb-5 sm:pb-6 gap-5 sm:gap-6">
             <div>
-              <h2 className="text-on-surface font-headline text-2xl sm:text-3xl font-bold tracking-tight mb-2">
+              <h2 className="text-deep-blue font-headline text-xl sm:text-2xl md:text-3xl font-bold tracking-tight mb-1.5 uppercase">
                 {t('projects.projectArchives')}
               </h2>
-              <p className="text-secondary text-xs sm:text-sm font-label uppercase tracking-widest">
+              <p className="text-slate-500 text-xs font-label uppercase tracking-widest font-semibold">
                 {t('projects.filterByClass')}
               </p>
             </div>
-            <div className="flex flex-wrap gap-3 sm:gap-4">
+            <div className="flex flex-wrap items-center gap-2">
               {categories.map((filter) => (
                 <button
                   key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-6 sm:px-8 py-2 sm:py-3 text-xs font-headline font-bold uppercase tracking-widest transition-all ${
-                    activeFilter === filter
-                      ? 'bg-primary text-white'
-                      : 'bg-surface-container-high text-primary hover:bg-outline-variant'
+                  onClick={() => handleFilterChange(filter)}
+                  className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
+                    activeFilter.toLowerCase() === filter.toLowerCase()
+                      ? 'bg-primary border-primary text-white shadow-xs'
+                      : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                   }`}
                 >
                   {filter === 'all'
@@ -333,22 +380,50 @@ export default function Projects() {
           )}
         </section>
 
-        <section className="mt-24 sm:mt-32 px-4 sm:px-8 md:px-16">
-          <div className="voltage-gradient p-8 sm:p-12 lg:p-24 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="max-w-2xl">
-              <h2 className="text-white font-headline text-3xl sm:text-4xl md:text-6xl font-black tracking-tighter leading-none mb-4 sm:mb-6">
+        <section className="mt-20 sm:mt-28 px-4 sm:px-8 md:px-16">
+          <div className="relative overflow-hidden bg-gradient-to-br from-[#16639F] via-primary to-deep-blue p-8 sm:p-12 lg:p-16 border border-white/10 shadow-lg">
+            {/* Subtle Blueprint Grid Texture */}
+            <svg
+              className="absolute inset-0 w-full h-full opacity-[0.08] pointer-events-none select-none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+            >
+              <defs>
+                <pattern id="projects-cta-grid" width="36" height="36" patternUnits="userSpaceOnUse">
+                  <path d="M 36 0 L 0 0 0 36" fill="none" stroke="currentColor" strokeWidth="1" className="text-white" />
+                  <circle cx="36" cy="36" r="1" fill="currentColor" className="text-white" />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#projects-cta-grid)" />
+            </svg>
+
+            {/* Ambient Radial Soft Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-white/5 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Centered Content Column */}
+            <div className="relative z-10 flex flex-col items-center text-center max-w-2xl mx-auto">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/10 backdrop-blur-xs text-white/90 text-[10px] font-headline font-bold uppercase tracking-[0.2em] mb-4 border border-white/15">
+                {t('projects.ctaEyebrow')}
+              </span>
+
+              <h2 className="text-white font-headline text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight leading-snug mb-3 sm:mb-4">
                 {t('projects.ctaTitle')}
               </h2>
-              <p className="text-white text-base sm:text-lg font-body">
+
+              <p className="text-white/85 text-sm sm:text-base font-body leading-relaxed max-w-2xl mx-auto mb-8">
                 {t('projects.ctaDesc')}
               </p>
+
+              <button
+                onClick={() => navigate('/contact')}
+                className="inline-flex items-center justify-center gap-3 bg-white text-deep-blue hover:bg-deep-blue hover:text-white px-8 py-3.5 sm:px-10 sm:py-4 font-headline text-xs sm:text-sm font-bold uppercase tracking-widest shadow-md hover:shadow-xl border border-white/20 transition-all duration-300 group cursor-pointer"
+              >
+                <span>{t('projects.ctaButton')}</span>
+                <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-1.5 rtl:group-hover:-translate-x-1.5 rtl:rotate-180">
+                  arrow_forward
+                </span>
+              </button>
             </div>
-            <button
-              onClick={() => navigate('/contact')}
-              className="bg-white text-deep-blue px-6 sm:px-12 py-4 sm:py-6 font-headline font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all text-xs sm:text-sm shrink-0 w-full sm:w-auto"
-            >
-              {t('ctaBanner.button')}
-            </button>
           </div>
         </section>
       </main>

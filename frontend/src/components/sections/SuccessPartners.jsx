@@ -14,13 +14,13 @@ export default function SuccessPartners() {
     <section className="py-20 sm:py-24 lg:py-32 px-4 sm:px-8 md:px-16 bg-surface">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-16 sm:mb-20">
-          <span className="text-tertiary font-headline font-bold tracking-[0.2em] uppercase text-s mb-4 block">
+          <span className="text-primary font-headline font-bold tracking-[0.2em] uppercase text-xs mb-3 block">
             {t('successPartners.badge')}
           </span>
-          <h2 className="text-on-surface font-headline text-4xl sm:text-5xl md:text-6xl font-black tracking-tighter leading-tight mb-6">
+          <h2 className="text-deep-blue font-headline text-xl sm:text-2xl md:text-3xl lg:text-[2rem] font-bold tracking-tight leading-snug mb-4">
             {t('successPartners.title')}
           </h2>
-          <p className="text-on-surface-variant max-w-2xl mx-auto text-base sm:text-lg font-body leading-relaxed">
+          <p className="text-slate-600 max-w-2xl mx-auto text-xs sm:text-sm md:text-base font-body leading-relaxed">
             {t('successPartners.description')}
           </p>
         </div>

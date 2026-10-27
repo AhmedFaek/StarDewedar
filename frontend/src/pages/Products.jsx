@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
@@ -11,13 +11,38 @@ import FavouriteButton from '../components/shared/FavouriteButton'
 export default function Products() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState(() => searchParams.get('category') || 'all')
   const [searchTerm, setSearchTerm] = useState('')
   const [maxPrice, setMaxPrice] = useState(1000000)
   const [sortBy, setSortBy] = useState('featured')
   const [loading, setLoading] = useState(true)
+
+  // Auto-sync selectedCategory whenever URL ?category= changes or categories load
+  useEffect(() => {
+    const catParam = searchParams.get('category')
+    if (catParam) {
+      if (catParam === 'all') {
+        setSelectedCategory('all')
+      } else {
+        const match = categories.find(
+          (c) =>
+            String(c.id) === String(catParam) ||
+            (c.name_en && c.name_en.toLowerCase() === catParam.toLowerCase()) ||
+            (c.name_ar && c.name_ar.toLowerCase() === catParam.toLowerCase())
+        )
+        if (match) {
+          setSelectedCategory(match.id)
+        } else {
+          setSelectedCategory(catParam)
+        }
+      }
+    } else {
+      setSelectedCategory('all')
+    }
+  }, [searchParams, categories])
 
   useEffect(() => {
     const fetchData = async () => {
@@ -97,13 +122,31 @@ export default function Products() {
     return () => removeJsonLd('products-page')
   }, [i18n.language, selectedCategory, categories])
 
+  const handleCategorySelect = (catId) => {
+    setSelectedCategory(catId)
+    const newParams = new URLSearchParams(searchParams)
+    if (catId === 'all') {
+      newParams.delete('category')
+    } else {
+      newParams.set('category', catId)
+    }
+    setSearchParams(newParams, { replace: true })
+  }
+
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
         const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
         const categoryId = product.category?.id || product.category_id || ''
+        const categoryNameEn = product.category?.name_en || ''
+        const categoryNameAr = product.category?.name_ar || ''
         
-        const matchesCategory = selectedCategory === 'all' || categoryId === selectedCategory
+        const matchesCategory =
+          selectedCategory === 'all' ||
+          String(categoryId) === String(selectedCategory) ||
+          categoryNameEn.toLowerCase() === String(selectedCategory).toLowerCase() ||
+          categoryNameAr.toLowerCase() === String(selectedCategory).toLowerCase()
+
         const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase())
         const matchesPrice = product.price ? Number(product.price) <= maxPrice : true
 
@@ -131,24 +174,25 @@ export default function Products() {
                 <img alt="Industrial component" className="w-full h-full object-cover object-center" src="/images/products_hero.webp" />
               </div>
               <div className="relative z-10 max-w-4xl">
-                <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-headline font-black text-white tracking-tighter leading-none mb-3 md:mb-4">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-headline font-black text-white tracking-tight leading-tight mb-3 md:mb-4">
                   {t('products.heroTitle1')} <br className="hidden sm:block" /> {t('products.heroTitle2')}
                 </h1>
-                <p className="text-white font-body text-base sm:text-lg md:text-lg max-w-xl">{t('products.heroDesc')}</p>
+                <p className="text-white font-body text-sm sm:text-base md:text-lg max-w-xl">{t('products.heroDesc')}</p>
               </div>
             </header>
 
             {/* Filter Bar */}
-            <section className="bg-surface-container-low px-4 sm:px-8 md:px-16 py-6 border-b border-outline-variant/10">
-              <div className="flex flex-col lg:flex-row gap-6 justify-between items-start lg:items-center">
-                <div className="flex flex-wrap gap-2">
+            <section className="bg-surface-container-low px-4 sm:px-8 md:px-16 py-5 border-b border-outline-variant/15">
+              <div className="max-w-7xl mx-auto space-y-3.5">
+                {/* Row 1: Category Filter Pills */}
+                <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 no-scrollbar">
                   <button
                     key="all-products"
-                    onClick={() => setSelectedCategory('all')}
-                    className={`px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold transition-all ${
+                    onClick={() => handleCategorySelect('all')}
+                    className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
                       selectedCategory === 'all'
-                        ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                        : 'bg-surface-container-lowest text-primary hover:bg-surface-variant'
+                        ? 'bg-primary border-primary text-white shadow-xs'
+                        : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                     }`}
                   >
                     {t('products.allProducts')}
@@ -156,32 +200,81 @@ export default function Products() {
                   {categories.map((category) => (
                     <button
                       key={category.id}
-                      onClick={() => setSelectedCategory(category.id)}
-                      className={`px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold transition-all ${
-                        selectedCategory === category.id
-                          ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                          : 'bg-surface-container-lowest text-primary hover:bg-surface-variant'
+                      onClick={() => handleCategorySelect(category.id)}
+                      className={`shrink-0 px-4 py-2 font-label text-[11px] uppercase tracking-wider font-bold transition-all border ${
+                        String(selectedCategory) === String(category.id)
+                          ? 'bg-primary border-primary text-white shadow-xs'
+                          : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                       }`}
                     >
                       {i18n.language === 'ar' ? category.name_ar : category.name_en}
                     </button>
                   ))}
                 </div>
-                <div className="flex flex-wrap items-center gap-4 w-full lg:w-auto">
-                  <div className="flex flex-col gap-1 min-w-[150px]">
-                    <label className="text-[10px] font-black uppercase tracking-widest text-secondary">
-                      {t('products.maxPrice')}: EGP{maxPrice.toLocaleString()}
-                    </label>
-                    <input type="range" min="0" max="1000000" step="1000" value={maxPrice} onChange={(e) => setMaxPrice(Number(e.target.value))} className="w-full accent-primary" />
+
+                {/* Row 2: Search Input & Controls Toolbar */}
+                <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 pt-3 border-t border-slate-200/60">
+                  {/* Search Bar */}
+                  <div className="relative flex-grow max-w-md">
+                    <span className="material-symbols-outlined absolute start-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
+                      search
+                    </span>
+                    <input
+                      type="text"
+                      placeholder={t('products.searchPlaceholder')}
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full bg-white border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary ps-9 pe-8 py-2 text-xs font-body text-deep-blue placeholder:text-slate-400 outline-none transition-colors"
+                    />
+                    {searchTerm && (
+                      <button
+                        onClick={() => setSearchTerm('')}
+                        className="absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-deep-blue text-xs"
+                        aria-label="Clear search"
+                      >
+                        <span className="material-symbols-outlined text-sm">close</span>
+                      </button>
+                    )}
                   </div>
-                  <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="bg-surface-container-lowest border-none px-4 py-2 font-label text-[10px] uppercase tracking-widest font-bold text-primary outline-none focus:ring-1 focus:ring-tertiary">
-                    <option value="featured">{t('products.featured')}</option>
-                    <option value="low-high">{t('products.priceLowHigh')}</option>
-                    <option value="high-low">{t('products.priceHighLow')}</option>
-                  </select>
-                  <div className="relative flex-grow lg:w-64">
-                    <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline text-sm">search</span>
-                    <input type="text" placeholder={t('products.searchPlaceholder')} value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="w-full bg-surface-container-lowest border-none focus:ring-1 focus:ring-tertiary px-10 py-2 font-label text-[10px] tracking-widest outline-none" />
+
+                  {/* Right Side: Price Slider & Sort Dropdown */}
+                  <div className="flex flex-wrap sm:flex-nowrap items-center gap-3 shrink-0">
+                    {/* Price Slider */}
+                    <div className="flex items-center gap-2.5 bg-white border border-slate-200 px-3 py-2 min-w-[210px]">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 whitespace-nowrap">
+                        {t('products.maxPrice')}:
+                      </span>
+                      <span className="text-[11px] font-black text-primary whitespace-nowrap">
+                        EGP {maxPrice.toLocaleString()}
+                      </span>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1000000"
+                        step="1000"
+                        value={maxPrice}
+                        onChange={(e) => setMaxPrice(Number(e.target.value))}
+                        className="w-24 sm:w-28 accent-primary cursor-pointer"
+                        aria-label={t('products.maxPrice')}
+                      />
+                    </div>
+
+                    {/* Sort By Dropdown */}
+                    <div className="relative">
+                      <select
+                        value={sortBy}
+                        onChange={(e) => setSortBy(e.target.value)}
+                        className="bg-white border border-slate-200 ps-3.5 pe-8 py-2 font-headline text-[11px] uppercase tracking-wider font-bold text-deep-blue outline-none focus:border-primary focus:ring-1 focus:ring-primary cursor-pointer appearance-none"
+                        aria-label="Sort products"
+                      >
+                        <option value="featured">{t('products.featured')}</option>
+                        <option value="low-high">{t('products.priceLowHigh')}</option>
+                        <option value="high-low">{t('products.priceHighLow')}</option>
+                      </select>
+                      <span className="material-symbols-outlined absolute end-2.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm pointer-events-none">
+                        expand_more
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -194,7 +287,7 @@ export default function Products() {
                   {filteredProducts.map((product) => (
                     <div key={product.id} className="group bg-surface-container-lowest border border-outline-variant/15 flex flex-col">
                       <div className="aspect-[4/3] overflow-hidden bg-surface-container-high relative">
-                        <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} loading="lazy" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
+                        <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <FavouriteButton productId={product.id} size="sm" />
                         </div>

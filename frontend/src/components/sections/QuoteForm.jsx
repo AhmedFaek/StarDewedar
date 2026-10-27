@@ -182,34 +182,36 @@ export default function QuoteForm({ productId = null, visible = true }) {
   const isSubmitDisabled = isSubmitting || !turnstileToken
 
   return (
-    <section className={`lg:col-span-8 bg-surface-container-lowest p-6 sm:p-10 md:p-12 lg:p-16 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
+    <section className={`lg:col-span-8 bg-white p-6 sm:p-8 lg:p-10 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="max-w-2xl">
-        <header className="mb-8 sm:mb-10 md:mb-12">
-          <h2 className="text-2xl sm:text-3xl font-headline font-bold tracking-tight text-on-surface">
+        <header className="mb-6 pb-3 border-b border-slate-100">
+          <span className="text-[10px] sm:text-[11px] font-headline font-bold uppercase tracking-wider text-primary">
+            SDC Engineering
+          </span>
+          <h3 className="text-xl sm:text-2xl font-headline font-bold tracking-tight text-deep-blue mt-0.5">
             {t('requestQuote.formTitle')}
-          </h2>
-          <div className="h-1 w-20 bg-tertiary-fixed mt-3 sm:mt-4" />
+          </h3>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-            <InputField label={t('requestQuote.firstName')} name="first_name" placeholder="AHMED" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} />
-            <InputField label={t('requestQuote.lastName')} name="last_name" placeholder="KHALED" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} />
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <InputField label={t('requestQuote.firstName')} name="first_name" placeholder="Ahmed" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} variant="bordered" />
+            <InputField label={t('requestQuote.lastName')} name="last_name" placeholder="Khaled" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} variant="bordered" />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8">
-            <InputField label={t('requestQuote.phone')} name="phone" type="tel" placeholder="(+20) 01234567890" value={formData.phone} onChange={handleInputChange} required error={errors.phone} />
-            <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="A.KHALED@GMAIL.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+            <InputField label={t('requestQuote.phone')} name="phone" type="tel" placeholder="(+20) 01234567890" value={formData.phone} onChange={handleInputChange} required error={errors.phone} variant="bordered" />
+            <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
           </div>
           <SelectField label={t('requestQuote.selectProduct')} name="product_id" value={formData.product_id} onChange={handleInputChange} options={productOptions} placeholder={t('requestQuote.selectPlaceholder')} />
           {formData.product_id === 'custom' && (
-            <InputField label={t('requestQuote.customProductName')} name="custom_product_name" placeholder={t('requestQuote.customProductPlaceholder')} value={formData.custom_product_name} onChange={handleInputChange} error={errors.custom_product_name} />
+            <InputField label={t('requestQuote.customProductName')} name="custom_product_name" placeholder={t('requestQuote.customProductPlaceholder')} value={formData.custom_product_name} onChange={handleInputChange} error={errors.custom_product_name} variant="bordered" />
           )}
-          <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={5} required error={errors.details} />
+          <TextAreaField label={t('requestQuote.projectScope')} name="details" placeholder={t('requestQuote.projectScopePlaceholder')} value={formData.details} onChange={handleInputChange} rows={3} required error={errors.details} />
           <FileUploadField key={fileUploadKey} label={t('requestQuote.fileUpload')} name="file_url" onChange={handleFileChange} />
 
           {/* Cloudflare Turnstile — must be completed before submitting */}
-          <div className="space-y-2">
-            <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
+          <div className="space-y-1.5 pt-1">
+            <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
               {t('turnstile.verifyPrompt')}
             </p>
             <TurnstileWidget
@@ -220,15 +222,15 @@ export default function QuoteForm({ productId = null, visible = true }) {
             />
           </div>
 
-          <div className="pt-4 sm:pt-6">
+          <div className="pt-3">
             <SubmitButton
               loading={isSubmitting}
               loadingText={t('requestQuote.submitting')}
               disabled={isSubmitDisabled}
-              className="w-full sm:w-auto bg-primary text-white font-headline font-bold uppercase tracking-[0.15em] text-xs sm:text-sm px-8 sm:px-12 py-4 sm:py-5 flex items-center justify-center gap-3 hover:bg-primary-dark transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full sm:w-auto h-11 sm:h-12 px-7 sm:px-8 rounded-xl bg-primary hover:bg-primary-dark text-white font-headline font-bold uppercase tracking-wider text-xs sm:text-sm shadow-sm hover:shadow-md transition-all active:scale-[0.99] flex items-center justify-center gap-2.5 group disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <span>{t('requestQuote.submitRequest')}</span>
-              <Icon icon="arrow_forward" className="transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
+              <Icon icon="arrow_forward" className="text-base transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
             </SubmitButton>
           </div>
         </form>

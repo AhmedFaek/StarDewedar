@@ -182,9 +182,9 @@ export default function ProjectDetail() {
   return (
     <div className="min-h-screen flex flex-col bg-surface">
       <Header />
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-16 sm:pt-20">
         {/* HERO */}
-        <section className="relative h-[600px] bg-deep-blue overflow-hidden">
+        <section className="relative h-[480px] sm:h-[540px] bg-deep-blue overflow-hidden">
           {project.images?.[0] && (
             <img
               src={project.images[0].image_url}
@@ -193,27 +193,27 @@ export default function ProjectDetail() {
               onClick={() => openLightbox(0)}
             />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-deep-blue via-transparent to-transparent pointer-events-none"></div>
-          <div className="relative h-full flex flex-col justify-end px-8 pb-20 max-w-7xl mx-auto pointer-events-none">
-            <span className="bg-primary text-white px-3 py-1 text-[10px] uppercase tracking-widest w-fit mb-6">{categoryName}</span>
-            <h1 className="text-white font-headline text-6xl md:text-8xl font-black tracking-tight mb-6">{title}</h1>
+          <div className="absolute inset-0 bg-gradient-to-t from-deep-blue via-deep-blue/40 to-transparent pointer-events-none"></div>
+          <div className="relative h-full flex flex-col justify-end px-4 sm:px-8 pb-14 sm:pb-16 max-w-7xl mx-auto pointer-events-none">
+            <span className="bg-primary text-white px-3 py-1 text-[10px] uppercase font-bold tracking-widest w-fit mb-4 shadow-xs">{categoryName}</span>
+            <h1 className="text-white font-headline text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight mb-2 max-w-4xl leading-[1.12]">{title}</h1>
           </div>
         </section>
 
         {/* MAIN GRID */}
-        <section className="py-24 px-8 max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <section className="py-16 sm:py-20 px-4 sm:px-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-10">
             {/* LEFT */}
             <div className="lg:col-span-8 space-y-8">
-              <div className="bg-surface-container-low p-12">
-                <h2 className="text-3xl font-headline font-black mb-6 border-l-4 border-tertiary-fixed pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('projectDetail.projectOverview')}</h2>
-                <p className="text-secondary leading-relaxed text-lg">{description}</p>
+              <div className="bg-white border border-slate-200/80 shadow-[0_2px_8px_rgba(16,42,67,0.04)] p-6 sm:p-10">
+                <h2 className="text-xl sm:text-2xl font-headline font-bold text-deep-blue mb-4 border-l-4 border-primary pl-4 rtl:border-l-0 rtl:border-r-4 rtl:pl-0 rtl:pr-4">{t('projectDetail.projectOverview')}</h2>
+                <p className="text-slate-600 leading-relaxed text-sm sm:text-base font-body">{description}</p>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {project.images?.slice(1).map((img, i) => (
                   <div
                     key={i}
-                    className="overflow-hidden aspect-video bg-surface-container-high cursor-pointer group"
+                    className="overflow-hidden aspect-video bg-slate-100 border border-slate-200/80 cursor-pointer group shadow-xs"
                     onClick={() => openLightbox(i + 1)}
                   >
                     <img src={img.image_url} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition duration-300" alt={`Detail ${i}`} />
@@ -224,45 +224,45 @@ export default function ProjectDetail() {
 
             {/* RIGHT */}
             <div className="lg:col-span-4 space-y-6">
-              <div className="sticky top-32 space-y-6">
-                <div className="bg-surface-container-low text-on-surface p-8 border border-outline-variant/40">
-                  <h3 className="text-sm uppercase tracking-[0.3em] mb-6">{t('projectDetail.projectInfo')}</h3>
-                  <div className="space-y-6">
+              <div className="sticky top-24 space-y-6">
+                <div className="bg-white text-on-surface p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_8px_rgba(16,42,67,0.04)]">
+                  <h3 className="text-xs uppercase font-bold tracking-[0.2em] text-primary mb-5">{t('projectDetail.projectInfo')}</h3>
+                  <div className="space-y-4 sm:space-y-5">
                     <div>
-                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.client')}</span>
-                      <p className="text-xl font-bold">{project.client_name || 'N/A'}</p>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.client')}</span>
+                      <p className="text-sm sm:text-base font-semibold text-deep-blue">{project.client_name || 'N/A'}</p>
                     </div>
                     <div>
-                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.category')}</span>
-                      <p className="text-xl font-bold">{categoryName}</p>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.category')}</span>
+                      <p className="text-sm sm:text-base font-semibold text-deep-blue">{categoryName}</p>
                     </div>
                     {location && (
                       <div>
-                        <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.location')}</span>
-                        <p className="text-xl font-bold">{location}</p>
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.location')}</span>
+                        <p className="text-sm sm:text-base font-semibold text-deep-blue">{location}</p>
                       </div>
                     )}
-                    <div className="border-t border-outline-variant/50 pt-6">
-                      <span className="text-[12px] uppercase text-on-surface-variant">{t('projectDetail.budget')}</span>
-                      <p className="text-3xl font-black text-on-surface">{t('projectDetail.budgetValue')}</p>
+                    <div className="border-t border-slate-100 pt-4">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.budget')}</span>
+                      <p className="text-lg sm:text-xl font-bold text-primary">{t('projectDetail.budgetValue')}</p>
                     </div>
                   </div>
                 </div>
 
-                <div className="bg-surface-container-low p-8">
-                  <h3 className="text-sm uppercase tracking-[0.3em] mb-6">{t('projectDetail.timeline')}</h3>
-                  <div className="space-y-4">
+                <div className="bg-white p-6 sm:p-7 border border-slate-200/80 shadow-[0_2px_8px_rgba(16,42,67,0.04)]">
+                  <h3 className="text-xs uppercase font-bold tracking-[0.2em] text-primary mb-5">{t('projectDetail.timeline')}</h3>
+                  <div className="space-y-3.5">
                     <div>
-                      <span className="text-sm uppercase text-outline">{t('projectDetail.start')}</span>
-                      <p className="text-lg font-bold">{formatDate(project.start_date)}</p>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.start')}</span>
+                      <p className="text-sm sm:text-[15px] font-semibold text-deep-blue">{formatDate(project.start_date)}</p>
                     </div>
                     <div>
-                      <span className="text-sm uppercase text-outline">{t('projectDetail.end')}</span>
-                      <p className="text-lg font-bold">{formatDate(project.end_date)}</p>
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{t('projectDetail.end')}</span>
+                      <p className="text-sm sm:text-[15px] font-semibold text-deep-blue">{formatDate(project.end_date)}</p>
                     </div>
                     <div>
-                      <span className="text-sm uppercase text-outline">{getDurationLabel()}</span>
-                      <p className="text-lg font-bold">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-slate-500 block mb-1">{getDurationLabel()}</span>
+                      <p className="text-sm sm:text-[15px] font-semibold text-deep-blue">
                         {formatDurationDays(durationInDays)}
                       </p>
                     </div>

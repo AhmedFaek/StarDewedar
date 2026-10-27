@@ -73,10 +73,10 @@ export default function About() {
           <div className="absolute inset-0 bg-gradient-to-b from-white to-primary-fixed opacity-90"></div>
           <div className="relative h-full flex flex-col justify-end px-6 md:px-16 pb-16 animate-fade-in-up">
             <span className="text-primary font-label text-xs uppercase tracking-widest mb-4">{t('about.badge')}</span>
-            <h1 className="font-headline text-5xl md:text-7xl font-black text-on-surface leading-none">
+            <h1 className="font-headline text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-on-surface leading-tight">
               {t('about.heroTitle1')}<br />{t('about.heroTitle2')}
             </h1>
-            <p className="text-on-surface-variant max-w-xl mt-6 text-lg">{t('about.heroDesc')}</p>
+            <p className="text-on-surface-variant max-w-xl mt-4 sm:mt-6 text-sm sm:text-base lg:text-lg leading-relaxed">{t('about.heroDesc')}</p>
           </div>
         </section>
 
