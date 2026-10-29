@@ -55,13 +55,10 @@ export const sendEmail = async ({ to, subject, html, attachments }) => {
             'Email send timed out. Please try again.'
         )
     } catch (err) {
-        console.error('[mailer] Failed to send email:', {
-            to: mailOptions.to,
-            subject,
+        console.error('[mailer] Failed to send email', {
+            event: 'email_delivery_failed',
             code: err.code,
             command: err.command,
-            response: err.response,
-            message: err.message,
         })
         throw err
     }

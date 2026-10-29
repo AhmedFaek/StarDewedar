@@ -43,7 +43,17 @@ export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) 
 
     const boqRequest = await repo.create(boqData)
 
-    await sendBOQRequestEmail(boqRequest)
+    try {
+        await sendBOQRequestEmail(boqRequest)
+    } catch (error) {
+        console.error('Request notification email failed', {
+            event: 'request_notification_email_failed',
+            requestType: 'BOQ',
+            requestId: boqRequest.id,
+            errorCode: error?.code,
+            errorName: error?.name,
+        })
+    }
 
     return boqRequest
 }
@@ -110,7 +120,6 @@ export const sendBOQRequestEmail = async (boqRequest) => {
             html,
         })
     } catch (error) {
-        console.error('❌ BOQ Email Error:', error)
         throw error
     }
 }

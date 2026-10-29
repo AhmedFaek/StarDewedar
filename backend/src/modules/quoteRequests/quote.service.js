@@ -37,8 +37,17 @@ export const createQuoteRequest = async (data, file) => {
     // Create quote request in DB
     const quoteRequest = await repo.create(quoteData)
 
-    // Send email notification to company
-    await sendQuoteRequestEmail(quoteRequest)
+    try {
+        await sendQuoteRequestEmail(quoteRequest)
+    } catch (error) {
+        console.error('Request notification email failed', {
+            event: 'request_notification_email_failed',
+            requestType: 'QUOTE',
+            requestId: quoteRequest.id,
+            errorCode: error?.code,
+            errorName: error?.name,
+        })
+    }
 
     return quoteRequest
 }
@@ -88,8 +97,7 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
             html,
         })
     } catch (error) {
-        console.error("❌ Yahoo SMTP Error:", error);
-        throw error;
+        throw error
     }
 };
 

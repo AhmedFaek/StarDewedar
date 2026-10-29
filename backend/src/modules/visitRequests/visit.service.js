@@ -33,7 +33,17 @@ export const createVisitRequest = async (data, file) => {
 
     const visitRequest = await repo.create(visitData);
 
-    await sendVisitRequestEmail(visitRequest);
+    try {
+        await sendVisitRequestEmail(visitRequest);
+    } catch (error) {
+        console.error('Request notification email failed', {
+            event: 'request_notification_email_failed',
+            requestType: 'VISIT',
+            requestId: visitRequest.id,
+            errorCode: error?.code,
+            errorName: error?.name,
+        });
+    }
 
     return visitRequest;
 };
@@ -87,7 +97,6 @@ export const sendVisitRequestEmail = async (visitRequest) => {
             html,
         });
     } catch (error) {
-        console.error('❌ Yahoo SMTP Error:', error);
         throw error;
     }
 };
