@@ -1,6 +1,11 @@
 import * as repo from './boq.repository.js'
 import { buildNotificationEmail } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
+import {
+    persistWithCloudinaryCleanup,
+    settleCloudinaryUploads,
+    validateCloudinaryUploadResult,
+} from '../../utils/cloudinaryCleanup.js'
 import cloudinary from '../../config/storage.js'
 import env from '../../config/env.js'
 
@@ -12,7 +17,11 @@ const uploadToCloudinary = (file, folder = 'boq') => {
             { resource_type: 'auto', folder },
             (error, result) => {
                 if (error) return reject(error)
-                resolve(result)
+                try {
+                    resolve(validateCloudinaryUploadResult(result))
+                } catch (validationError) {
+                    reject(validationError)
+                }
             }
         )
         stream.end(file.buffer)
@@ -24,14 +33,18 @@ const uploadToCloudinary = (file, folder = 'boq') => {
 export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) => {
     // BOQ file is required — validation already rejects missing file in controller
     const boqResult = await uploadToCloudinary(boqFileArray[0], 'boq/documents')
+    let uploadedAssets = [boqResult]
 
     // Supporting docs are optional
     let supportingUrls = []
     if (supportingDocsArray && supportingDocsArray.length > 0) {
-        const uploads = await Promise.all(
-            supportingDocsArray.map((f) => uploadToCloudinary(f, 'boq/supporting'))
+        const settledUploads = await settleCloudinaryUploads(
+            supportingDocsArray.map((f) => uploadToCloudinary(f, 'boq/supporting')),
+            uploadedAssets,
+            'BOQ'
         )
-        supportingUrls = uploads.map((r) => r.secure_url)
+        uploadedAssets = settledUploads.assets
+        supportingUrls = settledUploads.results.map((r) => r.secure_url)
     }
 
     const boqData = {
@@ -41,7 +54,11 @@ export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) 
         supporting_docs_urls: supportingUrls.length > 0 ? JSON.stringify(supportingUrls) : null,
     }
 
-    const boqRequest = await repo.create(boqData)
+    const boqRequest = await persistWithCloudinaryCleanup(
+        uploadedAssets,
+        'BOQ',
+        () => repo.create(boqData)
+    )
 
     try {
         await sendBOQRequestEmail(boqRequest)

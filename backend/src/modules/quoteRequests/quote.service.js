@@ -2,6 +2,10 @@ import * as repo from './quote.repository.js'
 import * as contactService from '../contactMessages/contact.service.js'
 import { buildNotificationEmail } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
+import {
+    persistWithCloudinaryCleanup,
+    validateCloudinaryUploadResult,
+} from '../../utils/cloudinaryCleanup.js'
 import cloudinary from '../../config/storage.js'
 import env from '../../config/env.js'
 
@@ -13,7 +17,11 @@ const uploadToCloudinary = (file) => {
             },
             (error, result) => {
                 if (error) return reject(error)
-                resolve(result)
+                try {
+                    resolve(validateCloudinaryUploadResult(result))
+                } catch (validationError) {
+                    reject(validationError)
+                }
             }
         )
         stream.end(file.buffer)
@@ -29,13 +37,18 @@ export const createQuoteRequest = async (data, file) => {
     }
 
     // Handle file upload if provided
+    const uploadedAssets = []
     if (file) {
         const result = await uploadToCloudinary(file)
+        uploadedAssets.push(result)
         quoteData.file_url = result.secure_url
     }
 
-    // Create quote request in DB
-    const quoteRequest = await repo.create(quoteData)
+    const quoteRequest = await persistWithCloudinaryCleanup(
+        uploadedAssets,
+        'QUOTE',
+        () => repo.create(quoteData)
+    )
 
     try {
         await sendQuoteRequestEmail(quoteRequest)

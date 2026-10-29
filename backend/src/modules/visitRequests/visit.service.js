@@ -2,6 +2,10 @@ import * as repo from './visit.repository.js';
 import * as contactService from '../contactMessages/contact.service.js';
 import { buildNotificationEmail, formatDateTime } from '../../utils/email.template.js';
 import { sendEmail } from '../../utils/mailer.js';
+import {
+    persistWithCloudinaryCleanup,
+    validateCloudinaryUploadResult,
+} from '../../utils/cloudinaryCleanup.js';
 import cloudinary from '../../config/storage.js';
 import env from '../../config/env.js';
 
@@ -11,7 +15,11 @@ const uploadToCloudinary = (file) => {
             { resource_type: 'auto' },
             (error, result) => {
                 if (error) return reject(error)
-                resolve(result)
+                try {
+                    resolve(validateCloudinaryUploadResult(result))
+                } catch (validationError) {
+                    reject(validationError)
+                }
             }
         )
         stream.end(file.buffer)
@@ -26,12 +34,18 @@ export const createVisitRequest = async (data, file) => {
     };
 
     // Handle optional file upload
+    const uploadedAssets = [];
     if (file) {
         const result = await uploadToCloudinary(file)
+        uploadedAssets.push(result);
         visitData.file_url = result.secure_url
     }
 
-    const visitRequest = await repo.create(visitData);
+    const visitRequest = await persistWithCloudinaryCleanup(
+        uploadedAssets,
+        'VISIT',
+        () => repo.create(visitData)
+    );
 
     try {
         await sendVisitRequestEmail(visitRequest);
