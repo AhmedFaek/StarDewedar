@@ -1,10 +1,12 @@
 import * as service from './quote.service.js'
 import { createQuoteRequestSchema } from './quote.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
+import { validateUploadedFile } from '../../utils/uploadValidation.js'
 
 export const createQuote = async (req, res) => {
     try {
         const validatedData = createQuoteRequestSchema.parse(req.body)
+        if (req.file) await validateUploadedFile(req.file)
         const quote = await service.createQuoteRequest(validatedData, req.file)
         res.status(201).json({
             success: true,

@@ -1,6 +1,7 @@
 import * as service from './boq.service.js'
 import { createBOQRequestSchema } from './boq.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
+import { validateUploadedFile } from '../../utils/uploadValidation.js'
 
 export const createBOQ = async (req, res) => {
     try {
@@ -16,6 +17,10 @@ export const createBOQ = async (req, res) => {
         }
 
         const validatedData = createBOQRequestSchema.parse(req.body)
+        await validateUploadedFile(boqFiles[0], { boq: true })
+        for (const file of supportingFiles || []) {
+            await validateUploadedFile(file, { boq: true })
+        }
         const boqRequest = await service.createBOQRequest(validatedData, boqFiles, supportingFiles || [])
 
         res.status(201).json({

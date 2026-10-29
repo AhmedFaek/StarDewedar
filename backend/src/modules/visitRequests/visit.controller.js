@@ -1,10 +1,12 @@
 import * as service from './visit.service.js'
 import { createVisitRequestSchema } from './visit.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
+import { validateUploadedFile } from '../../utils/uploadValidation.js'
 
 export const createVisit = async (req, res) => {
     try {
         const validatedData = createVisitRequestSchema.parse(req.body)
+        if (req.file) await validateUploadedFile(req.file)
         const visit = await service.createVisitRequest(validatedData, req.file)
         res.status(201).json({
             success: true,

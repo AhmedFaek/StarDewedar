@@ -535,6 +535,8 @@
     "maxSize": "Maximum size: 10MB",
     "allowedTypes": "Allowed: PDF, JPG, JPEG, PNG",
     "boqAllowedTypes": "Accepted formats: PDF, XLS, XLSX, CSV (Max 20MB)",
+    "maxSupportingFiles": "Up to {{max}} supporting files (20MB each).",
+    "removeFile": "Remove {{name}}",
     "dropOrBrowse": "Drop files here or click to browse",
     "selectedFile": "Selected file:"
   },
@@ -753,4 +755,3 @@
     "close": "Close"
   }
 }
-

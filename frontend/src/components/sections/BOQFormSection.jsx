@@ -105,10 +105,6 @@ export default function BOQFormSection({ visible = true }) {
 
   const handleBOQFileChange = (e) => {
     const file = e.target.files?.[0]
-    setBoqFileError('')
-    setBoqFileName('')
-    setBoqFile(null)
-
     if (!file) return
 
     const { valid, error } = validateBOQFile(file, t)
@@ -118,6 +114,7 @@ export default function BOQFormSection({ visible = true }) {
       return
     }
 
+    setBoqFileError('')
     setBoqFile(file)
     setBoqFileName(file.name)
     if (errors.boq_file) setErrors((prev) => ({ ...prev, boq_file: '' }))
@@ -125,20 +122,40 @@ export default function BOQFormSection({ visible = true }) {
 
   const handleSupportingFilesChange = (e) => {
     const files = Array.from(e.target.files || [])
-    const validFiles = []
     const fileErrors = []
+    const newValidFiles = []
 
     files.forEach((file) => {
       const { valid, error } = validateBOQFile(file, t)
       if (!valid) {
         fileErrors.push(`${file.name}: ${error}`)
       } else {
-        validFiles.push(file)
+        newValidFiles.push(file)
       }
     })
 
-    setSupportingFiles(validFiles)
+    const uniqueFiles = newValidFiles.filter((file, index) => {
+      const alreadySelected = supportingFiles.some((selected) =>
+        selected.name === file.name &&
+        selected.size === file.size &&
+        selected.lastModified === file.lastModified
+      )
+      const duplicateInSelection = newValidFiles.findIndex((candidate) =>
+        candidate.name === file.name &&
+        candidate.size === file.size &&
+        candidate.lastModified === file.lastModified
+      ) !== index
+      return !alreadySelected && !duplicateInSelection
+    })
+    const availableSlots = Math.max(0, 5 - supportingFiles.length)
+    const acceptedFiles = uniqueFiles.slice(0, availableSlots)
+    if (uniqueFiles.length > availableSlots) {
+      fileErrors.push(t('fileValidation.maxSupportingFiles', { max: 5 }))
+    }
+
+    setSupportingFiles((previous) => [...previous, ...acceptedFiles])
     setSupportingFileErrors(fileErrors)
+    e.target.value = ''
   }
 
   const resetTurnstile = () => {
@@ -374,7 +391,7 @@ export default function BOQFormSection({ visible = true }) {
                       </p>
                     </div>
                   </div>
-                  {boqFileName && !boqFileError && (
+                  {boqFileName && (
                     <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium self-start">
                       <span className="material-symbols-outlined text-sm">check_circle</span>
                       <span className="truncate max-w-xs">{boqFileName}</span>
@@ -416,12 +433,26 @@ export default function BOQFormSection({ visible = true }) {
                       </p>
                     </div>
                   </div>
+                  <p className="text-[10px] text-slate-400 mt-1 font-body">
+                    {t('fileValidation.maxSupportingFiles', { max: 5 })}
+                  </p>
                   {supportingFiles.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {supportingFiles.map((f, i) => (
                         <div key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium">
                           <span className="material-symbols-outlined text-xs">check_circle</span>
                           <span className="truncate max-w-[140px]">{f.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSupportingFiles((previous) => previous.filter((_, index) => index !== i))
+                              setSupportingFileErrors([])
+                            }}
+                            aria-label={t('fileValidation.removeFile', { name: f.name })}
+                            className="ms-1 text-emerald-700 hover:text-red-600"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
                     </div>

@@ -525,6 +525,8 @@
     "maxSize": "الحد الأقصى للحجم: 10 ميجابايت",
     "allowedTypes": "المسموح: PDF, JPG, JPEG, PNG",
     "boqAllowedTypes": "الصيغ المدعومة: PDF, XLS, XLSX, CSV (بحد أقصى 20 ميجابايت)",
+    "maxSupportingFiles": "بحد أقصى {{max}} ملفات داعمة (20 ميجابايت لكل ملف).",
+    "removeFile": "إزالة {{name}}",
     "dropOrBrowse": "اسحب الملفات هنا أو انقر للتصفح",
     "selectedFile": "الملف المختار:"
   },
