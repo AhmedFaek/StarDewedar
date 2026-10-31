@@ -10,6 +10,7 @@ import { getAllBOQs, updateBOQ, deleteBOQ } from '../services/boqService'
 import { retryRequestNotification } from '../services/notificationService'
 import { getDecodedToken } from '../utils/auth'
 import { hasPermission, PERMISSIONS } from '../utils/permissions'
+import { getQuoteProductName } from '../utils/quoteProductName'
 
 export default function AllRequests() {
   const { t, i18n } = useTranslation()
@@ -83,7 +84,10 @@ export default function AllRequests() {
         companyName: null,
         email: q.email,
         phone: q.phone,
-        subject: q.custom_product_name || (q.product ? (isAr ? q.product.name_ar || q.product.name_en : q.product.name_en || q.product.name_ar) : t('quotes.table.general_inquiry')),
+        subject: getQuoteProductName(q, {
+          isArabic: isAr,
+          generalInquiry: t('quotes.table.general_inquiry'),
+        }),
         details: q.details,
         date: q.created_at,
         status: q.status || 'pending',
@@ -811,7 +815,10 @@ export default function AllRequests() {
                       {t('quotes.modal.product_label')}
                     </label>
                     <p className="text-lg font-black text-on-surface uppercase tracking-tight">
-                      {selectedRequest.raw.custom_product_name || selectedRequest.raw.product?.name_ar || selectedRequest.raw.product?.name_en || t('quotes.modal.product_default')}
+                      {getQuoteProductName(selectedRequest.raw, {
+                        isArabic: isAr,
+                        generalInquiry: t('quotes.modal.product_default'),
+                      })}
                     </p>
                     {selectedRequest.raw.product_id && (
                       <p className="text-xs font-mono text-secondary italic">
