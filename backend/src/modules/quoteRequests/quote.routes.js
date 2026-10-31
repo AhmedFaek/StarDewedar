@@ -23,8 +23,8 @@ const quoteLimiter = rateLimit({
 })
 
 // Create a new quote request
-// Flow: rate limiter → bounded multipart parser → Turnstile → controller validation
-router.post('/', quoteLimiter, singleFileUpload, verifyTurnstile, controller.createQuote)
+// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
+router.post('/', quoteLimiter, verifyTurnstile, singleFileUpload, controller.createQuote)
 
 // Get all quote requests
 router.get('/', auth,

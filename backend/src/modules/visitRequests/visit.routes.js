@@ -23,8 +23,8 @@ const visitLimiter = rateLimit({
 })
 
 // Create a new visit request
-// Flow: rate limiter → bounded multipart parser → Turnstile → controller validation
-router.post('/', visitLimiter, singleFileUpload, verifyTurnstile, controller.createVisit)
+// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
+router.post('/', visitLimiter, verifyTurnstile, singleFileUpload, controller.createVisit)
 
 // Get all visit requests
 router.get('/', auth,

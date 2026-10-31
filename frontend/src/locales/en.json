@@ -455,7 +455,15 @@
     "supportingDocs": "Supporting Documents",
     "loading": "Loading your requests...",
     "error": "Failed to load requests. Please try again.",
-    "retry": "Retry"
+    "retry": "Retry",
+    "open": "Open My Requests",
+    "refresh": "Refresh",
+    "returnToForm": "Return to form",
+    "recoveryNote": "Check the history for the same account email. If your request appears, do not submit it again. If it is not visible, refresh and check again; an empty history does not prove it was not received.",
+    "recoveryEmptyTitle": "No matching request is visible yet",
+    "recoveryEmptyDesc": "This does not confirm the request was not received. Refresh and check again before returning to the form. If you retry, use the fresh Turnstile challenge.",
+    "contactRecoveryTitle": "Contact messages are not listed here",
+    "contactRecoveryNote": "My Requests only shows Quote, Visit, and BOQ requests matched to your signed-in account email. It cannot confirm whether a Contact message arrived; please contact us through the listed contact details before sending it again."
   },
 
   "whatsapp": {
@@ -469,6 +477,9 @@
   "notifications": {
     "genericError": "Something went wrong. Please try again.",
     "networkError": "Network error. Please check your connection and try again.",
+    "submissionOutcomeUnknown": "We could not confirm whether your request was received. Please verify again before retrying.",
+    "submissionOutcomeHistory": "Check My Requests for a record matching your signed-in account email. If it appears, do not submit the request again. If it is not visible, refresh and check again; an empty history does not prove it was not received. If you still cannot find it, return to this form and retry with a fresh Turnstile challenge.",
+    "submissionOutcomeContactNote": "Contact messages are not shown in My Requests, so that history cannot confirm whether this message arrived. Please use the listed contact details to check before sending it again.",
     "sessionExpired": "Session expired, please log in again.",
     "unauthorized": "Unauthorized access.",
     "invalidCredentials": "Invalid email or password.",

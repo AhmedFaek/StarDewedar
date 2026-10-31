@@ -15,6 +15,7 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SubmitButton from '../forms/SubmitButton'
 import TurnstileWidget from '../forms/TurnstileWidget'
+import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
@@ -41,6 +42,7 @@ export default function VisitFormSection({ visible = true }) {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -84,6 +86,7 @@ export default function VisitFormSection({ visible = true }) {
 
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
+      setUnknownOutcome(false)
       const payload = new FormData()
       payload.append('factory_name', formData.factory_name)
       payload.append('factory_activity', formData.factory_activity)
@@ -97,11 +100,10 @@ export default function VisitFormSection({ visible = true }) {
       payload.append('details', formData.details)
       payload.append('preferred_date', new Date(formData.preferred_date).toISOString())
       payload.append('status', 'PENDING')
-      payload.append('turnstileToken', turnstileToken)
       if (file instanceof File) {
         payload.append('file', file)
       }
-      return api.sendVisitRequest(payload)
+      return api.sendVisitRequest(payload, turnstileToken)
     },
     successMessage: t('notifications.visitSuccess'),
     onSuccess: () => {
@@ -124,6 +126,11 @@ export default function VisitFormSection({ visible = true }) {
       resetTurnstile()
       return false
     },
+    onUnknownOutcome: () => {
+      setUnknownOutcome(true)
+      return true
+    },
+    ambiguousNetworkError: true,
     t,
   })
 
@@ -137,6 +144,7 @@ export default function VisitFormSection({ visible = true }) {
   return (
     <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="bg-white p-6 sm:p-8 lg:p-10">
+        {unknownOutcome && <UnknownSubmissionOutcome requestType="visit" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
           {/* Section 1 — Facility Information */}
           <div>

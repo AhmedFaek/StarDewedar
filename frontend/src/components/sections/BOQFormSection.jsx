@@ -16,6 +16,7 @@ import SelectField from '../forms/SelectField'
 import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
 import TurnstileWidget from '../forms/TurnstileWidget'
+import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
@@ -54,6 +55,7 @@ export default function BOQFormSection({ visible = true }) {
 
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   // ── Fetch logged-in user profile to prefill contact information ────────────
   useEffect(() => {
@@ -165,6 +167,7 @@ export default function BOQFormSection({ visible = true }) {
 
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
+      setUnknownOutcome(false)
       const payload = new FormData()
 
       // Customer info
@@ -188,10 +191,7 @@ export default function BOQFormSection({ visible = true }) {
         payload.append('supporting_docs', file)
       })
 
-      // Turnstile
-      payload.append('turnstileToken', turnstileToken)
-
-      return api.sendBOQRequest(payload)
+      return api.sendBOQRequest(payload, turnstileToken)
     },
     successMessage: t('requestBOQ.successMsg'),
     onSuccess: () => {
@@ -219,6 +219,11 @@ export default function BOQFormSection({ visible = true }) {
       resetTurnstile()
       return false
     },
+    onUnknownOutcome: () => {
+      setUnknownOutcome(true)
+      return true
+    },
+    ambiguousNetworkError: true,
     t,
   })
 
@@ -247,6 +252,7 @@ export default function BOQFormSection({ visible = true }) {
   return (
     <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="bg-white p-6 sm:p-8 lg:p-10">
+        {unknownOutcome && <UnknownSubmissionOutcome requestType="boq" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
 
           {/* ─── Section 1: Customer Information ─────────────────────────── */}

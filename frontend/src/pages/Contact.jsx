@@ -6,6 +6,7 @@ import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
 import TurnstileWidget from '../components/forms/TurnstileWidget'
+import UnknownSubmissionOutcome from '../components/forms/UnknownSubmissionOutcome'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
@@ -57,6 +58,7 @@ export default function Contact() {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const validate = () => {
     const e = {}
@@ -107,7 +109,10 @@ export default function Contact() {
   }
 
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
-    onSubmit: () => api.sendContactMessage({ ...formData, turnstileToken }),
+    onSubmit: () => {
+      setUnknownOutcome(false)
+      return api.sendContactMessage(formData, turnstileToken)
+    },
     successMessage: t('notifications.contactSuccess'),
     onSuccess: () => {
       setErrors({})
@@ -136,6 +141,11 @@ export default function Contact() {
       }
       return false
     },
+    onUnknownOutcome: () => {
+      setUnknownOutcome(true)
+      return true
+    },
+    ambiguousNetworkError: true,
     t,
   })
 
@@ -205,6 +215,7 @@ export default function Contact() {
                 <h2 className="text-3xl font-headline font-bold uppercase tracking-tight mb-12 text-on-surface">
                   {t('contact.formTitle')}
                 </h2>
+                {unknownOutcome && <UnknownSubmissionOutcome requestType="contact" />}
                 <form onSubmit={handleSubmit} className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <InputField label={t('contact.firstName')} name="first_name" placeholder="AHMED" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} />
