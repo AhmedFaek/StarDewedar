@@ -69,7 +69,6 @@ lerna-debug.log*
 *.db
 *.sqlite
 *.sqlite3
-prisma/migrations/
 .prisma/
 
 # ============================================
