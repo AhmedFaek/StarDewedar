@@ -1,4 +1,7 @@
 {
+  "phone": {
+    "invalid": "Enter 11 digits starting with 01, or +20 followed by 10 digits."
+  },
   "nav": {
     "products": "Products",
     "projects": "Projects",

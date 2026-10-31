@@ -21,6 +21,7 @@ import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 export default function VisitFormSection({ visible = true }) {
   const { t } = useTranslation()
@@ -38,6 +39,7 @@ export default function VisitFormSection({ visible = true }) {
 
   const [file, setFile] = useState(null)
   const [fileUploadKey, setFileUploadKey] = useState(0)
+  const [errors, setErrors] = useState({})
 
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
@@ -47,6 +49,21 @@ export default function VisitFormSection({ visible = true }) {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handlePhoneChange = (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setErrors((prev) => ({ ...prev, [e.currentTarget.name]: t('phone.invalid') }))
+      return
+    }
+
+    const { name } = e.currentTarget
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({
+      ...prev,
+      [name]: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
   }
 
   const handleFileChange = (e) => {
@@ -136,6 +153,15 @@ export default function VisitFormSection({ visible = true }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    const phoneErrors = {}
+    if (!isValidEgyptianPhoneNumber(formData.phone_number)) {
+      phoneErrors.phone_number = t('phone.invalid')
+    }
+    if (formData.whatsapp_number && !isValidEgyptianPhoneNumber(formData.whatsapp_number)) {
+      phoneErrors.whatsapp_number = t('phone.invalid')
+    }
+    setErrors(phoneErrors)
+    if (Object.keys(phoneErrors).length > 0) return
     await submitForm()
   }
 
@@ -201,20 +227,26 @@ export default function VisitFormSection({ visible = true }) {
               <InputField
                 label={t('requestVisit.phoneNumber')}
                 type="tel"
-                placeholder="(+20) 01234567890"
+                inputMode="tel"
+                dir="ltr"
+                placeholder="01287879794 / +201287879794"
                 name="phone_number"
                 value={formData.phone_number}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
                 required
+                error={errors.phone_number}
                 variant="bordered"
               />
               <InputField
                 label={t('requestVisit.whatsappNumber')}
                 type="tel"
-                placeholder="(+20) 01012345678"
+                inputMode="tel"
+                dir="ltr"
+                placeholder="01287879794 / +201287879794"
                 name="whatsapp_number"
                 value={formData.whatsapp_number}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
+                error={errors.whatsapp_number}
                 variant="bordered"
               />
               <InputField

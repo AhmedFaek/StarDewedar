@@ -12,6 +12,7 @@ import { isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
 import { useFormSubmit } from '../hooks/useFormSubmit.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
 
 export default function Contact() {
   const { t, i18n } = useTranslation()
@@ -68,8 +69,10 @@ export default function Contact() {
       e.last_name = t('contact.validation.minChars', { n: 2 })
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       e.email = t('contact.validation.invalidEmail')
-    if (!formData.phone_number.trim())
-      e.phone_number = t('contact.validation.required')
+    if (!isValidEgyptianPhoneNumber(formData.phone_number))
+      e.phone_number = t('phone.invalid')
+    if (formData.whatsapp_number && !isValidEgyptianPhoneNumber(formData.whatsapp_number))
+      e.whatsapp_number = t('phone.invalid')
     if (!formData.message.trim() || formData.message.trim().length < 10)
       e.message = t('contact.validation.minChars', { n: 10 })
     return e
@@ -83,6 +86,20 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }))
     // Clear error for this field on change
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const handlePhoneChange = (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setErrors((prev) => ({ ...prev, [e.currentTarget.name]: t('phone.invalid') }))
+      return
+    }
+    const { name } = e.currentTarget
+    setFormData((prev) => ({ ...prev, [name]: value }))
+    setErrors((prev) => ({
+      ...prev,
+      [name]: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
   }
 
   useEffect(() => {
@@ -223,7 +240,7 @@ export default function Contact() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
-                    <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" placeholder="+20 11..." value={formData.phone_number} onChange={handleInputChange} required error={errors.phone_number} />
+                    <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone_number} onChange={handlePhoneChange} required error={errors.phone_number} />
                   </div>
                   <InputField
                     label={(
@@ -236,9 +253,12 @@ export default function Contact() {
                     )}
                     name="whatsapp_number"
                     type="tel"
-                    placeholder="+20 10..."
+                    inputMode="tel"
+                    dir="ltr"
+                    placeholder="01287879794 / +201287879794"
                     value={formData.whatsapp_number}
-                    onChange={handleInputChange}
+                    onChange={handlePhoneChange}
+                    error={errors.whatsapp_number}
                     className="focus:border-[#25D366]"
                   />
                   <div className="space-y-2">

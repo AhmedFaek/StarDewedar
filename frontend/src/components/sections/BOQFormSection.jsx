@@ -22,6 +22,7 @@ import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateBOQFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 // BOQ-specific file types shown to the user
 const BOQ_ACCEPT = '.pdf,.xls,.xlsx,.csv'
@@ -84,8 +85,8 @@ export default function BOQFormSection({ visible = true }) {
       e.company_name = t('requestBOQ.validation.companyRequired')
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       e.email = t('requestBOQ.validation.emailInvalid')
-    if (!formData.phone.trim() || formData.phone.trim().length < 10)
-      e.phone = t('requestBOQ.validation.phoneRequired')
+    if (!isValidEgyptianPhoneNumber(formData.phone))
+      e.phone = t('phone.invalid')
     if (!formData.project_name.trim() || formData.project_name.trim().length < 2)
       e.project_name = t('requestBOQ.validation.projectNameRequired')
     if (!formData.project_location.trim() || formData.project_location.trim().length < 2)
@@ -103,6 +104,19 @@ export default function BOQFormSection({ visible = true }) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const handlePhoneChange = (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setErrors((prev) => ({ ...prev, phone: t('phone.invalid') }))
+      return
+    }
+    setFormData((prev) => ({ ...prev, phone: value }))
+    setErrors((prev) => ({
+      ...prev,
+      phone: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
   }
 
   const handleBOQFileChange = (e) => {
@@ -297,9 +311,11 @@ export default function BOQFormSection({ visible = true }) {
               <InputField
                 label={t('requestBOQ.phoneNumber')}
                 type="tel"
+                inputMode="tel"
+                dir="ltr"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
                 required
                 error={errors.phone}
                 variant="bordered"

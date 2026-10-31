@@ -788,7 +788,7 @@ test('invalid BOQ supporting content prevents all Cloudinary upload calls', asyn
             name: 'Example User',
             company_name: 'Example Company',
             email: 'example@example.com',
-            phone: '+12345678901',
+            phone: '+201287879794',
             project_name: 'Example Project',
             project_location: 'Example Location',
             project_type: 'commercial',

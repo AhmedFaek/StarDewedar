@@ -5,6 +5,7 @@ import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 /**
  * AuthModal - slide-in modal with Login / Register / Email Verification / Forgot Password views.
@@ -29,6 +30,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const { showSuccess, showError, showInfo } = useNotification()
   const [tab, setTab] = useState(defaultTab)
   const [error, setError] = useState('')
+  const [phoneErrors, setPhoneErrors] = useState({})
   const overlayRef = useRef(null)
 
   // Forgot password state
@@ -60,6 +62,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     if (isOpen) {
       setTab(defaultTab)
       setError('')
+      setPhoneErrors({})
       setShowForgotPassword(false)
       setShowVerification(false)
       setForgotSent(false)
@@ -174,6 +177,15 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     e.preventDefault()
     setError('')
 
+    const invalidPhones = ['phone_number', 'whatsapp_number'].filter((field) =>
+      regData[field] && !isValidEgyptianPhoneNumber(regData[field])
+    )
+    if (invalidPhones.length > 0) {
+      setPhoneErrors(Object.fromEntries(invalidPhones.map((field) => [field, t('phone.invalid')])))
+      setError(t('phone.invalid'))
+      return
+    }
+
     if (!allValid) {
       setError(t('resetPassword.weakPassword'))
       return
@@ -185,6 +197,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     }
 
     await doRegister()
+  }
+
+  const handleRegistrationPhoneChange = (field) => (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setPhoneErrors((prev) => ({ ...prev, [field]: t('phone.invalid') }))
+      return
+    }
+    setRegData((prev) => ({ ...prev, [field]: value }))
+    setPhoneErrors((prev) => ({
+      ...prev,
+      [field]: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
   }
 
   // ── Verify Email form submission ─────────────────────────────────
@@ -358,7 +383,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                   <input
                     id="auth-verification-code"
                     type="text"
-                    inputMode="numeric"
+                    inputMode="tel"
                     autoComplete="one-time-code"
                     maxLength={6}
                     required
@@ -633,11 +658,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       <input
                         id="auth-reg-phone"
                         type="tel"
+                        inputMode="tel"
+                        dir="ltr"
                         value={regData.phone_number}
-                        onChange={(e) => setRegData((prev) => ({ ...prev, phone_number: e.target.value }))}
+                        onChange={handleRegistrationPhoneChange('phone_number')}
                         className="auth-input"
-                        placeholder="+20 ..."
+                        placeholder="01287879794 / +201287879794"
                       />
+                      {phoneErrors.phone_number && <p className="mt-1 text-[11px] text-red-500">{phoneErrors.phone_number}</p>}
                     </div>
                     <div>
                       <label className="auth-label">{t('auth.whatsappOptional')}</label>
@@ -659,13 +687,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                         <input
                           id="auth-reg-whatsapp"
                           type="tel"
+                          inputMode="numeric"
+                          dir="ltr"
                           value={regData.whatsapp_number}
-                          onChange={(e) => setRegData((prev) => ({ ...prev, whatsapp_number: e.target.value }))}
+                          onChange={handleRegistrationPhoneChange('whatsapp_number')}
                           className="auth-input"
                           style={{ paddingLeft: '34px' }}
-                          placeholder="+20 ..."
+                          placeholder="01287879794 / +201287879794"
                         />
                       </div>
+                      {phoneErrors.whatsapp_number && <p className="mt-1 text-[11px] text-red-500">{phoneErrors.whatsapp_number}</p>}
                     </div>
                     <div className="col-span-2">
                       <label className="auth-label">{t('auth.companyOptional')}</label>

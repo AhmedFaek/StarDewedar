@@ -1,4 +1,7 @@
 {
+  "phone": {
+    "invalid": "Enter 11 digits starting with 01, or +20 followed by 10 digits."
+  },
   "common": {
     "loading": "LOADING DATA...",
     "save": "Save",
@@ -352,6 +355,7 @@
     },
     "modal": {
       "title": "Create New User",
+      "required_note": "Required field",
       "name_label": "Full Name",
       "name_placeholder": "e.g. John Doe",
       "email_label": "Email Address",
@@ -361,9 +365,9 @@
       "password_hint": "Must contain uppercase, lowercase, and a number",
       "role_label": "User Role",
       "phone_label": "Phone Number",
-      "phone_placeholder": "+20 xxx xxx xxxx",
+      "phone_placeholder": "01287879794 / +201287879794",
       "whatsapp_label": "WhatsApp Number",
-      "whatsapp_placeholder": "+20 xxx xxx xxxx",
+      "whatsapp_placeholder": "01287879794 / +201287879794",
       "company_label": "Company Name",
       "company_placeholder": "e.g. Star Dewedar Co.",
       "submit": "Create User"

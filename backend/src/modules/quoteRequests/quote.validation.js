@@ -1,10 +1,11 @@
 import { z } from 'zod';
+import { egyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
 
 export const createQuoteRequestSchema = z.object({
     first_name: z.string().trim().min(2).max(100),
     last_name: z.string().trim().min(2).max(100),
 
-    phone: z.string().trim().min(10).max(30),
+    phone: egyptianPhoneSchema,
 
     email: z.string().email().max(254),
 
@@ -34,6 +35,6 @@ export const updateQuoteRequestSchema = z.object({
     details: z.string().trim().min(5).max(10000).optional(),
     first_name: z.string().trim().min(2).max(100).optional(),
     last_name: z.string().trim().min(2).max(100).optional(),
-    phone: z.string().trim().min(10).max(30).optional(),
+    phone: egyptianPhoneSchema.optional(),
     email: z.string().email().max(254).optional(),
 })
