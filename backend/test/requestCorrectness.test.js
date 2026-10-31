@@ -95,6 +95,20 @@ const replaceMethod = (t, target, methodName, implementation) => {
     })
 }
 
+const replaceQuoteTransaction = (t, { product = null, create, onFindUnique = () => {} }) => {
+    replaceMethod(t, prisma, '$transaction', (callback) => callback({
+        product: {
+            findUnique: async (args) => {
+                onFindUnique(args)
+                return product
+            },
+        },
+        quoteRequest: {
+            create,
+        },
+    }))
+}
+
 const invokeCreate = (requestType, body = requestBodies[requestType], file = null) => {
     const req = { body }
     if (requestType === 'BOQ') {
@@ -162,10 +176,10 @@ test('Visit and Quote services whitelist create data even when called with untru
         captured.visit = data
         return { id: 'visit-1', ...data }
     })
-    replaceMethod(t, prisma.quoteRequest, 'create', async ({ data }) => {
+    replaceQuoteTransaction(t, { create: async ({ data }) => {
         captured.quote = data
         return { id: 'quote-1', product: null, ...data }
-    })
+    } })
     t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
 
     await visitService.createVisitRequest({
@@ -187,6 +201,81 @@ test('Visit and Quote services whitelist create data even when called with untru
     assert.equal(Object.hasOwn(captured.quote, 'untrusted_field'), false)
     assert.equal(captured.visit.name, requestBodies.VISIT.name)
     assert.equal(captured.quote.custom_product_name, requestBodies.QUOTE.custom_product_name)
+    assert.equal(captured.quote.product_name_en_snapshot, null)
+    assert.equal(captured.quote.product_name_ar_snapshot, null)
+})
+
+test('catalog Quote snapshots come from the database Product lookup', async (t) => {
+    const captured = {}
+    const product = {
+        name_en: 'Database English Name',
+        name_ar: 'اسم قاعدة البيانات',
+    }
+    let lookup
+    replaceQuoteTransaction(t, {
+        product,
+        onFindUnique: (args) => { lookup = args },
+        create: async ({ data }) => {
+            captured.data = data
+            return { id: 'quote-catalog-1', product, ...data }
+        },
+    })
+    t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
+
+    await quoteService.createQuoteRequest({
+        ...requestBodies.QUOTE,
+        product_id: 'catalog-product-1',
+        product_name_en_snapshot: 'Untrusted English Name',
+        product_name_ar_snapshot: 'اسم غير موثوق',
+    }, null)
+
+    assert.deepEqual(lookup, {
+        where: { id: 'catalog-product-1' },
+        select: { name_en: true, name_ar: true },
+    })
+    assert.equal(captured.data.product_id, 'catalog-product-1')
+    assert.equal(captured.data.product_name_en_snapshot, product.name_en)
+    assert.equal(captured.data.product_name_ar_snapshot, product.name_ar)
+})
+
+test('custom Quote requests do not look up or persist catalog snapshots', async (t) => {
+    const captured = {}
+    let lookupCount = 0
+    replaceQuoteTransaction(t, {
+        onFindUnique: () => { lookupCount += 1 },
+        create: async ({ data }) => {
+            captured.data = data
+            return { id: 'quote-custom-1', product: null, ...data }
+        },
+    })
+    t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
+
+    await quoteService.createQuoteRequest(requestBodies.QUOTE, null)
+
+    assert.equal(lookupCount, 0)
+    assert.equal(captured.data.product_id, null)
+    assert.equal(captured.data.custom_product_name, requestBodies.QUOTE.custom_product_name)
+    assert.equal(captured.data.product_name_en_snapshot, null)
+    assert.equal(captured.data.product_name_ar_snapshot, null)
+})
+
+test('catalog Quote creation fails if the selected Product no longer exists', async (t) => {
+    let createCount = 0
+    replaceQuoteTransaction(t, {
+        create: async () => {
+            createCount += 1
+            return { id: 'unexpected-quote' }
+        },
+    })
+
+    await assert.rejects(
+        quoteService.createQuoteRequest({
+            ...requestBodies.QUOTE,
+            product_id: 'deleted-product',
+        }, null),
+        /Requested product is no longer available/
+    )
+    assert.equal(createCount, 0)
 })
 
 test('Visit and Quote persist only the Cloudinary URL after a successful multipart upload', async (t) => {
@@ -196,10 +285,10 @@ test('Visit and Quote persist only the Cloudinary URL after a successful multipa
         captured.visit = data
         return { id: 'visit-upload-1', ...data }
     })
-    replaceMethod(t, prisma.quoteRequest, 'create', async ({ data }) => {
+    replaceQuoteTransaction(t, { create: async ({ data }) => {
         captured.quote = data
         return { id: 'quote-upload-1', product: null, ...data }
-    })
+    } })
     t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
         end() {
             uploadCount += 1
@@ -232,14 +321,19 @@ test('successful public create requests retain their 201 response shape', async 
     const persistedData = {}
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         const delegate = prismaDelegates[requestType]
-        replaceMethod(t, delegate, 'create', async ({ data }) => {
+        const create = async ({ data }) => {
             persistedData[requestType] = data
             return {
                 id: `${requestType.toLowerCase()}-1`,
                 ...data,
                 ...(requestType === 'QUOTE' ? { product: null } : {}),
             }
-        })
+        }
+        if (requestType === 'QUOTE') {
+            replaceQuoteTransaction(t, { create })
+        } else {
+            replaceMethod(t, delegate, 'create', create)
+        }
     }
     t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
         end() {
@@ -271,14 +365,19 @@ test('successful public create requests retain their 201 response shape', async 
 test('notification email failures remain non-fatal after persistence', async (t) => {
     const persistedTypes = []
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
-        replaceMethod(t, prismaDelegates[requestType], 'create', async ({ data }) => {
+        const create = async ({ data }) => {
             persistedTypes.push(requestType)
             return {
                 id: `${requestType.toLowerCase()}-email-failure`,
                 ...data,
                 ...(requestType === 'QUOTE' ? { product: null } : {}),
             }
-        })
+        }
+        if (requestType === 'QUOTE') {
+            replaceQuoteTransaction(t, { create })
+        } else {
+            replaceMethod(t, prismaDelegates[requestType], 'create', create)
+        }
     }
     t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
         end() {
@@ -356,9 +455,14 @@ for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
             new Error('database secret and query details'),
             { code: 'P2002', name: 'PrismaClientKnownRequestError' }
         )
-        replaceMethod(t, prismaDelegates[requestType], 'create', async () => {
+        const create = async () => {
             throw databaseError
-        })
+        }
+        if (requestType === 'QUOTE') {
+            replaceQuoteTransaction(t, { create })
+        } else {
+            replaceMethod(t, prismaDelegates[requestType], 'create', create)
+        }
         t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
             end() {
                 callback(null, {

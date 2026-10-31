@@ -164,8 +164,10 @@ model QuoteRequest {
   notification_lease_expires_at DateTime?
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
+  product_name_en_snapshot      String?
+  product_name_ar_snapshot      String?
 
-  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
 
   @@index([created_at])
   @@index([notification_status, created_at])

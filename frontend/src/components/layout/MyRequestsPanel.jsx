@@ -30,9 +30,14 @@ function StatusBadge({ status, t }) {
 /* ── Single Quote Card ───────────────────────────────────────────────────── */
 
 function QuoteCard({ quote, lang, t }) {
-  const productName = quote.product
-    ? (quote.product[`name_${lang}`] ?? quote.product.name_en)
-    : quote.custom_product_name ?? t('myRequests.customProduct')
+  const liveProductName = quote.product?.[`name_${lang}`]?.trim()
+  const snapshotName = (lang === 'ar'
+    ? quote.product_name_ar_snapshot
+    : quote.product_name_en_snapshot)?.trim()
+  const productName = liveProductName
+    || snapshotName
+    || quote.custom_product_name?.trim()
+    || t('myRequests.customProduct')
 
   const date = new Date(quote.created_at).toLocaleDateString(
     lang === 'ar' ? 'ar-EG' : 'en-GB',
