@@ -5,7 +5,7 @@ import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
-import { isLoggedIn } from '../utils/auth'
+import { getUser, isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler'
 import { useNotification } from '../hooks/useNotification'
 
@@ -45,12 +45,11 @@ const SUGGESTED_SUBJECTS = [
   { key: 'generalInquiry', defaultEn: 'General Inquiry' },
 ]
 
-function NewConversationModal({ onClose, onCreate, t }) {
+function NewConversationModal({ onClose, onCreate, onAccessError, t }) {
   const [subject, setSubject] = useState('')
   const [content, setContent] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const { showError } = useNotification()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -65,7 +64,7 @@ function NewConversationModal({ onClose, onCreate, t }) {
       })
       onCreate(result.data.conversation)
     } catch (err) {
-      setError(getApiErrorMessage(err, { t }))
+      if (!onAccessError(err)) setError(getApiErrorMessage(err, { t }))
     } finally {
       setLoading(false)
     }
@@ -268,6 +267,26 @@ export default function MessagesPage() {
   const [loadingMore, setLoadingMore] = useState(false)
 
   const loggedIn = isLoggedIn()
+  const isCustomer = loggedIn && getUser()?.role === 'customer'
+  const [accessIssue, setAccessIssue] = useState(null)
+
+  const handleAccessError = useCallback((err) => {
+    if (err?.status === 403) {
+      setAccessIssue('role')
+      setShowModal(false)
+      return true
+    }
+    if (err?.status === 401) {
+      setAccessIssue('session')
+      setShowModal(false)
+      return true
+    }
+    return false
+  }, [])
+
+  const handleLoadError = useCallback((err) => {
+    if (!handleAccessError(err)) showError(getApiErrorMessage(err, { t }))
+  }, [handleAccessError, showError, t])
 
   const loadConversations = useCallback(async (page = 1, append = false) => {
     try {
@@ -279,14 +298,14 @@ export default function MessagesPage() {
       }
       setPagination(res.pagination || { page: 1, totalPages: 1 })
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      handleLoadError(err)
     }
-  }, [t, showError])
+  }, [handleLoadError])
 
   const LIST_POLL_INTERVAL = 15000 // 15 seconds
 
   useEffect(() => {
-    if (!loggedIn) { setLoading(false); return }
+    if (!isCustomer || accessIssue) { setLoading(false); return }
     loadConversations(1).finally(() => setLoading(false))
 
     // Background polling to keep status badges & last messages fresh
@@ -304,7 +323,7 @@ export default function MessagesPage() {
             setPagination(prev => ({ ...prev, total: res.pagination.total, totalPages: res.pagination.totalPages }))
           }
         }
-      }).catch(() => {})
+      }).catch(handleLoadError)
     }, LIST_POLL_INTERVAL)
 
     const handleFocus = () => {
@@ -318,7 +337,7 @@ export default function MessagesPage() {
             return [...brandNew, ...updated]
           })
         }
-      }).catch(() => {})
+      }).catch(handleLoadError)
     }
     window.addEventListener('focus', handleFocus)
 
@@ -326,7 +345,7 @@ export default function MessagesPage() {
       clearInterval(interval)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [loggedIn, loadConversations])
+  }, [isCustomer, accessIssue, loadConversations, handleLoadError])
 
   const handleLoadMore = async () => {
     if (loadingMore || pagination.page >= pagination.totalPages) return
@@ -361,7 +380,7 @@ export default function MessagesPage() {
                 {t('messages.subtitle')}
               </p>
             </div>
-            {loggedIn && (
+            {isCustomer && !accessIssue && (
               <button
                 id="new-conversation-btn"
                 onClick={() => setShowModal(true)}
@@ -375,7 +394,7 @@ export default function MessagesPage() {
         </div>
 
         {/* ── Not Logged In ─────────────────────────────────────────────── */}
-        {!loggedIn && (
+        {!loggedIn && accessIssue !== 'session' && (
           <div className="py-24 text-center">
             <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock</span>
             <p className="font-headline font-bold uppercase tracking-widest text-sm text-slate-600 mb-2">
@@ -387,8 +406,32 @@ export default function MessagesPage() {
           </div>
         )}
 
+        {(loggedIn && !isCustomer) || accessIssue === 'role' ? (
+          <div className="py-24 text-center">
+            <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock</span>
+            <p className="font-headline font-bold uppercase tracking-widest text-sm text-slate-600 mb-2">
+              {t('messages.customerRequired')}
+            </p>
+            <p className="text-xs text-slate-400 font-body">
+              {t('messages.customerRequiredDesc')}
+            </p>
+          </div>
+        ) : null}
+
+        {accessIssue === 'session' && (
+          <div className="py-24 text-center">
+            <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock_clock</span>
+            <p className="font-headline font-bold uppercase tracking-widest text-sm text-slate-600 mb-2">
+              {t('messages.sessionExpiredTitle')}
+            </p>
+            <p className="text-xs text-slate-400 font-body">
+              {t('messages.sessionExpiredDesc')}
+            </p>
+          </div>
+        )}
+
         {/* ── Loading ────────────────────────────────────────────────────── */}
-        {loggedIn && loading && (
+        {isCustomer && !accessIssue && loading && (
           <div className="space-y-3">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="border border-slate-100 bg-white p-4 animate-pulse">
@@ -405,7 +448,7 @@ export default function MessagesPage() {
         )}
 
         {/* ── Empty State ────────────────────────────────────────────────── */}
-        {loggedIn && !loading && conversations.length === 0 && (
+        {isCustomer && !accessIssue && !loading && conversations.length === 0 && (
           <div className="py-24 text-center">
             <span className="material-symbols-outlined text-6xl text-slate-200 block mb-4"
               style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>
@@ -429,7 +472,7 @@ export default function MessagesPage() {
         )}
 
         {/* ── Conversation List ──────────────────────────────────────────── */}
-        {loggedIn && !loading && conversations.length > 0 && (
+        {isCustomer && !accessIssue && !loading && conversations.length > 0 && (
           <div className="space-y-2">
             {conversations.map((conv) => (
               <ConversationRow
@@ -468,6 +511,7 @@ export default function MessagesPage() {
           t={t}
           onClose={() => setShowModal(false)}
           onCreate={handleConversationCreated}
+          onAccessError={handleAccessError}
         />
       )}
 
