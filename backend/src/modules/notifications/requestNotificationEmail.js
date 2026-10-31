@@ -1,4 +1,9 @@
-import { buildNotificationEmail, formatDateTime } from '../../utils/email.template.js'
+import {
+    buildNotificationEmail,
+    createSdcMonogramAttachment,
+    formatDateTime,
+    SDC_MONOGRAM_CID,
+} from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
 import env from '../../config/env.js'
 
@@ -31,13 +36,14 @@ export const sendVisitRequestEmail = async (visitRequest) => {
         details,
         attachments,
         customerEmail: email,
-        logoUrl: env.logoUrl,
+        logoCid: SDC_MONOGRAM_CID,
         adminUrl,
     })
 
     return sendEmail({
-        subject: `New Visit Request — ${name} — Star Dewedar`,
+        subject: `New Visit Request — ${name} — SDC`,
         html,
+        attachments: [createSdcMonogramAttachment()],
     })
 }
 
@@ -65,13 +71,14 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
         details: quoteRequest.details,
         attachments,
         customerEmail: email,
-        logoUrl: env.logoUrl,
+        logoCid: SDC_MONOGRAM_CID,
         adminUrl,
     })
 
     return sendEmail({
-        subject: `New Quote Request — ${fullName} — Star Dewedar`,
+        subject: `New Quote Request — ${fullName} — SDC`,
         html,
+        attachments: [createSdcMonogramAttachment()],
     })
 }
 
@@ -115,13 +122,14 @@ export const sendBOQRequestEmail = async (boqRequest) => {
         detailsTitle: 'Additional Requirements',
         attachments,
         customerEmail: email,
-        logoUrl: env.logoUrl,
+        logoCid: SDC_MONOGRAM_CID,
         adminUrl,
     })
     const subjectCompanyPart = company ? `${company} (${name})` : name
 
     return sendEmail({
-        subject: `New BOQ Request — ${subjectCompanyPart} — Star Dewedar`,
+        subject: `New BOQ Request — ${subjectCompanyPart} — SDC`,
         html,
+        attachments: [createSdcMonogramAttachment()],
     })
 }

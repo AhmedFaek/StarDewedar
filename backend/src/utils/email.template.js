@@ -1,4 +1,19 @@
 import { escapeHtml } from './htmlEscaper.js'
+import { fileURLToPath } from 'node:url'
+
+export const SDC_MONOGRAM_CID = 'sdc-monogram@stardewedar.com'
+export const createSdcMonogramAttachment = () => ({
+  filename: 'sdc-monogram.png',
+  path: fileURLToPath(new URL('../assets/sdc-monogram.png', import.meta.url)),
+  cid: SDC_MONOGRAM_CID,
+})
+
+const requestTitles = {
+  VISIT: 'New Visit Request',
+  QUOTE: 'New Quote Request',
+  BOQ: 'New BOQ Request',
+  CONTACT: 'New Contact Message',
+}
 
 /**
  * Format a date/time into a consistent, readable format: "15 October 2026 at 2:30 PM"
@@ -34,14 +49,14 @@ export const formatDateTime = (dateInput) => {
  */
 const renderTableRow = (label, valueHtml, isLast = false) => {
   if (valueHtml === null || valueHtml === undefined || valueHtml === '') return ''
-  const borderStyle = isLast ? '' : 'border-bottom: 1px solid #f1f5f9;'
+  const borderStyle = isLast ? '' : 'border-bottom: 1px solid #E5EBF0;'
 
   return `
-    <tr style="${borderStyle}">
-      <td style="padding: 10px 12px 10px 0; width: 34%; vertical-align: top; font-size: 11px; font-weight: 700; color: #5d5e61; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Inter', Arial, sans-serif;">
+    <tr>
+      <td style="padding: 11px 12px 11px 0; width: 34%; vertical-align: top; font-size: 11px; font-weight: 700; color: #526579; text-transform: uppercase; letter-spacing: 0.5px; font-family: Arial, Helvetica, sans-serif; ${borderStyle}">
         ${escapeHtml(label)}
       </td>
-      <td style="padding: 10px 0 10px 12px; width: 66%; vertical-align: top; font-size: 14px; color: #000e24; line-height: 1.5; word-break: break-word; overflow-wrap: break-word; font-family: 'Inter', Arial, sans-serif;" dir="auto">
+      <td style="padding: 11px 0 11px 12px; width: 66%; vertical-align: top; font-size: 14px; color: #102A43; line-height: 1.5; word-break: break-word; font-family: Arial, Helvetica, sans-serif; ${borderStyle}" dir="auto">
         ${valueHtml}
       </td>
     </tr>
@@ -53,9 +68,13 @@ const renderTableRow = (label, valueHtml, isLast = false) => {
  */
 const renderSectionHeader = (title) => {
   return `
-    <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #000e24; text-transform: uppercase; background-color: #f8fafc; border-left: 3px solid #000e24; padding: 7px 12px; margin: 24px 0 12px 0; font-family: 'Inter', Arial, sans-serif;">
-      ${escapeHtml(title)}
-    </div>
+    <table cellpadding="0" cellspacing="0" border="0" width="100%" style="margin: 24px 0 12px 0; border-collapse: collapse;">
+      <tr>
+        <td style="background-color: #F3F6F9; border-left: 3px solid #1B75BA; padding: 9px 12px; font-size: 11px; font-weight: 700; letter-spacing: 1px; color: #102A43; text-transform: uppercase; font-family: Arial, Helvetica, sans-serif;">
+          ${escapeHtml(title)}
+        </td>
+      </tr>
+    </table>
   `
 }
 
@@ -70,7 +89,7 @@ const renderSectionHeader = (title) => {
  * @param {string} [options.detailsTitle] - Section title for details block (default: "Details")
  * @param {Array<{ label: string, url: string }>} [options.attachments] - Array of attachment objects
  * @param {string} [options.customerEmail] - Customer email for the reply mailto CTA
- * @param {string} [options.logoUrl] - Cloudinary logo URL
+ * @param {string} [options.logoCid] - Content-ID for the inline SDC monogram attachment
  * @param {string} [options.adminUrl] - Admin dashboard deep link URL
  * @returns {string} Full HTML email document
  */
@@ -82,22 +101,22 @@ export const buildNotificationEmail = ({
   detailsTitle = 'Details',
   attachments = [],
   customerEmail = '',
-  logoUrl = null,
+  logoCid = SDC_MONOGRAM_CID,
   adminUrl = null,
 }) => {
   const currentYear = new Date().getFullYear()
 
   // 1. Customer Information Rows
   const statusBadge = customerInfo.status
-    ? `<span style="display: inline-block; background-color: #edf2f7; color: #000e24; border: 1px solid #b3bed4; padding: 2px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">${escapeHtml(customerInfo.status)}</span>`
+    ? `<span style="display: inline-block; background-color: #EAF3FA; color: #102A43; border: 1px solid #B9D7EC; padding: 3px 8px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase;">${escapeHtml(customerInfo.status)}</span>`
     : ''
 
   const emailValue = customerInfo.email
-    ? `<a href="mailto:${escapeHtml(customerInfo.email)}" style="color: #00234b; text-decoration: underline; word-break: break-all;">${escapeHtml(customerInfo.email)}</a>`
+    ? `<a href="mailto:${escapeHtml(customerInfo.email)}" style="color: #1B75BA; text-decoration: underline; word-break: break-all;">${escapeHtml(customerInfo.email)}</a>`
     : ''
 
   const phoneValue = customerInfo.phone
-    ? `<a href="tel:${escapeHtml(customerInfo.phone)}" style="color: #000e24; text-decoration: none;">${escapeHtml(customerInfo.phone)}</a>`
+    ? `<a href="tel:${escapeHtml(customerInfo.phone)}" style="color: #102A43; text-decoration: none;">${escapeHtml(customerInfo.phone)}</a>`
     : ''
 
   const customerRows = [
@@ -123,7 +142,9 @@ export const buildNotificationEmail = ({
   const detailsHtml = (details && String(details).trim().length > 0)
     ? `
       ${renderSectionHeader(detailsTitle)}
-      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid #000e24; padding: 14px 16px; font-size: 14px; line-height: 1.7; color: #1e293b; white-space: pre-wrap; word-break: break-word; overflow-wrap: break-word; font-family: 'Inter', Arial, sans-serif;" dir="auto">${escapeHtml(String(details).trim())}</div>
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; background-color: #F3F6F9; border: 1px solid #E5EBF0; border-left: 3px solid #1B75BA;">
+        <tr><td style="padding: 14px 16px; font-size: 14px; line-height: 1.7; color: #334E68; white-space: pre-wrap; word-break: break-word; font-family: Arial, Helvetica, sans-serif;" dir="auto">${escapeHtml(String(details).trim())}</td></tr>
+      </table>
     `
     : ''
 
@@ -132,14 +153,14 @@ export const buildNotificationEmail = ({
   const attachmentsHtml = validAttachments.length > 0
     ? `
       ${renderSectionHeader('Attachments')}
-      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; border: 1px solid #e2e8f0; background-color: #f8fafc;">
+      <table cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse: collapse; border: 1px solid #E5EBF0; background-color: #F3F6F9;">
         ${validAttachments.map((att, i) => `
           <tr style="${i < validAttachments.length - 1 ? 'border-bottom: 1px solid #e2e8f0;' : ''}">
-            <td style="padding: 10px 14px; font-size: 13px; font-weight: 600; color: #000e24; font-family: 'Inter', Arial, sans-serif; word-break: break-word;">
+            <td style="padding: 10px 14px; font-size: 13px; font-weight: 600; color: #102A43; font-family: Arial, Helvetica, sans-serif; word-break: break-word;">
               ${escapeHtml(att.label || `Attachment ${i + 1}`)}
             </td>
             <td align="right" style="padding: 10px 14px; white-space: nowrap;">
-              <a href="${escapeHtml(att.url)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #000e24; color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: none; padding: 6px 12px; font-family: 'Inter', Arial, sans-serif;">
+              <a href="${escapeHtml(att.url)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #1B75BA; color: #ffffff; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: none; padding: 8px 12px; font-family: Arial, Helvetica, sans-serif;">
                 Download &rarr;
               </a>
             </td>
@@ -153,7 +174,7 @@ export const buildNotificationEmail = ({
   const replyEmail = customerEmail || customerInfo.email
   const primaryCta = adminUrl
     ? `
-      <a href="${escapeHtml(adminUrl)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #000e24; color: #ffffff; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; padding: 13px 26px; border: 1px solid #000e24; font-family: 'Inter', Arial, sans-serif; margin-right: 12px; margin-bottom: 8px;">
+      <a href="${escapeHtml(adminUrl)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #1B75BA; color: #ffffff; font-size: 13px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; text-decoration: none; padding: 13px 20px; border: 1px solid #1B75BA; font-family: Arial, Helvetica, sans-serif; margin-right: 12px; margin-bottom: 8px;">
         View Request &rarr;
       </a>
     `
@@ -161,7 +182,7 @@ export const buildNotificationEmail = ({
 
   const secondaryCta = replyEmail
     ? `
-      <a href="mailto:${escapeHtml(replyEmail)}" style="display: inline-block; background-color: #ffffff; color: #000e24; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-decoration: none; padding: 12px 22px; border: 1px solid #b3bed4; font-family: 'Inter', Arial, sans-serif; margin-bottom: 8px;">
+      <a href="mailto:${escapeHtml(replyEmail)}" style="display: inline-block; background-color: #ffffff; color: #102A43; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-decoration: none; padding: 12px 20px; border: 1px solid #B9C9D6; font-family: Arial, Helvetica, sans-serif; margin-bottom: 8px;">
         Reply to Customer
       </a>
     `
@@ -177,13 +198,14 @@ export const buildNotificationEmail = ({
     : ''
 
   // 6. Header Logo / Wordmark
-  const logoHtml = logoUrl
+  const title = requestTitles[requestType] || `New ${requestType} Request`
+  const logoHtml = logoCid
     ? `
-      <img src="${escapeHtml(logoUrl)}" alt="Star Dewedar" width="160" style="max-width: 160px; height: auto; display: block; border: 0; color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 1px;" />
+      <img src="cid:${escapeHtml(logoCid)}" alt="SDC — STAR DEWEDAR Company" width="176" height="53" style="display: block; width: 176px; height: 53px; border: 0; outline: none; text-decoration: none;" />
     `
     : `
-      <div style="color: #ffffff; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; font-family: 'Inter', Arial, sans-serif;">
-        STAR DEWEDAR
+      <div style="color: #102A43; font-size: 22px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; font-family: Arial, Helvetica, sans-serif;">
+        SDC
       </div>
     `
 
@@ -193,7 +215,7 @@ export const buildNotificationEmail = ({
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
-  <title>New ${escapeHtml(requestType)} Request &mdash; Star Dewedar</title>
+  <title>${escapeHtml(title)} — SDC</title>
   <style type="text/css">
     body, table, td, p, a, li, blockquote {
       -webkit-text-size-adjust: 100%;
@@ -228,22 +250,21 @@ export const buildNotificationEmail = ({
     }
   </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f2f4f7; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f4f7; width: 100%; margin: 0; padding: 32px 12px;">
+<body style="margin: 0; padding: 0; background-color: #F3F6F9; font-family: Arial, Helvetica, sans-serif; -webkit-font-smoothing: antialiased;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #F3F6F9; width: 100%; margin: 0; padding: 32px 12px;">
     <tr>
       <td align="center" valign="top">
-        <!-- Main Card (Architectural Monolith, 0px border-radius) -->
-        <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-collapse: collapse;">
+        <table class="email-container" width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #FFFFFF; border: 1px solid #E5EBF0; border-collapse: collapse;">
 
           <!-- Brand Header -->
           <tr>
-            <td class="header-padding" style="background-color: #000e24; background: linear-gradient(135deg, #000e24 0%, #00234b 100%); padding: 28px 32px;">
+            <td class="header-padding" style="background-color: #FFFFFF; padding: 24px 32px; border-bottom: 1px solid #E5EBF0;">
               <table width="100%" cellpadding="0" cellspacing="0" border="0">
                 <tr>
                   <td>
                     ${logoHtml}
-                    <p style="color: #94a3b8; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin: 8px 0 0 0; font-family: 'Inter', Arial, sans-serif;">
-                      Electrical Solutions &amp; Industrial Systems
+                    <p style="color: #526579; font-size: 11px; font-weight: 600; letter-spacing: 0.3px; margin: 8px 0 0 0; font-family: Arial, Helvetica, sans-serif;">
+                      STAR DEWEDAR Company &nbsp;|&nbsp; General Contracting &amp; Engineering
                     </p>
                   </td>
                 </tr>
@@ -251,29 +272,25 @@ export const buildNotificationEmail = ({
             </td>
           </tr>
 
-          <!-- Signature Voltage Accent Line (3px) -->
           <tr>
-            <td style="height: 3px; background-color: #f9e454; line-height: 3px; font-size: 3px;">&nbsp;</td>
+            <td style="height: 3px; background-color: #1B75BA; line-height: 3px; font-size: 3px;">&nbsp;</td>
           </tr>
 
           <!-- Request Header & Type Badge -->
           <tr>
-            <td class="content-padding" style="padding: 28px 32px 16px 32px; background-color: #ffffff;">
-              <div style="font-size: 11px; font-weight: 700; color: #5d5e61; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 6px;">
-                NEW REQUEST
-              </div>
-              <div style="display: inline-block; background-color: #000e24; color: #ffffff; font-size: 12px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; border: 1px solid #000e24; font-family: 'Inter', Arial, sans-serif;">
-                ${escapeHtml(requestType)}
-              </div>
-              <p style="margin: 16px 0 0 0; font-size: 14px; line-height: 1.6; color: #334155; font-family: 'Inter', Arial, sans-serif;">
-                A new request has been submitted through the Star Dewedar website.
+            <td class="content-padding" style="padding: 28px 32px 16px 32px; background-color: #FFFFFF;">
+              <h1 style="font-size: 22px; line-height: 1.3; font-weight: 700; color: #102A43; margin: 0 0 10px 0; font-family: Arial, Helvetica, sans-serif;">
+                ${escapeHtml(title)}
+              </h1>
+              <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #526579; font-family: Arial, Helvetica, sans-serif;">
+                A new submission has been received through the SDC website.
               </p>
             </td>
           </tr>
 
           <!-- Body Content -->
           <tr>
-            <td class="content-padding" style="padding: 0 32px 32px 32px; background-color: #ffffff;">
+            <td class="content-padding" style="padding: 0 32px 32px 32px; background-color: #FFFFFF;">
 
               <!-- Customer Information -->
               ${renderSectionHeader('Customer Information')}
@@ -303,18 +320,18 @@ export const buildNotificationEmail = ({
 
           <!-- Footer -->
           <tr>
-            <td class="footer-padding" style="background-color: #000e24; padding: 24px 32px; text-align: center; border-top: 1px solid #112240;">
-              <p style="color: #ffffff; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin: 0 0 4px 0; font-family: 'Inter', Arial, sans-serif;">
-                STAR DEWEDAR
+            <td class="footer-padding" style="background-color: #102A43; padding: 24px 32px; text-align: center;">
+              <p style="color: #FFFFFF; font-size: 13px; font-weight: 700; letter-spacing: 0.8px; margin: 0 0 4px 0; font-family: Arial, Helvetica, sans-serif;">
+                STAR DEWEDAR Company
               </p>
-              <p style="color: #94a3b8; font-size: 11px; margin: 0 0 12px 0; font-family: 'Inter', Arial, sans-serif;">
-                Electrical Solutions &amp; Industrial Systems
+              <p style="color: #D7E3EC; font-size: 11px; margin: 0 0 12px 0; font-family: Arial, Helvetica, sans-serif;">
+                General Contracting &amp; Engineering
               </p>
-              <p style="color: #64748b; font-size: 11px; line-height: 1.5; margin: 0 0 8px 0; font-family: 'Inter', Arial, sans-serif;">
-                This is an automated notification from the Star Dewedar website.
+              <p style="color: #D7E3EC; font-size: 11px; line-height: 1.5; margin: 0 0 8px 0; font-family: Arial, Helvetica, sans-serif;">
+                This is an automated notification from the SDC website.
               </p>
-              <p style="color: #475569; font-size: 10px; margin: 0; font-family: 'Inter', Arial, sans-serif;">
-                &copy; ${currentYear} Star Dewedar. All rights reserved.
+              <p style="color: #B9C9D6; font-size: 10px; margin: 0; font-family: Arial, Helvetica, sans-serif;">
+                &copy; ${currentYear} SDC. All rights reserved.
               </p>
             </td>
           </tr>
@@ -326,64 +343,3 @@ export const buildNotificationEmail = ({
 </body>
 </html>`
 }
-
-/**
- * Backward-compatible template wrapper (also upgraded to Architectural Monolith aesthetic).
- * Used by contact.service.js or any legacy callers.
- *
- * @param {{ title: string, content: string }} options
- * @returns {string}
- */
-export const baseEmailTemplate = ({ title, content }) => {
-  const currentYear = new Date().getFullYear()
-
-  return `<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" lang="en">
-<head>
-  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>${escapeHtml(title)}</title>
-</head>
-<body style="margin: 0; padding: 0; background-color: #f2f4f7; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f4f7; width: 100%; margin: 0; padding: 32px 12px;">
-    <tr>
-      <td align="center" valign="top">
-        <table width="600" cellpadding="0" cellspacing="0" border="0" style="width: 100%; max-width: 600px; background-color: #ffffff; border: 1px solid #e2e8f0; border-collapse: collapse;">
-          <!-- Header -->
-          <tr>
-            <td style="background-color: #000e24; background: linear-gradient(135deg, #000e24 0%, #00234b 100%); padding: 24px 32px;">
-              <div style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;">
-                STAR DEWEDAR
-              </div>
-              <p style="color: #94a3b8; font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin: 6px 0 0 0;">
-                Electrical Solutions &amp; Industrial Systems
-              </p>
-            </td>
-          </tr>
-          <tr>
-            <td style="height: 3px; background-color: #f9e454; line-height: 3px; font-size: 3px;">&nbsp;</td>
-          </tr>
-          <!-- Content -->
-          <tr>
-            <td style="padding: 28px 32px; color: #1e293b; line-height: 1.6;">
-              <h2 style="color: #000e24; font-size: 18px; margin: 0 0 16px 0; font-weight: 700;">
-                ${escapeHtml(title)}
-              </h2>
-              ${content}
-            </td>
-          </tr>
-          <!-- Footer -->
-          <tr>
-            <td style="background-color: #000e24; padding: 20px 32px; text-align: center; border-top: 1px solid #112240;">
-              <p style="color: #94a3b8; font-size: 11px; margin: 0;">
-                &copy; ${currentYear} Star Dewedar System &mdash; Automated Email
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
-</body>
-</html>`
-}
