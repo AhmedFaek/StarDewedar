@@ -11,11 +11,11 @@ export const createQuoteRequestSchema = z.object({
     product_id: z.string().trim().max(100).optional(),
 
     custom_product_name: z.string().trim().max(200).optional(),
-    custom_image_url: z.string().url().max(1000).optional(),
+    custom_image_url: z.never().optional(),
 
     details: z.string().trim().min(5).max(10000),
 
-    file_url: z.string().url().max(1000).optional(),
+    file_url: z.never().optional(),
 })
     .refine(
         (data) => {

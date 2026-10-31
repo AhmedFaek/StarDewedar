@@ -2,6 +2,7 @@ import * as service from './quote.service.js'
 import { createQuoteRequestSchema } from './quote.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
+import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 
 export const createQuote = async (req, res) => {
     try {
@@ -14,11 +15,7 @@ export const createQuote = async (req, res) => {
             data: quote,
         })
     } catch (error) {
-        console.error('Error creating quote request:', error)
-        res.status(400).json({
-            success: false,
-            message: error.message || 'Failed to create quote request',
-        })
+        sendPublicRequestError(res, error, 'QUOTE')
     }
 }
 

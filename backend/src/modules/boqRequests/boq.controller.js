@@ -2,6 +2,7 @@ import * as service from './boq.service.js'
 import { createBOQRequestSchema } from './boq.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
+import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 
 export const createBOQ = async (req, res) => {
     try {
@@ -29,11 +30,7 @@ export const createBOQ = async (req, res) => {
             data: boqRequest,
         })
     } catch (error) {
-        console.error('Error creating BOQ request:', error)
-        res.status(400).json({
-            success: false,
-            message: error.message || 'Failed to create BOQ request',
-        })
+        sendPublicRequestError(res, error, 'BOQ')
     }
 }
 

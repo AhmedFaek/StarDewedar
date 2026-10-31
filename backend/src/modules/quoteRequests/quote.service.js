@@ -31,7 +31,12 @@ const uploadToCloudinary = (file) => {
 export const createQuoteRequest = async (data, file) => {
     // Set default status to 'pending'
     const quoteData = {
-        ...data,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        email: data.email,
+        custom_product_name: data.custom_product_name,
+        details: data.details,
         status: 'pending',
         product_id: data.product_id || null,
     }

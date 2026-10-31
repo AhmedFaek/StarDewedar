@@ -2,6 +2,7 @@ import * as service from './visit.service.js'
 import { createVisitRequestSchema } from './visit.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
+import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 
 export const createVisit = async (req, res) => {
     try {
@@ -14,11 +15,7 @@ export const createVisit = async (req, res) => {
             data: visit,
         })
     } catch (error) {
-        console.error('Error creating visit request:', error)
-        res.status(400).json({
-            success: false,
-            message: error.message || 'Failed to create visit request',
-        })
+        sendPublicRequestError(res, error, 'VISIT')
     }
 }
 

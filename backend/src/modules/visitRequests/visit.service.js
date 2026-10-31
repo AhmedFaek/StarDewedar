@@ -28,9 +28,16 @@ const uploadToCloudinary = (file) => {
 
 export const createVisitRequest = async (data, file) => {
     const visitData = {
-        ...data,
+        factory_name: data.factory_name,
+        factory_activity: data.factory_activity,
+        name: data.name,
+        phone_number: data.phone_number,
+        whatsapp_number: data.whatsapp_number,
+        email: data.email,
+        address: data.address,
         status: 'pending',
         preferred_date: new Date(data.preferred_date),
+        details: data.details,
     };
 
     // Handle optional file upload
