@@ -1,9 +1,11 @@
 import * as repo from './quote.repository.js'
 import * as contactService from '../contactMessages/contact.service.js'
-import { buildNotificationEmail } from '../../utils/email.template.js'
-import { sendEmail } from '../../utils/mailer.js'
+import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js'
+import {
+    persistWithCloudinaryCleanup,
+    validateCloudinaryUploadResult,
+} from '../../utils/cloudinaryCleanup.js'
 import cloudinary from '../../config/storage.js'
-import env from '../../config/env.js'
 
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -13,7 +15,11 @@ const uploadToCloudinary = (file) => {
             },
             (error, result) => {
                 if (error) return reject(error)
-                resolve(result)
+                try {
+                    resolve(validateCloudinaryUploadResult(result))
+                } catch (validationError) {
+                    reject(validationError)
+                }
             }
         )
         stream.end(file.buffer)
@@ -23,76 +29,43 @@ const uploadToCloudinary = (file) => {
 export const createQuoteRequest = async (data, file) => {
     // Set default status to 'pending'
     const quoteData = {
-        ...data,
+        first_name: data.first_name,
+        last_name: data.last_name,
+        phone: data.phone,
+        email: data.email,
+        custom_product_name: data.custom_product_name,
+        details: data.details,
         status: 'pending',
         product_id: data.product_id || null,
     }
 
     // Handle file upload if provided
+    const uploadedAssets = []
     if (file) {
         const result = await uploadToCloudinary(file)
+        uploadedAssets.push(result)
         quoteData.file_url = result.secure_url
     }
 
-    // Create quote request in DB
-    const quoteRequest = await repo.create(quoteData)
+    const quoteRequest = await persistWithCloudinaryCleanup(
+        uploadedAssets,
+        'QUOTE',
+        () => repo.create(quoteData)
+    )
 
-    // Send email notification to company
-    await sendQuoteRequestEmail(quoteRequest)
+    try {
+        await attemptInitialNotification('quote', quoteRequest.id)
+    } catch (error) {
+        console.error('Request notification attempt could not be recorded', {
+            event: 'request_notification_attempt_error',
+            requestType: 'QUOTE',
+            requestId: quoteRequest.id,
+            errorCode: error?.code === 'P2025' ? 'REQUEST_NOT_FOUND' : 'NOTIFICATION_STATE_ERROR',
+        })
+    }
 
     return quoteRequest
 }
-
-export const sendQuoteRequestEmail = async (quoteRequest) => {
-    try {
-        const firstName = quoteRequest.first_name || ''
-        const lastName = quoteRequest.last_name || ''
-        const fullName = `${firstName} ${lastName}`.trim() || 'Valued Customer'
-        const email = quoteRequest.email
-        const phone = quoteRequest.phone
-        const status = quoteRequest.status || 'pending'
-        const details = quoteRequest.details
-
-        const productName = quoteRequest.product
-            ? (quoteRequest.product.name_ar || quoteRequest.product.name_en)
-            : quoteRequest.custom_product_name
-
-        const requestInfo = [
-            productName ? { label: 'Product', value: productName } : null,
-        ].filter(Boolean)
-
-        const attachments = quoteRequest.file_url
-            ? [{ label: 'Uploaded Spec / Document', url: quoteRequest.file_url }]
-            : []
-
-        const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=quote` : null
-
-        const html = buildNotificationEmail({
-            requestType: 'QUOTE',
-            customerInfo: {
-                name: fullName,
-                email,
-                phone,
-                status,
-            },
-            requestInfo,
-            details,
-            attachments,
-            customerEmail: email,
-            logoUrl: env.logoUrl,
-            adminUrl,
-        })
-
-        return await sendEmail({
-            subject: `New Quote Request — ${fullName} — Star Dewedar`,
-            html,
-        })
-    } catch (error) {
-        console.error("❌ Yahoo SMTP Error:", error);
-        throw error;
-    }
-};
-
 
 export const getQuoteRequests = (options) => repo.findAll(options)
 

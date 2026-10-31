@@ -11,6 +11,8 @@ export default function InputField({
   variant = 'underline',
   disabled = false,
   id,
+  inputMode,
+  dir,
 }) {
   const inputId = id || name
 
@@ -30,6 +32,8 @@ export default function InputField({
       <input
         id={inputId}
         type={type}
+        inputMode={inputMode}
+        dir={dir}
         name={name}
         value={value}
         onChange={onChange}

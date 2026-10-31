@@ -7,7 +7,11 @@
     "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "test": "node --test",
-    "rbac:migrate": "node scripts/migrate-admin-roles.js"
+    "rbac:migrate": "node scripts/migrate-admin-roles.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate:dev": "prisma migrate dev",
+    "prisma:migrate:deploy": "prisma migrate deploy",
+    "prisma:migrate:status": "prisma migrate status"
   },
   "keywords": [],
   "author": "",
@@ -17,6 +21,7 @@
     "@prisma/adapter-pg": "^7.7.0",
     "@prisma/client": "^7.7.0",
     "bcryptjs": "^3.0.3",
+    "cfb": "^1.2.2",
     "cloudinary": "^2.9.0",
     "cors": "^2.8.6",
     "disposable-email-domains": "^1.0.62",
@@ -29,6 +34,8 @@
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
     "resend": "^6.12.2",
+    "sharp": "^0.34.5",
+    "yauzl": "^3.4.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

@@ -19,10 +19,10 @@ export default function FileUploadField({
 
   const handleChange = (e) => {
     const file = e.target.files?.[0]
-    setFileError('')
-    setSelectedName('')
 
     if (!file) {
+      setFileError('')
+      setSelectedName('')
       onChange(e)
       return
     }
@@ -34,6 +34,7 @@ export default function FileUploadField({
       return
     }
 
+    setFileError('')
     setSelectedName(file.name)
     onChange(e)
   }

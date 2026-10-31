@@ -156,7 +156,22 @@ model QuoteRequest {
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
-  product Product? @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  assets                        Json?
+  notification_attempts         Int       @default(0)
+  notification_error_code       String?
+  notification_error_message    String?
+  notification_last_attempt_at  DateTime?
+  notification_lease_expires_at DateTime?
+  notification_lease_token      String?
+  notification_sent_at          DateTime?
+  notification_status           String    @default("pending")
+  product_name_en_snapshot      String?
+  product_name_ar_snapshot      String?
+
+  product Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+
+  @@index([created_at])
+  @@index([notification_status, created_at])
 }
 
 model VisitRequest {
@@ -174,6 +189,19 @@ model VisitRequest {
   status           String
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
+
+  assets                        Json?
+  notification_attempts         Int       @default(0)
+  notification_error_code       String?
+  notification_error_message    String?
+  notification_last_attempt_at  DateTime?
+  notification_lease_expires_at DateTime?
+  notification_lease_token      String?
+  notification_sent_at          DateTime?
+  notification_status           String    @default("pending")
+
+  @@index([created_at])
+  @@index([notification_status, created_at])
 }
 
 model ContactMessage {
@@ -202,6 +230,37 @@ model BOQRequest {
   status                  String
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
+
+  assets                        Json?
+  notification_attempts         Int       @default(0)
+  notification_error_code       String?
+  notification_error_message    String?
+  notification_last_attempt_at  DateTime?
+  notification_lease_expires_at DateTime?
+  notification_lease_token      String?
+  notification_sent_at          DateTime?
+  notification_status           String    @default("pending")
+
+  @@index([created_at])
+  @@index([notification_status, created_at])
+}
+
+model IdempotencyRecord {
+  id               String   @id
+  request_type     String
+  key              String
+  fingerprint      String
+  status           String
+  request_id       String?
+  assets           Json?
+  lease_token      String
+  lease_expires_at DateTime
+  attempt          Int      @default(1)
+  created_at       DateTime @default(now())
+  updated_at       DateTime
+
+  @@unique([request_type, key])
+  @@index([status, lease_expires_at])
 }
 
 // ─── Support Messaging ────────────────────────────────────────────────────────

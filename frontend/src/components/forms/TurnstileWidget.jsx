@@ -27,6 +27,7 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(
         onExpire={onExpire}
         onError={onError}
         options={{
+          action: 'public_request',
           theme: 'light',
           language: 'auto',
         }}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api.js'
@@ -30,9 +30,14 @@ function StatusBadge({ status, t }) {
 /* ── Single Quote Card ───────────────────────────────────────────────────── */
 
 function QuoteCard({ quote, lang, t }) {
-  const productName = quote.product
-    ? (quote.product[`name_${lang}`] ?? quote.product.name_en)
-    : quote.custom_product_name ?? t('myRequests.customProduct')
+  const liveProductName = quote.product?.[`name_${lang}`]?.trim()
+  const snapshotName = (lang === 'ar'
+    ? quote.product_name_ar_snapshot
+    : quote.product_name_en_snapshot)?.trim()
+  const productName = liveProductName
+    || snapshotName
+    || quote.custom_product_name?.trim()
+    || t('myRequests.customProduct')
 
   const date = new Date(quote.created_at).toLocaleDateString(
     lang === 'ar' ? 'ar-EG' : 'en-GB',
@@ -218,7 +223,7 @@ function EmptyState({ icon, text, desc, ctaLabel, onCta }) {
 
 /* ── Main Panel ──────────────────────────────────────────────────────────── */
 
-export default function MyRequestsPanel({ isOpen, onClose, user }) {
+export default function MyRequestsPanel({ isOpen, onClose, user, recoveryRequestType }) {
   const { t, i18n } = useTranslation()
   const { showError } = useNotification()
   const lang = i18n.language
@@ -245,24 +250,42 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
     }
   }, [isOpen])
 
-  // Fetch on first open
-  useEffect(() => {
-    if (!isOpen || fetched) return
+  const loadRequests = useCallback(async () => {
+    setFetched(true)
     setLoading(true)
     setError(null)
-    Promise.all([api.getMyQuotes(), api.getMyVisits(), api.getMyBOQs()])
-      .then(([q, v, b]) => {
-        setQuotes(Array.isArray(q) ? q : [])
-        setVisits(Array.isArray(v) ? v : [])
-        setBoqs(Array.isArray(b) ? b : [])
-        setFetched(true)
-      })
-      .catch((err) => {
-        setError(t('myRequests.error'))
-        showError(getApiErrorMessage(err, { t }))
-      })
-      .finally(() => setLoading(false))
-  }, [isOpen, fetched, t])
+    try {
+      const [q, v, b] = await Promise.all([
+        api.getMyQuotes(),
+        api.getMyVisits(),
+        api.getMyBOQs(),
+      ])
+      setQuotes(Array.isArray(q) ? q : [])
+      setVisits(Array.isArray(v) ? v : [])
+      setBoqs(Array.isArray(b) ? b : [])
+      setFetched(true)
+    } catch (err) {
+      setError(t('myRequests.error'))
+      showError(getApiErrorMessage(err, { t }))
+    } finally {
+      setLoading(false)
+    }
+  }, [showError, t])
+
+  // Fetch on first open or when the user explicitly refreshes.
+  useEffect(() => {
+    if (isOpen && !fetched && !loading) loadRequests()
+  }, [isOpen, fetched, loading, loadRequests])
+
+  useEffect(() => {
+    if (!isOpen) return
+    const requestedTab = {
+      quote: 'quotes',
+      visit: 'visits',
+      boq: 'boqs',
+    }[recoveryRequestType]
+    if (requestedTab) setActiveTab(requestedTab)
+  }, [isOpen, recoveryRequestType])
 
   // Reset fetched on close so data refreshes on next open
   useEffect(() => {
@@ -293,6 +316,15 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
     { key: 'visits', label: t('myRequests.visitsTab'), icon: 'factory',       count: visits.length },
     { key: 'boqs',   label: t('myRequests.boqsTab'),   icon: 'receipt_long',  count: boqs.length },
   ]
+  const refreshRequests = () => loadRequests()
+  const recoveryTab = {
+    quote: 'quotes',
+    visit: 'visits',
+    boq: 'boqs',
+  }[recoveryRequestType]
+  const recoveryTabIsEmpty = recoveryRequestType !== 'contact' &&
+    recoveryTab === activeTab &&
+    (activeTab === 'quotes' ? quotes.length === 0 : activeTab === 'visits' ? visits.length === 0 : boqs.length === 0)
 
   return (
     <>
@@ -350,6 +382,27 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
           ))}
         </div>
 
+        {recoveryRequestType && (
+          <div className="flex items-start gap-3 border-b border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-relaxed text-amber-950">
+            <p className="flex-1">
+              {recoveryRequestType === 'contact'
+                ? t('myRequests.contactRecoveryNote')
+                : t('myRequests.recoveryNote')}
+            </p>
+            {recoveryRequestType !== 'contact' && <button
+              type="button"
+              onClick={refreshRequests}
+              disabled={loading}
+              className="inline-flex shrink-0 items-center gap-1 font-bold uppercase tracking-wide text-amber-950 underline disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-sm ${loading ? 'animate-spin' : ''}`}>
+                {loading ? 'progress_activity' : 'refresh'}
+              </span>
+              {t('myRequests.refresh')}
+            </button>}
+          </div>
+        )}
+
         {/* Body */}
         <div className="flex-1 overflow-y-auto">
           {loading ? (
@@ -362,15 +415,31 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
               <span className="material-symbols-outlined text-4xl text-red-300">error</span>
               <p className="text-xs text-red-500 font-bold uppercase tracking-widest">{error}</p>
               <button
-                onClick={() => setFetched(false)}
+                onClick={refreshRequests}
                 className="text-xs font-bold uppercase tracking-widest px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-100 transition-colors"
               >
                   {t('myRequests.retry')}
               </button>
             </div>
+          ) : recoveryRequestType === 'contact' ? (
+            <EmptyState
+              icon="info"
+              text={t('myRequests.contactRecoveryTitle')}
+              desc={t('myRequests.contactRecoveryNote')}
+              ctaLabel={t('myRequests.returnToForm')}
+              onCta={onClose}
+            />
           ) : activeTab === 'quotes' ? (
             quotes.length === 0 ? (
-              <EmptyState
+              recoveryTabIsEmpty ? (
+                <EmptyState
+                  icon="schedule"
+                  text={t('myRequests.recoveryEmptyTitle')}
+                  desc={t('myRequests.recoveryEmptyDesc')}
+                  ctaLabel={t('myRequests.returnToForm')}
+                  onCta={onClose}
+                />
+              ) : <EmptyState
                 icon="request_quote"
                 text={t('myRequests.noQuotes')}
                 desc={t('myRequests.noQuotesDesc')}
@@ -384,7 +453,15 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
             )
           ) : activeTab === 'visits' ? (
             visits.length === 0 ? (
-              <EmptyState
+              recoveryTabIsEmpty ? (
+                <EmptyState
+                  icon="schedule"
+                  text={t('myRequests.recoveryEmptyTitle')}
+                  desc={t('myRequests.recoveryEmptyDesc')}
+                  ctaLabel={t('myRequests.returnToForm')}
+                  onCta={onClose}
+                />
+              ) : <EmptyState
                 icon="factory"
                 text={t('myRequests.noVisits')}
                 desc={t('myRequests.noVisitsDesc')}
@@ -398,7 +475,15 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
             )
           ) : (
             boqs.length === 0 ? (
-              <EmptyState
+              recoveryTabIsEmpty ? (
+                <EmptyState
+                  icon="schedule"
+                  text={t('myRequests.recoveryEmptyTitle')}
+                  desc={t('myRequests.recoveryEmptyDesc')}
+                  ctaLabel={t('myRequests.returnToForm')}
+                  onCta={onClose}
+                />
+              ) : <EmptyState
                 icon="receipt_long"
                 text={t('myRequests.noBOQs')}
                 desc={t('myRequests.noBOQsDesc')}
@@ -414,7 +499,7 @@ export default function MyRequestsPanel({ isOpen, onClose, user }) {
         </div>
 
         {/* Footer CTAs */}
-        {!loading && !error && (
+        {!loading && !error && !recoveryRequestType && (
           <div className="shrink-0 border-t border-slate-200 px-4 pt-3 pb-4 bg-white space-y-2">
             <div className="grid grid-cols-2 gap-2">
               <button

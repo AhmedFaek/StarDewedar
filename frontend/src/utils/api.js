@@ -107,34 +107,44 @@ export const api = {
   getProjects: () => cachedFetch('projects', () => fetch(`${API_URL}/projects`).then(handleResponse)),
   getProjectById: (id) => cachedFetch(`project:${id}`, () => fetch(`${API_URL}/projects/${id}`).then(handleResponse)),
 
-  sendContactMessage: (data) => fetch(`${API_URL}/contact`, {
+  sendContactMessage: (data, turnstileToken) => fetch(`${API_URL}/contact`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Turnstile-Token': turnstileToken,
+    },
     body: JSON.stringify(data),
   }).then(handleResponse),
 
-  sendQuoteRequest: (data) => {
+  sendQuoteRequest: (data, turnstileToken) => {
     const isFormData = data instanceof FormData
     return fetch(`${API_URL}/quotes`, {
       method: 'POST',
-      headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        'X-Turnstile-Token': turnstileToken,
+      },
       body: isFormData ? data : JSON.stringify(data),
     }).then(handleResponse)
   },
 
-  sendVisitRequest: (data) => {
+  sendVisitRequest: (data, turnstileToken) => {
     const isFormData = data instanceof FormData
     return fetch(`${API_URL}/visits`, {
       method: 'POST',
-      headers: isFormData ? {} : { 'Content-Type': 'application/json' },
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        'X-Turnstile-Token': turnstileToken,
+      },
       body: isFormData ? data : JSON.stringify(data),
     }).then(handleResponse)
   },
 
-  sendBOQRequest: (data) => {
+  sendBOQRequest: (data, turnstileToken) => {
     // Always FormData (multi-file upload)
     return fetch(`${API_URL}/boq`, {
       method: 'POST',
+      headers: { 'X-Turnstile-Token': turnstileToken },
       body: data,
     }).then(handleResponse)
   },

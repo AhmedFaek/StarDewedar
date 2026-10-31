@@ -7,7 +7,7 @@ import validate from '../../middleware/validation.middleware.js'
 import { updateQuoteRequestSchema } from './quote.validation.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
-import upload from '../../middleware/upload.middleware.js'
+import { singleFileUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 
 const router = express.Router()
@@ -23,8 +23,8 @@ const quoteLimiter = rateLimit({
 })
 
 // Create a new quote request
-// Flow: rate limiter → multer (parse multipart) → Turnstile verify → controller
-router.post('/', quoteLimiter, upload.single('file'), verifyTurnstile, controller.createQuote)
+// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
+router.post('/', quoteLimiter, verifyTurnstile, singleFileUpload, controller.createQuote)
 
 // Get all quote requests
 router.get('/', auth,

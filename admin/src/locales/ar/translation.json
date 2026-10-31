@@ -1,4 +1,7 @@
 {
+  "phone": {
+    "invalid": "أدخل ١١ رقمًا يبدأ بـ 01، أو +20 متبوعًا بـ ١٠ أرقام."
+  },
   "common": {
     "loading": "جارِ تحميل البيانات...",
     "save": "حفظ",
@@ -354,6 +357,7 @@
     },
     "modal": {
       "title": "إنشاء مستخدم جديد",
+      "required_note": "حقل مطلوب",
       "name_label": "الاسم الكامل",
       "name_placeholder": "مثال: أحمد محمد",
       "email_label": "البريد الإلكتروني",
@@ -363,9 +367,9 @@
       "password_hint": "يجب أن تحتوي على حرف كبير وصغير ورقم",
       "role_label": "دور المستخدم",
       "phone_label": "رقم الهاتف",
-      "phone_placeholder": "+20 xxx xxx xxxx",
+      "phone_placeholder": "01287879794 / +201287879794",
       "whatsapp_label": "رقم الواتساب",
-      "whatsapp_placeholder": "+20 xxx xxx xxxx",
+      "whatsapp_placeholder": "01287879794 / +201287879794",
       "company_label": "اسم الشركة",
       "company_placeholder": "مثال: شركة ستار ديودار",
       "submit": "إنشاء المستخدم"
@@ -446,7 +450,25 @@
       "status": "الحالة",
       "action": "إجراء"
     },
-    "no_requests": "لا توجد طلبات"
+    "no_requests": "لا توجد طلبات",
+    "notification": {
+      "title": "إشعار البريد الإلكتروني",
+      "attempts": "عدد المحاولات: {{count}}",
+      "last_attempt": "آخر محاولة",
+      "retry": "إعادة إرسال البريد",
+      "retrying": "جارٍ الإرسال...",
+      "retry_success": "تم قبول الإشعار بواسطة خادم البريد.",
+      "retry_failure": "فشلت إعادة محاولة الإشعار.",
+      "retry_conflict": "توجد محاولة إرسال أخرى قيد التنفيذ.",
+      "confirm_unknown": "تعذّر تأكيد التسليم. قد تؤدي إعادة الإرسال إلى إرسال بريد مكرر. هل تريد المتابعة؟",
+      "status": {
+        "pending": "قيد الانتظار",
+        "sending": "جارٍ الإرسال",
+        "sent": "قُبل بواسطة خادم البريد",
+        "failed": "فشل",
+        "unknown": "حالة التسليم غير معروفة"
+      }
+    }
   },
 
   "conversations": {

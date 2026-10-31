@@ -13,23 +13,36 @@ import userRoutes from './modules/users/user.routes.js'
 import conversationRoutes from './modules/conversations/conversation.routes.js'
 import sitemapRoutes from './modules/sitemap/sitemap.routes.js'
 import analyticsRoutes from './modules/analytics/analytics.routes.js'
+import notificationRoutes from './modules/notifications/notification.routes.js'
 
 const app = express()
 
-const resolveErrorStatus = (err) => {
+export const resolveErrorStatus = (err) => {
     if (typeof err?.status === 'number') return err.status
     if (typeof err?.statusCode === 'number') return err.statusCode
     if (typeof err?.code === 'number' && err.code >= 400 && err.code < 600) return err.code
 
-    const message = String(err?.message || '').toLowerCase()
     const code = String(err?.code || '').toUpperCase()
 
     if (
-        code.startsWith('LIMIT_') ||
-        message.includes('file too large') ||
-        message.includes('invalid file') ||
-        message.includes('file extension')
+        code === 'LIMIT_FILE_SIZE' ||
+        code === 'LIMIT_FIELD_VALUE' ||
+        code === 'LIMIT_AGGREGATE_FILE_SIZE' ||
+        code === 'LIMIT_REQUEST_SIZE'
     ) {
+        return 413
+    }
+
+    if (
+        code.startsWith('LIMIT_') ||
+        code === 'INVALID_UPLOAD' ||
+        code === 'INVALID_MULTIPART'
+    ) {
+        return 400
+    }
+
+    const message = String(err?.message || '').toLowerCase()
+    if (message.includes('invalid file') || message.includes('file extension')) {
         return 400
     }
 
@@ -70,6 +83,7 @@ app.use('/api/conversations', conversationRoutes)
 app.use('/api/sitemap.xml', sitemapRoutes)
 app.use('/sitemap.xml', sitemapRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 // Test route
 app.get('/', (req, res) => {
@@ -89,7 +103,20 @@ app.use((err, req, res, next) => {
 
     // Operational/Client errors (< 500) keep user-friendly error details
     if (status < 500) {
-        const payload = { message: err?.message || 'Bad Request' }
+        const code = String(err?.code || '').toUpperCase()
+        const uploadError = code.startsWith('LIMIT_') ||
+            code === 'INVALID_UPLOAD' ||
+            code === 'INVALID_MULTIPART'
+        const message = status === 413
+            ? 'Uploaded request exceeds the maximum allowed size.'
+            : uploadError
+                ? code === 'INVALID_UPLOAD'
+                    ? 'Invalid file type or content.'
+                    : code === 'INVALID_MULTIPART'
+                        ? 'Invalid multipart upload request.'
+                        : 'Invalid upload request.'
+                : err?.message || 'Bad Request'
+        const payload = { message }
         if (Array.isArray(err?.errors) && err.errors.length > 0) {
             payload.errors = err.errors
         }
@@ -97,7 +124,7 @@ app.use((err, req, res, next) => {
             payload.requiresEmailVerification = true
             if (err?.email) payload.email = err.email
         }
-        if (err?.code && typeof err.code === 'string') {
+        if (!uploadError && err?.code && typeof err.code === 'string') {
             payload.code = err.code
         }
         if (typeof err?.remaining === 'number') {

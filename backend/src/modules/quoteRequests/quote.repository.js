@@ -1,11 +1,40 @@
 import prisma from '../../utils/prisma.js'
 
 export const create = (data) => {
-    return prisma.quoteRequest.create({
-        data,
-        include: {
-            product: true,
-        },
+    return prisma.$transaction(async (transaction) => {
+        let snapshots = {
+            product_name_en_snapshot: null,
+            product_name_ar_snapshot: null,
+        }
+
+        if (data.product_id) {
+            const product = await transaction.product.findUnique({
+                where: { id: data.product_id },
+                select: {
+                    name_en: true,
+                    name_ar: true,
+                },
+            })
+
+            if (!product) {
+                throw new Error('Requested product is no longer available')
+            }
+
+            snapshots = {
+                product_name_en_snapshot: product.name_en,
+                product_name_ar_snapshot: product.name_ar,
+            }
+        }
+
+        return transaction.quoteRequest.create({
+            data: {
+                ...data,
+                ...snapshots,
+            },
+            include: {
+                product: true,
+            },
+        })
     })
 }
 

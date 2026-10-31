@@ -48,6 +48,7 @@ export default function Header() {
   const [userMenuOpen, setUserMenuOpen] = useState(false)
   const [loggingOut, setLoggingOut] = useState(false)
   const [requestsPanelOpen, setRequestsPanelOpen] = useState(false)
+  const [requestsRecoveryType, setRequestsRecoveryType] = useState(null)
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
   const userMenuRef = useRef(null)
   const headerContainerRef = useRef(null)
@@ -243,6 +244,26 @@ export default function Header() {
   const handleAuthSuccess = (userData) => {
     setUser(userData)
     setAuthModal({ open: false, tab: 'login' })
+    if (requestsRecoveryType) setRequestsPanelOpen(true)
+  }
+
+  useEffect(() => {
+    const handleOpenMyRequests = (event) => {
+      setRequestsRecoveryType(event.detail?.requestType || null)
+      if (user) {
+        setRequestsPanelOpen(true)
+      } else {
+        setAuthModal({ open: true, tab: 'login' })
+      }
+    }
+
+    window.addEventListener('star-dewedar:open-my-requests', handleOpenMyRequests)
+    return () => window.removeEventListener('star-dewedar:open-my-requests', handleOpenMyRequests)
+  }, [user])
+
+  const closeRequestsPanel = () => {
+    setRequestsPanelOpen(false)
+    setRequestsRecoveryType(null)
   }
 
   const handleLogout = async () => {
@@ -1258,14 +1279,18 @@ export default function Header() {
         <AuthModal
           isOpen={authModal.open}
           defaultTab={authModal.tab}
-          onClose={() => setAuthModal((p) => ({ ...p, open: false }))}
+          onClose={() => {
+            setAuthModal((p) => ({ ...p, open: false }))
+            setRequestsRecoveryType(null)
+          }}
           onAuthSuccess={handleAuthSuccess}
         />
 
         <MyRequestsPanel
           isOpen={requestsPanelOpen}
-          onClose={() => setRequestsPanelOpen(false)}
+          onClose={closeRequestsPanel}
           user={user}
+          recoveryRequestType={requestsRecoveryType}
         />
 
         <ChangePasswordModal

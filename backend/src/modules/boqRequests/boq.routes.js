@@ -23,8 +23,8 @@ const boqLimiter = rateLimit({
 })
 
 // Create a new BOQ request
-// Flow: rate limiter → multer (boq_file + supporting_docs fields) → Turnstile verify → controller
-router.post('/', boqLimiter, boqUpload, verifyTurnstile, controller.createBOQ)
+// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
+router.post('/', boqLimiter, verifyTurnstile, boqUpload, controller.createBOQ)
 
 // Get all BOQ requests (admin only)
 router.get('/', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), controller.getBOQs)

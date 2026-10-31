@@ -17,7 +17,15 @@ import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
  * @param {function} [options.t]           — i18next `t` function for translation
  * @returns {{ isSubmitting, handleSubmit }}
  */
-export function useFormSubmit({ onSubmit, onSuccess, onError, successMessage, t }) {
+export function useFormSubmit({
+  onSubmit,
+  onSuccess,
+  onError,
+  onUnknownOutcome,
+  successMessage,
+  ambiguousNetworkError = false,
+  t,
+}) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const inflightRef = useRef(false)
   const { showSuccess, showError } = useNotification()
@@ -40,14 +48,23 @@ export function useFormSubmit({ onSubmit, onSuccess, onError, successMessage, t 
       }
     } catch (error) {
       // Detect network errors (fetch failures, server unreachable)
-      const isNetworkError =
-        error instanceof TypeError && error.message?.toLowerCase().includes('failed to fetch')
+      const isNetworkError = error instanceof TypeError && (
+        ambiguousNetworkError || error.message?.toLowerCase().includes('failed to fetch')
+      )
 
       if (isNetworkError) {
-        const networkMsg = typeof t === 'function'
-          ? t('notifications.networkError')
-          : 'Network error. Please check your connection and try again.'
-        showError(networkMsg)
+        const suppressed = ambiguousNetworkError && onError ? onError(error) : false
+        const recoveryHandled = ambiguousNetworkError && onUnknownOutcome?.(error) === true
+        if (!suppressed && !recoveryHandled) {
+          const networkMsg = typeof t === 'function'
+            ? t(ambiguousNetworkError
+              ? 'notifications.submissionOutcomeUnknown'
+              : 'notifications.networkError')
+            : ambiguousNetworkError
+              ? 'We could not confirm whether your request was received. Please verify again before retrying.'
+              : 'Network error. Please check your connection and try again.'
+          showError(networkMsg)
+        }
       } else {
         // Let the caller optionally handle the error; if they return true, we skip the toast
         const suppressed = onError ? onError(error) : false
@@ -59,7 +76,7 @@ export function useFormSubmit({ onSubmit, onSuccess, onError, successMessage, t 
       setIsSubmitting(false)
       inflightRef.current = false
     }
-  }, [onSubmit, onSuccess, onError, successMessage, t, showSuccess, showError])
+  }, [onSubmit, onSuccess, onError, onUnknownOutcome, successMessage, ambiguousNetworkError, t, showSuccess, showError])
 
   return { isSubmitting, handleSubmit }
 }

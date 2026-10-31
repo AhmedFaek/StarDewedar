@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Badge } from '../components'
 import { Pagination } from '../components/ui/Pagination'
 import * as userService from '../services/userService'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
 
 export default function Users() {
   const { t, i18n } = useTranslation()
@@ -15,6 +16,7 @@ export default function Users() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [phoneErrors, setPhoneErrors] = useState({})
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -61,11 +63,18 @@ export default function Users() {
       company_name: '',
     })
     setShowPassword(false)
+    setPhoneErrors({})
     setIsModalOpen(true)
   }
 
   const handleSave = async (e) => {
     e.preventDefault()
+    const invalidPhones = ['phone_number', 'whatsapp_number'].filter((field) =>
+      formData[field] && !isValidEgyptianPhoneNumber(formData[field])
+    )
+    setPhoneErrors(Object.fromEntries(invalidPhones.map((field) => [field, t('phone.invalid')])))
+    if (invalidPhones.length > 0) return
+
     setError(null)
     setIsSaving(true)
     try {
@@ -90,6 +99,19 @@ export default function Users() {
     } finally {
       setIsSaving(false)
     }
+  }
+
+  const handlePhoneChange = (field) => (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setPhoneErrors((prev) => ({ ...prev, [field]: t('phone.invalid') }))
+      return
+    }
+    setFormData((prev) => ({ ...prev, [field]: value }))
+    setPhoneErrors((prev) => ({
+      ...prev,
+      [field]: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
   }
 
   const handleDelete = async (id) => {
@@ -184,9 +206,14 @@ export default function Users() {
                 <button type="button" onClick={() => setIsModalOpen(false)} className="text-secondary hover:text-primary transition-colors"><span className="material-symbols-outlined">close</span></button>
               </div>
               <div className="space-y-5 p-4 sm:p-6 lg:p-8">
+                <p className="text-[10px] font-medium text-secondary">
+                  <span className="text-red-500">*</span> {t('users.modal.required_note')}
+                </p>
                 {/* Name */}
                 <div>
-                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.name_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
+                    {t('users.modal.name_label')}<span className="text-red-500 ms-1">*</span>
+                  </label>
                   <input
                     className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                     value={formData.name}
@@ -201,7 +228,9 @@ export default function Users() {
 
                 {/* Email */}
                 <div>
-                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.email_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
+                    {t('users.modal.email_label')}<span className="text-red-500 ms-1">*</span>
+                  </label>
                   <input
                     type="email"
                     className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
@@ -215,7 +244,9 @@ export default function Users() {
 
                 {/* Password */}
                 <div>
-                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.password_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
+                    {t('users.modal.password_label')}<span className="text-red-500 ms-1">*</span>
+                  </label>
                   <div className="relative">
                     <input
                       type={showPassword ? 'text' : 'password'}
@@ -241,10 +272,13 @@ export default function Users() {
 
                 {/* Role */}
                 <div>
-                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.role_label')}</label>
+                  <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">
+                    {t('users.modal.role_label')}<span className="text-red-500 ms-1">*</span>
+                  </label>
                   <select
                     value={formData.role}
                     onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                    required
                     className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold focus:outline-none focus:border-primary uppercase"
                     disabled={isSaving}
                   >
@@ -260,24 +294,30 @@ export default function Users() {
                   <div>
                     <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.phone_label')}</label>
                     <input
+                      type="tel"
+                      inputMode="tel"
+                      dir="ltr"
                       className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                       value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      onChange={handlePhoneChange('phone_number')}
                       placeholder={t('users.modal.phone_placeholder')}
                       disabled={isSaving}
-                      maxLength={30}
                     />
+                    {phoneErrors.phone_number && <p className="mt-1 text-[11px] text-red-500">{phoneErrors.phone_number}</p>}
                   </div>
                   <div>
                     <label className="text-[10px] font-bold text-secondary uppercase tracking-widest block mb-2">{t('users.modal.whatsapp_label')}</label>
                     <input
+                      type="tel"
+                      inputMode="tel"
+                      dir="ltr"
                       className="w-full bg-surface-container-low border border-surface-variant px-4 py-3 text-on-surface font-bold placeholder:text-secondary focus:outline-none focus:border-primary"
                       value={formData.whatsapp_number}
-                      onChange={(e) => setFormData({ ...formData, whatsapp_number: e.target.value })}
+                      onChange={handlePhoneChange('whatsapp_number')}
                       placeholder={t('users.modal.whatsapp_placeholder')}
                       disabled={isSaving}
-                      maxLength={30}
                     />
+                    {phoneErrors.whatsapp_number && <p className="mt-1 text-[11px] text-red-500">{phoneErrors.whatsapp_number}</p>}
                   </div>
                 </div>
 

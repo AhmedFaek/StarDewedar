@@ -1,22 +1,22 @@
 import * as service from './quote.service.js'
 import { createQuoteRequestSchema } from './quote.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
+import { validateUploadedFile } from '../../utils/uploadValidation.js'
+import { sendPublicRequestError } from '../../utils/publicRequestError.js'
+import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
 
 export const createQuote = async (req, res) => {
     try {
         const validatedData = createQuoteRequestSchema.parse(req.body)
+        if (req.file) await validateUploadedFile(req.file)
         const quote = await service.createQuoteRequest(validatedData, req.file)
         res.status(201).json({
             success: true,
             message: 'Quote request created successfully',
-            data: quote,
+            data: toPublicRequest(quote),
         })
     } catch (error) {
-        console.error('Error creating quote request:', error)
-        res.status(400).json({
-            success: false,
-            message: error.message || 'Failed to create quote request',
-        })
+        sendPublicRequestError(res, error, 'QUOTE')
     }
 }
 
@@ -26,7 +26,7 @@ export const getQuotes = async (req, res) => {
         const quotes = await service.getQuoteRequests({ take, skip })
         res.status(200).json({
             success: true,
-            data: quotes,
+            data: quotes.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching quotes:', error)
@@ -51,7 +51,7 @@ export const getQuoteById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: quote,
+            data: toAdminRequest(quote),
         })
     } catch (error) {
         console.error('Error fetching quote:', error)
@@ -69,7 +69,7 @@ export const getQuotesByEmail = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: quotes,
+            data: quotes.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching quotes by email:', error)
@@ -87,7 +87,7 @@ export const getQuotesByStatus = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: quotes,
+            data: quotes.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching quotes by status:', error)
@@ -106,7 +106,7 @@ export const updateQuote = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Quote request updated successfully',
-            data: quote,
+            data: toAdminRequest(quote),
         })
     } catch (error) {
         console.error('Error updating quote:', error)

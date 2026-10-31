@@ -7,10 +7,12 @@ import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import SubmitButton from '../forms/SubmitButton'
 import TurnstileWidget from '../forms/TurnstileWidget'
+import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 export default function QuoteForm({ productId = null, visible = true }) {
   const { t, i18n } = useTranslation()
@@ -33,6 +35,7 @@ export default function QuoteForm({ productId = null, visible = true }) {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const validate = () => {
     const e = {}
@@ -42,8 +45,8 @@ export default function QuoteForm({ productId = null, visible = true }) {
       e.last_name = t('contact.validation.minChars', { n: 2 })
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       e.email = t('contact.validation.invalidEmail')
-    if (!formData.phone.trim() || formData.phone.trim().length < 10)
-      e.phone = t('contact.validation.required')
+    if (!isValidEgyptianPhoneNumber(formData.phone))
+      e.phone = t('phone.invalid')
     if (!formData.details.trim() || formData.details.trim().length < 5)
       e.details = t('requestQuote.validation.detailsMin', { n: 5 })
     return e
@@ -89,6 +92,19 @@ export default function QuoteForm({ productId = null, visible = true }) {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
+  const handlePhoneChange = (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setErrors((prev) => ({ ...prev, phone: t('phone.invalid') }))
+      return
+    }
+    setFormData((prev) => ({ ...prev, phone: value }))
+    setErrors((prev) => ({
+      ...prev,
+      phone: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
+  }
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -115,15 +131,13 @@ export default function QuoteForm({ productId = null, visible = true }) {
 
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
+      setUnknownOutcome(false)
       const formDataToSend = new FormData()
       formDataToSend.append('first_name', formData.first_name)
       formDataToSend.append('last_name', formData.last_name)
       formDataToSend.append('phone', formData.phone)
       formDataToSend.append('email', formData.email)
       formDataToSend.append('details', formData.details)
-      // Include the verified Turnstile token
-      formDataToSend.append('turnstileToken', turnstileToken)
-
       if (formData.product_id && formData.product_id !== 'custom') {
         formDataToSend.append('product_id', formData.product_id)
       } else {
@@ -134,7 +148,7 @@ export default function QuoteForm({ productId = null, visible = true }) {
         formDataToSend.append('file', formData.file_url)
       }
 
-      return api.sendQuoteRequest(formDataToSend)
+      return api.sendQuoteRequest(formDataToSend, turnstileToken)
     },
     successMessage: t('notifications.quoteSuccess'),
     onSuccess: () => {
@@ -156,6 +170,11 @@ export default function QuoteForm({ productId = null, visible = true }) {
       // Return false so the hook still shows the error toast
       return false
     },
+    onUnknownOutcome: () => {
+      setUnknownOutcome(true)
+      return true
+    },
+    ambiguousNetworkError: true,
     t,
   })
 
@@ -193,13 +212,14 @@ export default function QuoteForm({ productId = null, visible = true }) {
           </h3>
         </header>
 
+        {unknownOutcome && <UnknownSubmissionOutcome requestType="quote" />}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <InputField label={t('requestQuote.firstName')} name="first_name" placeholder="Ahmed" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} variant="bordered" />
             <InputField label={t('requestQuote.lastName')} name="last_name" placeholder="Khaled" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} variant="bordered" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            <InputField label={t('requestQuote.phone')} name="phone" type="tel" placeholder="(+20) 01234567890" value={formData.phone} onChange={handleInputChange} required error={errors.phone} variant="bordered" />
+            <InputField label={t('requestQuote.phone')} name="phone" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone} onChange={handlePhoneChange} required error={errors.phone} variant="bordered" />
             <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
           </div>
           <SelectField label={t('requestQuote.selectProduct')} name="product_id" value={formData.product_id} onChange={handleInputChange} options={productOptions} placeholder={t('requestQuote.selectPlaceholder')} />

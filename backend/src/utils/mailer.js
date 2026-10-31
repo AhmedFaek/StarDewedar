@@ -1,8 +1,6 @@
 import nodemailer from 'nodemailer'
 import env from '../config/env.js'
 
-const MAIL_TIMEOUT_MS = 20_000
-
 /* ─── Shared Transporter Singleton ───────────────────────────────────────── */
 
 export const transporter = nodemailer.createTransport({
@@ -13,24 +11,10 @@ export const transporter = nodemailer.createTransport({
         user: env.yahooEmail,
         pass: env.yahooPassword,
     },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: MAIL_TIMEOUT_MS,
+    connectionTimeout: 30_000,
+    greetingTimeout: 30_000,
+    socketTimeout: 120_000,
 })
-
-const withTimeout = (promise, ms, message) => {
-    let timer
-    return Promise.race([
-        promise,
-        new Promise((_, reject) => {
-            timer = setTimeout(() => {
-                const err = new Error(message)
-                err.code = 'EMAIL_TIMEOUT'
-                reject(err)
-            }, ms)
-        }),
-    ]).finally(() => clearTimeout(timer))
-}
 
 /**
  * Send an email using the shared transporter.
@@ -49,19 +33,15 @@ export const sendEmail = async ({ to, subject, html, attachments }) => {
     }
 
     try {
-        return await withTimeout(
-            transporter.sendMail(mailOptions),
-            MAIL_TIMEOUT_MS,
-            'Email send timed out. Please try again.'
-        )
+        return await transporter.sendMail(mailOptions)
     } catch (err) {
-        console.error('[mailer] Failed to send email:', {
-            to: mailOptions.to,
-            subject,
-            code: err.code,
-            command: err.command,
-            response: err.response,
-            message: err.message,
+        const code = String(err?.code || '').toUpperCase()
+        console.error('[mailer] Failed to send email', {
+            event: 'email_delivery_failed',
+            errorCode: /^[A-Z0-9_]{1,48}$/.test(code) ? code : 'EMAIL_DELIVERY_FAILED',
+            errorName: /^[A-Za-z0-9_$]{1,64}$/.test(String(err?.name || ''))
+                ? err.name
+                : 'Error',
         })
         throw err
     }

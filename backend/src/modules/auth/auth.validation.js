@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { ROLES, ADMIN_ROLES } from '../../utils/constants.js'
+import { optionalEgyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
 
 /* ─── Shared: strong password rule ───────────────────────────────────────── */
 
@@ -16,8 +17,8 @@ export const registerSchema = z.object({
     name: z.string().min(2).max(100),
     email: z.string().email().max(254),
     password: strongPassword,
-    whatsapp_number: z.string().max(30).optional(),
-    phone_number: z.string().max(30).optional(),
+    whatsapp_number: optionalEgyptianPhoneSchema,
+    phone_number: optionalEgyptianPhoneSchema,
     company_name: z.string().max(150).optional(),
 })
 
@@ -26,8 +27,8 @@ export const createUserSchema = z.object({
     name: z.string().min(2).max(100),
     email: z.string().email().max(254),
     password: strongPassword,
-    whatsapp_number: z.string().max(30).optional(),
-    phone_number: z.string().max(30).optional(),
+    whatsapp_number: optionalEgyptianPhoneSchema,
+    phone_number: optionalEgyptianPhoneSchema,
     company_name: z.string().max(150).optional(),
     role: z.enum([...ADMIN_ROLES, ROLES.CUSTOMER]),
 })

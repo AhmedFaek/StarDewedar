@@ -269,7 +269,7 @@ function MessageBubble({ message, currentUserId, t, lang, navigate }) {
 
 /* ─── Message Input Bar ───────────────────────────────────────────────────── */
 
-function MessageInputBar({ conversationId, t, onMessageSent, onShowProductPicker }) {
+function MessageInputBar({ conversationId, t, onMessageSent, onShowProductPicker, onAccessError }) {
   const [content, setContent] = useState('')
   const [sending, setSending] = useState(false)
   const textareaRef = useRef(null)
@@ -287,7 +287,7 @@ function MessageInputBar({ conversationId, t, onMessageSent, onShowProductPicker
       setContent('')
       onMessageSent(res.data)
     } catch (err) {
-      showError(getApiErrorMessage(err, {}))
+      if (!onAccessError(err)) showError(getApiErrorMessage(err, { t }))
     } finally {
       setSending(false)
     }
@@ -363,6 +363,7 @@ export default function ConversationPage() {
 
   const currentUser = getUser()
   const loggedIn = isLoggedIn()
+  const isCustomer = loggedIn && currentUser?.role === 'customer'
 
   const [conversation, setConversation] = useState(null)
   const [messages, setMessages] = useState([])
@@ -373,10 +374,23 @@ export default function ConversationPage() {
   const [loadingOlder, setLoadingOlder] = useState(false)
   const [showProductPicker, setShowProductPicker] = useState(false)
   const [actionLoading, setActionLoading] = useState(false)
+  const [accessIssue, setAccessIssue] = useState(null)
 
   const messagesEndRef = useRef(null)
   const pollRef = useRef(null)
   const lastMessageIdRef = useRef(null)
+
+  const handleAccessError = useCallback((err) => {
+    if (err?.status === 403) {
+      setAccessIssue('role')
+      return true
+    }
+    if (err?.status === 401) {
+      setAccessIssue('session')
+      return true
+    }
+    return false
+  }, [])
 
   // ── Load conversation ────────────────────────────────────────────────────
   const loadConversation = useCallback(async () => {
@@ -384,9 +398,11 @@ export default function ConversationPage() {
       const res = await api.getConversationById(conversationId)
       setConversation(res.data)
     } catch (err) {
-      if (err?.status === 404) navigate('/messages')
+      if (err?.status === 404) {
+        navigate('/messages')
+      } else handleAccessError(err)
     }
-  }, [conversationId, navigate])
+  }, [conversationId, handleAccessError, navigate])
 
   // ── Load initial messages ────────────────────────────────────────────────
   const loadMessages = useCallback(async () => {
@@ -402,17 +418,23 @@ export default function ConversationPage() {
       setHasMore(more)
       if (msgs?.length) lastMessageIdRef.current = msgs[0]?.id // newest
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      if (!handleAccessError(err)) {
+        showError(getApiErrorMessage(err, { t }))
+      }
     }
-  }, [conversationId, t, showError])
+  }, [conversationId, handleAccessError, t, showError])
 
   useEffect(() => {
-    if (!loggedIn) return
+    if (!isCustomer) {
+      setLoadingConv(false)
+      setLoadingMessages(false)
+      return
+    }
     Promise.all([loadConversation(), loadMessages()]).finally(() => {
       setLoadingConv(false)
       setLoadingMessages(false)
     })
-  }, [loggedIn, loadConversation, loadMessages])
+  }, [isCustomer, loadConversation, loadMessages])
 
   // Scroll to bottom on initial load
   useEffect(() => {
@@ -423,7 +445,7 @@ export default function ConversationPage() {
 
   // ── Polling for new messages & status updates ────────────────────────────
   useEffect(() => {
-    if (!loggedIn) return
+    if (!isCustomer || accessIssue) return
 
     const poll = async () => {
       try {
@@ -450,7 +472,9 @@ export default function ConversationPage() {
           })
           setTimeout(() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100)
         }
-      } catch { /* silently ignore poll errors */ }
+      } catch (err) {
+        handleAccessError(err)
+      }
     }
 
     pollRef.current = setInterval(poll, POLL_INTERVAL)
@@ -464,7 +488,7 @@ export default function ConversationPage() {
       clearInterval(pollRef.current)
       window.removeEventListener('focus', handleFocus)
     }
-  }, [loggedIn, conversationId])
+  }, [isCustomer, accessIssue, conversationId, handleAccessError])
 
   // ── Load older messages (cursor-based) ──────────────────────────────────
   const handleLoadOlder = async () => {
@@ -481,7 +505,7 @@ export default function ConversationPage() {
       setNextCursor(newCursor)
       setHasMore(more)
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      if (!handleAccessError(err)) showError(getApiErrorMessage(err, { t }))
     } finally {
       setLoadingOlder(false)
     }
@@ -511,7 +535,7 @@ export default function ConversationPage() {
       })
       handleMessageSent(res.data)
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      if (!handleAccessError(err)) showError(getApiErrorMessage(err, { t }))
     }
   }
 
@@ -524,7 +548,7 @@ export default function ConversationPage() {
       setConversation(prev => prev ? { ...prev, status: 'CLOSED' } : prev)
       showSuccess(t('messages.conversationClosed'))
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      if (!handleAccessError(err)) showError(getApiErrorMessage(err, { t }))
     } finally {
       setActionLoading(false)
     }
@@ -538,7 +562,7 @@ export default function ConversationPage() {
       setConversation(prev => prev ? { ...prev, status: 'OPEN' } : prev)
       showSuccess(t('messages.conversationReopened'))
     } catch (err) {
-      showError(getApiErrorMessage(err, { t }))
+      if (!handleAccessError(err)) showError(getApiErrorMessage(err, { t }))
     } finally {
       setActionLoading(false)
     }
@@ -553,7 +577,7 @@ export default function ConversationPage() {
       <main className="flex-grow pt-28 pb-0 flex flex-col max-w-screen-lg mx-auto w-full px-4 sm:px-8 md:px-16">
 
         {/* ── Not logged in ─────────────────────────────────────────────── */}
-        {!loggedIn && (
+        {!loggedIn && accessIssue !== 'session' && (
           <div className="flex-grow flex items-center justify-center py-24">
             <div className="text-center">
               <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock</span>
@@ -564,15 +588,43 @@ export default function ConversationPage() {
           </div>
         )}
 
+        {(loggedIn && !isCustomer) || accessIssue === 'role' ? (
+          <div className="flex-grow flex items-center justify-center py-24">
+            <div className="text-center">
+              <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock</span>
+              <p className="font-headline font-bold uppercase tracking-widest text-sm text-slate-600 mb-2">
+                {t('messages.customerRequired')}
+              </p>
+              <p className="text-xs text-slate-400 font-body">
+                {t('messages.customerRequiredDesc')}
+              </p>
+            </div>
+          </div>
+        ) : null}
+
+        {accessIssue === 'session' && (
+          <div className="flex-grow flex items-center justify-center py-24">
+            <div className="text-center">
+              <span className="material-symbols-outlined text-6xl text-slate-300 block mb-4">lock_clock</span>
+              <p className="font-headline font-bold uppercase tracking-widest text-sm text-slate-600 mb-2">
+                {t('messages.sessionExpiredTitle')}
+              </p>
+              <p className="text-xs text-slate-400 font-body">
+                {t('messages.sessionExpiredDesc')}
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* ── Loading ────────────────────────────────────────────────────── */}
-        {loggedIn && loadingConv && (
+        {isCustomer && !accessIssue && loadingConv && (
           <div className="flex-grow flex items-center justify-center py-24">
             <span className="inline-block w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         )}
 
         {/* ── Conversation Thread ───────────────────────────────────────── */}
-        {loggedIn && !loadingConv && conversation && (
+        {isCustomer && !accessIssue && !loadingConv && conversation && (
           <div className="flex flex-col flex-grow min-h-0 pb-6">
 
             {/* Header row */}
@@ -695,6 +747,7 @@ export default function ConversationPage() {
               t={t}
               onMessageSent={handleMessageSent}
               onShowProductPicker={() => setShowProductPicker(true)}
+              onAccessError={handleAccessError}
             />
           </div>
         )}

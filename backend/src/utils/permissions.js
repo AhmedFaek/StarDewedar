@@ -9,6 +9,7 @@ export const PERMISSIONS = {
     PROJECTS_MANAGE: 'projects:manage',
     REQUESTS_MANAGE: 'requests:manage',   // BOQ / visit / quotation requests
     SUPPORT_MANAGE: 'support:manage',     // contact messages + conversations
+    NOTIFICATION_RETRY: 'notifications:retry',
     ANALYTICS_VIEW: 'analytics:view',
     DASHBOARD_VIEW: 'dashboard:view',     // aggregate stats on dashboard home
     USERS_MANAGE: 'users:manage',         // admin user accounts and role assignment
@@ -17,7 +18,11 @@ export const PERMISSIONS = {
 const ROLE_PERMISSIONS = {
     [ROLES.SUPER_ADMIN]: Object.values(PERMISSIONS),
     [ROLES.CATALOG_MANAGER]: [PERMISSIONS.CATALOG_MANAGE],
-    [ROLES.SALES_SUPPORT_MANAGER]: [PERMISSIONS.REQUESTS_MANAGE, PERMISSIONS.SUPPORT_MANAGE],
+    [ROLES.SALES_SUPPORT_MANAGER]: [
+        PERMISSIONS.REQUESTS_MANAGE,
+        PERMISSIONS.SUPPORT_MANAGE,
+        PERMISSIONS.NOTIFICATION_RETRY,
+    ],
     // customer (and any unknown role) → no admin permissions
 }
 

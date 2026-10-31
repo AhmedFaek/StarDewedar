@@ -16,11 +16,13 @@ import SelectField from '../forms/SelectField'
 import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
 import TurnstileWidget from '../forms/TurnstileWidget'
+import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateBOQFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 // BOQ-specific file types shown to the user
 const BOQ_ACCEPT = '.pdf,.xls,.xlsx,.csv'
@@ -54,6 +56,7 @@ export default function BOQFormSection({ visible = true }) {
 
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   // ── Fetch logged-in user profile to prefill contact information ────────────
   useEffect(() => {
@@ -82,8 +85,8 @@ export default function BOQFormSection({ visible = true }) {
       e.company_name = t('requestBOQ.validation.companyRequired')
     if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
       e.email = t('requestBOQ.validation.emailInvalid')
-    if (!formData.phone.trim() || formData.phone.trim().length < 10)
-      e.phone = t('requestBOQ.validation.phoneRequired')
+    if (!isValidEgyptianPhoneNumber(formData.phone))
+      e.phone = t('phone.invalid')
     if (!formData.project_name.trim() || formData.project_name.trim().length < 2)
       e.project_name = t('requestBOQ.validation.projectNameRequired')
     if (!formData.project_location.trim() || formData.project_location.trim().length < 2)
@@ -103,12 +106,21 @@ export default function BOQFormSection({ visible = true }) {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
+  const handlePhoneChange = (e) => {
+    const value = getAllowedEgyptianPhoneInput(e)
+    if (value === null) {
+      setErrors((prev) => ({ ...prev, phone: t('phone.invalid') }))
+      return
+    }
+    setFormData((prev) => ({ ...prev, phone: value }))
+    setErrors((prev) => ({
+      ...prev,
+      phone: value && !isValidEgyptianPhoneNumber(value) ? t('phone.invalid') : '',
+    }))
+  }
+
   const handleBOQFileChange = (e) => {
     const file = e.target.files?.[0]
-    setBoqFileError('')
-    setBoqFileName('')
-    setBoqFile(null)
-
     if (!file) return
 
     const { valid, error } = validateBOQFile(file, t)
@@ -118,6 +130,7 @@ export default function BOQFormSection({ visible = true }) {
       return
     }
 
+    setBoqFileError('')
     setBoqFile(file)
     setBoqFileName(file.name)
     if (errors.boq_file) setErrors((prev) => ({ ...prev, boq_file: '' }))
@@ -125,20 +138,40 @@ export default function BOQFormSection({ visible = true }) {
 
   const handleSupportingFilesChange = (e) => {
     const files = Array.from(e.target.files || [])
-    const validFiles = []
     const fileErrors = []
+    const newValidFiles = []
 
     files.forEach((file) => {
       const { valid, error } = validateBOQFile(file, t)
       if (!valid) {
         fileErrors.push(`${file.name}: ${error}`)
       } else {
-        validFiles.push(file)
+        newValidFiles.push(file)
       }
     })
 
-    setSupportingFiles(validFiles)
+    const uniqueFiles = newValidFiles.filter((file, index) => {
+      const alreadySelected = supportingFiles.some((selected) =>
+        selected.name === file.name &&
+        selected.size === file.size &&
+        selected.lastModified === file.lastModified
+      )
+      const duplicateInSelection = newValidFiles.findIndex((candidate) =>
+        candidate.name === file.name &&
+        candidate.size === file.size &&
+        candidate.lastModified === file.lastModified
+      ) !== index
+      return !alreadySelected && !duplicateInSelection
+    })
+    const availableSlots = Math.max(0, 5 - supportingFiles.length)
+    const acceptedFiles = uniqueFiles.slice(0, availableSlots)
+    if (uniqueFiles.length > availableSlots) {
+      fileErrors.push(t('fileValidation.maxSupportingFiles', { max: 5 }))
+    }
+
+    setSupportingFiles((previous) => [...previous, ...acceptedFiles])
     setSupportingFileErrors(fileErrors)
+    e.target.value = ''
   }
 
   const resetTurnstile = () => {
@@ -148,6 +181,7 @@ export default function BOQFormSection({ visible = true }) {
 
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
+      setUnknownOutcome(false)
       const payload = new FormData()
 
       // Customer info
@@ -171,10 +205,7 @@ export default function BOQFormSection({ visible = true }) {
         payload.append('supporting_docs', file)
       })
 
-      // Turnstile
-      payload.append('turnstileToken', turnstileToken)
-
-      return api.sendBOQRequest(payload)
+      return api.sendBOQRequest(payload, turnstileToken)
     },
     successMessage: t('requestBOQ.successMsg'),
     onSuccess: () => {
@@ -202,6 +233,11 @@ export default function BOQFormSection({ visible = true }) {
       resetTurnstile()
       return false
     },
+    onUnknownOutcome: () => {
+      setUnknownOutcome(true)
+      return true
+    },
+    ambiguousNetworkError: true,
     t,
   })
 
@@ -230,6 +266,7 @@ export default function BOQFormSection({ visible = true }) {
   return (
     <div className={`lg:col-span-8 ${visible ? '' : 'hidden'}`} aria-hidden={!visible}>
       <div className="bg-white p-6 sm:p-8 lg:p-10">
+        {unknownOutcome && <UnknownSubmissionOutcome requestType="boq" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
 
           {/* ─── Section 1: Customer Information ─────────────────────────── */}
@@ -274,9 +311,11 @@ export default function BOQFormSection({ visible = true }) {
               <InputField
                 label={t('requestBOQ.phoneNumber')}
                 type="tel"
+                inputMode="tel"
+                dir="ltr"
                 name="phone"
                 value={formData.phone}
-                onChange={handleChange}
+                onChange={handlePhoneChange}
                 required
                 error={errors.phone}
                 variant="bordered"
@@ -374,7 +413,7 @@ export default function BOQFormSection({ visible = true }) {
                       </p>
                     </div>
                   </div>
-                  {boqFileName && !boqFileError && (
+                  {boqFileName && (
                     <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-medium self-start">
                       <span className="material-symbols-outlined text-sm">check_circle</span>
                       <span className="truncate max-w-xs">{boqFileName}</span>
@@ -416,12 +455,26 @@ export default function BOQFormSection({ visible = true }) {
                       </p>
                     </div>
                   </div>
+                  <p className="text-[10px] text-slate-400 mt-1 font-body">
+                    {t('fileValidation.maxSupportingFiles', { max: 5 })}
+                  </p>
                   {supportingFiles.length > 0 && (
                     <div className="mt-2 flex flex-wrap gap-1.5">
                       {supportingFiles.map((f, i) => (
                         <div key={i} className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] font-medium">
                           <span className="material-symbols-outlined text-xs">check_circle</span>
                           <span className="truncate max-w-[140px]">{f.name}</span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSupportingFiles((previous) => previous.filter((_, index) => index !== i))
+                              setSupportingFileErrors([])
+                            }}
+                            aria-label={t('fileValidation.removeFile', { name: f.name })}
+                            className="ms-1 text-emerald-700 hover:text-red-600"
+                          >
+                            ×
+                          </button>
                         </div>
                       ))}
                     </div>

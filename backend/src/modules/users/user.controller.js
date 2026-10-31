@@ -2,6 +2,7 @@ import * as userRepo from './user.repository.js'
 import * as quoteRepo from '../quoteRequests/quote.repository.js'
 import * as visitRepo from '../visitRequests/visit.repository.js'
 import * as boqRepo from '../boqRequests/boq.repository.js'
+import { toPublicRequest } from '../../utils/publicRequestDto.js'
 
 /**
  * GET /api/users
@@ -133,7 +134,7 @@ export const getMyQuotes = async (req, res, next) => {
         const user = await userRepo.findUserById(userId)
         if (!user) return res.status(404).json({ message: 'User not found.' })
         const quotes = await quoteRepo.findByEmail(user.email)
-        res.json(quotes)
+        res.json(quotes.map(toPublicRequest))
     } catch (err) {
         next(err)
     }
@@ -149,7 +150,7 @@ export const getMyVisits = async (req, res, next) => {
         const user = await userRepo.findUserById(userId)
         if (!user) return res.status(404).json({ message: 'User not found.' })
         const visits = await visitRepo.findByEmail(user.email)
-        res.json(visits)
+        res.json(visits.map(toPublicRequest))
     } catch (err) {
         next(err)
     }
@@ -165,7 +166,7 @@ export const getMyBOQs = async (req, res, next) => {
         const user = await userRepo.findUserById(userId)
         if (!user) return res.status(404).json({ message: 'User not found.' })
         const boqs = await boqRepo.findByEmail(user.email)
-        res.json(boqs)
+        res.json(boqs.map(toPublicRequest))
     } catch (err) {
         next(err)
     }

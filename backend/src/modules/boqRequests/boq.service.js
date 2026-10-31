@@ -1,8 +1,11 @@
 import * as repo from './boq.repository.js'
-import { buildNotificationEmail } from '../../utils/email.template.js'
-import { sendEmail } from '../../utils/mailer.js'
+import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js'
+import {
+    persistWithCloudinaryCleanup,
+    settleCloudinaryUploads,
+    validateCloudinaryUploadResult,
+} from '../../utils/cloudinaryCleanup.js'
 import cloudinary from '../../config/storage.js'
-import env from '../../config/env.js'
 
 // ── Cloudinary upload helper ──────────────────────────────────────────────────
 
@@ -12,7 +15,11 @@ const uploadToCloudinary = (file, folder = 'boq') => {
             { resource_type: 'auto', folder },
             (error, result) => {
                 if (error) return reject(error)
-                resolve(result)
+                try {
+                    resolve(validateCloudinaryUploadResult(result))
+                } catch (validationError) {
+                    reject(validationError)
+                }
             }
         )
         stream.end(file.buffer)
@@ -24,14 +31,18 @@ const uploadToCloudinary = (file, folder = 'boq') => {
 export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) => {
     // BOQ file is required — validation already rejects missing file in controller
     const boqResult = await uploadToCloudinary(boqFileArray[0], 'boq/documents')
+    let uploadedAssets = [boqResult]
 
     // Supporting docs are optional
     let supportingUrls = []
     if (supportingDocsArray && supportingDocsArray.length > 0) {
-        const uploads = await Promise.all(
-            supportingDocsArray.map((f) => uploadToCloudinary(f, 'boq/supporting'))
+        const settledUploads = await settleCloudinaryUploads(
+            supportingDocsArray.map((f) => uploadToCloudinary(f, 'boq/supporting')),
+            uploadedAssets,
+            'BOQ'
         )
-        supportingUrls = uploads.map((r) => r.secure_url)
+        uploadedAssets = settledUploads.assets
+        supportingUrls = settledUploads.results.map((r) => r.secure_url)
     }
 
     const boqData = {
@@ -41,80 +52,25 @@ export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) 
         supporting_docs_urls: supportingUrls.length > 0 ? JSON.stringify(supportingUrls) : null,
     }
 
-    const boqRequest = await repo.create(boqData)
+    const boqRequest = await persistWithCloudinaryCleanup(
+        uploadedAssets,
+        'BOQ',
+        () => repo.create(boqData)
+    )
 
-    await sendBOQRequestEmail(boqRequest)
+    try {
+        await attemptInitialNotification('boq', boqRequest.id)
+    } catch (error) {
+        console.error('Request notification attempt could not be recorded', {
+            event: 'request_notification_attempt_error',
+            requestType: 'BOQ',
+            requestId: boqRequest.id,
+            errorCode: error?.code === 'P2025' ? 'REQUEST_NOT_FOUND' : 'NOTIFICATION_STATE_ERROR',
+        })
+    }
 
     return boqRequest
 }
-
-export const sendBOQRequestEmail = async (boqRequest) => {
-    try {
-        const name        = boqRequest.name || 'Valued Customer'
-        const company     = boqRequest.company_name
-        const email       = boqRequest.email
-        const phone       = boqRequest.phone
-        const projectName = boqRequest.project_name
-        const projectLoc  = boqRequest.project_location
-        const projectType = boqRequest.project_type
-        const boqUrl      = boqRequest.boq_file_url
-        const status      = boqRequest.status || 'pending'
-        const additionalReq = boqRequest.additional_requirements
-
-        // Parse supporting docs JSON array
-        let supportingDocs = []
-        if (boqRequest.supporting_docs_urls) {
-            try {
-                supportingDocs = JSON.parse(boqRequest.supporting_docs_urls)
-            } catch { /* ignore parse errors */ }
-        }
-
-        const requestInfo = [
-            projectName ? { label: 'Project Name', value: projectName } : null,
-            projectLoc  ? { label: 'Location', value: projectLoc } : null,
-            projectType ? { label: 'Project Type', value: projectType } : null,
-        ].filter(Boolean)
-
-        const attachments = [
-            boqUrl ? { label: 'BOQ Main Document', url: boqUrl } : null,
-            ...supportingDocs.map((url, i) => ({
-                label: `Supporting Document ${i + 1}`,
-                url,
-            })),
-        ].filter(Boolean)
-
-        const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=boq` : null
-
-        const html = buildNotificationEmail({
-            requestType: 'BOQ',
-            customerInfo: {
-                name,
-                company,
-                email,
-                phone,
-                status,
-            },
-            requestInfo,
-            details: additionalReq,
-            detailsTitle: 'Additional Requirements',
-            attachments,
-            customerEmail: email,
-            logoUrl: env.logoUrl,
-            adminUrl,
-        })
-
-        const subjectCompanyPart = company ? `${company} (${name})` : name
-
-        return await sendEmail({
-            subject: `New BOQ Request — ${subjectCompanyPart} — Star Dewedar`,
-            html,
-        })
-    } catch (error) {
-        console.error('❌ BOQ Email Error:', error)
-        throw error
-    }
-}
-
 
 export const getBOQRequests    = (options) => repo.findAll(options)
 export const getBOQRequestById = (id) => repo.findById(id)
