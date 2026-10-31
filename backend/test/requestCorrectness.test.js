@@ -20,7 +20,7 @@ Object.assign(process.env, testEnv)
 const [
     { default: cloudinary },
     { default: prisma },
-    { transporter },
+    { transporter, sendEmail },
     { createVisit },
     { createQuote },
     { createBOQ },
@@ -135,6 +135,92 @@ const prismaDelegates = {
     BOQ: prisma.bOQRequest,
 }
 
+test('mailer uses the configured Nodemailer timeouts and awaits sendMail', async (t) => {
+    assert.equal(transporter.options.connectionTimeout, 30_000)
+    assert.equal(transporter.options.greetingTimeout, 30_000)
+    assert.equal(transporter.options.socketTimeout, 120_000)
+
+    const messageInfo = { messageId: 'mailer-test-message' }
+    let capturedOptions
+    t.mock.method(transporter, 'sendMail', async (options) => {
+        capturedOptions = options
+        return messageInfo
+    })
+
+    const result = await sendEmail({
+        to: 'recipient@example.invalid',
+        subject: 'Mailer test',
+        html: '<p>Test</p>',
+        attachments: [{ filename: 'test.txt', content: 'test' }],
+    })
+
+    assert.equal(result, messageInfo)
+    assert.equal(capturedOptions.to, 'recipient@example.invalid')
+    assert.equal(capturedOptions.subject, 'Mailer test')
+    assert.equal(capturedOptions.attachments.length, 1)
+})
+
+const mockNotificationPersistence = (t) => {
+    for (const [requestType, delegate] of Object.entries(prismaDelegates)) {
+        const states = new Map()
+        replaceMethod(t, delegate, 'updateMany', async ({ where, data }) => {
+            const state = states.get(where.id) || {
+                notification_status: 'pending',
+                notification_attempts: 0,
+                notification_lease_expires_at: null,
+                notification_lease_token: null,
+            }
+            if (where.notification_lease_token !== undefined) {
+                if (state.notification_lease_token !== where.notification_lease_token) {
+                    return { count: 0 }
+                }
+                Object.assign(state, data)
+                states.set(where.id, state)
+                return { count: 1 }
+            }
+            if (!where.AND || state.notification_status !== 'pending') return { count: 0 }
+            state.notification_status = data.notification_status
+            state.notification_attempts += data.notification_attempts.increment
+            state.notification_last_attempt_at = data.notification_last_attempt_at
+            state.notification_lease_expires_at = data.notification_lease_expires_at
+            state.notification_lease_token = data.notification_lease_token
+            state.notification_error_code = data.notification_error_code
+            state.notification_error_message = data.notification_error_message
+            states.set(where.id, state)
+            return { count: 1 }
+        })
+        replaceMethod(t, delegate, 'findUnique', async ({ where }) => ({
+            id: where.id,
+            ...(requestType === 'VISIT' ? {
+                name: 'Example Customer',
+                email: 'customer@example.invalid',
+                phone_number: '+12345678901',
+                preferred_date: new Date('2030-01-02T03:04:05.000Z'),
+            } : {}),
+            ...(requestType === 'QUOTE' ? {
+                first_name: 'Example',
+                last_name: 'Customer',
+                email: 'customer@example.invalid',
+                phone: '+12345678901',
+                product: null,
+                custom_product_name: 'Custom Product Request',
+            } : {}),
+            ...(requestType === 'BOQ' ? {
+                name: 'Example Customer',
+                email: 'customer@example.invalid',
+                phone: '+12345678901',
+                supporting_docs_urls: null,
+            } : {}),
+            ...(states.get(where.id) || {
+                notification_status: 'pending',
+                notification_attempts: 0,
+                notification_lease_expires_at: null,
+                notification_lease_token: null,
+            }),
+        }))
+    }
+}
+
 test('public create schemas reject client-owned attachment URLs', async (t) => {
     let uploadCalls = 0
     const logs = []
@@ -171,6 +257,7 @@ test('public create schemas reject client-owned attachment URLs', async (t) => {
 })
 
 test('Visit and Quote services whitelist create data even when called with untrusted URL fields', async (t) => {
+    mockNotificationPersistence(t)
     const captured = {}
     replaceMethod(t, prisma.visitRequest, 'create', async ({ data }) => {
         captured.visit = data
@@ -206,6 +293,7 @@ test('Visit and Quote services whitelist create data even when called with untru
 })
 
 test('catalog Quote snapshots come from the database Product lookup', async (t) => {
+    mockNotificationPersistence(t)
     const captured = {}
     const product = {
         name_en: 'Database English Name',
@@ -239,6 +327,7 @@ test('catalog Quote snapshots come from the database Product lookup', async (t) 
 })
 
 test('custom Quote requests do not look up or persist catalog snapshots', async (t) => {
+    mockNotificationPersistence(t)
     const captured = {}
     let lookupCount = 0
     replaceQuoteTransaction(t, {
@@ -279,6 +368,7 @@ test('catalog Quote creation fails if the selected Product no longer exists', as
 })
 
 test('Visit and Quote persist only the Cloudinary URL after a successful multipart upload', async (t) => {
+    mockNotificationPersistence(t)
     const captured = {}
     let uploadCount = 0
     replaceMethod(t, prisma.visitRequest, 'create', async ({ data }) => {
@@ -318,6 +408,7 @@ test('Visit and Quote persist only the Cloudinary URL after a successful multipa
 })
 
 test('successful public create requests retain their 201 response shape', async (t) => {
+    mockNotificationPersistence(t)
     const persistedData = {}
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         const delegate = prismaDelegates[requestType]
@@ -326,6 +417,10 @@ test('successful public create requests retain their 201 response shape', async 
             return {
                 id: `${requestType.toLowerCase()}-1`,
                 ...data,
+                assets: { private: true },
+                notification_status: 'pending',
+                notification_attempts: 0,
+                notification_lease_token: 'private-lease-token',
                 ...(requestType === 'QUOTE' ? { product: null } : {}),
             }
         }
@@ -353,6 +448,8 @@ test('successful public create requests retain their 201 response shape', async 
         assert.equal(result.body.success, true)
         assert.equal(typeof result.body.message, 'string')
         assert.ok(result.body.data.id)
+        assert.equal(Object.hasOwn(result.body.data, 'assets'), false)
+        assert.equal(Object.keys(result.body.data).some((key) => key.startsWith('notification_')), false)
         const persistedAttachment = requestType === 'BOQ'
             ? result.body.data.boq_file_url
             : result.body.data.file_url
@@ -363,6 +460,7 @@ test('successful public create requests retain their 201 response shape', async 
 })
 
 test('notification email failures remain non-fatal after persistence', async (t) => {
+    mockNotificationPersistence(t)
     const persistedTypes = []
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         const create = async ({ data }) => {
@@ -404,9 +502,10 @@ test('notification email failures remain non-fatal after persistence', async (t)
     assert.equal(JSON.stringify(logs).includes('customer@example.invalid'), false)
     assert.ok(['VISIT', 'QUOTE', 'BOQ'].every((requestType) =>
         logs.some(([, details]) =>
-            details?.event === 'request_notification_email_failed' &&
+            details?.event === 'request_notification_attempt_completed' &&
             details.requestType === requestType &&
-            details.requestId === `${requestType.toLowerCase()}-email-failure`
+            details.requestId === `${requestType.toLowerCase()}-email-failure` &&
+            details.outcome === 'failed'
         )
     ))
 })

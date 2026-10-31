@@ -3,6 +3,7 @@ import { createVisitRequestSchema } from './visit.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
 import { sendPublicRequestError } from '../../utils/publicRequestError.js'
+import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
 
 export const createVisit = async (req, res) => {
     try {
@@ -12,7 +13,7 @@ export const createVisit = async (req, res) => {
         res.status(201).json({
             success: true,
             message: 'Visit request created successfully',
-            data: visit,
+            data: toPublicRequest(visit),
         })
     } catch (error) {
         sendPublicRequestError(res, error, 'VISIT')
@@ -25,7 +26,7 @@ export const getVisits = async (req, res) => {
         const visits = await service.getVisitRequests({ take, skip })
         res.status(200).json({
             success: true,
-            data: visits,
+            data: visits.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching visit requests:', error)
@@ -50,7 +51,7 @@ export const getVisitById = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: visit,
+            data: toAdminRequest(visit),
         })
     } catch (error) {
         console.error('Error fetching visit:', error)
@@ -68,7 +69,7 @@ export const getVisitsByEmail = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: visits,
+            data: visits.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching visits by email:', error)
@@ -86,7 +87,7 @@ export const getVisitsByStatus = async (req, res) => {
 
         res.status(200).json({
             success: true,
-            data: visits,
+            data: visits.map(toAdminRequest),
         })
     } catch (error) {
         console.error('Error fetching visits by status:', error)
@@ -105,7 +106,7 @@ export const updateVisit = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'Visit request updated successfully',
-            data: visit,
+            data: toAdminRequest(visit),
         })
     } catch (error) {
         console.error('Error updating visit:', error)

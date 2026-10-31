@@ -13,6 +13,7 @@ import userRoutes from './modules/users/user.routes.js'
 import conversationRoutes from './modules/conversations/conversation.routes.js'
 import sitemapRoutes from './modules/sitemap/sitemap.routes.js'
 import analyticsRoutes from './modules/analytics/analytics.routes.js'
+import notificationRoutes from './modules/notifications/notification.routes.js'
 
 const app = express()
 
@@ -82,6 +83,7 @@ app.use('/api/conversations', conversationRoutes)
 app.use('/api/sitemap.xml', sitemapRoutes)
 app.use('/sitemap.xml', sitemapRoutes)
 app.use('/api/analytics', analyticsRoutes)
+app.use('/api/notifications', notificationRoutes)
 
 // Test route
 app.get('/', (req, res) => {

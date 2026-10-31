@@ -7,6 +7,9 @@ import { formatDate } from '../utils/helpers'
 import { getAllQuotes, updateQuote, deleteQuote } from '../services/quoteService'
 import { getAllVisits, updateVisit, deleteVisit } from '../services/visitService'
 import { getAllBOQs, updateBOQ, deleteBOQ } from '../services/boqService'
+import { retryRequestNotification } from '../services/notificationService'
+import { getDecodedToken } from '../utils/auth'
+import { hasPermission, PERMISSIONS } from '../utils/permissions'
 
 export default function AllRequests() {
   const { t, i18n } = useTranslation()
@@ -25,6 +28,12 @@ export default function AllRequests() {
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [savingStatus, setSavingStatus] = useState(false)
+  const [retryingNotification, setRetryingNotification] = useState(false)
+  const [notificationFeedback, setNotificationFeedback] = useState(null)
+  const canRetryNotifications = hasPermission(
+    getDecodedToken()?.role,
+    PERMISSIONS.NOTIFICATION_RETRY
+  )
 
   const fetchAll = async () => {
     setLoading(true)
@@ -57,6 +66,10 @@ export default function AllRequests() {
   useEffect(() => {
     fetchAll()
   }, [])
+
+  useEffect(() => {
+    setNotificationFeedback(null)
+  }, [selectedRequest?.id])
 
   // Normalize all request types into a single format
   const normalizedRequests = useMemo(() => {
@@ -270,6 +283,72 @@ export default function AllRequests() {
     window.open(fileUrl, '_blank', 'noopener,noreferrer')
   }
 
+  const updateNotificationData = (reqItem, data) => {
+    const apply = (request) => ({
+      ...request,
+      notification_status: data.status,
+      notification_attempts: data.attempts,
+      notification_last_attempt_at: data.lastAttemptAt,
+      notification_sent_at: data.sentAt,
+      notification_error_code: data.errorCode || null,
+      notification_error_message: data.errorMessage || null,
+      notification_lease_expires_at: data.leaseExpiresAt || null,
+    })
+    const updateList = (items) =>
+      items.map((item) => item.id === reqItem.id ? apply(item) : item)
+
+    if (reqItem.type === 'quote') setQuotes(updateList)
+    if (reqItem.type === 'visit') setVisits(updateList)
+    if (reqItem.type === 'boq') setBoqs(updateList)
+    setSelectedRequest((selected) => selected
+      ? { ...selected, raw: apply(selected.raw) }
+      : selected
+    )
+  }
+
+  const handleNotificationRetry = async () => {
+    const request = selectedRequest
+    if (!request || retryingNotification) return
+    const notificationStatus = request.raw.notification_status || 'pending'
+    const confirmUnknownDelivery = notificationStatus === 'unknown'
+    if (confirmUnknownDelivery && !window.confirm(t('allRequests.notification.confirm_unknown'))) {
+      return
+    }
+
+    setRetryingNotification(true)
+    setNotificationFeedback(null)
+    try {
+      const result = await retryRequestNotification(request.type, request.id, {
+        ...(confirmUnknownDelivery ? { confirmUnknownDelivery: true } : {}),
+      })
+      updateNotificationData(request, result.data)
+      setNotificationFeedback({
+        type: 'success',
+        message: t('allRequests.notification.retry_success'),
+      })
+    } catch (error) {
+      if (error.data) updateNotificationData(request, error.data)
+      setNotificationFeedback({
+        type: 'error',
+        message: error.code === 'NOTIFICATION_RETRY_IN_PROGRESS'
+          ? t('allRequests.notification.retry_conflict')
+          : error.code === 'UNKNOWN_DELIVERY_CONFIRMATION_REQUIRED'
+            ? t('allRequests.notification.confirm_unknown')
+            : error.message || t('allRequests.notification.retry_failure'),
+      })
+    } finally {
+      setRetryingNotification(false)
+    }
+  }
+
+  const notificationRetryAvailable = (request) => {
+    if (!canRetryNotifications) return false
+    const status = request.raw.notification_status || 'pending'
+    const leaseExpiresAt = request.raw.notification_lease_expires_at
+    const leaseExpired = !leaseExpiresAt || new Date(leaseExpiresAt).getTime() <= Date.now()
+    return leaseExpired && ['pending', 'failed', 'unknown', 'sending'].includes(status)
+  }
+
   const handleTabChange = (tabId) => {
     setCurrentPage(1)
     if (tabId === 'all') {
@@ -281,6 +360,7 @@ export default function AllRequests() {
       nextParams.set('tab', tabId)
       setSearchParams(nextParams, { replace: true })
     }
+
   }
 
   return (
@@ -582,6 +662,61 @@ export default function AllRequests() {
               </div>
 
               {/* Specific Content by Type */}
+              {canRetryNotifications && (
+                <section className="border border-surface-variant bg-surface-container-low p-4 space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <h4 className="text-xs font-bold uppercase tracking-widest text-on-surface">
+                        {t('allRequests.notification.title')}
+                      </h4>
+                      <p className="mt-1 text-sm font-bold text-secondary">
+                        {t(`allRequests.notification.status.${selectedRequest.raw.notification_status || 'pending'}`)}
+                      </p>
+                    </div>
+                    <span className="text-xs font-mono text-secondary">
+                      {t('allRequests.notification.attempts', {
+                        count: selectedRequest.raw.notification_attempts || 0,
+                      })}
+                    </span>
+                  </div>
+                  {selectedRequest.raw.notification_last_attempt_at && (
+                    <p className="text-xs text-secondary">
+                      {t('allRequests.notification.last_attempt')}:{' '}
+                      {formatDate(selectedRequest.raw.notification_last_attempt_at, isAr ? 'ar' : 'en-US')}
+                    </p>
+                  )}
+                  {selectedRequest.raw.notification_error_message && (
+                    <p className="text-xs text-error">
+                      {selectedRequest.raw.notification_error_message}
+                      {selectedRequest.raw.notification_error_code
+                        ? ` (${selectedRequest.raw.notification_error_code})`
+                        : ''}
+                    </p>
+                  )}
+                  {notificationRetryAvailable(selectedRequest) && (
+                    <Button
+                      variant="secondary"
+                      onClick={handleNotificationRetry}
+                      disabled={retryingNotification}
+                    >
+                      {retryingNotification
+                        ? t('allRequests.notification.retrying')
+                        : t('allRequests.notification.retry')}
+                    </Button>
+                  )}
+                  {notificationFeedback && (
+                    <p
+                      role="status"
+                      className={`text-xs font-bold ${
+                        notificationFeedback.type === 'success' ? 'text-emerald-700' : 'text-error'
+                      }`}
+                    >
+                      {notificationFeedback.message}
+                    </p>
+                  )}
+                </section>
+              )}
+
               {selectedRequest.type === 'boq' && (
                 <>
                   <div className="p-4 bg-surface-container-low border-s-4 border-emerald-600 space-y-2">

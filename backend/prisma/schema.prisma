@@ -162,6 +162,7 @@ model QuoteRequest {
   notification_error_message    String?
   notification_last_attempt_at  DateTime?
   notification_lease_expires_at DateTime?
+  notification_lease_token      String?
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
   product_name_en_snapshot      String?
@@ -195,6 +196,7 @@ model VisitRequest {
   notification_error_message    String?
   notification_last_attempt_at  DateTime?
   notification_lease_expires_at DateTime?
+  notification_lease_token      String?
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
 
@@ -235,6 +237,7 @@ model BOQRequest {
   notification_error_message    String?
   notification_last_attempt_at  DateTime?
   notification_lease_expires_at DateTime?
+  notification_lease_token      String?
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
 
