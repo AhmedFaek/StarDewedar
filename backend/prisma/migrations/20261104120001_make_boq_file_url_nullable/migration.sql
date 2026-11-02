@@ -1,0 +1,2 @@
+ALTER TABLE "BOQRequest"
+ALTER COLUMN "boq_file_url" DROP NOT NULL;

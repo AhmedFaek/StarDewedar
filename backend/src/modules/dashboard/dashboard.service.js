@@ -14,9 +14,24 @@ export const getStats = async () => {
     ] = await Promise.all([
         prisma.product.count(),
         prisma.project.count(),
-        prisma.quoteRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
-        prisma.visitRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
-        prisma.bOQRequest.count({ where: { OR: [{ status: 'pending' }, { status: 'PENDING' }] } }),
+        prisma.quoteRequest.count({
+            where: {
+                archived_at: null,
+                OR: [{ status: 'pending' }, { status: 'PENDING' }],
+            },
+        }),
+        prisma.visitRequest.count({
+            where: {
+                archived_at: null,
+                OR: [{ status: 'pending' }, { status: 'PENDING' }],
+            },
+        }),
+        prisma.bOQRequest.count({
+            where: {
+                archived_at: null,
+                OR: [{ status: 'pending' }, { status: 'PENDING' }],
+            },
+        }),
         prisma.bOQRequest.count(),
         prisma.contactMessage.count(),
         prisma.user.count({ where: { role: 'customer' } }),

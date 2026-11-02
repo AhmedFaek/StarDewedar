@@ -54,7 +54,6 @@ test('notification lease tokens and internal metadata are omitted from API DTOs'
     assert.deepEqual(toPublicRequest(request), { id: 'request-1' })
     assert.deepEqual(toAdminRequest(request), {
         id: 'request-1',
-        assets: { internal: true },
         notification_status: 'failed',
     })
 })

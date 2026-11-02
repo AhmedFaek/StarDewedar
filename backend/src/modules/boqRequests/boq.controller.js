@@ -38,7 +38,11 @@ export const createBOQ = async (req, res) => {
 export const getBOQs = async (req, res) => {
     try {
         const { take, skip } = getPaginationParams(req.query)
-        const boqs = await service.getBOQRequests({ take, skip })
+        const boqs = await service.getBOQRequests({
+            take,
+            skip,
+            archived: req.requestArchived,
+        })
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
         console.error('Error fetching BOQ requests:', error)
@@ -65,7 +69,7 @@ export const getBOQById = async (req, res) => {
 export const getBOQsByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const boqs = await service.getBOQsByEmail(email)
+        const boqs = await service.getBOQsByEmail(email, req.requestArchived)
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
         console.error('Error fetching BOQs by email:', error)
@@ -76,7 +80,7 @@ export const getBOQsByEmail = async (req, res) => {
 export const getBOQsByStatus = async (req, res) => {
     try {
         const { status } = req.params
-        const boqs = await service.getBOQsByStatus(status)
+        const boqs = await service.getBOQsByStatus(status, req.requestArchived)
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
         console.error('Error fetching BOQs by status:', error)
@@ -103,14 +107,22 @@ export const updateBOQ = async (req, res) => {
     }
 }
 
-export const deleteBOQ = async (req, res) => {
+export const deleteBOQ = async (req, res, next) => {
     try {
         const { id } = req.params
-        await service.deleteBOQRequest(id)
+        const result = await service.deleteBOQRequest(id, req.body.confirmation)
+        const cleanupPending = result.cleanup_operations.some(
+            (operation) => operation.status !== 'COMPLETED'
+        )
 
-        res.status(200).json({ success: true, message: 'BOQ request deleted successfully' })
+        res.status(cleanupPending ? 202 : 200).json({
+            success: true,
+            message: cleanupPending
+                ? 'BOQ request deleted; attachment cleanup requires attention.'
+                : 'BOQ request deleted successfully',
+            data: result,
+        })
     } catch (error) {
-        console.error('Error deleting BOQ:', error)
-        res.status(500).json({ success: false, message: 'Failed to delete BOQ request' })
+        next(error)
     }
 }

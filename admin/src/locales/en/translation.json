@@ -275,11 +275,11 @@
     },
     "status": {
       "pending": "Pending",
-      "contacted": "In Coordination",
+      "contacted": "Contacted",
       "in_progress": "In Progress",
       "completed": "Completed",
       "rejected": "Rejected",
-      "closed": "Completed / Archived"
+      "closed": "Closed"
     },
     "modal": {
       "title": "Visit Details",
@@ -425,6 +425,47 @@
     }
   },
 
+  "attachmentCleanup": {
+    "title": "Attachment Cleanup",
+    "description": "Review attachment removal operations that need attention and safely retry eligible work.",
+    "filterLabel": "Filter by status",
+    "filter": {
+      "attention": "Needs attention"
+    },
+    "refresh": "Refresh",
+    "loading": "Loading cleanup operations...",
+    "empty": "No cleanup operations found for this status.",
+    "unknownFile": "Filename unavailable",
+    "attempts": "Attempts",
+    "updated": "Updated",
+    "retry": "Retry cleanup",
+    "retrying": "Retrying",
+    "previous": "Previous",
+    "page": "Page",
+    "next": "Next",
+    "loadError": "Unable to load attachment cleanup operations.",
+    "retryError": "Unable to retry cleanup.",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "failed": "Failed",
+      "completed": "Completed"
+    },
+    "requestType": {
+      "quote": "Quote",
+      "visit": "Visit",
+      "boq": "BOQ"
+    },
+    "errors": {
+      "ASSET_STILL_REFERENCED": "This file is still used by another record and was not removed.",
+      "REFERENCE_CHECK_FAILED": "File usage could not be verified, so removal was not attempted.",
+      "CLOUDINARY_UNCONFIRMED_RESULT": "The file provider did not confirm removal.",
+      "CLOUDINARY_REQUEST_FAILED": "The file provider could not process the removal request.",
+      "UNKNOWN_CLEANUP_ERROR": "The removal could not be completed. Review the operation and retry if appropriate.",
+      "unknown": "The removal could not be completed. Review the operation and retry if appropriate."
+    }
+  },
+
   "allRequests": {
     "title": "ALL REQUESTS",
     "subtitle": "Unified Request Management",
@@ -449,6 +490,15 @@
       "action": "Action"
     },
     "no_requests": "No requests found",
+    "status_description": {
+      "pending": "The request has been received and no follow-up has taken place yet.",
+      "contacted": "The company has contacted the customer.",
+      "in_progress": "Coordination or work related to the request is ongoing.",
+      "completed": "The company has completed its requested work.",
+      "rejected": "The company has decided not to proceed with the request.",
+      "closed": "The interaction has ended and no further follow-up is currently expected."
+    },
+    "quote_completed_note": "For Quote requests, Completed means the quote has been prepared and sent to the customer, even if the customer has not responded.",
     "notification": {
       "title": "Email notification",
       "attempts": "Attempts: {{count}}",

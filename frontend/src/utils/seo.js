@@ -50,7 +50,6 @@ export function truncate(str, maxLen = 155) {
  * @param {string}  [params.canonical]  - Canonical URL (full HTTPS URL)
  * @param {string}  [params.ogType]     - Open Graph type (default: 'website')
  * @param {string}  [params.ogImage]    - Absolute URL to OG image
- * @param {string}  [params.lang]       - Document language ('en' | 'ar')
  * @param {boolean} [params.noindex]    - If true, sets robots to noindex, nofollow and removes canonical
  */
 export function setPageMeta({
@@ -59,18 +58,11 @@ export function setPageMeta({
   canonical,
   ogType = 'website',
   ogImage = SITE.defaultOgImage,
-  lang = 'en',
   noindex = false,
 }) {
   // ── Title ─────────────────────────────────────────────────────────────────
   if (title) {
     document.title = title
-  }
-
-  // ── Lang attribute ────────────────────────────────────────────────────────
-  if (lang) {
-    document.documentElement.lang = lang
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr'
   }
 
   // ── Robots ────────────────────────────────────────────────────────────────

@@ -14,6 +14,9 @@ import conversationRoutes from './modules/conversations/conversation.routes.js'
 import sitemapRoutes from './modules/sitemap/sitemap.routes.js'
 import analyticsRoutes from './modules/analytics/analytics.routes.js'
 import notificationRoutes from './modules/notifications/notification.routes.js'
+import attachmentRoutes from './modules/attachments/attachment.routes.js'
+import emailAttachmentAccessRoutes from './modules/attachments/emailAttachmentAccess.routes.js'
+import requestWorkflowRoutes from './modules/requestWorkflow/requestWorkflow.routes.js'
 
 const app = express()
 
@@ -84,6 +87,9 @@ app.use('/api/sitemap.xml', sitemapRoutes)
 app.use('/sitemap.xml', sitemapRoutes)
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/notifications', notificationRoutes)
+app.use('/api/attachments', attachmentRoutes)
+app.use('/api/attachments', emailAttachmentAccessRoutes)
+app.use('/api/request-workflow', requestWorkflowRoutes)
 
 // Test route
 app.get('/', (req, res) => {

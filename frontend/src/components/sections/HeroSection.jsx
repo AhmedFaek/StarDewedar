@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function HeroSection() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const isRtl = i18n.dir?.() === 'rtl' || i18n.language === 'ar'
+  const isRtl = resolveUiLanguage(i18n.language) === 'ar'
 
   // Desktop panoramic: Arabic uses clean blueprint version to avoid text overlap; English uses full branded version
   const desktopHeroImage = isRtl ? '/logo/hero-sdc-ar.webp' : '/logo/hero-sdc.webp'
@@ -127,4 +128,3 @@ export default function HeroSection() {
     </section>
   )
 }
-

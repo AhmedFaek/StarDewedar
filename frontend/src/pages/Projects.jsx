@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -9,6 +10,7 @@ import ContentLoader from '../components/shared/ContentLoader'
 
 export default function Projects() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [projects, setProjects] = useState([])
@@ -88,7 +90,6 @@ export default function Projects() {
   }, [])
 
   useEffect(() => {
-    const lang = i18n.language === 'ar' ? 'ar' : 'en'
     const isAr = lang === 'ar'
 
     setPageMeta({
@@ -98,7 +99,6 @@ export default function Projects() {
         : 'Browse the project portfolio of Star Dewedar Co. — industrial and commercial electrical projects delivered across Egypt. Low-voltage equipment supply and installation for 300+ projects.',
       canonical: buildUrl('/projects'),
       ogType: 'website',
-      lang,
     })
 
     setJsonLd('projects-page', {
@@ -113,14 +113,14 @@ export default function Projects() {
     })
 
     return () => removeJsonLd('projects-page')
-  }, [i18n.language])
+  }, [lang])
 
   useEffect(() => {
     setCurrentPage(1)
   }, [activeFilter])
 
   const formatCurrency = (amount) => {
-    if (!amount) return i18n.language === 'ar' ? 'غير محدد' : 'N/A'
+    if (!amount) return lang === 'ar' ? 'غير محدد' : 'N/A'
     return `EGP ${Number(amount).toLocaleString('en-EG')}`
   }
 
@@ -241,7 +241,7 @@ export default function Projects() {
                   {filter === 'all'
                     ? t('projects.allProjects')
                     : (projects.find((project) => project.category?.name_en === filter)?.category?.[
-                        i18n.language === 'ar' ? 'name_ar' : 'name_en'
+                        lang === 'ar' ? 'name_ar' : 'name_en'
                       ] || filter)}
                 </button>
               ))}
@@ -252,10 +252,10 @@ export default function Projects() {
         <section className="px-4 sm:px-8 md:px-16">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
             {paginatedProjects.map((project, index) => {
-              const title = i18n.language === 'ar' ? project.title_ar : project.title_en
-              const description = i18n.language === 'ar' ? project.description_ar : project.description_en
-              const categoryName = i18n.language === 'ar' ? project.category?.name_ar : project.category?.name_en
-              const location = i18n.language === 'ar' ? project.location_ar : project.location_en
+              const title = lang === 'ar' ? project.title_ar : project.title_en
+              const description = lang === 'ar' ? project.description_ar : project.description_en
+              const categoryName = lang === 'ar' ? project.category?.name_ar : project.category?.name_en
+              const location = lang === 'ar' ? project.location_ar : project.location_en
               const colSpan = getProjectLayoutClasses(index)
               const imageHeight = getImageHeightClasses(index)
               const isFeatured = index === 0 || index === 3
@@ -302,7 +302,7 @@ export default function Projects() {
                           {t('projects.client')}
                         </p>
                         <p className="text-sm font-headline font-bold text-on-surface">
-                          {project.client_name || (i18n.language === 'ar' ? 'غير محدد' : 'N/A')}
+                          {project.client_name || (lang === 'ar' ? 'غير محدد' : 'N/A')}
                         </p>
                       </div>
                       <div className="rounded-sm bg-surface-container-low px-4 py-3">
@@ -317,7 +317,7 @@ export default function Projects() {
 
                     <div className="flex items-center justify-between border-t border-outline-variant/15 pt-5">
                       <span className="text-[10px] font-label font-bold uppercase tracking-[0.22em] text-secondary">
-                        {i18n.language === 'ar' ? 'عرض المشروع' : 'View Project'}
+                        {lang === 'ar' ? 'عرض المشروع' : 'View Project'}
                       </span>
                       <span className="flex h-11 w-11 items-center justify-center bg-primary text-white transition-transform duration-300 group-hover:translate-x-1 rtl:group-hover:-translate-x-1">
                         <span className="material-symbols-outlined text-lg">arrow_forward</span>
@@ -332,7 +332,7 @@ export default function Projects() {
           {filteredProjects.length === 0 && (
             <div className="py-20 text-center">
               <p className="text-secondary font-label uppercase tracking-widest">
-                {i18n.language === 'ar' ? 'لا توجد مشاريع مطابقة لهذا التصنيف.' : 'No projects match this filter.'}
+                {lang === 'ar' ? 'لا توجد مشاريع مطابقة لهذا التصنيف.' : 'No projects match this filter.'}
               </p>
             </div>
           )}
@@ -340,7 +340,7 @@ export default function Projects() {
           {filteredProjects.length > 0 && (
             <div className="mt-12 flex flex-col gap-4 border-t border-outline-variant/20 pt-8 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-xs font-label uppercase tracking-widest text-secondary">
-                {i18n.language === 'ar'
+                {lang === 'ar'
                   ? `عرض ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredProjects.length)} من ${filteredProjects.length}`
                   : `Showing ${startIndex + 1}-${Math.min(startIndex + itemsPerPage, filteredProjects.length)} of ${filteredProjects.length}`}
               </p>
@@ -351,7 +351,7 @@ export default function Projects() {
                   disabled={currentPage === 1}
                   className="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest text-primary bg-surface-container-high hover:bg-outline-variant disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {i18n.language === 'ar' ? 'السابق' : 'Previous'}
+                  {lang === 'ar' ? 'السابق' : 'Previous'}
                 </button>
                 {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((page) => (
                   <button
@@ -373,7 +373,7 @@ export default function Projects() {
                   disabled={currentPage === totalPages}
                   className="px-4 py-2 text-xs font-headline font-bold uppercase tracking-widest text-primary bg-surface-container-high hover:bg-outline-variant disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  {i18n.language === 'ar' ? 'التالي' : 'Next'}
+                  {lang === 'ar' ? 'التالي' : 'Next'}
                 </button>
               </div>
             </div>

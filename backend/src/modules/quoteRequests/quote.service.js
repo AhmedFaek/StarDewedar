@@ -1,30 +1,8 @@
 import * as repo from './quote.repository.js'
-import * as contactService from '../contactMessages/contact.service.js'
 import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js'
-import {
-    persistWithCloudinaryCleanup,
-    validateCloudinaryUploadResult,
-} from '../../utils/cloudinaryCleanup.js'
-import cloudinary from '../../config/storage.js'
-
-const uploadToCloudinary = (file) => {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            { 
-                resource_type: 'auto'
-            },
-            (error, result) => {
-                if (error) return reject(error)
-                try {
-                    resolve(validateCloudinaryUploadResult(result))
-                } catch (validationError) {
-                    reject(validationError)
-                }
-            }
-        )
-        stream.end(file.buffer)
-    })
-}
+import { persistWithCloudinaryCleanup } from '../../utils/cloudinaryCleanup.js'
+import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js'
+import { deleteRequestWithCleanup } from '../attachments/requestDeletion.service.js'
 
 export const createQuoteRequest = async (data, file) => {
     // Set default status to 'pending'
@@ -39,18 +17,19 @@ export const createQuoteRequest = async (data, file) => {
         product_id: data.product_id || null,
     }
 
-    // Handle file upload if provided
+    // Uploads happen before the request insert; nested Prisma creation persists both atomically.
     const uploadedAssets = []
+    const attachments = []
     if (file) {
-        const result = await uploadToCloudinary(file)
+        const result = await uploadRequestAttachment(file, { folder: 'requests/quote' })
         uploadedAssets.push(result)
-        quoteData.file_url = result.secure_url
+        attachments.push(result.attachment_data)
     }
 
     const quoteRequest = await persistWithCloudinaryCleanup(
         uploadedAssets,
         'QUOTE',
-        () => repo.create(quoteData)
+        () => repo.create(quoteData, attachments)
     )
 
     try {
@@ -71,9 +50,9 @@ export const getQuoteRequests = (options) => repo.findAll(options)
 
 export const getQuoteRequestById = (id) => repo.findById(id)
 
-export const getQuoteRequestsByEmail = (email) => repo.findByEmail(email)
+export const getQuoteRequestsByEmail = (email, archived) => repo.findByEmail(email, archived)
 
-export const getQuoteRequestsByStatus = (status) => repo.findByStatus(status)
+export const getQuoteRequestsByStatus = (status, archived) => repo.findByStatus(status, archived)
 
 export const updateQuoteRequest = (id, data) => {
     const payload = {}
@@ -87,6 +66,5 @@ export const updateQuoteRequest = (id, data) => {
     return repo.update(id, payload)
 }
 
-export const deleteQuoteRequest = (id) => {
-    return repo.remove(id)
-}
+export const deleteQuoteRequest = (id, confirmation) =>
+    deleteRequestWithCleanup('QUOTE', id, confirmation)

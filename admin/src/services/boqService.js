@@ -1,8 +1,9 @@
 import { API_BASE_URL } from '../utils/constants'
 import { apiClient, handleApiResponse } from './apiClient'
 
-export const getAllBOQs = async () => {
-    const response = await apiClient(`${API_BASE_URL}/boq`, {
+export const getAllBOQs = async ({ archived = false } = {}) => {
+    const query = archived ? '?archived=true' : ''
+    const response = await apiClient(`${API_BASE_URL}/boq${query}`, {
         method: 'GET',
     })
     return handleApiResponse(response)
@@ -33,9 +34,10 @@ export const updateBOQ = async (id, data) => {
     return handleApiResponse(response)
 }
 
-export const deleteBOQ = async (id) => {
+export const deleteBOQ = async (id, confirmation) => {
     const response = await apiClient(`${API_BASE_URL}/boq/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ confirmation }),
     })
     return handleApiResponse(response)
 }

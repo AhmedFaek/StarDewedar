@@ -47,9 +47,9 @@ test('cleanup distinguishes deleted, already-missing, and failed Cloudinary resp
     ], 'VISIT')
 
     assert.deepEqual(calls, [
-        { publicId: 'visit/doc', options: { resource_type: 'raw' } },
-        { publicId: 'quote/image', options: { resource_type: 'image' } },
-        { publicId: 'boq/file', options: { resource_type: 'raw' } },
+        { publicId: 'visit/doc', options: { resource_type: 'raw', type: 'upload', invalidate: true } },
+        { publicId: 'quote/image', options: { resource_type: 'image', type: 'upload', invalidate: true } },
+        { publicId: 'boq/file', options: { resource_type: 'raw', type: 'upload', invalidate: true } },
     ])
     assert.deepEqual(outcomes.map(({ status }) => status), [
         'deleted',
@@ -68,6 +68,26 @@ test('cleanup distinguishes deleted, already-missing, and failed Cloudinary resp
             errorName: 'CloudinaryError',
         },
     ])
+})
+
+test('cleanup uses the asset delivery type when deleting authenticated request files', async (t) => {
+    let capturedOptions
+    t.mock.method(cloudinary.uploader, 'destroy', async (_publicId, options) => {
+        capturedOptions = options
+        return { result: 'ok' }
+    })
+
+    await cleanupCloudinaryAssets([{
+        public_id: 'requests/quote/document',
+        resource_type: 'raw',
+        type: 'authenticated',
+    }], 'QUOTE')
+
+    assert.deepEqual(capturedOptions, {
+        resource_type: 'raw',
+        type: 'authenticated',
+        invalidate: true,
+    })
 })
 
 test('cleanup safely ignores empty or invalid asset lists', async (t) => {
@@ -287,14 +307,20 @@ test('BOQ persistence failure cleans main and all supporting assets', async (t) 
         Promise.resolve({
             public_id: 'boq/support-a',
             resource_type: 'raw',
+            type: 'authenticated',
             secure_url: 'https://res.cloudinary.com/test/raw/upload/support-a',
         }),
         Promise.resolve({
             public_id: 'boq/support-b',
             resource_type: 'raw',
+            type: 'authenticated',
             secure_url: 'https://res.cloudinary.com/test/raw/upload/support-b',
         }),
-    ], [{ public_id: 'boq/main', resource_type: 'raw' }], 'BOQ')
+    ], [{
+        public_id: 'boq/main',
+        resource_type: 'raw',
+        type: 'authenticated',
+    }], 'BOQ')
 
     const databaseError = new Error('BOQ insert failed')
     await assert.rejects(
@@ -304,5 +330,18 @@ test('BOQ persistence failure cleans main and all supporting assets', async (t) 
         (error) => error === databaseError
     )
 
-    assert.equal(deleted.length, 3)
+    assert.deepEqual(deleted, [
+        {
+            publicId: 'boq/main',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+        {
+            publicId: 'boq/support-a',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+        {
+            publicId: 'boq/support-b',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+    ])
 })

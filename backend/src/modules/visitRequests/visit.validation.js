@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { egyptianPhoneSchema, optionalEgyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
+import { requestStatusSchema } from '../../utils/requestStatus.js'
 
 export const createVisitRequestSchema = z.object({
     factory_name: z.string().min(2).max(200),
@@ -15,7 +16,7 @@ export const createVisitRequestSchema = z.object({
 })
 
 export const updateVisitRequestSchema = z.object({
-    status: z.enum(['pending', 'contacted', 'closed', 'in_progress', 'completed', 'rejected']).optional(),
+    status: requestStatusSchema.optional(),
     factory_name: z.string().min(2).max(200).optional(),
     factory_activity: z.string().min(2).max(200).optional(),
     name: z.string().min(2).max(100).optional(),

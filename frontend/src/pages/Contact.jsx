@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
@@ -16,7 +17,7 @@ import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../
 
 export default function Contact() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+  const lang = resolveUiLanguage(i18n.language)
   const { showSuccess, showError } = useNotification()
 
   useEffect(() => {
@@ -30,7 +31,6 @@ export default function Contact() {
         : 'Contact Star Dewedar Co. for technical inquiries, quote requests, and project consultations. Email: info@stardewedar.com | Accounting: +20 100 319 6400 / +20 108 006 5750',
       canonical: buildUrl('/contact'),
       ogType: 'website',
-      lang,
     })
 
     setJsonLd('contact-page', {

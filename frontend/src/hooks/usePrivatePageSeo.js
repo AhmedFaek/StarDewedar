@@ -13,22 +13,19 @@
  */
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
+import { resolveUiLanguage } from '../utils/language'
 
 export function usePrivatePageSeo({ en: titleEn, ar: titleAr }) {
   const { i18n } = useTranslation()
 
   useEffect(() => {
-    const lang = i18n.language === 'ar' ? 'ar' : 'en'
+    const lang = resolveUiLanguage(i18n.language)
     const isAr = lang === 'ar'
 
     // Set page title
     document.title = isAr
       ? `${titleAr} | ستار ديودار`
       : `${titleEn} | Star Dewedar`
-
-    // Update lang/dir
-    document.documentElement.lang = lang
-    document.documentElement.dir = isAr ? 'rtl' : 'ltr'
 
     // Ensure noindex
     let robotsMeta = document.querySelector('meta[name="robots"]')

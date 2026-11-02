@@ -9,6 +9,7 @@ import { getUser, isLoggedIn } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
+import { resolveUiLanguage } from '../../utils/language'
 
 const getUserInitials = (name) => {
   const nameParts = name?.trim().split(/\s+/).filter(Boolean) ?? []
@@ -53,7 +54,8 @@ export default function Header() {
   const userMenuRef = useRef(null)
   const headerContainerRef = useRef(null)
 
-  const isRTL = i18n.language === 'ar'
+  const language = resolveUiLanguage(i18n.language)
+  const isRTL = language === 'ar'
 
   // ── Derive active state from current URL ──────────────────────────────────
   const path = location.pathname
@@ -130,12 +132,6 @@ export default function Header() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // ── Document Direction ────────────────────────────────────────────────────
-  useEffect(() => {
-    document.documentElement.dir = isRTL ? 'rtl' : 'ltr'
-    document.documentElement.lang = i18n.language
-  }, [i18n.language, isRTL])
-
   // ── Keyboard Shortcuts (Escape to close, Ctrl/Cmd+K to search) ───────────
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -210,7 +206,7 @@ export default function Header() {
 
   // ── Navigation Handlers ───────────────────────────────────────────────────
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'ar' ? 'en' : 'ar'
+    const newLang = language === 'ar' ? 'en' : 'ar'
     i18n.changeLanguage(newLang)
   }
 

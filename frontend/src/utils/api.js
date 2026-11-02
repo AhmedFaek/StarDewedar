@@ -2,6 +2,7 @@ import { getValidAccessToken, refreshAccessToken, saveTokens, saveUser, clearAut
 import { createApiError } from './apiErrorHandler.js'
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_ORIGIN = new URL(API_URL, window.location.origin).origin
 
 // ── In-memory cache for static catalog endpoints ──────────────────────────────
 const CACHE_TTL = 60_000 // 60 seconds
@@ -59,7 +60,7 @@ const handleResponse = async (response) => {
   return body
 }
 
-const authFetch = async (url, options = {}) => {
+const authFetchResponse = async (url, options = {}) => {
   const token = await getValidAccessToken()
   const headers = {
     'Content-Type': 'application/json',
@@ -68,7 +69,8 @@ const authFetch = async (url, options = {}) => {
   }
 
   let res = await fetch(url, { ...options, headers })
-  if (res.status === 401 && !url.includes('/auth/refresh')) {
+  const isApiResponse = () => new URL(res.url, window.location.origin).origin === API_ORIGIN
+  if (res.status === 401 && !url.includes('/auth/refresh') && isApiResponse()) {
     const newToken = await refreshAccessToken()
     if (newToken) {
       const retryHeaders = {
@@ -87,7 +89,7 @@ const authFetch = async (url, options = {}) => {
     }
   }
 
-  if (res.status === 401) {
+  if (res.status === 401 && isApiResponse()) {
     clearAuth()
     throw {
       __normalizedApiError: true,
@@ -96,7 +98,27 @@ const authFetch = async (url, options = {}) => {
     }
   }
 
+  return res
+}
+
+const authFetch = async (url, options = {}) => {
+  const res = await authFetchResponse(url, options)
   return handleResponse(res)
+}
+
+const triggerAttachmentDownload = (blob, filename) => {
+  const safeFilename = String(filename || 'attachment')
+    .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
+    .trim() || 'attachment'
+  const blobUrl = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+
+  link.href = blobUrl
+  link.download = safeFilename
+  document.body.appendChild(link)
+  link.click()
+  link.remove()
+  window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000)
 }
 
 export const api = {
@@ -225,6 +247,26 @@ export const api = {
   getMyQuotes: () => authFetch(`${API_URL}/users/me/quotes`),
   getMyVisits: () => authFetch(`${API_URL}/users/me/visits`),
   getMyBOQs: () => authFetch(`${API_URL}/users/me/boq`),
+  downloadAttachment: async (attachment) => {
+    const url = new URL(attachment?.download_path, `${API_URL}/`)
+    const apiBase = new URL(API_URL, window.location.origin)
+    const apiPath = apiBase.pathname.replace(/\/+$/, '')
+    if (
+      url.origin !== apiBase.origin ||
+      !url.pathname.startsWith(`${apiPath}/attachments/`) ||
+      !url.pathname.endsWith('/download')
+    ) {
+      throw new Error('Attachment download path is invalid')
+    }
+
+    const response = await authFetchResponse(url.toString(), { method: 'GET' })
+    if (!response.ok) {
+      await handleResponse(response)
+      return
+    }
+
+    triggerAttachmentDownload(await response.blob(), attachment.original_filename)
+  },
 
   // ── Support Conversations ──────────────────────────────────────────────────
   // Customer endpoints

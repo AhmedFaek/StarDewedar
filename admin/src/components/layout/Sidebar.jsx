@@ -15,6 +15,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
     { id: 'dashboard', label: t('sidebar.dashboard'), icon: 'dashboard', path: '/' },
     { id: 'allRequests', label: t('sidebar.allRequests'), icon: 'inbox', path: '/requests' },
+    { id: 'attachmentCleanup', label: t('sidebar.attachmentCleanup', { defaultValue: isAr ? 'تنظيف المرفقات' : 'Attachment Cleanup' }), icon: 'cleaning_services', path: '/attachment-cleanup' },
     { id: 'categories', label: t('sidebar.categories'), icon: 'category', path: '/categories' },
     { id: 'products', label: t('sidebar.products'), icon: 'inventory_2', path: '/products' },
     { id: 'projects', label: t('sidebar.projects'), icon: 'architecture', path: '/projects' },

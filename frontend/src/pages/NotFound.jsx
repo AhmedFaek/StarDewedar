@@ -2,13 +2,14 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { setPageMeta } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 
 export default function NotFound() {
   const navigate = useNavigate()
   const { t, i18n } = useTranslation()
-  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+  const lang = resolveUiLanguage(i18n.language)
 
   useEffect(() => {
     const title =
@@ -25,7 +26,6 @@ export default function NotFound() {
       title,
       description,
       noindex: true,
-      lang,
     })
 
     // Signal 404 to pre-renderers / proxies that read this meta tag

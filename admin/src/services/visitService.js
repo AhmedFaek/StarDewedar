@@ -1,8 +1,9 @@
 import { API_BASE_URL } from '../utils/constants'
 import { apiClient, handleApiResponse } from './apiClient'
 
-export const getAllVisits = async () => {
-    const response = await apiClient(`${API_BASE_URL}/visits`, {
+export const getAllVisits = async ({ archived = false } = {}) => {
+    const query = archived ? '?archived=true' : ''
+    const response = await apiClient(`${API_BASE_URL}/visits${query}`, {
         method: 'GET',
     })
     return handleApiResponse(response)
@@ -40,9 +41,10 @@ export const updateVisit = async (id, data) => {
     return handleApiResponse(response)
 }
 
-export const deleteVisit = async (id) => {
+export const deleteVisit = async (id, confirmation) => {
     const response = await apiClient(`${API_BASE_URL}/visits/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ confirmation }),
     })
     return handleApiResponse(response)
 }

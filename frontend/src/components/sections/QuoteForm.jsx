@@ -13,9 +13,11 @@ import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function QuoteForm({ productId = null, visible = true }) {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const [products, setProducts] = useState([])
   const [formData, setFormData] = useState({
     first_name: '',
@@ -192,7 +194,7 @@ export default function QuoteForm({ productId = null, visible = true }) {
   const productOptions = [
     ...products.map((p) => ({
       value: p.id,
-      label: i18n.language === 'ar' ? p.name_ar : p.name_en,
+      label: lang === 'ar' ? p.name_ar : p.name_en,
     })),
     { value: 'custom', label: t('requestQuote.customProduct') },
   ]

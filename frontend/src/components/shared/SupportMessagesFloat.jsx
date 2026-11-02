@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useCompare } from '../../utils/compareContext'
+import { resolveUiLanguage } from '../../utils/language'
 
 // Height of the CompareDrawer bar (px) — keep in sync with the drawer padding
 const DRAWER_HEIGHT = 72
@@ -17,7 +18,7 @@ export default function SupportMessagesFloat() {
   const [isAnimating, setIsAnimating] = useState(false)
   const [hasDismissed, setHasDismissed] = useState(false)
 
-  const isRTL = i18n.language === 'ar'
+  const isRTL = resolveUiLanguage(i18n.language) === 'ar'
   const drawerOpen = compareList.length > 0
   const bottomOffset = drawerOpen ? DRAWER_HEIGHT + 16 : 28
 

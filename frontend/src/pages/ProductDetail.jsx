@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl, truncate } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -12,6 +13,7 @@ import { useNotification } from '../hooks/useNotification.js'
 
 export default function ProductDetail() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const { addToCompare, removeFromCompare, isInCompare } = useCompare()
@@ -53,7 +55,6 @@ export default function ProductDetail() {
   useEffect(() => {
     if (!product) return
 
-    const lang = i18n.language === 'ar' ? 'ar' : 'en'
     const isAr = lang === 'ar'
     const productName = isAr ? product.name_ar : product.name_en
     const productDesc = isAr ? product.description_ar : product.description_en
@@ -72,7 +73,6 @@ export default function ProductDetail() {
       canonical: buildUrl(`/product-detail?id=${product.id}`),
       ogType: 'website',
       ogImage: productImage,
-      lang,
     })
 
     const breadcrumb = {
@@ -123,7 +123,7 @@ export default function ProductDetail() {
       removeJsonLd(`product-${product.id}`)
       removeJsonLd(`product-${product.id}-breadcrumb`)
     }
-  }, [product, i18n.language])
+  }, [product, lang])
 
   if (loading) {
     return (
@@ -182,10 +182,10 @@ export default function ProductDetail() {
     })
   }
 
-  const name = i18n.language === 'ar' ? product.name_ar : product.name_en
-  const description = i18n.language === 'ar' ? product.description_ar : product.description_en
+  const name = lang === 'ar' ? product.name_ar : product.name_en
+  const description = lang === 'ar' ? product.description_ar : product.description_en
   const navigateToProduct = (id) => navigate(`/product-detail?id=${id}`)
-  const categoryName = i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en
+  const categoryName = lang === 'ar' ? product.category?.name_ar : product.category?.name_en
 
   return (
     <div className="min-h-screen flex flex-col bg-surface text-on-surface">
@@ -271,7 +271,7 @@ export default function ProductDetail() {
                 </p>
                 <div className="flex items-baseline gap-2">
                   <span className="text-xs sm:text-sm font-bold text-slate-500 font-headline uppercase tracking-wider">
-                    {i18n.language === 'ar' ? 'ج.م' : 'EGP'}
+                    {lang === 'ar' ? 'ج.م' : 'EGP'}
                   </span>
                   <span className="text-2xl sm:text-3xl font-headline font-black text-deep-blue tracking-tight">
                     {product.price ? Number(product.price).toLocaleString('en-EG', { minimumFractionDigits: 2 }) : 'N/A'}
@@ -341,7 +341,7 @@ export default function ProductDetail() {
             <div className="flex items-center justify-between mb-8">
               <div>
                 <p className="text-[11px] font-bold tracking-widest uppercase text-primary font-label mb-1">
-                  {i18n.language === 'ar' ? 'تشكيلة مماثلة' : 'Engineered Systems'}
+                  {lang === 'ar' ? 'تشكيلة مماثلة' : 'Engineered Systems'}
                 </p>
                 <h2 className="text-2xl font-headline font-black text-deep-blue uppercase tracking-tight">
                   {t('productDetail.relatedProducts')}
@@ -358,20 +358,20 @@ export default function ProductDetail() {
                   <div className="aspect-[4/3] bg-slate-50 overflow-hidden mb-4 p-4 flex items-center justify-center">
                     <img
                       src={item.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'}
-                      alt={i18n.language === 'ar' ? item.name_ar : item.name_en}
+                      alt={lang === 'ar' ? item.name_ar : item.name_en}
                       loading="lazy"
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     />
                   </div>
                   <p className="text-[10px] font-bold tracking-widest uppercase text-slate-400 mb-1 font-label">
-                    {i18n.language === 'ar' ? item.category?.name_ar : item.category?.name_en}
+                    {lang === 'ar' ? item.category?.name_ar : item.category?.name_en}
                   </p>
                   <h3 className="text-sm font-headline font-bold text-deep-blue leading-snug group-hover:text-primary transition-colors uppercase line-clamp-2 min-h-[2.5rem]">
-                    {i18n.language === 'ar' ? item.name_ar : item.name_en}
+                    {lang === 'ar' ? item.name_ar : item.name_en}
                   </h3>
                   <div className="mt-3 pt-3 border-t border-slate-100 flex items-baseline gap-1.5">
                     <span className="text-[10px] font-bold text-slate-400 uppercase">
-                      {i18n.language === 'ar' ? 'ج.م' : 'EGP'}
+                      {lang === 'ar' ? 'ج.م' : 'EGP'}
                     </span>
                     <span className="text-sm font-headline font-black text-deep-blue">
                       {item.price ? Number(item.price).toLocaleString('en-EG') : 'N/A'}
@@ -387,4 +387,3 @@ export default function ProductDetail() {
     </div>
   )
 }
-

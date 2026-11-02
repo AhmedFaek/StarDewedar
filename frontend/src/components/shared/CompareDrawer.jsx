@@ -1,9 +1,11 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useCompare, MAX_COMPARE } from '../../utils/compareContext'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function CompareDrawer() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const location = useLocation()
   const { compareList, removeFromCompare, clearCompare } = useCompare()
@@ -43,7 +45,7 @@ export default function CompareDrawer() {
           {/* Product chips */}
           <div className="flex gap-3 flex-1 justify-center flex-wrap">
             {compareList.map((product) => {
-              const name = i18n.language === 'ar' ? product.name_ar : product.name_en
+              const name = lang === 'ar' ? product.name_ar : product.name_en
               const img = product.images?.[0]?.image_url
               return (
                 <div

@@ -1,15 +1,42 @@
 import prisma from '../../utils/prisma.js'
 
-export const create = (data) => {
+const requestReadRelations = {
+    attachments: {
+        where: { status: 'ACTIVE' },
+        select: {
+            id: true,
+            original_filename: true,
+            mime_type: true,
+            file_size: true,
+            created_at: true,
+            status: true,
+        },
+    },
+}
+
+const archivedWhere = (archived) =>
+    archived === undefined
+        ? {}
+        : { archived_at: archived ? { not: null } : null }
+
+export const create = (data, attachments = []) => {
     return prisma.visitRequest.create({
-        data,
+        data: {
+            ...data,
+            ...(attachments.length > 0
+                ? { attachments: { create: attachments } }
+                : {}),
+        },
+        include: requestReadRelations,
     })
 }
 
-export const findAll = ({ take = 100, skip = 0 } = {}) => {
+export const findAll = ({ take = 100, skip = 0, archived = false } = {}) => {
     return prisma.visitRequest.findMany({
+        where: archivedWhere(archived),
         take: Math.min(100, Math.max(1, Number(take) || 100)),
         skip: Math.max(0, Number(skip) || 0),
+        include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })
 }
@@ -17,12 +44,14 @@ export const findAll = ({ take = 100, skip = 0 } = {}) => {
 export const findById = (id) => {
     return prisma.visitRequest.findUnique({
         where: { id },
+        include: requestReadRelations,
     })
 }
 
-export const findByEmail = (email) => {
+export const findByEmail = (email, archived) => {
     return prisma.visitRequest.findMany({
-        where: { email },
+        where: { email, ...archivedWhere(archived) },
+        include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })
 }
@@ -31,18 +60,14 @@ export const update = (id, data) => {
     return prisma.visitRequest.update({
         where: { id },
         data,
+        include: requestReadRelations,
     })
 }
 
-export const remove = (id) => {
-    return prisma.visitRequest.delete({
-        where: { id },
-    })
-}
-
-export const findByStatus = (status) => {
+export const findByStatus = (status, archived = false) => {
     return prisma.visitRequest.findMany({
-        where: { status },
+        where: { status: { in: [status, status.toUpperCase()] }, ...archivedWhere(archived) },
+        include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })
 }

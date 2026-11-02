@@ -48,7 +48,10 @@ test('company notification email flows embed the SDC monogram and retain request
         details: 'Visit details <script>alert(1)</script>',
         status: 'pending',
         file_url: 'https://files.example.invalid/visit.pdf',
-    })
+    }, [{
+        label: 'Uploaded Site / Project Document',
+        url: `http://api.example.invalid/api/attachments/email/${'V'.repeat(43)}`,
+    }])
     await sendQuoteRequestEmail({
         first_name: 'Quote',
         last_name: 'Customer',
@@ -57,7 +60,10 @@ test('company notification email flows embed the SDC monogram and retain request
         custom_product_name: 'Quote Product',
         details: 'Quote details',
         file_url: 'https://files.example.invalid/quote.pdf',
-    })
+    }, [{
+        label: 'Uploaded Spec / Document',
+        url: `http://api.example.invalid/api/attachments/email/${'Q'.repeat(43)}`,
+    }])
     await sendBOQRequestEmail({
         name: 'BOQ Customer',
         company_name: 'BOQ Company',
@@ -69,7 +75,16 @@ test('company notification email flows embed the SDC monogram and retain request
         additional_requirements: 'BOQ requirements',
         boq_file_url: 'https://files.example.invalid/boq.xlsx',
         supporting_docs_urls: JSON.stringify(['https://files.example.invalid/support.pdf']),
-    })
+    }, [
+        {
+            label: 'BOQ Main Document',
+            url: `http://api.example.invalid/api/attachments/email/${'B'.repeat(43)}`,
+        },
+        {
+            label: 'Supporting Document 1',
+            url: `http://api.example.invalid/api/attachments/email/${'S'.repeat(43)}`,
+        },
+    ])
     await sendContactEmail({
         first_name: 'Contact',
         last_name: 'Customer',
@@ -101,15 +116,20 @@ test('company notification email flows embed the SDC monogram and retain request
     assert.match(visit.html, /Visit details &lt;script&gt;alert\(1\)&lt;\/script&gt;/)
     assert.doesNotMatch(visit.html, /<script>/)
     assert.match(visit.html, /Uploaded Site \/ Project Document/)
+    assert.match(visit.html, /api\.example\.invalid\/api\/attachments\/email\//)
+    assert.doesNotMatch(visit.html, /files\.example\.invalid/)
     assert.match(quote.html, /New Quote Request/)
     assert.match(quote.html, /Quote Product/)
     assert.match(quote.html, /Quote details/)
     assert.match(quote.html, /Uploaded Spec \/ Document/)
+    assert.doesNotMatch(quote.html, /files\.example\.invalid/)
     assert.match(boq.html, /New BOQ Request/)
     assert.match(boq.html, /BOQ Company/)
     assert.match(boq.html, /Project Location/)
     assert.match(boq.html, /BOQ requirements/)
     assert.match(boq.html, /Supporting Document 1/)
+    assert.match(boq.html, /BOQ Main Document/)
+    assert.doesNotMatch(boq.html, /files\.example\.invalid/)
     assert.match(contact.html, /New Contact Message/)
     assert.match(contact.html, /Contact message details &lt;script&gt;alert\(1\)&lt;\/script&gt;/)
     assert.doesNotMatch(contact.html, /<script>/)

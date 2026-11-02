@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button } from '../components'
 import { Pagination } from '../components/ui/Pagination'
@@ -8,6 +8,8 @@ import { getAllQuotes, updateQuote, deleteQuote } from '../services/quoteService
 import { getAllVisits, updateVisit, deleteVisit } from '../services/visitService'
 import { getAllBOQs, updateBOQ, deleteBOQ } from '../services/boqService'
 import { retryRequestNotification } from '../services/notificationService'
+import { downloadRequestAttachment } from '../services/attachmentService'
+import { getRequestStatusCatalog, setRequestArchived } from '../services/requestWorkflowService'
 import { getDecodedToken } from '../utils/auth'
 import { hasPermission, PERMISSIONS } from '../utils/permissions'
 import { getQuoteProductName } from '../utils/quoteProductName'
@@ -15,12 +17,15 @@ import { getQuoteProductName } from '../utils/quoteProductName'
 export default function AllRequests() {
   const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
+  const navigate = useNavigate()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const tabFromQuery = searchParams.get('tab')
   const activeTab = ['all', 'visit', 'quote', 'boq'].includes(tabFromQuery) ? tabFromQuery : 'all'
+  const archivedOnly = searchParams.get('archived') === 'true'
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
+  const [requestLoadError, setRequestLoadError] = useState(null)
 
   const [quotes, setQuotes] = useState([])
   const [visits, setVisits] = useState([])
@@ -31,19 +36,36 @@ export default function AllRequests() {
   const [savingStatus, setSavingStatus] = useState(false)
   const [retryingNotification, setRetryingNotification] = useState(false)
   const [notificationFeedback, setNotificationFeedback] = useState(null)
+  const [downloadingAttachmentId, setDownloadingAttachmentId] = useState(null)
+  const [attachmentFeedback, setAttachmentFeedback] = useState(null)
+  const [statusCatalog, setStatusCatalog] = useState(null)
+  const [statusCatalogError, setStatusCatalogError] = useState(null)
+  const [changingArchive, setChangingArchive] = useState(false)
+  const requestFetchVersion = useRef(0)
   const canRetryNotifications = hasPermission(
     getDecodedToken()?.role,
     PERMISSIONS.NOTIFICATION_RETRY
   )
+  const canDeleteRequests = hasPermission(
+    getDecodedToken()?.role,
+    PERMISSIONS.REQUESTS_DELETE
+  )
 
-  const fetchAll = async () => {
+  const fetchAll = useCallback(async () => {
+    const fetchVersion = ++requestFetchVersion.current
     setLoading(true)
+    setRequestLoadError(null)
+    setQuotes([])
+    setVisits([])
+    setBoqs([])
     try {
       const [quotesRes, visitsRes, boqsRes] = await Promise.allSettled([
-        getAllQuotes(),
-        getAllVisits(),
-        getAllBOQs(),
+        getAllQuotes({ archived: archivedOnly }),
+        getAllVisits({ archived: archivedOnly }),
+        getAllBOQs({ archived: archivedOnly }),
       ])
+
+      if (fetchVersion !== requestFetchVersion.current) return
 
       if (quotesRes.status === 'fulfilled') {
         const d = quotesRes.value
@@ -57,19 +79,49 @@ export default function AllRequests() {
         const d = boqsRes.value
         setBoqs(d?.data || (Array.isArray(d) ? d : []))
       }
+      const failures = [quotesRes, visitsRes, boqsRes].filter((result) => result.status === 'rejected')
+      if (failures.length > 0) {
+        failures.forEach((result) => console.error('Failed to fetch request list:', result.reason))
+        setRequestLoadError(failures[0].reason?.message || 'Unable to load some request lists.')
+      }
     } catch (error) {
+      if (fetchVersion !== requestFetchVersion.current) return
       console.error('Failed to fetch requests:', error)
+      setRequestLoadError(error.message || 'Unable to load requests.')
     } finally {
-      setLoading(false)
+      if (fetchVersion === requestFetchVersion.current) setLoading(false)
     }
-  }
+  }, [archivedOnly])
 
   useEffect(() => {
     fetchAll()
+    return () => {
+      requestFetchVersion.current += 1
+    }
+  }, [fetchAll])
+
+  useEffect(() => {
+    let cancelled = false
+    getRequestStatusCatalog()
+      .then((catalog) => {
+        if (!Array.isArray(catalog?.statuses)) {
+          throw new Error('Request status catalog is invalid')
+        }
+        if (!cancelled) setStatusCatalog(catalog)
+      })
+      .catch((error) => {
+        console.error('Failed to load request status catalog:', error)
+        if (!cancelled) setStatusCatalogError(error.message)
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {
     setNotificationFeedback(null)
+    setAttachmentFeedback(null)
   }, [selectedRequest?.id])
 
   // Normalize all request types into a single format
@@ -174,6 +226,16 @@ export default function AllRequests() {
     }
   }
 
+  const getRequestNamespace = (type) =>
+    type === 'boq' ? 'boq' : type === 'visit' ? 'visits' : 'quotes'
+
+  const getStatusLabel = (type, status) => {
+    const definition = statusCatalog?.statuses?.find((item) => item.value === status)
+    return t(`${getRequestNamespace(type)}.status.${status}`, {
+      defaultValue: definition?.label || status,
+    })
+  }
+
   const getStatusConfig = (status) => {
     switch (status) {
       case 'pending':
@@ -255,36 +317,82 @@ export default function AllRequests() {
     }
   }
 
-  const handleDelete = async (reqItem) => {
-    const confirmMsg =
-      reqItem.type === 'boq'
-        ? t('boq.delete_confirm')
-        : reqItem.type === 'visit'
-        ? t('visits.delete_confirm')
-        : t('quotes.delete_confirm')
+  const handleArchiveChange = async (reqItem) => {
+    if (changingArchive) return
+    const restore = Boolean(reqItem.raw.archived_at)
+    setChangingArchive(true)
+    try {
+      await setRequestArchived(reqItem.type, reqItem.id, !restore)
+      const removeRequest = (items) => items.filter((item) => item.id !== reqItem.id)
+      if (reqItem.type === 'quote') setQuotes(removeRequest)
+      if (reqItem.type === 'visit') setVisits(removeRequest)
+      if (reqItem.type === 'boq') setBoqs(removeRequest)
+      setCurrentPage(1)
+      setSelectedRequest(null)
+    } catch (error) {
+      const action = restore
+        ? t('allRequests.archive.restoreError', { defaultValue: isAr ? 'تعذر استعادة الطلب.' : 'Unable to restore the request.' })
+        : t('allRequests.archive.archiveError', { defaultValue: isAr ? 'تعذر أرشفة الطلب.' : 'Unable to archive the request.' })
+      alert(`${action} ${error.message}`)
+    } finally {
+      setChangingArchive(false)
+    }
+  }
 
-    if (!window.confirm(confirmMsg)) return
+  const handleDelete = async (reqItem) => {
+    if (!canDeleteRequests) return
+
+    const requestTypeLabel = t(
+      reqItem.type === 'boq'
+        ? 'boq.modal.project_label'
+        : reqItem.type === 'visit'
+          ? 'visits.modal.factory_label'
+          : 'quotes.modal.product_label',
+      { defaultValue: reqItem.type.toUpperCase() }
+    )
+    const confirmation = window.prompt(t('allRequests.deletePermanentConfirm', {
+      defaultValue: isAr
+        ? `سيتم حذف طلب ${requestTypeLabel} نهائيًا. اكتب DELETE للتأكيد.`
+        : `This ${requestTypeLabel} request will be permanently deleted. Type DELETE to confirm.`,
+    }))
+    if (confirmation !== 'DELETE') return
 
     try {
+      let result
       if (reqItem.type === 'quote') {
-        await deleteQuote(reqItem.id)
+        result = await deleteQuote(reqItem.id, confirmation)
         setQuotes((prev) => prev.filter((q) => q.id !== reqItem.id))
       } else if (reqItem.type === 'visit') {
-        await deleteVisit(reqItem.id)
+        result = await deleteVisit(reqItem.id, confirmation)
         setVisits((prev) => prev.filter((v) => v.id !== reqItem.id))
       } else if (reqItem.type === 'boq') {
-        await deleteBOQ(reqItem.id)
+        result = await deleteBOQ(reqItem.id, confirmation)
         setBoqs((prev) => prev.filter((b) => b.id !== reqItem.id))
       }
       setSelectedRequest(null)
+      if (result?.data?.cleanup_operations?.some((operation) => operation.status !== 'COMPLETED')) {
+        navigate('/attachment-cleanup')
+      }
     } catch (error) {
       alert(t(`${reqItem.type === 'visit' ? 'visits' : reqItem.type === 'boq' ? 'boq' : 'quotes'}.delete_error`) + ': ' + error.message)
     }
   }
 
-  const handleFileOpen = (fileUrl) => {
-    if (!fileUrl) return
-    window.open(fileUrl, '_blank', 'noopener,noreferrer')
+  const handleAttachmentDownload = async (attachment) => {
+    setDownloadingAttachmentId(attachment.id)
+    setAttachmentFeedback(null)
+    try {
+      await downloadRequestAttachment(attachment)
+    } catch (error) {
+      console.error('Failed to download request attachment:', error)
+      setAttachmentFeedback(
+        t('allRequests.attachments.downloadFailed', {
+          defaultValue: isAr ? 'تعذر تنزيل الملف. حاول مرة أخرى.' : 'Unable to download this file. Please try again.',
+        })
+      )
+    } finally {
+      setDownloadingAttachmentId(null)
+    }
   }
 
   const updateNotificationData = (reqItem, data) => {
@@ -367,6 +475,17 @@ export default function AllRequests() {
 
   }
 
+  const handleArchivedFilterChange = (archived) => {
+    setCurrentPage(1)
+    const nextParams = new URLSearchParams(searchParams)
+    if (archived) {
+      nextParams.set('archived', 'true')
+    } else {
+      nextParams.delete('archived')
+    }
+    setSearchParams(nextParams, { replace: true })
+  }
+
   return (
     <div className="max-w-full relative">
       {/* Header */}
@@ -409,6 +528,22 @@ export default function AllRequests() {
         </div>
       </div>
 
+      {statusCatalogError && (
+        <p role="alert" className="mb-4 border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800">
+          {t('allRequests.statusCatalogError', {
+            defaultValue: isAr ? 'تعذر تحميل حالات الطلبات؛ تم تعطيل تغيير الحالة.' : 'Unable to load request statuses; status changes are disabled.',
+          })}
+        </p>
+      )}
+      {requestLoadError && (
+        <div role="alert" className="mb-4 flex flex-wrap items-center justify-between gap-3 border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-800">
+          <span>{requestLoadError}</span>
+          <button type="button" onClick={fetchAll} className="font-bold underline">
+            {t('common.retry', { defaultValue: isAr ? 'إعادة المحاولة' : 'Retry' })}
+          </button>
+        </div>
+      )}
+
       {/* Tabs */}
       <div className="flex border-b border-surface-variant mb-6 overflow-x-auto">
         {[
@@ -435,6 +570,35 @@ export default function AllRequests() {
             </span>
           </button>
         ))}
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2" role="group" aria-label={t('allRequests.archive.filterLabel', {
+        defaultValue: isAr ? 'تصفية الأرشيف' : 'Archive filter',
+      })}>
+        <button
+          type="button"
+          onClick={() => handleArchivedFilterChange(false)}
+          aria-pressed={!archivedOnly}
+          className={`border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+            !archivedOnly
+              ? 'border-tertiary bg-tertiary text-white'
+              : 'border-surface-variant bg-white text-secondary hover:border-tertiary'
+          }`}
+        >
+          {t('allRequests.archive.active', { defaultValue: isAr ? 'الطلبات النشطة' : 'Active requests' })}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleArchivedFilterChange(true)}
+          aria-pressed={archivedOnly}
+          className={`border px-3 py-2 text-xs font-bold uppercase tracking-wider transition-colors ${
+            archivedOnly
+              ? 'border-tertiary bg-tertiary text-white'
+              : 'border-surface-variant bg-white text-secondary hover:border-tertiary'
+          }`}
+        >
+          {t('allRequests.archive.archived', { defaultValue: isAr ? 'الطلبات المؤرشفة' : 'Archived requests' })}
+        </button>
       </div>
 
       {/* Table Card */}
@@ -487,6 +651,11 @@ export default function AllRequests() {
                       <span className={`inline-flex items-center px-2.5 py-1 text-[11px] font-bold uppercase tracking-wider ${getTypeBadge(req.type)}`}>
                         {t(`allRequests.type.${req.type}`)}
                       </span>
+                      {req.raw.archived_at && (
+                        <span className="mt-1 block text-[9px] font-bold uppercase tracking-wider text-secondary">
+                          {t('allRequests.archive.archivedBadge', { defaultValue: isAr ? 'مؤرشف' : 'Archived' })}
+                        </span>
+                      )}
                     </td>
 
                     {/* Customer */}
@@ -525,7 +694,7 @@ export default function AllRequests() {
                         return (
                           <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-[11px] font-black font-headline uppercase tracking-wider rounded-sm border ${sc.bg} ${sc.text} ${sc.border} shadow-xs`}>
                             <span className={`w-2 h-2 rounded-full shrink-0 ${sc.dot}`} />
-                            <span>{t(`${req.type === 'boq' ? 'boq' : req.type === 'visit' ? 'visits' : 'quotes'}.status.${req.status}`) || req.status}</span>
+                            <span>{getStatusLabel(req.type, req.status)}</span>
                           </span>
                         )
                       })()}
@@ -570,6 +739,11 @@ export default function AllRequests() {
                   <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${getTypeBadge(selectedRequest.type)}`}>
                     {t(`allRequests.type.${selectedRequest.type}`)}
                   </span>
+                  {selectedRequest.raw.archived_at && (
+                    <span className="inline-flex items-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider border border-slate-300 bg-slate-100 text-slate-700">
+                      {t('allRequests.archive.archivedBadge', { defaultValue: isAr ? 'مؤرشف' : 'Archived' })}
+                    </span>
+                  )}
                   <span className="text-[10px] font-mono text-slate-400 uppercase tracking-widest">
                     ID: {selectedRequest.id}
                   </span>
@@ -623,7 +797,7 @@ export default function AllRequests() {
                       return (
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 text-[10px] font-black font-headline uppercase tracking-wider rounded-sm border ${msc.bg} ${msc.text} ${msc.border}`}>
                           <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${msc.dot}`} />
-                          <span>{t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.${selectedRequest.status}`) || selectedRequest.status}</span>
+                          <span>{getStatusLabel(selectedRequest.type, selectedRequest.status)}</span>
                         </span>
                       )
                     })()}
@@ -636,32 +810,29 @@ export default function AllRequests() {
                   <select
                     value={selectedRequest.status}
                     onChange={(e) => handleStatusChange(selectedRequest, e.target.value)}
-                    disabled={savingStatus}
+                    disabled={savingStatus || !statusCatalog?.statuses?.length}
                     className={`w-full bg-surface-container-low border-2 ${getStatusConfig(selectedRequest.status).border} px-3 py-2 text-sm font-black text-on-surface focus:outline-none focus:ring-1 focus:ring-tertiary uppercase disabled:opacity-50`}
                   >
-                    <option value="pending" className="font-bold text-amber-900 bg-amber-50">
-                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.pending`)}
-                    </option>
-                    <option value="contacted" className="font-bold text-sky-900 bg-sky-50">
-                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.contacted`)}
-                    </option>
-                    {selectedRequest.type === 'boq' && (
-                      <>
-                        <option value="in_progress" className="font-bold text-indigo-900 bg-indigo-50">
-                          ● {t('boq.status.in_progress')}
-                        </option>
-                        <option value="completed" className="font-bold text-emerald-900 bg-emerald-50">
-                          ● {t('boq.status.completed')}
-                        </option>
-                        <option value="rejected" className="font-bold text-rose-900 bg-rose-50">
-                          ● {t('boq.status.rejected')}
-                        </option>
-                      </>
-                    )}
-                    <option value="closed" className="font-bold text-slate-800 bg-slate-100">
-                      ● {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.status.closed`)}
-                    </option>
+                    {(statusCatalog?.statuses || [{ value: selectedRequest.status }]).map((status) => (
+                      <option key={status.value} value={status.value}>
+                        {getStatusLabel(selectedRequest.type, status.value)}
+                      </option>
+                    ))}
                   </select>
+                  {statusCatalog?.statuses?.find((status) => status.value === selectedRequest.status)?.description && (
+                    <p className="mt-1 text-[11px] leading-relaxed text-secondary">
+                      {t(`allRequests.status_description.${selectedRequest.status}`, {
+                        defaultValue: statusCatalog.statuses.find((status) => status.value === selectedRequest.status).description,
+                      })}
+                    </p>
+                  )}
+                  {selectedRequest.type === 'quote' && selectedRequest.status === 'completed' && statusCatalog?.request_specific_notes?.quote_completed && (
+                    <p className="mt-1 border-s-2 border-tertiary ps-2 text-[11px] leading-relaxed text-secondary">
+                      {t('allRequests.quote_completed_note', {
+                        defaultValue: statusCatalog.request_specific_notes.quote_completed,
+                      })}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -721,6 +892,37 @@ export default function AllRequests() {
                 </section>
               )}
 
+              {Array.isArray(selectedRequest.raw.attachments) && selectedRequest.raw.attachments.length > 0 && (
+                <section className="border border-surface-variant bg-surface-container-low p-4 space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-on-surface">
+                    {t('allRequests.attachments.title', { defaultValue: isAr ? 'المرفقات' : 'Attachments' })}
+                  </h4>
+                  {selectedRequest.raw.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between gap-3 border border-surface-variant bg-white p-2.5"
+                    >
+                      <span className="min-w-0 truncate text-xs text-secondary">
+                        {attachment.original_filename || t('allRequests.attachments.file', { defaultValue: isAr ? 'ملف مرفق' : 'Attachment' })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAttachmentDownload(attachment)}
+                        disabled={downloadingAttachmentId !== null}
+                        className="shrink-0 text-xs font-bold uppercase text-tertiary hover:underline disabled:opacity-50"
+                      >
+                        {downloadingAttachmentId === attachment.id
+                          ? t('allRequests.attachments.downloading', { defaultValue: isAr ? 'جارٍ التنزيل' : 'Downloading' })
+                          : t('allRequests.attachments.download', { defaultValue: isAr ? 'تنزيل' : 'Download' })}
+                      </button>
+                    </div>
+                  ))}
+                  {attachmentFeedback && (
+                    <p role="alert" className="text-xs font-bold text-error">{attachmentFeedback}</p>
+                  )}
+                </section>
+              )}
+
               {selectedRequest.type === 'boq' && (
                 <>
                   <div className="p-4 bg-surface-container-low border-s-4 border-emerald-600 space-y-2">
@@ -757,54 +959,6 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {/* BOQ File Link */}
-                  {selectedRequest.raw.boq_file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-emerald-300 bg-emerald-50/50">
-                      <span className="material-symbols-outlined text-emerald-700">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">{t('boq.modal.boq_file_label')}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.boq_file_url)}
-                        className="text-xs font-black text-emerald-700 hover:underline uppercase"
-                      >
-                        {t('boq.modal.boq_file_download')}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Supporting Documents */}
-                  {selectedRequest.raw.supporting_docs_urls && (() => {
-                    let docs = []
-                    try {
-                      docs = JSON.parse(selectedRequest.raw.supporting_docs_urls)
-                    } catch {
-                      docs = []
-                    }
-                    if (!docs || docs.length === 0) return null
-                    return (
-                      <div>
-                        <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">
-                          {t('boq.modal.supporting_docs_label')} ({docs.length})
-                        </label>
-                        <div className="space-y-2">
-                          {docs.map((docUrl, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-2.5 bg-surface-container-low border border-surface-variant text-xs">
-                              <span className="font-mono text-secondary">Document #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleFileOpen(docUrl)}
-                                className="text-tertiary hover:underline font-bold uppercase text-[11px]"
-                              >
-                                {t('boq.modal.boq_file_download')}
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })()}
                 </>
               )}
 
@@ -838,21 +992,6 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {selectedRequest.raw.file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
-                      <span className="material-symbols-outlined text-tertiary">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">{t('quotes.modal.file_label')}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.file_url)}
-                        className="text-xs font-black text-tertiary hover:underline uppercase"
-                      >
-                        {t('quotes.modal.file_download')}
-                      </button>
-                    </div>
-                  )}
                 </>
               )}
 
@@ -892,36 +1031,34 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {selectedRequest.raw.file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
-                      <span className="material-symbols-outlined text-blue-700">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">
-                          {t('visits.modal.file_label', { defaultValue: t('quotes.modal.file_label', { defaultValue: isAr ? 'مستند مرفق' : 'Attached Document' }) })}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.file_url)}
-                        className="text-xs font-black text-tertiary hover:underline uppercase"
-                      >
-                        {t('visits.modal.file_download', { defaultValue: t('quotes.modal.file_download', { defaultValue: isAr ? 'تحميل' : 'Download' }) })}
-                      </button>
-                    </div>
-                  )}
                 </>
               )}
             </div>
 
             {/* Modal Footer */}
             <div className="flex flex-col gap-3 border-t border-surface-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="button"
-                onClick={() => handleDelete(selectedRequest)}
-                className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity"
-              >
-                {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.delete`)}
-              </button>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  variant="outline"
+                  onClick={() => handleArchiveChange(selectedRequest)}
+                  disabled={changingArchive}
+                >
+                  {changingArchive
+                    ? t('allRequests.archive.saving', { defaultValue: isAr ? 'جارٍ الحفظ' : 'Saving' })
+                    : selectedRequest.raw.archived_at
+                      ? t('allRequests.archive.restore', { defaultValue: isAr ? 'استعادة' : 'Restore' })
+                      : t('allRequests.archive.archive', { defaultValue: isAr ? 'أرشفة' : 'Archive' })}
+                </Button>
+                {canDeleteRequests && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(selectedRequest)}
+                    className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity"
+                  >
+                    {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.delete`)}
+                  </button>
+                )}
+              </div>
               <Button
                 variant="secondary"
                 onClick={() => setSelectedRequest(null)}

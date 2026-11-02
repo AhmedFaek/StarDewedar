@@ -8,6 +8,7 @@ import { api } from '../utils/api'
 import { getUser, isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler'
 import { useNotification } from '../hooks/useNotification'
+import { resolveUiLanguage } from '../utils/language'
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -257,7 +258,7 @@ export default function MessagesPage() {
   usePrivatePageSeo({ en: 'My Messages', ar: 'رسائلي' })
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
-  const lang = i18n.language
+  const lang = resolveUiLanguage(i18n.language)
   const { showError, showSuccess } = useNotification()
 
   const [conversations, setConversations] = useState([])

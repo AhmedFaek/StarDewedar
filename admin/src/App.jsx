@@ -10,6 +10,7 @@ import Categories from './pages/Categories'
 import Products from './pages/Products'
 import Projects from './pages/Projects'
 import AllRequests from './pages/AllRequests'
+import AttachmentCleanup from './pages/AttachmentCleanup'
 import ContactMessagesPage from './pages/contactMessages'
 import Conversations from './pages/Conversations'
 import Users from './pages/Users'
@@ -71,6 +72,7 @@ export default function App() {
                     <Route path="/products" element={guard(PERMISSIONS.CATALOG_MANAGE, <Products />)} />
                     <Route path="/projects" element={guard(PERMISSIONS.PROJECTS_MANAGE, <Projects />)} />
                     <Route path="/requests" element={guard(PERMISSIONS.REQUESTS_MANAGE, <AllRequests />)} />
+                    <Route path="/attachment-cleanup" element={guard(PERMISSIONS.ATTACHMENT_CLEANUP, <AttachmentCleanup />)} />
                     <Route path="/quote-requests" element={<Navigate to="/requests?tab=quote" replace />} />
                     <Route path="/visits" element={<Navigate to="/requests?tab=visit" replace />} />
                     <Route path="/messages" element={<Navigate to="/conversations" replace />} />

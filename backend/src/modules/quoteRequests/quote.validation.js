@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { egyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
+import { requestStatusSchema } from '../../utils/requestStatus.js'
 
 export const createQuoteRequestSchema = z.object({
     first_name: z.string().trim().min(2).max(100),
@@ -31,7 +32,7 @@ export const createQuoteRequestSchema = z.object({
     );
 
 export const updateQuoteRequestSchema = z.object({
-    status: z.enum(['pending', 'contacted', 'closed', 'in_progress', 'completed', 'rejected']).optional(),
+    status: requestStatusSchema.optional(),
     details: z.string().trim().min(5).max(10000).optional(),
     first_name: z.string().trim().min(2).max(100).optional(),
     last_name: z.string().trim().min(2).max(100).optional(),

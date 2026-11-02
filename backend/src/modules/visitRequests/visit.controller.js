@@ -23,7 +23,11 @@ export const createVisit = async (req, res) => {
 export const getVisits = async (req, res) => {
     try {
         const { take, skip } = getPaginationParams(req.query)
-        const visits = await service.getVisitRequests({ take, skip })
+        const visits = await service.getVisitRequests({
+            take,
+            skip,
+            archived: req.requestArchived,
+        })
         res.status(200).json({
             success: true,
             data: visits.map(toAdminRequest),
@@ -65,7 +69,7 @@ export const getVisitById = async (req, res) => {
 export const getVisitsByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const visits = await service.getVisitRequestsByEmail(email)
+        const visits = await service.getVisitRequestsByEmail(email, req.requestArchived)
 
         res.status(200).json({
             success: true,
@@ -83,7 +87,7 @@ export const getVisitsByEmail = async (req, res) => {
 export const getVisitsByStatus = async (req, res) => {
     try {
         const { status } = req.params
-        const visits = await service.getVisitRequestsByStatus(status)
+        const visits = await service.getVisitRequestsByStatus(status, req.requestArchived)
 
         res.status(200).json({
             success: true,
@@ -117,20 +121,22 @@ export const updateVisit = async (req, res) => {
     }
 }
 
-export const deleteVisit = async (req, res) => {
+export const deleteVisit = async (req, res, next) => {
     try {
         const { id } = req.params
-        await service.deleteVisitRequest(id)
+        const result = await service.deleteVisitRequest(id, req.body.confirmation)
+        const cleanupPending = result.cleanup_operations.some(
+            (operation) => operation.status !== 'COMPLETED'
+        )
 
-        res.status(200).json({
+        res.status(cleanupPending ? 202 : 200).json({
             success: true,
-            message: 'Visit request deleted successfully',
+            message: cleanupPending
+                ? 'Visit request deleted; attachment cleanup requires attention.'
+                : 'Visit request deleted successfully',
+            data: result,
         })
     } catch (error) {
-        console.error('Error deleting visit:', error)
-        res.status(500).json({
-            success: false,
-            message: 'Failed to delete visit request',
-        })
+        next(error)
     }
 }
