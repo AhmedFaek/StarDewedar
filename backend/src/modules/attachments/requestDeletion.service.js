@@ -9,6 +9,9 @@ const CLEANUP_ERROR = {
     CLOUDINARY_UNCONFIRMED_RESULT: 'Cloudinary did not confirm asset deletion.',
     CLOUDINARY_REQUEST_FAILED: 'Cloudinary deletion request failed.',
 }
+const CLEANUP_ERROR_CODES = new Map(
+    Object.entries(CLEANUP_ERROR).map(([code, message]) => [message, code])
+)
 
 const requestDefinitions = {
     QUOTE: { delegate: 'quoteRequest' },
@@ -100,7 +103,9 @@ export const toCleanupOperationDto = (operation) => ({
     request_id: operation.request_id,
     status: operation.status,
     attempt_count: operation.attempt_count,
-    last_error: operation.last_error,
+    error_code: operation.last_error
+        ? CLEANUP_ERROR_CODES.get(operation.last_error) || 'UNKNOWN_CLEANUP_ERROR'
+        : null,
     created_at: operation.created_at,
     updated_at: operation.updated_at,
     completed_at: operation.completed_at,

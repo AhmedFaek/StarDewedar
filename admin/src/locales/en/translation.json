@@ -425,6 +425,47 @@
     }
   },
 
+  "attachmentCleanup": {
+    "title": "Attachment Cleanup",
+    "description": "Review attachment removal operations that need attention and safely retry eligible work.",
+    "filterLabel": "Filter by status",
+    "filter": {
+      "attention": "Needs attention"
+    },
+    "refresh": "Refresh",
+    "loading": "Loading cleanup operations...",
+    "empty": "No cleanup operations found for this status.",
+    "unknownFile": "Filename unavailable",
+    "attempts": "Attempts",
+    "updated": "Updated",
+    "retry": "Retry cleanup",
+    "retrying": "Retrying",
+    "previous": "Previous",
+    "page": "Page",
+    "next": "Next",
+    "loadError": "Unable to load attachment cleanup operations.",
+    "retryError": "Unable to retry cleanup.",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "failed": "Failed",
+      "completed": "Completed"
+    },
+    "requestType": {
+      "quote": "Quote",
+      "visit": "Visit",
+      "boq": "BOQ"
+    },
+    "errors": {
+      "ASSET_STILL_REFERENCED": "This file is still used by another record and was not removed.",
+      "REFERENCE_CHECK_FAILED": "File usage could not be verified, so removal was not attempted.",
+      "CLOUDINARY_UNCONFIRMED_RESULT": "The file provider did not confirm removal.",
+      "CLOUDINARY_REQUEST_FAILED": "The file provider could not process the removal request.",
+      "UNKNOWN_CLEANUP_ERROR": "The removal could not be completed. Review the operation and retry if appropriate.",
+      "unknown": "The removal could not be completed. Review the operation and retry if appropriate."
+    }
+  },
+
   "allRequests": {
     "title": "ALL REQUESTS",
     "subtitle": "Unified Request Management",

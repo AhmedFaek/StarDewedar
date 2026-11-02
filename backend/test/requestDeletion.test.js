@@ -18,7 +18,7 @@ Object.assign(process.env, {
 })
 
 const [
-    { createRequestDeletionService },
+    { createRequestDeletionService, toCleanupOperationDto },
     { requireRole },
     { ROLES },
     { setUserLookup },
@@ -291,7 +291,8 @@ test('a Cloudinary asset referenced elsewhere is not deleted and remains visible
 
     assert.equal(destroyCalled, false)
     assert.equal(result.cleanup_operations[0].status, 'FAILED')
-    assert.equal(result.cleanup_operations[0].last_error, 'Asset is still referenced by another active record.')
+    assert.equal(result.cleanup_operations[0].error_code, 'ASSET_STILL_REFERENCED')
+    assert.equal('last_error' in result.cleanup_operations[0], false)
     assert.equal(state.attachments.get('attachment-1').status, 'CLEANUP_FAILED')
 })
 
@@ -388,9 +389,27 @@ test('cleanup inspection returns only pending work by default and safe context f
     const operations = await service.listCleanupOperations()
     assert.equal(operations.length, 1)
     assert.equal(operations[0].status, 'FAILED')
+    assert.equal(operations[0].error_code, 'CLOUDINARY_REQUEST_FAILED')
     assert.equal(operations[0].attachment.original_filename, 'visit.pdf')
+    assert.equal('last_error' in operations[0], false)
     assert.equal('public_id' in operations[0], false)
     assert.equal('processing_token' in operations[0], false)
+})
+
+test('cleanup DTO exposes stable error codes without persisted diagnostic text', () => {
+    const diagnostics = [
+        ['Asset is still referenced by another active record.', 'ASSET_STILL_REFERENCED'],
+        ['Asset references could not be verified; cleanup was not attempted.', 'REFERENCE_CHECK_FAILED'],
+        ['Cloudinary did not confirm asset deletion.', 'CLOUDINARY_UNCONFIRMED_RESULT'],
+        ['Cloudinary deletion request failed.', 'CLOUDINARY_REQUEST_FAILED'],
+        ['Unexpected provider diagnostic that must remain private.', 'UNKNOWN_CLEANUP_ERROR'],
+    ]
+
+    diagnostics.forEach(([last_error, expectedCode]) => {
+        const operation = toCleanupOperationDto({ id: 'cleanup-test', last_error })
+        assert.equal(operation.error_code, expectedCode)
+        assert.equal('last_error' in operation, false)
+    })
 })
 
 test('only Super Admin passes the cleanup and permanent-deletion role guard', () => {

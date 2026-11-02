@@ -44,13 +44,11 @@ export default function AttachmentCleanup() {
             setOperations(result)
         } catch (loadError) {
             console.error('Failed to load attachment cleanup operations:', loadError)
-            setError(loadError.message || t('attachmentCleanup.loadError', {
-                defaultValue: isAr ? 'تعذر تحميل عمليات تنظيف المرفقات.' : 'Unable to load attachment cleanup operations.',
-            }))
+            setError(t('attachmentCleanup.loadError'))
         } finally {
             setLoading(false)
         }
-    }, [isAr, page, status, t])
+    }, [page, status, t])
 
     useEffect(() => {
         loadOperations()
@@ -64,31 +62,36 @@ export default function AttachmentCleanup() {
             await loadOperations()
         } catch (retryError) {
             console.error('Failed to retry attachment cleanup:', retryError)
-            setError(retryError.message || t('attachmentCleanup.retryError', {
-                defaultValue: isAr ? 'تعذر إعادة محاولة التنظيف.' : 'Unable to retry cleanup.',
-            }))
+            setError(t('attachmentCleanup.retryError'))
         } finally {
             setRetryingId(null)
         }
     }
 
-    const statusLabel = (operationStatus) => t(`attachmentCleanup.status.${operationStatus.toLowerCase()}`, {
-        defaultValue: operationStatus,
-    })
+    const statusLabel = (operationStatus) =>
+        t(`attachmentCleanup.status.${operationStatus.toLowerCase()}`, {
+            defaultValue: operationStatus,
+        })
+
+    const requestTypeLabel = (requestType) =>
+        t(`attachmentCleanup.requestType.${requestType.toLowerCase()}`, {
+            defaultValue: requestType,
+        })
+
+    const errorLabel = (errorCode) =>
+        t(`attachmentCleanup.errors.${errorCode}`, {
+            defaultValue: t('attachmentCleanup.errors.unknown'),
+        })
 
     return (
         <div className="space-y-6 p-4 sm:p-6">
             <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
                 <div>
                     <h1 className="font-headline text-2xl font-black text-on-surface">
-                        {t('attachmentCleanup.title', { defaultValue: isAr ? 'تنظيف المرفقات' : 'Attachment Cleanup' })}
+                        {t('attachmentCleanup.title')}
                     </h1>
                     <p className="mt-1 max-w-2xl text-sm text-secondary">
-                        {t('attachmentCleanup.description', {
-                            defaultValue: isAr
-                                ? 'راجع عمليات حذف ملفات Cloudinary التي تحتاج إلى متابعة، وأعد محاولة العمليات الآمنة.'
-                                : 'Review Cloudinary deletion operations that need attention and safely retry eligible cleanup.',
-                        })}
+                        {t('attachmentCleanup.description')}
                     </p>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -99,17 +102,17 @@ export default function AttachmentCleanup() {
                             setStatus(event.target.value)
                         }}
                         className="border border-outline-variant bg-white px-3 py-2 text-sm text-on-surface"
-                        aria-label={t('attachmentCleanup.filterLabel', { defaultValue: isAr ? 'تصفية الحالة' : 'Filter by status' })}
+                        aria-label={t('attachmentCleanup.filterLabel')}
                     >
                         <option value="">
-                            {t('attachmentCleanup.filter.attention', { defaultValue: isAr ? 'بحاجة إلى متابعة' : 'Needs attention' })}
+                            {t('attachmentCleanup.filter.attention')}
                         </option>
                         {['PENDING', 'PROCESSING', 'FAILED', 'COMPLETED'].map((value) => (
                             <option key={value} value={value}>{statusLabel(value)}</option>
                         ))}
                     </select>
                     <Button variant="outline" onClick={loadOperations} disabled={loading}>
-                        {t('attachmentCleanup.refresh', { defaultValue: isAr ? 'تحديث' : 'Refresh' })}
+                        {t('attachmentCleanup.refresh')}
                     </Button>
                 </div>
             </header>
@@ -123,11 +126,11 @@ export default function AttachmentCleanup() {
             <section className="overflow-hidden border border-outline-variant bg-white">
                 {loading ? (
                     <p className="p-6 text-sm text-secondary">
-                        {t('attachmentCleanup.loading', { defaultValue: isAr ? 'جارٍ التحميل...' : 'Loading cleanup operations...' })}
+                        {t('attachmentCleanup.loading')}
                     </p>
                 ) : operations.length === 0 ? (
                     <p className="p-6 text-sm text-secondary">
-                        {t('attachmentCleanup.empty', { defaultValue: isAr ? 'لا توجد عمليات تنظيف في هذه الحالة.' : 'No cleanup operations found for this status.' })}
+                        {t('attachmentCleanup.empty')}
                     </p>
                 ) : (
                     <div className="divide-y divide-outline-variant">
@@ -139,28 +142,26 @@ export default function AttachmentCleanup() {
                                             {statusLabel(operation.status)}
                                         </span>
                                         <span className="text-xs font-bold uppercase text-secondary">
-                                            {operation.request_type}
+                                            {requestTypeLabel(operation.request_type)}
                                         </span>
                                         <span className="font-mono text-[11px] text-secondary">
                                             {operation.request_id}
                                         </span>
                                     </div>
                                     <p className="truncate text-sm font-semibold text-on-surface">
-                                        {operation.attachment?.original_filename || t('attachmentCleanup.unknownFile', {
-                                            defaultValue: isAr ? 'اسم الملف غير متاح' : 'Filename unavailable',
-                                        })}
+                                        {operation.attachment?.original_filename || t('attachmentCleanup.unknownFile')}
                                     </p>
                                     <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-secondary">
                                         <span>
-                                            {t('attachmentCleanup.attempts', { defaultValue: isAr ? 'المحاولات' : 'Attempts' })}: {operation.attempt_count}
+                                            {t('attachmentCleanup.attempts')}: {operation.attempt_count}
                                         </span>
                                         <span>
-                                            {t('attachmentCleanup.updated', { defaultValue: isAr ? 'آخر تحديث' : 'Updated' })}:{' '}
+                                            {t('attachmentCleanup.updated')}:{' '}
                                             {formatDate(operation.updated_at, isAr ? 'ar' : 'en-US')}
                                         </span>
                                     </div>
-                                    {operation.last_error && (
-                                        <p className="text-xs font-medium text-red-700">{operation.last_error}</p>
+                                    {operation.error_code && (
+                                        <p className="text-xs font-medium text-red-700">{errorLabel(operation.error_code)}</p>
                                     )}
                                 </div>
                                 {canRetryOperation(operation) && (
@@ -171,8 +172,8 @@ export default function AttachmentCleanup() {
                                         disabled={retryingId !== null}
                                     >
                                         {retryingId === operation.id
-                                            ? t('attachmentCleanup.retrying', { defaultValue: isAr ? 'جارٍ إعادة المحاولة' : 'Retrying' })
-                                            : t('attachmentCleanup.retry', { defaultValue: isAr ? 'إعادة المحاولة' : 'Retry cleanup' })}
+                                            ? t('attachmentCleanup.retrying')
+                                            : t('attachmentCleanup.retry')}
                                     </Button>
                                 )}
                             </article>
@@ -187,17 +188,17 @@ export default function AttachmentCleanup() {
                     onClick={() => setPage((current) => Math.max(0, current - 1))}
                     disabled={page === 0 || loading}
                 >
-                    {t('attachmentCleanup.previous', { defaultValue: isAr ? 'السابق' : 'Previous' })}
+                    {t('attachmentCleanup.previous')}
                 </Button>
                 <span className="text-xs font-medium text-secondary">
-                    {t('attachmentCleanup.page', { defaultValue: isAr ? 'صفحة' : 'Page' })} {page + 1}
+                    {t('attachmentCleanup.page')} {page + 1}
                 </span>
                 <Button
                     variant="ghost"
                     onClick={() => setPage((current) => current + 1)}
                     disabled={loading || operations.length < PAGE_SIZE}
                 >
-                    {t('attachmentCleanup.next', { defaultValue: isAr ? 'التالي' : 'Next' })}
+                    {t('attachmentCleanup.next')}
                 </Button>
             </div>
         </div>
