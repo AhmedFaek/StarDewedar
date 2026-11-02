@@ -67,6 +67,8 @@ export const cleanupCloudinaryAssets = async (assets, requestType) => {
             try {
                 const response = await cloudinary.uploader.destroy(asset.public_id, {
                     resource_type: asset.resource_type,
+                    type: asset.delivery_type || asset.type || 'upload',
+                    invalidate: true,
                 })
 
                 if (response?.result === 'ok') {

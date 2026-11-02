@@ -3,59 +3,42 @@ import { attemptInitialNotification } from '../notifications/notificationRecover
 import {
     persistWithCloudinaryCleanup,
     settleCloudinaryUploads,
-    validateCloudinaryUploadResult,
 } from '../../utils/cloudinaryCleanup.js'
-import cloudinary from '../../config/storage.js'
-
-// ── Cloudinary upload helper ──────────────────────────────────────────────────
-
-const uploadToCloudinary = (file, folder = 'boq') => {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto', folder },
-            (error, result) => {
-                if (error) return reject(error)
-                try {
-                    resolve(validateCloudinaryUploadResult(result))
-                } catch (validationError) {
-                    reject(validationError)
-                }
-            }
-        )
-        stream.end(file.buffer)
-    })
-}
+import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js'
 
 // ── Service functions ─────────────────────────────────────────────────────────
 
 export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) => {
     // BOQ file is required — validation already rejects missing file in controller
-    const boqResult = await uploadToCloudinary(boqFileArray[0], 'boq/documents')
+    const boqResult = await uploadRequestAttachment(boqFileArray[0], { folder: 'boq/documents' })
     let uploadedAssets = [boqResult]
+    let attachments = [boqResult.attachment_data]
 
     // Supporting docs are optional
-    let supportingUrls = []
     if (supportingDocsArray && supportingDocsArray.length > 0) {
         const settledUploads = await settleCloudinaryUploads(
-            supportingDocsArray.map((f) => uploadToCloudinary(f, 'boq/supporting')),
+            supportingDocsArray.map((file) =>
+                uploadRequestAttachment(file, { folder: 'boq/supporting' })
+            ),
             uploadedAssets,
             'BOQ'
         )
         uploadedAssets = settledUploads.assets
-        supportingUrls = settledUploads.results.map((r) => r.secure_url)
+        attachments = [
+            ...attachments,
+            ...settledUploads.results.map((result) => result.attachment_data),
+        ]
     }
 
     const boqData = {
         ...data,
         status: 'pending',
-        boq_file_url: boqResult.secure_url,
-        supporting_docs_urls: supportingUrls.length > 0 ? JSON.stringify(supportingUrls) : null,
     }
 
     const boqRequest = await persistWithCloudinaryCleanup(
         uploadedAssets,
         'BOQ',
-        () => repo.create(boqData)
+        () => repo.create(boqData, attachments)
     )
 
     try {

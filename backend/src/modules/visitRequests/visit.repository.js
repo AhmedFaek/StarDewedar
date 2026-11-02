@@ -1,8 +1,13 @@
 import prisma from '../../utils/prisma.js'
 
-export const create = (data) => {
+export const create = (data, attachments = []) => {
     return prisma.visitRequest.create({
-        data,
+        data: {
+            ...data,
+            ...(attachments.length > 0
+                ? { attachments: { create: attachments } }
+                : {}),
+        },
     })
 }
 

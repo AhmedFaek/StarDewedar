@@ -1,28 +1,7 @@
 import * as repo from './visit.repository.js';
-import * as contactService from '../contactMessages/contact.service.js';
 import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js';
-import {
-    persistWithCloudinaryCleanup,
-    validateCloudinaryUploadResult,
-} from '../../utils/cloudinaryCleanup.js';
-import cloudinary from '../../config/storage.js';
-
-const uploadToCloudinary = (file) => {
-    return new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            { resource_type: 'auto' },
-            (error, result) => {
-                if (error) return reject(error)
-                try {
-                    resolve(validateCloudinaryUploadResult(result))
-                } catch (validationError) {
-                    reject(validationError)
-                }
-            }
-        )
-        stream.end(file.buffer)
-    })
-}
+import { persistWithCloudinaryCleanup } from '../../utils/cloudinaryCleanup.js';
+import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js';
 
 export const createVisitRequest = async (data, file) => {
     const visitData = {
@@ -38,18 +17,19 @@ export const createVisitRequest = async (data, file) => {
         details: data.details,
     };
 
-    // Handle optional file upload
+    // Uploads happen before the request insert; nested Prisma creation persists both atomically.
     const uploadedAssets = [];
+    const attachments = [];
     if (file) {
-        const result = await uploadToCloudinary(file)
+        const result = await uploadRequestAttachment(file, { folder: 'requests/visit' })
         uploadedAssets.push(result);
-        visitData.file_url = result.secure_url
+        attachments.push(result.attachment_data);
     }
 
     const visitRequest = await persistWithCloudinaryCleanup(
         uploadedAssets,
         'VISIT',
-        () => repo.create(visitData)
+        () => repo.create(visitData, attachments)
     );
 
     try {

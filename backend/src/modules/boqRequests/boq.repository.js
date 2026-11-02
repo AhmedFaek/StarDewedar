@@ -1,7 +1,12 @@
 import prisma from '../../utils/prisma.js'
 
-export const create = (data) =>
-    prisma.bOQRequest.create({ data })
+export const create = (data, attachments = []) =>
+    prisma.bOQRequest.create({
+        data: {
+            ...data,
+            attachments: { create: attachments },
+        },
+    })
 
 export const findAll = ({ take = 50, skip = 0 } = {}) =>
     prisma.bOQRequest.findMany({

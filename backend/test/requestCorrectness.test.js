@@ -26,6 +26,7 @@ const [
     { createBOQ },
     visitService,
     quoteService,
+    { uploadRequestAttachment },
 ] = await Promise.all([
     import('../src/config/storage.js'),
     import('../src/utils/prisma.js'),
@@ -35,12 +36,14 @@ const [
     import('../src/modules/boqRequests/boq.controller.js'),
     import('../src/modules/visitRequests/visit.service.js'),
     import('../src/modules/quoteRequests/quote.service.js'),
+    import('../src/utils/requestAttachmentUpload.js'),
 ])
 
 const attachment = {
     originalname: 'request.pdf',
     mimetype: 'application/pdf',
     buffer: Buffer.from('%PDF-1.7\n%%EOF'),
+    size: Buffer.byteLength('%PDF-1.7\n%%EOF'),
 }
 
 const requestBodies = {
@@ -109,12 +112,12 @@ const replaceQuoteTransaction = (t, { product = null, create, onFindUnique = () 
     }))
 }
 
-const invokeCreate = (requestType, body = requestBodies[requestType], file = null) => {
+const invokeCreate = (requestType, body = requestBodies[requestType], file = null, supportingFiles = []) => {
     const req = { body }
     if (requestType === 'BOQ') {
         req.files = file
-            ? { boq_file: [file], supporting_docs: [] }
-            : { boq_file: [attachment], supporting_docs: [] }
+            ? { boq_file: [file], supporting_docs: supportingFiles }
+            : { boq_file: [attachment], supporting_docs: supportingFiles }
     } else if (file) {
         req.file = file
     }
@@ -367,10 +370,11 @@ test('catalog Quote creation fails if the selected Product no longer exists', as
     assert.equal(createCount, 0)
 })
 
-test('Visit and Quote persist only the Cloudinary URL after a successful multipart upload', async (t) => {
+test('Visit and Quote persist authenticated attachment metadata without storing Cloudinary URLs', async (t) => {
     mockNotificationPersistence(t)
     const captured = {}
     let uploadCount = 0
+    const uploadOptions = []
     replaceMethod(t, prisma.visitRequest, 'create', async ({ data }) => {
         captured.visit = data
         return { id: 'visit-upload-1', ...data }
@@ -379,13 +383,15 @@ test('Visit and Quote persist only the Cloudinary URL after a successful multipa
         captured.quote = data
         return { id: 'quote-upload-1', product: null, ...data }
     } })
-    t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
         end() {
+            uploadOptions.push(options)
             uploadCount += 1
             callback(null, {
                 public_id: `request/${uploadCount}`,
-                resource_type: 'raw',
-                secure_url: `https://res.cloudinary.com/test/raw/upload/request/${uploadCount}.pdf`,
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: `https://res.cloudinary.com/test/${options.resource_type}/authenticated/request/${uploadCount}.pdf`,
             })
         },
     }))
@@ -402,21 +408,178 @@ test('Visit and Quote persist only the Cloudinary URL after a successful multipa
     }, attachment)
 
     assert.equal(uploadCount, 2)
-    assert.equal(captured.visit.file_url, 'https://res.cloudinary.com/test/raw/upload/request/1.pdf')
-    assert.equal(captured.quote.file_url, 'https://res.cloudinary.com/test/raw/upload/request/2.pdf')
+    assert.deepEqual(uploadOptions, [
+        { resource_type: 'raw', type: 'authenticated', folder: 'requests/visit' },
+        { resource_type: 'raw', type: 'authenticated', folder: 'requests/quote' },
+    ])
+    assert.equal(Object.hasOwn(captured.visit, 'file_url'), false)
+    assert.equal(Object.hasOwn(captured.quote, 'file_url'), false)
+    assert.equal(captured.visit.attachments.create[0].public_id, 'request/1')
+    assert.equal(captured.visit.attachments.create[0].resource_type, 'raw')
+    assert.equal(captured.visit.attachments.create[0].delivery_type, 'authenticated')
+    assert.equal(captured.visit.attachments.create[0].original_filename, attachment.originalname)
+    assert.equal(captured.visit.attachments.create[0].mime_type, attachment.mimetype)
+    assert.equal(captured.visit.attachments.create[0].file_size, attachment.size)
+    assert.equal(captured.quote.attachments.create[0].public_id, 'request/2')
+    assert.equal(captured.quote.attachments.create[0].delivery_type, 'authenticated')
     assert.equal(Object.hasOwn(captured.quote, 'custom_image_url'), false)
 })
 
-test('successful public create requests retain their 201 response shape', async (t) => {
+test('request attachment uploads select image/raw resources and authenticated delivery by MIME type', async (t) => {
+    const calls = []
+    let uploadCount = 0
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
+        end() {
+            calls.push(options)
+            uploadCount += 1
+            callback(null, {
+                public_id: `request/type-${uploadCount}`,
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: `https://res.cloudinary.com/test/${options.resource_type}/authenticated/type-${uploadCount}`,
+            })
+        },
+    }))
+
+    for (const [mimetype, expectedResourceType] of [
+        ['image/jpeg', 'image'],
+        ['image/png', 'image'],
+        ['application/pdf', 'raw'],
+        ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'raw'],
+    ]) {
+        const file = {
+            originalname: `document-${uploadCount + 1}`,
+            mimetype,
+            buffer: Buffer.from('synthetic'),
+            size: 9,
+        }
+        const result = await uploadRequestAttachment(file, { folder: 'requests/test' })
+
+        assert.equal(result.resource_type, expectedResourceType)
+        assert.equal(result.type, 'authenticated')
+        assert.equal(result.attachment_data.resource_type, expectedResourceType)
+        assert.equal(result.attachment_data.delivery_type, 'authenticated')
+        assert.equal(Object.hasOwn(result.attachment_data, 'secure_url'), false)
+    }
+
+    assert.deepEqual(calls.map(({ resource_type, type }) => ({ resource_type, type })), [
+        { resource_type: 'image', type: 'authenticated' },
+        { resource_type: 'image', type: 'authenticated' },
+        { resource_type: 'raw', type: 'authenticated' },
+        { resource_type: 'raw', type: 'authenticated' },
+    ])
+})
+
+test('BOQ stores its primary and all supporting files as separate authenticated attachments', async (t) => {
+    mockNotificationPersistence(t)
+    let capturedCreateData
+    const uploadOptions = []
+    replaceMethod(t, prisma.bOQRequest, 'create', async ({ data }) => {
+        capturedCreateData = data
+        const { attachments, ...requestData } = data
+        return { id: 'boq-attachments-1', ...requestData }
+    })
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
+        end() {
+            uploadOptions.push(options)
+            const index = uploadOptions.length
+            callback(null, {
+                public_id: `boq/document-${index}`,
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: `https://res.cloudinary.com/test/raw/authenticated/boq/document-${index}`,
+            })
+        },
+    }))
+    t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
+
+    const supportFiles = [
+        { ...attachment, originalname: 'support-a.pdf' },
+        { ...attachment, originalname: 'support-b.pdf' },
+    ]
+    const result = await invokeCreate('BOQ', requestBodies.BOQ, attachment, supportFiles)
+
+    assert.equal(result.statusCode, 201)
+    assert.equal(uploadOptions.length, 3)
+    assert.deepEqual(uploadOptions.map(({ resource_type, type, folder }) => ({
+        resource_type,
+        type,
+        folder,
+    })), [
+        { resource_type: 'raw', type: 'authenticated', folder: 'boq/documents' },
+        { resource_type: 'raw', type: 'authenticated', folder: 'boq/supporting' },
+        { resource_type: 'raw', type: 'authenticated', folder: 'boq/supporting' },
+    ])
+    assert.equal(capturedCreateData.attachments.create.length, 3)
+    assert.deepEqual(capturedCreateData.attachments.create.map(({ original_filename }) => original_filename), [
+        'request.pdf',
+        'support-a.pdf',
+        'support-b.pdf',
+    ])
+    assert.ok(capturedCreateData.attachments.create.every((item) =>
+        item.resource_type === 'raw' &&
+        item.delivery_type === 'authenticated' &&
+        item.status === 'ACTIVE'
+    ))
+    assert.equal(Object.hasOwn(capturedCreateData, 'boq_file_url'), false)
+    assert.equal(Object.hasOwn(capturedCreateData, 'supporting_docs_urls'), false)
+    assert.equal(JSON.stringify(result.body.data).includes('res.cloudinary.com'), false)
+})
+
+test('BOQ partial supporting upload failure cleans every confirmed authenticated asset', async (t) => {
+    let uploadCount = 0
+    const deletedAssets = []
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
+        end() {
+            uploadCount += 1
+            if (uploadCount === 3) {
+                callback(Object.assign(new Error('support upload failed'), {
+                    code: 'CLOUDINARY_UNAVAILABLE',
+                }))
+                return
+            }
+            callback(null, {
+                public_id: `boq/asset-${uploadCount}`,
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: `https://res.cloudinary.com/test/raw/authenticated/boq/asset-${uploadCount}`,
+            })
+        },
+    }))
+    t.mock.method(cloudinary.uploader, 'destroy', async (publicId, options) => {
+        deletedAssets.push({ publicId, options })
+        return { result: 'ok' }
+    })
+    t.mock.method(console, 'error', () => {})
+
+    const result = await invokeCreate('BOQ', requestBodies.BOQ, attachment, [
+        { ...attachment, originalname: 'support-a.pdf' },
+        { ...attachment, originalname: 'support-b.pdf' },
+    ])
+
+    assert.equal(result.statusCode, 500)
+    assert.deepEqual(deletedAssets.map(({ publicId }) => publicId).sort(), [
+        'boq/asset-1',
+        'boq/asset-2',
+    ])
+    assert.ok(deletedAssets.every(({ options }) =>
+        options.type === 'authenticated' &&
+        options.resource_type === 'raw' &&
+        options.invalidate === true
+    ))
+})
+
+test('request create responses do not disclose attachment provider identifiers or URLs', async (t) => {
     mockNotificationPersistence(t)
     const persistedData = {}
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         const delegate = prismaDelegates[requestType]
         const create = async ({ data }) => {
             persistedData[requestType] = data
+            const { attachments, ...requestData } = data
             return {
                 id: `${requestType.toLowerCase()}-1`,
-                ...data,
+                ...requestData,
                 assets: { private: true },
                 notification_status: 'pending',
                 notification_attempts: 0,
@@ -430,12 +593,13 @@ test('successful public create requests retain their 201 response shape', async 
             replaceMethod(t, delegate, 'create', create)
         }
     }
-    t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
         end() {
             callback(null, {
                 public_id: 'boq/request',
-                resource_type: 'raw',
-                secure_url: 'https://res.cloudinary.com/test/raw/upload/boq/request.pdf',
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: 'https://res.cloudinary.com/test/raw/authenticated/boq/request.pdf',
             })
         },
     }))
@@ -450,10 +614,10 @@ test('successful public create requests retain their 201 response shape', async 
         assert.ok(result.body.data.id)
         assert.equal(Object.hasOwn(result.body.data, 'assets'), false)
         assert.equal(Object.keys(result.body.data).some((key) => key.startsWith('notification_')), false)
-        const persistedAttachment = requestType === 'BOQ'
-            ? result.body.data.boq_file_url
-            : result.body.data.file_url
-        assert.equal(persistedAttachment, 'https://res.cloudinary.com/test/raw/upload/boq/request.pdf')
+        assert.equal(Object.hasOwn(result.body.data, 'boq_file_url'), false)
+        assert.equal(Object.hasOwn(result.body.data, 'file_url'), false)
+        assert.equal(JSON.stringify(result.body.data).includes('res.cloudinary.com'), false)
+        assert.equal(JSON.stringify(result.body.data).includes('public_id'), false)
     }
 
     assert.deepEqual(Object.keys(persistedData), ['VISIT', 'QUOTE', 'BOQ'])
@@ -465,9 +629,10 @@ test('notification email failures remain non-fatal after persistence', async (t)
     for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         const create = async ({ data }) => {
             persistedTypes.push(requestType)
+            const { attachments, ...requestData } = data
             return {
                 id: `${requestType.toLowerCase()}-email-failure`,
-                ...data,
+                ...requestData,
                 ...(requestType === 'QUOTE' ? { product: null } : {}),
             }
         }
@@ -477,12 +642,13 @@ test('notification email failures remain non-fatal after persistence', async (t)
             replaceMethod(t, prismaDelegates[requestType], 'create', create)
         }
     }
-    t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
         end() {
             callback(null, {
                 public_id: 'request/notification',
-                resource_type: 'raw',
-                secure_url: 'https://res.cloudinary.com/test/raw/upload/request/notification.pdf',
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: 'https://res.cloudinary.com/test/raw/authenticated/request/notification.pdf',
             })
         },
     }))
@@ -550,6 +716,7 @@ for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
 
     test(`${requestType} database failures return a generic 500 response`, async (t) => {
         const logs = []
+        const deletedAssets = []
         const databaseError = Object.assign(
             new Error('database secret and query details'),
             { code: 'P2002', name: 'PrismaClientKnownRequestError' }
@@ -562,23 +729,23 @@ for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
         } else {
             replaceMethod(t, prismaDelegates[requestType], 'create', create)
         }
-        t.mock.method(cloudinary.uploader, 'upload_stream', (_options, callback) => ({
+        t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
             end() {
                 callback(null, {
                     public_id: 'boq/request',
-                    resource_type: 'raw',
-                    secure_url: 'https://res.cloudinary.com/test/raw/upload/boq/request.pdf',
+                    resource_type: options.resource_type,
+                    type: options.type,
+                    secure_url: 'https://res.cloudinary.com/test/raw/authenticated/boq/request.pdf',
                 })
             },
         }))
-        t.mock.method(cloudinary.uploader, 'destroy', async () => ({ result: 'ok' }))
+        t.mock.method(cloudinary.uploader, 'destroy', async (publicId, options) => {
+            deletedAssets.push({ publicId, options })
+            return { result: 'ok' }
+        })
         t.mock.method(console, 'error', (...args) => logs.push(args))
 
-        const result = await invokeCreate(
-            requestType,
-            requestBodies[requestType],
-            requestType === 'BOQ' ? attachment : null
-        )
+        const result = await invokeCreate(requestType, requestBodies[requestType], attachment)
 
         assert.equal(result.statusCode, 500)
         assert.equal(result.body.message, 'Failed to create request. Please try again later.')
@@ -589,6 +756,14 @@ for (const requestType of ['VISIT', 'QUOTE', 'BOQ']) {
             details.errorCode === 'P2002' &&
             details.errorName === 'PrismaClientKnownRequestError'
         ))
+        assert.deepEqual(deletedAssets, [{
+            publicId: 'boq/request',
+            options: {
+                resource_type: 'raw',
+                type: 'authenticated',
+                invalidate: true,
+            },
+        }])
     })
 }
 

@@ -1,6 +1,6 @@
 import prisma from '../../utils/prisma.js'
 
-export const create = (data) => {
+export const create = (data, attachments = []) => {
     return prisma.$transaction(async (transaction) => {
         let snapshots = {
             product_name_en_snapshot: null,
@@ -30,6 +30,9 @@ export const create = (data) => {
             data: {
                 ...data,
                 ...snapshots,
+                ...(attachments.length > 0
+                    ? { attachments: { create: attachments } }
+                    : {}),
             },
             include: {
                 product: true,
