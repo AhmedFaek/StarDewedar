@@ -275,11 +275,11 @@
     },
     "status": {
       "pending": "Pending",
-      "contacted": "In Coordination",
+      "contacted": "Contacted",
       "in_progress": "In Progress",
       "completed": "Completed",
       "rejected": "Rejected",
-      "closed": "Completed / Archived"
+      "closed": "Closed"
     },
     "modal": {
       "title": "Visit Details",

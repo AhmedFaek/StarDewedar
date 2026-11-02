@@ -277,11 +277,11 @@
     },
     "status": {
       "pending": "قيد الانتظار",
-      "contacted": "جارِ التنسيق",
+      "contacted": "تم التواصل",
       "in_progress": "قيد التنفيذ",
       "completed": "مكتمل",
       "rejected": "مرفوض",
-      "closed": "مكتمل / مؤرشف"
+      "closed": "مغلق"
     },
     "modal": {
       "title": "تفاصيل الزيارة",
@@ -384,7 +384,7 @@
     "delete_error": "خطأ في حذف طلب BOQ",
     "status_error": "خطأ في تحديث الحالة",
     "status": {
-      "pending": "معلق",
+      "pending": "قيد الانتظار",
       "contacted": "تم التواصل",
       "in_progress": "قيد التنفيذ",
       "completed": "مكتمل",
