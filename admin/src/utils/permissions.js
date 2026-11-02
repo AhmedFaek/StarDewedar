@@ -11,6 +11,8 @@ export const PERMISSIONS = {
   CATALOG_MANAGE: 'catalog:manage',
   PROJECTS_MANAGE: 'projects:manage',
   REQUESTS_MANAGE: 'requests:manage',
+  REQUESTS_DELETE: 'requests:delete',
+  ATTACHMENT_CLEANUP: 'attachments:cleanup',
   SUPPORT_MANAGE: 'support:manage',
   NOTIFICATION_RETRY: 'notifications:retry',
   ANALYTICS_VIEW: 'analytics:view',
@@ -40,6 +42,7 @@ export const hasPermission = (role, permission) =>
 export const ROUTE_PERMISSIONS = {
   '/': PERMISSIONS.DASHBOARD_VIEW,
   '/requests': PERMISSIONS.REQUESTS_MANAGE,
+  '/attachment-cleanup': PERMISSIONS.ATTACHMENT_CLEANUP,
   '/categories': PERMISSIONS.CATALOG_MANAGE,
   '/products': PERMISSIONS.CATALOG_MANAGE,
   '/projects': PERMISSIONS.PROJECTS_MANAGE,

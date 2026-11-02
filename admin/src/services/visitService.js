@@ -40,9 +40,10 @@ export const updateVisit = async (id, data) => {
     return handleApiResponse(response)
 }
 
-export const deleteVisit = async (id) => {
+export const deleteVisit = async (id, confirmation) => {
     const response = await apiClient(`${API_BASE_URL}/visits/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ confirmation }),
     })
     return handleApiResponse(response)
 }

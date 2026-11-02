@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Badge, Button } from '../components'
 import { Pagination } from '../components/ui/Pagination'
@@ -16,6 +16,7 @@ import { getQuoteProductName } from '../utils/quoteProductName'
 export default function AllRequests() {
   const { t, i18n } = useTranslation()
   const isAr = i18n.language === 'ar'
+  const navigate = useNavigate()
 
   const [searchParams, setSearchParams] = useSearchParams()
   const tabFromQuery = searchParams.get('tab')
@@ -37,6 +38,10 @@ export default function AllRequests() {
   const canRetryNotifications = hasPermission(
     getDecodedToken()?.role,
     PERMISSIONS.NOTIFICATION_RETRY
+  )
+  const canDeleteRequests = hasPermission(
+    getDecodedToken()?.role,
+    PERMISSIONS.REQUESTS_DELETE
   )
 
   const fetchAll = async () => {
@@ -260,27 +265,39 @@ export default function AllRequests() {
   }
 
   const handleDelete = async (reqItem) => {
-    const confirmMsg =
-      reqItem.type === 'boq'
-        ? t('boq.delete_confirm')
-        : reqItem.type === 'visit'
-        ? t('visits.delete_confirm')
-        : t('quotes.delete_confirm')
+    if (!canDeleteRequests) return
 
-    if (!window.confirm(confirmMsg)) return
+    const requestTypeLabel = t(
+      reqItem.type === 'boq'
+        ? 'boq.modal.project_label'
+        : reqItem.type === 'visit'
+          ? 'visits.modal.factory_label'
+          : 'quotes.modal.product_label',
+      { defaultValue: reqItem.type.toUpperCase() }
+    )
+    const confirmation = window.prompt(t('allRequests.deletePermanentConfirm', {
+      defaultValue: isAr
+        ? `سيتم حذف طلب ${requestTypeLabel} نهائيًا. اكتب DELETE للتأكيد.`
+        : `This ${requestTypeLabel} request will be permanently deleted. Type DELETE to confirm.`,
+    }))
+    if (confirmation !== 'DELETE') return
 
     try {
+      let result
       if (reqItem.type === 'quote') {
-        await deleteQuote(reqItem.id)
+        result = await deleteQuote(reqItem.id, confirmation)
         setQuotes((prev) => prev.filter((q) => q.id !== reqItem.id))
       } else if (reqItem.type === 'visit') {
-        await deleteVisit(reqItem.id)
+        result = await deleteVisit(reqItem.id, confirmation)
         setVisits((prev) => prev.filter((v) => v.id !== reqItem.id))
       } else if (reqItem.type === 'boq') {
-        await deleteBOQ(reqItem.id)
+        result = await deleteBOQ(reqItem.id, confirmation)
         setBoqs((prev) => prev.filter((b) => b.id !== reqItem.id))
       }
       setSelectedRequest(null)
+      if (result?.data?.cleanup_operations?.some((operation) => operation.status !== 'COMPLETED')) {
+        navigate('/attachment-cleanup')
+      }
     } catch (error) {
       alert(t(`${reqItem.type === 'visit' ? 'visits' : reqItem.type === 'boq' ? 'boq' : 'quotes'}.delete_error`) + ': ' + error.message)
     }
@@ -882,13 +899,15 @@ export default function AllRequests() {
 
             {/* Modal Footer */}
             <div className="flex flex-col gap-3 border-t border-surface-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-              <button
-                type="button"
-                onClick={() => handleDelete(selectedRequest)}
-                className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity"
-              >
-                {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.delete`)}
-              </button>
+              {canDeleteRequests && (
+                <button
+                  type="button"
+                  onClick={() => handleDelete(selectedRequest)}
+                  className="text-xs font-bold uppercase text-error hover:opacity-70 transition-opacity"
+                >
+                  {t(`${selectedRequest.type === 'boq' ? 'boq' : selectedRequest.type === 'visit' ? 'visits' : 'quotes'}.modal.delete`)}
+                </button>
+              )}
               <Button
                 variant="secondary"
                 onClick={() => setSelectedRequest(null)}

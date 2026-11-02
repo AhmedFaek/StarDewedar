@@ -33,9 +33,10 @@ export const updateBOQ = async (id, data) => {
     return handleApiResponse(response)
 }
 
-export const deleteBOQ = async (id) => {
+export const deleteBOQ = async (id, confirmation) => {
     const response = await apiClient(`${API_BASE_URL}/boq/${id}`, {
         method: 'DELETE',
+        body: JSON.stringify({ confirmation }),
     })
     return handleApiResponse(response)
 }
