@@ -117,20 +117,22 @@ export const updateQuote = async (req, res) => {
     }
 }
 
-export const deleteQuote = async (req, res) => {
+export const deleteQuote = async (req, res, next) => {
     try {
         const { id } = req.params
-        await service.deleteQuoteRequest(id)
+        const result = await service.deleteQuoteRequest(id, req.body.confirmation)
+        const cleanupPending = result.cleanup_operations.some(
+            (operation) => operation.status !== 'COMPLETED'
+        )
 
-        res.status(200).json({
+        res.status(cleanupPending ? 202 : 200).json({
             success: true,
-            message: 'Quote request deleted successfully',
+            message: cleanupPending
+                ? 'Quote request deleted; attachment cleanup requires attention.'
+                : 'Quote request deleted successfully',
+            data: result,
         })
     } catch (error) {
-        console.error('Error deleting quote:', error)
-        res.status(500).json({
-            success: false,
-            message: 'Failed to delete quote request',
-        })
+        next(error)
     }
 }

@@ -117,20 +117,22 @@ export const updateVisit = async (req, res) => {
     }
 }
 
-export const deleteVisit = async (req, res) => {
+export const deleteVisit = async (req, res, next) => {
     try {
         const { id } = req.params
-        await service.deleteVisitRequest(id)
+        const result = await service.deleteVisitRequest(id, req.body.confirmation)
+        const cleanupPending = result.cleanup_operations.some(
+            (operation) => operation.status !== 'COMPLETED'
+        )
 
-        res.status(200).json({
+        res.status(cleanupPending ? 202 : 200).json({
             success: true,
-            message: 'Visit request deleted successfully',
+            message: cleanupPending
+                ? 'Visit request deleted; attachment cleanup requires attention.'
+                : 'Visit request deleted successfully',
+            data: result,
         })
     } catch (error) {
-        console.error('Error deleting visit:', error)
-        res.status(500).json({
-            success: false,
-            message: 'Failed to delete visit request',
-        })
+        next(error)
     }
 }

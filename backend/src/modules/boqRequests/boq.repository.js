@@ -57,6 +57,3 @@ export const update = (id, data) =>
         data,
         include: requestReadRelations,
     })
-
-export const remove = (id) =>
-    prisma.bOQRequest.delete({ where: { id } })

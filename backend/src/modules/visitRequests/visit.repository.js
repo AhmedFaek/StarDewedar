@@ -58,12 +58,6 @@ export const update = (id, data) => {
     })
 }
 
-export const remove = (id) => {
-    return prisma.visitRequest.delete({
-        where: { id },
-    })
-}
-
 export const findByStatus = (status) => {
     return prisma.visitRequest.findMany({
         where: { status },

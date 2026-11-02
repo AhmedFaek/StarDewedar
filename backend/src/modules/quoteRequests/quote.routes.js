@@ -2,10 +2,12 @@ import express from 'express'
 import rateLimit from 'express-rate-limit'
 import * as controller from './quote.controller.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requirePermission } from '../../middleware/roles.middleware.js'
+import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateQuoteRequestSchema } from './quote.validation.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
+import { ROLES } from '../../utils/constants.js'
+import { requestDeletionSchema } from '../attachments/requestDeletion.validation.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { singleFileUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
@@ -56,8 +58,9 @@ router.put('/:id', auth,
 
 // Delete quote request
 router.delete('/:id', auth,
-    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    requireRole(ROLES.SUPER_ADMIN),
     validateUuidParam(),
+    validate(requestDeletionSchema),
     controller.deleteQuote)
 
 export default router

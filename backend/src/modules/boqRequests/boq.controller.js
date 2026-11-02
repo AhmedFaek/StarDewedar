@@ -103,14 +103,22 @@ export const updateBOQ = async (req, res) => {
     }
 }
 
-export const deleteBOQ = async (req, res) => {
+export const deleteBOQ = async (req, res, next) => {
     try {
         const { id } = req.params
-        await service.deleteBOQRequest(id)
+        const result = await service.deleteBOQRequest(id, req.body.confirmation)
+        const cleanupPending = result.cleanup_operations.some(
+            (operation) => operation.status !== 'COMPLETED'
+        )
 
-        res.status(200).json({ success: true, message: 'BOQ request deleted successfully' })
+        res.status(cleanupPending ? 202 : 200).json({
+            success: true,
+            message: cleanupPending
+                ? 'BOQ request deleted; attachment cleanup requires attention.'
+                : 'BOQ request deleted successfully',
+            data: result,
+        })
     } catch (error) {
-        console.error('Error deleting BOQ:', error)
-        res.status(500).json({ success: false, message: 'Failed to delete BOQ request' })
+        next(error)
     }
 }

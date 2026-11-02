@@ -2,6 +2,7 @@ import * as repo from './visit.repository.js';
 import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js';
 import { persistWithCloudinaryCleanup } from '../../utils/cloudinaryCleanup.js';
 import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js';
+import { deleteRequestWithCleanup } from '../attachments/requestDeletion.service.js'
 
 export const createVisitRequest = async (data, file) => {
     const visitData = {
@@ -70,6 +71,5 @@ export const updateVisitRequest = (id, data) => {
     return repo.update(id, payload)
 }
 
-export const deleteVisitRequest = (id) => {
-    return repo.remove(id)
-}
+export const deleteVisitRequest = (id, confirmation) =>
+    deleteRequestWithCleanup('VISIT', id, confirmation)

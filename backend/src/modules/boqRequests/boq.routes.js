@@ -2,10 +2,12 @@ import express from 'express'
 import rateLimit from 'express-rate-limit'
 import * as controller from './boq.controller.js'
 import auth from '../../middleware/auth.middleware.js'
-import { requirePermission } from '../../middleware/roles.middleware.js'
+import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateBOQRequestSchema } from './boq.validation.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
+import { ROLES } from '../../utils/constants.js'
+import { requestDeletionSchema } from '../attachments/requestDeletion.validation.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { boqUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
@@ -42,6 +44,13 @@ router.get('/:id', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validat
 router.put('/:id', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateUuidParam(), validate(updateBOQRequestSchema), controller.updateBOQ)
 
 // Delete BOQ request (admin only)
-router.delete('/:id', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateUuidParam(), controller.deleteBOQ)
+router.delete(
+    '/:id',
+    auth,
+    requireRole(ROLES.SUPER_ADMIN),
+    validateUuidParam(),
+    validate(requestDeletionSchema),
+    controller.deleteBOQ
+)
 
 export default router

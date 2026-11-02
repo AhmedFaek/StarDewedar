@@ -5,6 +5,7 @@ import {
     settleCloudinaryUploads,
 } from '../../utils/cloudinaryCleanup.js'
 import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js'
+import { deleteRequestWithCleanup } from '../attachments/requestDeletion.service.js'
 
 // ── Service functions ─────────────────────────────────────────────────────────
 
@@ -72,4 +73,5 @@ export const updateBOQRequest = (id, data) => {
     return repo.update(id, payload)
 }
 
-export const deleteBOQRequest = (id) => repo.remove(id)
+export const deleteBOQRequest = (id, confirmation) =>
+    deleteRequestWithCleanup('BOQ', id, confirmation)

@@ -2,6 +2,7 @@ import * as repo from './quote.repository.js'
 import { attemptInitialNotification } from '../notifications/notificationRecovery.service.js'
 import { persistWithCloudinaryCleanup } from '../../utils/cloudinaryCleanup.js'
 import { uploadRequestAttachment } from '../../utils/requestAttachmentUpload.js'
+import { deleteRequestWithCleanup } from '../attachments/requestDeletion.service.js'
 
 export const createQuoteRequest = async (data, file) => {
     // Set default status to 'pending'
@@ -65,6 +66,5 @@ export const updateQuoteRequest = (id, data) => {
     return repo.update(id, payload)
 }
 
-export const deleteQuoteRequest = (id) => {
-    return repo.remove(id)
-}
+export const deleteQuoteRequest = (id, confirmation) =>
+    deleteRequestWithCleanup('QUOTE', id, confirmation)

@@ -310,23 +310,27 @@ model Attachment {
 }
 
 model CloudinaryCleanupOperation {
-  id            String                  @id @default(uuid())
-  attachment_id String?
-  public_id     String
-  resource_type String
-  delivery_type String
-  status        CloudinaryCleanupStatus @default(PENDING)
-  attempt_count Int                     @default(0)
-  last_error    String?
-  created_at    DateTime                @default(now())
-  updated_at    DateTime                @updatedAt
-  completed_at  DateTime?
+  id               String                  @id @default(uuid())
+  attachment_id    String?
+  request_type     NotificationRequestType?
+  request_id       String?
+  public_id        String
+  resource_type    String
+  delivery_type    String
+  status           CloudinaryCleanupStatus @default(PENDING)
+  processing_token String?                 @unique
+  attempt_count    Int                     @default(0)
+  last_error       String?
+  created_at       DateTime                @default(now())
+  updated_at       DateTime                @updatedAt
+  completed_at     DateTime?
 
   attachment Attachment? @relation(fields: [attachment_id], references: [id], onDelete: SetNull)
 
   @@unique([public_id, resource_type, delivery_type])
   @@index([status, created_at])
   @@index([attachment_id])
+  @@index([request_type, request_id])
 }
 
 model NotificationAttempt {

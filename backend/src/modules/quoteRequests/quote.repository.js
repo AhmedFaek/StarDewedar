@@ -86,12 +86,6 @@ export const update = (id, data) => {
     })
 }
 
-export const remove = (id) => {
-    return prisma.quoteRequest.delete({
-        where: { id },
-    })
-}
-
 export const findByStatus = (status) => {
     return prisma.quoteRequest.findMany({
         where: { status },
