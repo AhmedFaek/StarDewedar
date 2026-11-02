@@ -59,7 +59,9 @@ function RequestAttachments({ attachments, t }) {
             className="inline-flex shrink-0 items-center gap-1 text-[10px] font-bold text-primary hover:underline disabled:opacity-50"
           >
             <span className="material-symbols-outlined text-[12px] leading-none">download</span>
-            {downloadingId === attachment.id ? t('myRequests.loading') : t('myRequests.viewFile')}
+            {downloadingId === attachment.id
+              ? t('myRequests.downloadingAttachment')
+              : t('myRequests.downloadAttachment')}
           </button>
         </div>
       ))}
