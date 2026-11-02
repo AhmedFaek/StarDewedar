@@ -307,14 +307,20 @@ test('BOQ persistence failure cleans main and all supporting assets', async (t) 
         Promise.resolve({
             public_id: 'boq/support-a',
             resource_type: 'raw',
+            type: 'authenticated',
             secure_url: 'https://res.cloudinary.com/test/raw/upload/support-a',
         }),
         Promise.resolve({
             public_id: 'boq/support-b',
             resource_type: 'raw',
+            type: 'authenticated',
             secure_url: 'https://res.cloudinary.com/test/raw/upload/support-b',
         }),
-    ], [{ public_id: 'boq/main', resource_type: 'raw' }], 'BOQ')
+    ], [{
+        public_id: 'boq/main',
+        resource_type: 'raw',
+        type: 'authenticated',
+    }], 'BOQ')
 
     const databaseError = new Error('BOQ insert failed')
     await assert.rejects(
@@ -324,5 +330,18 @@ test('BOQ persistence failure cleans main and all supporting assets', async (t) 
         (error) => error === databaseError
     )
 
-    assert.equal(deleted.length, 3)
+    assert.deepEqual(deleted, [
+        {
+            publicId: 'boq/main',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+        {
+            publicId: 'boq/support-a',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+        {
+            publicId: 'boq/support-b',
+            options: { resource_type: 'raw', type: 'authenticated', invalidate: true },
+        },
+    ])
 })

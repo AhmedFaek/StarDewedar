@@ -563,6 +563,48 @@ test('BOQ stores its primary and all supporting files as separate authenticated 
         item.delivery_type === 'authenticated' &&
         item.status === 'ACTIVE'
     ))
+    assert.deepEqual(capturedCreateData.attachments.create.map(({ public_id }) => public_id), [
+        'boq/document-1',
+        'boq/document-2',
+        'boq/document-3',
+    ])
+    assert.equal(Object.hasOwn(capturedCreateData, 'boq_file_url'), false)
+    assert.equal(Object.hasOwn(capturedCreateData, 'supporting_docs_urls'), false)
+    assert.equal(JSON.stringify(result.body.data).includes('res.cloudinary.com'), false)
+})
+
+test('BOQ stores its main file as an authenticated attachment when no supporting files are submitted', async (t) => {
+    mockNotificationPersistence(t)
+    let capturedCreateData
+    replaceMethod(t, prisma.bOQRequest, 'create', async ({ data }) => {
+        capturedCreateData = data
+        const { attachments, ...requestData } = data
+        return { id: 'boq-main-only-1', ...requestData }
+    })
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
+        end() {
+            callback(null, {
+                public_id: 'boq/document-main-only',
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: 'https://res.cloudinary.com/test/raw/authenticated/boq/document-main-only',
+            })
+        },
+    }))
+    t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
+
+    const result = await invokeCreate('BOQ', requestBodies.BOQ, attachment)
+
+    assert.equal(result.statusCode, 201)
+    assert.deepEqual(capturedCreateData.attachments.create, [{
+        original_filename: 'request.pdf',
+        mime_type: 'application/pdf',
+        file_size: attachment.size,
+        public_id: 'boq/document-main-only',
+        resource_type: 'raw',
+        delivery_type: 'authenticated',
+        status: 'ACTIVE',
+    }])
     assert.equal(Object.hasOwn(capturedCreateData, 'boq_file_url'), false)
     assert.equal(Object.hasOwn(capturedCreateData, 'supporting_docs_urls'), false)
     assert.equal(JSON.stringify(result.body.data).includes('res.cloudinary.com'), false)
