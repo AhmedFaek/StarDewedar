@@ -8,6 +8,7 @@ import { getAllQuotes, updateQuote, deleteQuote } from '../services/quoteService
 import { getAllVisits, updateVisit, deleteVisit } from '../services/visitService'
 import { getAllBOQs, updateBOQ, deleteBOQ } from '../services/boqService'
 import { retryRequestNotification } from '../services/notificationService'
+import { downloadRequestAttachment } from '../services/attachmentService'
 import { getDecodedToken } from '../utils/auth'
 import { hasPermission, PERMISSIONS } from '../utils/permissions'
 import { getQuoteProductName } from '../utils/quoteProductName'
@@ -31,6 +32,8 @@ export default function AllRequests() {
   const [savingStatus, setSavingStatus] = useState(false)
   const [retryingNotification, setRetryingNotification] = useState(false)
   const [notificationFeedback, setNotificationFeedback] = useState(null)
+  const [downloadingAttachmentId, setDownloadingAttachmentId] = useState(null)
+  const [attachmentFeedback, setAttachmentFeedback] = useState(null)
   const canRetryNotifications = hasPermission(
     getDecodedToken()?.role,
     PERMISSIONS.NOTIFICATION_RETRY
@@ -70,6 +73,7 @@ export default function AllRequests() {
 
   useEffect(() => {
     setNotificationFeedback(null)
+    setAttachmentFeedback(null)
   }, [selectedRequest?.id])
 
   // Normalize all request types into a single format
@@ -282,9 +286,21 @@ export default function AllRequests() {
     }
   }
 
-  const handleFileOpen = (fileUrl) => {
-    if (!fileUrl) return
-    window.open(fileUrl, '_blank', 'noopener,noreferrer')
+  const handleAttachmentDownload = async (attachment) => {
+    setDownloadingAttachmentId(attachment.id)
+    setAttachmentFeedback(null)
+    try {
+      await downloadRequestAttachment(attachment)
+    } catch (error) {
+      console.error('Failed to download request attachment:', error)
+      setAttachmentFeedback(
+        t('allRequests.attachments.downloadFailed', {
+          defaultValue: isAr ? 'تعذر تنزيل الملف. حاول مرة أخرى.' : 'Unable to download this file. Please try again.',
+        })
+      )
+    } finally {
+      setDownloadingAttachmentId(null)
+    }
   }
 
   const updateNotificationData = (reqItem, data) => {
@@ -721,6 +737,37 @@ export default function AllRequests() {
                 </section>
               )}
 
+              {Array.isArray(selectedRequest.raw.attachments) && selectedRequest.raw.attachments.length > 0 && (
+                <section className="border border-surface-variant bg-surface-container-low p-4 space-y-2">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-on-surface">
+                    {t('allRequests.attachments.title', { defaultValue: isAr ? 'المرفقات' : 'Attachments' })}
+                  </h4>
+                  {selectedRequest.raw.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className="flex items-center justify-between gap-3 border border-surface-variant bg-white p-2.5"
+                    >
+                      <span className="min-w-0 truncate text-xs text-secondary">
+                        {attachment.original_filename || t('allRequests.attachments.file', { defaultValue: isAr ? 'ملف مرفق' : 'Attachment' })}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleAttachmentDownload(attachment)}
+                        disabled={downloadingAttachmentId !== null}
+                        className="shrink-0 text-xs font-bold uppercase text-tertiary hover:underline disabled:opacity-50"
+                      >
+                        {downloadingAttachmentId === attachment.id
+                          ? t('allRequests.attachments.downloading', { defaultValue: isAr ? 'جارٍ التنزيل' : 'Downloading' })
+                          : t('allRequests.attachments.download', { defaultValue: isAr ? 'تنزيل' : 'Download' })}
+                      </button>
+                    </div>
+                  ))}
+                  {attachmentFeedback && (
+                    <p role="alert" className="text-xs font-bold text-error">{attachmentFeedback}</p>
+                  )}
+                </section>
+              )}
+
               {selectedRequest.type === 'boq' && (
                 <>
                   <div className="p-4 bg-surface-container-low border-s-4 border-emerald-600 space-y-2">
@@ -757,54 +804,6 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {/* BOQ File Link */}
-                  {selectedRequest.raw.boq_file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-emerald-300 bg-emerald-50/50">
-                      <span className="material-symbols-outlined text-emerald-700">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">{t('boq.modal.boq_file_label')}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.boq_file_url)}
-                        className="text-xs font-black text-emerald-700 hover:underline uppercase"
-                      >
-                        {t('boq.modal.boq_file_download')}
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Supporting Documents */}
-                  {selectedRequest.raw.supporting_docs_urls && (() => {
-                    let docs = []
-                    try {
-                      docs = JSON.parse(selectedRequest.raw.supporting_docs_urls)
-                    } catch {
-                      docs = []
-                    }
-                    if (!docs || docs.length === 0) return null
-                    return (
-                      <div>
-                        <label className="text-[10px] font-bold text-tertiary uppercase tracking-widest block mb-2">
-                          {t('boq.modal.supporting_docs_label')} ({docs.length})
-                        </label>
-                        <div className="space-y-2">
-                          {docs.map((docUrl, idx) => (
-                            <div key={idx} className="flex items-center justify-between p-2.5 bg-surface-container-low border border-surface-variant text-xs">
-                              <span className="font-mono text-secondary">Document #{idx + 1}</span>
-                              <button
-                                type="button"
-                                onClick={() => handleFileOpen(docUrl)}
-                                className="text-tertiary hover:underline font-bold uppercase text-[11px]"
-                              >
-                                {t('boq.modal.boq_file_download')}
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )
-                  })()}
                 </>
               )}
 
@@ -838,21 +837,6 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {selectedRequest.raw.file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
-                      <span className="material-symbols-outlined text-tertiary">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">{t('quotes.modal.file_label')}</p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.file_url)}
-                        className="text-xs font-black text-tertiary hover:underline uppercase"
-                      >
-                        {t('quotes.modal.file_download')}
-                      </button>
-                    </div>
-                  )}
                 </>
               )}
 
@@ -892,23 +876,6 @@ export default function AllRequests() {
                     </div>
                   )}
 
-                  {selectedRequest.raw.file_url && (
-                    <div className="flex items-center gap-4 p-3 border border-dashed border-surface-variant">
-                      <span className="material-symbols-outlined text-blue-700">description</span>
-                      <div className="flex-1">
-                        <p className="text-xs font-bold text-on-surface uppercase">
-                          {t('visits.modal.file_label', { defaultValue: t('quotes.modal.file_label', { defaultValue: isAr ? 'مستند مرفق' : 'Attached Document' }) })}
-                        </p>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleFileOpen(selectedRequest.raw.file_url)}
-                        className="text-xs font-black text-tertiary hover:underline uppercase"
-                      >
-                        {t('visits.modal.file_download', { defaultValue: t('quotes.modal.file_download', { defaultValue: isAr ? 'تحميل' : 'Download' }) })}
-                      </button>
-                    </div>
-                  )}
                 </>
               )}
             </div>

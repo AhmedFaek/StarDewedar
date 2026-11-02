@@ -27,6 +27,45 @@ function StatusBadge({ status, t }) {
   )
 }
 
+function RequestAttachments({ attachments, t }) {
+  const { showError } = useNotification()
+  const [downloadingId, setDownloadingId] = useState(null)
+
+  if (!Array.isArray(attachments) || attachments.length === 0) return null
+
+  const handleDownload = async (attachment) => {
+    setDownloadingId(attachment.id)
+    try {
+      await api.downloadAttachment(attachment)
+    } catch (error) {
+      showError(getApiErrorMessage(error, { t }))
+    } finally {
+      setDownloadingId(null)
+    }
+  }
+
+  return (
+    <div className="mt-2 space-y-1.5 border-t border-slate-100 pt-2">
+      {attachments.map((attachment) => (
+        <div key={attachment.id} className="flex items-center justify-between gap-2">
+          <span className="min-w-0 truncate text-[10px] text-slate-500">
+            {attachment.original_filename || t('myRequests.supportingDocs')}
+          </span>
+          <button
+            type="button"
+            onClick={() => handleDownload(attachment)}
+            disabled={downloadingId !== null}
+            className="inline-flex shrink-0 items-center gap-1 text-[10px] font-bold text-primary hover:underline disabled:opacity-50"
+          >
+            <span className="material-symbols-outlined text-[12px] leading-none">download</span>
+            {downloadingId === attachment.id ? t('myRequests.loading') : t('myRequests.viewFile')}
+          </button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ── Single Quote Card ───────────────────────────────────────────────────── */
 
 function QuoteCard({ quote, lang, t }) {
@@ -67,6 +106,7 @@ function QuoteCard({ quote, lang, t }) {
       {quote.details && (
         <p className="mt-1.5 text-[11px] text-slate-600 leading-relaxed line-clamp-2">{quote.details}</p>
       )}
+      <RequestAttachments attachments={quote.attachments} t={t} />
     </div>
   )
 }
@@ -104,6 +144,7 @@ function VisitCard({ visit, lang, t }) {
       <p className="text-[11px] text-slate-500 font-medium">
         {visit.factory_activity}{visit.address ? ` · ${visit.address}` : ''}
       </p>
+      <RequestAttachments attachments={visit.attachments} t={t} />
     </div>
   )
 }
@@ -115,15 +156,6 @@ function BOQCard({ boq, lang, t }) {
     lang === 'ar' ? 'ar-EG' : 'en-GB',
     { year: 'numeric', month: 'short', day: 'numeric' }
   )
-
-  let supportingDocs = []
-  if (boq.supporting_docs_urls) {
-    try {
-      supportingDocs = JSON.parse(boq.supporting_docs_urls)
-    } catch {
-      supportingDocs = []
-    }
-  }
 
   return (
     <div className="border border-slate-100 bg-white hover:border-emerald-400 hover:shadow-xs transition-all duration-200 p-3">
@@ -177,26 +209,7 @@ function BOQCard({ boq, lang, t }) {
         </p>
       )}
 
-      {/* Attachments */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-1.5 border-t border-slate-100">
-        {boq.boq_file_url ? (
-          <a
-            href={boq.boq_file_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 border border-emerald-200 text-[11px] font-bold text-emerald-800 hover:bg-emerald-100 transition-colors"
-          >
-            <span className="material-symbols-outlined text-[13px] leading-none">download</span>
-            {t('myRequests.viewFile')}
-          </a>
-        ) : <span />}
-        {supportingDocs.length > 0 && (
-          <span className="inline-flex items-center gap-1 text-[10px] text-slate-400 font-medium">
-            <span className="material-symbols-outlined text-[12px] leading-none text-slate-400">attach_file</span>
-            {supportingDocs.length} {t('myRequests.supportingDocs')}
-          </span>
-        )}
-      </div>
+      <RequestAttachments attachments={boq.attachments} t={t} />
     </div>
   )
 }
