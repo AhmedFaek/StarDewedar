@@ -1,8 +1,9 @@
 import { API_BASE_URL } from '../utils/constants'
 import { apiClient, handleApiResponse } from './apiClient'
 
-export const getAllQuotes = async () => {
-    const response = await apiClient(`${API_BASE_URL}/quotes`, {
+export const getAllQuotes = async ({ archived = false } = {}) => {
+    const query = archived ? '?archived=true' : ''
+    const response = await apiClient(`${API_BASE_URL}/quotes${query}`, {
         method: 'GET',
     })
     return handleApiResponse(response)
