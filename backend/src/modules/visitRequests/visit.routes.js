@@ -11,6 +11,11 @@ import { requestDeletionSchema } from '../attachments/requestDeletion.validation
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { singleFileUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import {
+    validateArchivedQuery,
+    validateRequestStatusParam,
+} from '../../middleware/requestFilters.middleware.js'
+import * as workflowController from '../requestWorkflow/requestWorkflow.controller.js'
 
 const router = express.Router()
 
@@ -31,17 +36,31 @@ router.post('/', visitLimiter, verifyTurnstile, singleFileUpload, controller.cre
 // Get all visit requests
 router.get('/', auth,
     requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    validateArchivedQuery,
     controller.getVisits)
 
 // Get visit requests by status
 router.get('/status/:status', auth,
     requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    validateRequestStatusParam,
+    validateArchivedQuery,
     controller.getVisitsByStatus)
 
 // Get visit requests by email
 router.get('/email/:email', auth,
     requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    validateArchivedQuery,
     controller.getVisitsByEmail)
+
+router.post('/:id/archive', auth,
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    validateUuidParam(),
+    workflowController.archiveVisitRequest)
+
+router.post('/:id/restore', auth,
+    requirePermission(PERMISSIONS.REQUESTS_MANAGE),
+    validateUuidParam(),
+    workflowController.restoreVisitRequest)
 
 // Get single visit request by ID
 router.get('/:id', auth,

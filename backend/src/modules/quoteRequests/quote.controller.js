@@ -23,7 +23,11 @@ export const createQuote = async (req, res) => {
 export const getQuotes = async (req, res) => {
     try {
         const { take, skip } = getPaginationParams(req.query)
-        const quotes = await service.getQuoteRequests({ take, skip })
+        const quotes = await service.getQuoteRequests({
+            take,
+            skip,
+            archived: req.requestArchived,
+        })
         res.status(200).json({
             success: true,
             data: quotes.map(toAdminRequest),
@@ -65,7 +69,7 @@ export const getQuoteById = async (req, res) => {
 export const getQuotesByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const quotes = await service.getQuoteRequestsByEmail(email)
+        const quotes = await service.getQuoteRequestsByEmail(email, req.requestArchived)
 
         res.status(200).json({
             success: true,
@@ -83,7 +87,7 @@ export const getQuotesByEmail = async (req, res) => {
 export const getQuotesByStatus = async (req, res) => {
     try {
         const { status } = req.params
-        const quotes = await service.getQuoteRequestsByStatus(status)
+        const quotes = await service.getQuoteRequestsByStatus(status, req.requestArchived)
 
         res.status(200).json({
             success: true,

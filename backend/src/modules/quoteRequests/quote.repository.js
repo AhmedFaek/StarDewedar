@@ -15,6 +15,11 @@ const requestReadRelations = {
     },
 }
 
+const archivedWhere = (archived) =>
+    archived === undefined
+        ? {}
+        : { archived_at: archived ? { not: null } : null }
+
 export const create = (data, attachments = []) => {
     return prisma.$transaction(async (transaction) => {
         let snapshots = {
@@ -54,8 +59,9 @@ export const create = (data, attachments = []) => {
     })
 }
 
-export const findAll = ({ take = 100, skip = 0 } = {}) => {
+export const findAll = ({ take = 100, skip = 0, archived = false } = {}) => {
     return prisma.quoteRequest.findMany({
+        where: archivedWhere(archived),
         take: Math.min(100, Math.max(1, Number(take) || 100)),
         skip: Math.max(0, Number(skip) || 0),
         include: requestReadRelations,
@@ -70,9 +76,9 @@ export const findById = (id) => {
     })
 }
 
-export const findByEmail = (email) => {
+export const findByEmail = (email, archived) => {
     return prisma.quoteRequest.findMany({
-        where: { email },
+        where: { email, ...archivedWhere(archived) },
         include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })
@@ -86,9 +92,9 @@ export const update = (id, data) => {
     })
 }
 
-export const findByStatus = (status) => {
+export const findByStatus = (status, archived = false) => {
     return prisma.quoteRequest.findMany({
-        where: { status },
+        where: { status: { in: [status, status.toUpperCase()] }, ...archivedWhere(archived) },
         include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })

@@ -11,6 +11,11 @@ import { requestDeletionSchema } from '../attachments/requestDeletion.validation
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { boqUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import {
+    validateArchivedQuery,
+    validateRequestStatusParam,
+} from '../../middleware/requestFilters.middleware.js'
+import * as workflowController from '../requestWorkflow/requestWorkflow.controller.js'
 
 const router = express.Router()
 
@@ -29,13 +34,16 @@ const boqLimiter = rateLimit({
 router.post('/', boqLimiter, verifyTurnstile, boqUpload, controller.createBOQ)
 
 // Get all BOQ requests (admin only)
-router.get('/', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), controller.getBOQs)
+router.get('/', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateArchivedQuery, controller.getBOQs)
 
 // Get BOQ requests by status (admin only)
-router.get('/status/:status', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), controller.getBOQsByStatus)
+router.get('/status/:status', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateRequestStatusParam, validateArchivedQuery, controller.getBOQsByStatus)
 
 // Get BOQ requests by email (admin only)
-router.get('/email/:email', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), controller.getBOQsByEmail)
+router.get('/email/:email', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateArchivedQuery, controller.getBOQsByEmail)
+
+router.post('/:id/archive', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateUuidParam(), workflowController.archiveBOQRequest)
+router.post('/:id/restore', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateUuidParam(), workflowController.restoreBOQRequest)
 
 // Get single BOQ request by ID (admin only)
 router.get('/:id', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateUuidParam(), controller.getBOQById)

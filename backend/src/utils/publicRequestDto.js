@@ -36,7 +36,9 @@ export const toPublicRequest = (request) => {
     const safeRequest = toSafeRequest(request)
     const publicRequest = Object.fromEntries(
         Object.entries(safeRequest).filter(([key]) =>
-            key !== 'assets' && !key.startsWith('notification_')
+            key !== 'assets' &&
+            key !== 'archived_at' &&
+            !key.startsWith('notification_')
         )
     )
     if (Array.isArray(request.attachments)) {

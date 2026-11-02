@@ -51,9 +51,9 @@ export const getVisitRequests = (options) => repo.findAll(options)
 
 export const getVisitRequestById = (id) => repo.findById(id)
 
-export const getVisitRequestsByEmail = (email) => repo.findByEmail(email)
+export const getVisitRequestsByEmail = (email, archived) => repo.findByEmail(email, archived)
 
-export const getVisitRequestsByStatus = (status) => repo.findByStatus(status)
+export const getVisitRequestsByStatus = (status, archived) => repo.findByStatus(status, archived)
 
 export const updateVisitRequest = (id, data) => {
     const payload = {}

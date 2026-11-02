@@ -23,7 +23,11 @@ export const createVisit = async (req, res) => {
 export const getVisits = async (req, res) => {
     try {
         const { take, skip } = getPaginationParams(req.query)
-        const visits = await service.getVisitRequests({ take, skip })
+        const visits = await service.getVisitRequests({
+            take,
+            skip,
+            archived: req.requestArchived,
+        })
         res.status(200).json({
             success: true,
             data: visits.map(toAdminRequest),
@@ -65,7 +69,7 @@ export const getVisitById = async (req, res) => {
 export const getVisitsByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const visits = await service.getVisitRequestsByEmail(email)
+        const visits = await service.getVisitRequestsByEmail(email, req.requestArchived)
 
         res.status(200).json({
             success: true,
@@ -83,7 +87,7 @@ export const getVisitsByEmail = async (req, res) => {
 export const getVisitsByStatus = async (req, res) => {
     try {
         const { status } = req.params
-        const visits = await service.getVisitRequestsByStatus(status)
+        const visits = await service.getVisitRequestsByStatus(status, req.requestArchived)
 
         res.status(200).json({
             success: true,

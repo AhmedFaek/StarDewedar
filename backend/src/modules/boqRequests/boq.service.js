@@ -58,8 +58,8 @@ export const createBOQRequest = async (data, boqFileArray, supportingDocsArray) 
 
 export const getBOQRequests    = (options) => repo.findAll(options)
 export const getBOQRequestById = (id) => repo.findById(id)
-export const getBOQsByEmail    = (email) => repo.findByEmail(email)
-export const getBOQsByStatus   = (status) => repo.findByStatus(status)
+export const getBOQsByEmail    = (email, archived) => repo.findByEmail(email, archived)
+export const getBOQsByStatus   = (status, archived) => repo.findByStatus(status, archived)
 
 export const updateBOQRequest = (id, data) => {
     const payload = {}

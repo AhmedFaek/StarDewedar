@@ -14,6 +14,11 @@ const requestReadRelations = {
     },
 }
 
+const archivedWhere = (archived) =>
+    archived === undefined
+        ? {}
+        : { archived_at: archived ? { not: null } : null }
+
 export const create = (data, attachments = []) =>
     prisma.bOQRequest.create({
         data: {
@@ -23,8 +28,9 @@ export const create = (data, attachments = []) =>
         include: requestReadRelations,
     })
 
-export const findAll = ({ take = 50, skip = 0 } = {}) =>
+export const findAll = ({ take = 50, skip = 0, archived = false } = {}) =>
     prisma.bOQRequest.findMany({
+        where: archivedWhere(archived),
         orderBy: { created_at: 'desc' },
         take,
         skip,
@@ -37,16 +43,16 @@ export const findById = (id) =>
         include: requestReadRelations,
     })
 
-export const findByEmail = (email) =>
+export const findByEmail = (email, archived) =>
     prisma.bOQRequest.findMany({
-        where: { email },
+        where: { email, ...archivedWhere(archived) },
         include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })
 
-export const findByStatus = (status) =>
+export const findByStatus = (status, archived = false) =>
     prisma.bOQRequest.findMany({
-        where: { status },
+        where: { status: { in: [status, status.toUpperCase()] }, ...archivedWhere(archived) },
         include: requestReadRelations,
         orderBy: { created_at: 'desc' },
     })

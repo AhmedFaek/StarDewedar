@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { egyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
+import { requestStatusSchema } from '../../utils/requestStatus.js'
 
 const BOQ_PROJECT_TYPES = [
     'industrial',
@@ -24,7 +25,7 @@ export const createBOQRequestSchema = z.object({
 })
 
 export const updateBOQRequestSchema = z.object({
-    status: z.enum(['pending', 'contacted', 'in_progress', 'completed', 'closed', 'rejected']).optional(),
+    status: requestStatusSchema.optional(),
     name:             z.string().trim().min(2).max(100).optional(),
     company_name:     z.string().trim().min(2).max(200).optional(),
     email:            z.string().email().max(254).optional(),

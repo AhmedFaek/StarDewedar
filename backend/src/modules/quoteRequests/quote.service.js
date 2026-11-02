@@ -50,9 +50,9 @@ export const getQuoteRequests = (options) => repo.findAll(options)
 
 export const getQuoteRequestById = (id) => repo.findById(id)
 
-export const getQuoteRequestsByEmail = (email) => repo.findByEmail(email)
+export const getQuoteRequestsByEmail = (email, archived) => repo.findByEmail(email, archived)
 
-export const getQuoteRequestsByStatus = (status) => repo.findByStatus(status)
+export const getQuoteRequestsByStatus = (status, archived) => repo.findByStatus(status, archived)
 
 export const updateQuoteRequest = (id, data) => {
     const payload = {}

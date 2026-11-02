@@ -179,6 +179,7 @@ model QuoteRequest {
   file_url String?
 
   status String
+  archived_at DateTime?
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
@@ -200,6 +201,7 @@ model QuoteRequest {
   notification_history NotificationAttempt[] @relation("QuoteNotificationAttempts")
 
   @@index([created_at])
+  @@index([archived_at, created_at])
   @@index([notification_status, created_at])
 }
 
@@ -216,6 +218,7 @@ model VisitRequest {
   details          String
   file_url         String?
   status           String
+  archived_at      DateTime?
   created_at       DateTime @default(now())
   updated_at       DateTime @updatedAt
 
@@ -233,6 +236,7 @@ model VisitRequest {
   notification_history NotificationAttempt[] @relation("VisitNotificationAttempts")
 
   @@index([created_at])
+  @@index([archived_at, created_at])
   @@index([notification_status, created_at])
 }
 
@@ -260,6 +264,7 @@ model BOQRequest {
   supporting_docs_urls    String?  // JSON-encoded array of Cloudinary URLs
   additional_requirements String?
   status                  String
+  archived_at             DateTime?
   created_at              DateTime @default(now())
   updated_at              DateTime @updatedAt
 
@@ -277,6 +282,7 @@ model BOQRequest {
   notification_history NotificationAttempt[] @relation("BOQNotificationAttempts")
 
   @@index([created_at])
+  @@index([archived_at, created_at])
   @@index([notification_status, created_at])
 }
 
