@@ -1,4 +1,4 @@
-import { lazy, Suspense, useEffect } from 'react'
+import { lazy, Suspense, useEffect, useLayoutEffect } from 'react'
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { CompareProvider } from './utils/compareContext'
 import CompareDrawer from './components/shared/CompareDrawer'
@@ -7,6 +7,8 @@ import TopProgressBar from './components/shared/TopProgressBar'
 import { NotificationProvider } from './context/NotificationContext'
 import ToastContainer from './components/notifications/ToastContainer'
 import { initAnalytics } from './utils/analytics'
+import { useTranslation } from 'react-i18next'
+import { resolveUiLanguage } from './utils/language'
 
 function RedirectQuote() {
   const location = useLocation()
@@ -38,11 +40,19 @@ const ConversationPage = lazy(() => import('./pages/ConversationPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
 
 export default function App() {
+  const { i18n } = useTranslation()
+
   // Silently initialize analytics tracking — this never affects the UI
   useEffect(() => {
     const cleanup = initAnalytics()
     return cleanup
   }, [])
+
+  useLayoutEffect(() => {
+    const language = resolveUiLanguage(i18n.language)
+    document.documentElement.lang = language
+    document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr'
+  }, [i18n.language])
 
   return (
     <NotificationProvider>

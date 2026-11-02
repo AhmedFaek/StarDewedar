@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import HeroSection from '../components/sections/HeroSection'
@@ -14,7 +15,7 @@ import ScrollReveal from '../components/shared/ScrollReveal'
 
 export default function Home() {
   const { i18n } = useTranslation()
-  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+  const lang = resolveUiLanguage(i18n.language)
 
   useEffect(() => {
     const isAr = lang === 'ar'
@@ -27,7 +28,6 @@ export default function Home() {
         : 'Star Dewedar is a general contracting and engineering company delivering civil contracting, turnkey project execution, and specialized electrical systems for industrial and commercial projects.',
       canonical: buildUrl('/'),
       ogType: 'website',
-      lang,
     })
 
     setJsonLd('website', {

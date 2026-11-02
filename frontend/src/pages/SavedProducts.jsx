@@ -10,10 +10,12 @@ import { api } from '../utils/api'
 import { getUser, isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
+import { resolveUiLanguage } from '../utils/language'
 
 export default function SavedProducts() {
   usePrivatePageSeo({ en: 'Saved Products', ar: 'المنتجات المحفوظة' })
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const { showError } = useNotification()
   const [products, setProducts] = useState([])
@@ -122,9 +124,9 @@ export default function SavedProducts() {
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-0">
               {products.map((product) => {
-                const name = i18n.language === 'ar' ? product.name_ar : product.name_en
-                const desc = i18n.language === 'ar' ? product.description_ar : product.description_en
-                const catName = i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en
+                const name = lang === 'ar' ? product.name_ar : product.name_en
+                const desc = lang === 'ar' ? product.description_ar : product.description_en
+                const catName = lang === 'ar' ? product.category?.name_ar : product.category?.name_en
 
                 return (
                   <div

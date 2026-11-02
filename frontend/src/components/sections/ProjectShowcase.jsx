@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
 import ContentLoader from '../shared/ContentLoader'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function ProjectShowcase() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
@@ -71,8 +73,8 @@ export default function ProjectShowcase() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-3 md:gap-4 md:h-[800px]">
           {projects.map((project, index) => {
             const layout = layoutMapping[index] || { colSpan: 'md:col-span-4', featured: false }
-            const title = i18n.language === 'ar' ? project.title_ar : project.title_en
-            const categoryName = i18n.language === 'ar' ? project.category?.name_ar : project.category?.name_en
+            const title = lang === 'ar' ? project.title_ar : project.title_en
+            const categoryName = lang === 'ar' ? project.category?.name_ar : project.category?.name_en
 
             return (
               <div 

@@ -6,6 +6,7 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { useCompare, MAX_COMPARE } from '../utils/compareContext'
 import { api } from '../utils/api'
+import { resolveUiLanguage } from '../utils/language'
 
 // ── Comparison rows config ─────────────────────────────────────────────────────
 // Each row defines a label key and how to extract the value from a product.
@@ -31,12 +32,12 @@ const ROWS = [
 
 // ── Empty slot ─────────────────────────────────────────────────────────────────
 function EmptySlot({ onSelect, lang, allProducts, compareList }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [query, setQuery] = useState('')
 
   const sameCategory = compareList.length > 0 ? compareList[0].category_id : null
   const filtered = allProducts.filter((p) => {
-    const name = i18n.language === 'ar' ? p.name_ar : p.name_en
+    const name = lang === 'ar' ? p.name_ar : p.name_en
     const alreadyIn = compareList.some((c) => c.id === p.id)
     const samecat = sameCategory ? p.category_id === sameCategory : true
     return !alreadyIn && samecat && (!query || name.toLowerCase().includes(query.toLowerCase()))
@@ -65,7 +66,7 @@ function EmptySlot({ onSelect, lang, allProducts, compareList }) {
       {filtered.length > 0 && (
         <div className="w-full max-h-52 overflow-y-auto divide-y divide-outline-variant/10">
           {filtered.slice(0, 8).map((p) => {
-            const name = i18n.language === 'ar' ? p.name_ar : p.name_en
+            const name = lang === 'ar' ? p.name_ar : p.name_en
             const img = p.images?.[0]?.image_url
             return (
               <button
@@ -98,7 +99,8 @@ function EmptySlot({ onSelect, lang, allProducts, compareList }) {
 function ProductHeader({ product, onRemove }) {
   const { i18n, t } = useTranslation()
   const navigate = useNavigate()
-  const name = i18n.language === 'ar' ? product.name_ar : product.name_en
+  const lang = resolveUiLanguage(i18n.language)
+  const name = lang === 'ar' ? product.name_ar : product.name_en
   const img = product.images?.[0]?.image_url
 
   return (
@@ -125,7 +127,7 @@ function ProductHeader({ product, onRemove }) {
       <div className="text-center">
         <h3 className="font-headline font-black text-base sm:text-lg text-on-surface uppercase leading-tight">{name}</h3>
         <p className="text-[10px] text-outline font-label tracking-widest uppercase mt-1">
-          {i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en}
+          {lang === 'ar' ? product.category?.name_ar : product.category?.name_en}
         </p>
       </div>
 
@@ -145,6 +147,7 @@ function ProductHeader({ product, onRemove }) {
 export default function ComparePage() {
   usePrivatePageSeo({ en: 'Compare Products', ar: 'مقارنة المنتجات' })
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const { compareList, addToCompare, removeFromCompare, clearCompare } = useCompare()
   const [allProducts, setAllProducts] = useState([])
@@ -167,11 +170,11 @@ export default function ComparePage() {
   const emptySlots = MAX_COMPARE - filledCount
 
   // Build column values per row — used for "hide similar" logic
-  const getValues = (rowDef) => compareList.map((p) => rowDef.get(p, i18n.language))
+  const getValues = (rowDef) => compareList.map((p) => rowDef.get(p, lang))
   const allSame = (values) => values.every((v) => v === values[0])
 
   const title = compareList.length >= 2
-    ? `${i18n.language === 'ar' ? compareList[0].name_ar : compareList[0].name_en} vs ${i18n.language === 'ar' ? compareList[1].name_ar : compareList[1].name_en}${compareList[2] ? ` vs ${i18n.language === 'ar' ? compareList[2].name_ar : compareList[2].name_en}` : ''}`
+    ? `${lang === 'ar' ? compareList[0].name_ar : compareList[0].name_en} vs ${lang === 'ar' ? compareList[1].name_ar : compareList[1].name_en}${compareList[2] ? ` vs ${lang === 'ar' ? compareList[2].name_ar : compareList[2].name_en}` : ''}`
     : t('compare.page.title')
 
   return (
@@ -239,7 +242,7 @@ export default function ComparePage() {
             {/* Mobile swipe hint */}
             <div className="flex items-center gap-1.5 text-xs text-outline font-label uppercase tracking-widest sm:hidden mb-3">
               <span className="material-symbols-outlined text-sm">swipe</span>
-              <span>{i18n.language === 'ar' ? 'اسحب أفقياً للمقارنة' : 'Swipe horizontally to compare'}</span>
+              <span>{lang === 'ar' ? 'اسحب أفقياً للمقارنة' : 'Swipe horizontally to compare'}</span>
             </div>
 
             {/* ── Columns grid ── */}
@@ -295,7 +298,7 @@ export default function ComparePage() {
 
                     /* Value cells */
                     ...compareList.map((product, colIdx) => {
-                      const val = rowDef.get(product, i18n.language)
+                      const val = rowDef.get(product, lang)
 
                       return (
                         <div

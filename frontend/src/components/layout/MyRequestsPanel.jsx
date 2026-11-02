@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
+import { resolveUiLanguage } from '../../utils/language'
 
 /* ── Status Badge ─────────────────────────────────────────────────────────── */
 
@@ -239,7 +240,7 @@ function EmptyState({ icon, text, desc, ctaLabel, onCta }) {
 export default function MyRequestsPanel({ isOpen, onClose, user, recoveryRequestType }) {
   const { t, i18n } = useTranslation()
   const { showError } = useNotification()
-  const lang = i18n.language
+  const lang = resolveUiLanguage(i18n.language)
   const isRTL = lang === 'ar'
   const panelRef = useRef(null)
 

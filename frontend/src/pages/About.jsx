@@ -1,13 +1,14 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import AnimatedCounter from '../components/shared/AnimatedCounter'
 
 export default function About() {
   const { t, i18n } = useTranslation()
-  const lang = i18n.language === 'ar' ? 'ar' : 'en'
+  const lang = resolveUiLanguage(i18n.language)
 
   useEffect(() => {
     const isAr = lang === 'ar'
@@ -20,7 +21,6 @@ export default function About() {
         : 'Learn about Star Dewedar Co. — a leading company specializing in supplying and installing low-voltage electrical equipment for industrial and commercial projects in Egypt. 10+ years of experience, 300+ projects delivered.',
       canonical: buildUrl('/about'),
       ogType: 'website',
-      lang,
     })
 
     setJsonLd('about-page', {

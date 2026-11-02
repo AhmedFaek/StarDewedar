@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -10,6 +11,7 @@ import FavouriteButton from '../components/shared/FavouriteButton'
 
 export default function Products() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const [products, setProducts] = useState([])
@@ -73,7 +75,6 @@ export default function Products() {
   }, [])
 
   useEffect(() => {
-    const lang = i18n.language === 'ar' ? 'ar' : 'en'
     const isAr = lang === 'ar'
 
     // If a category is selected, use its name in the title
@@ -105,7 +106,6 @@ export default function Products() {
       description,
       canonical: buildUrl(canonicalPath),
       ogType: 'website',
-      lang,
     })
 
     setJsonLd('products-page', {
@@ -120,7 +120,7 @@ export default function Products() {
     })
 
     return () => removeJsonLd('products-page')
-  }, [i18n.language, selectedCategory, categories])
+  }, [lang, selectedCategory, categories])
 
   const handleCategorySelect = (catId) => {
     setSelectedCategory(catId)
@@ -136,7 +136,7 @@ export default function Products() {
   const filteredProducts = useMemo(() => {
     return products
       .filter((product) => {
-        const name = (i18n.language === 'ar' ? product.name_ar : product.name_en) || ''
+        const name = (lang === 'ar' ? product.name_ar : product.name_en) || ''
         const categoryId = product.category?.id || product.category_id || ''
         const categoryNameEn = product.category?.name_en || ''
         const categoryNameAr = product.category?.name_ar || ''
@@ -157,7 +157,7 @@ export default function Products() {
         if (sortBy === 'high-low') return Number(b.price) - Number(a.price)
         return 0
       })
-  }, [products, selectedCategory, searchTerm, maxPrice, sortBy, i18n.language])
+  }, [products, selectedCategory, searchTerm, maxPrice, sortBy, lang])
 
   return (
     <div className="min-h-screen flex flex-col bg-surface">
@@ -207,7 +207,7 @@ export default function Products() {
                           : 'bg-white border-slate-200 text-deep-blue hover:border-primary/50 hover:text-primary hover:bg-slate-50'
                       }`}
                     >
-                      {i18n.language === 'ar' ? category.name_ar : category.name_en}
+                      {lang === 'ar' ? category.name_ar : category.name_en}
                     </button>
                   ))}
                 </div>
@@ -287,20 +287,20 @@ export default function Products() {
                   {filteredProducts.map((product) => (
                     <div key={product.id} className="group bg-surface-container-lowest border border-outline-variant/15 flex flex-col">
                       <div className="aspect-[4/3] overflow-hidden bg-surface-container-high relative">
-                        <img alt={i18n.language === 'ar' ? product.name_ar : product.name_en} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
+                        <img alt={lang === 'ar' ? product.name_ar : product.name_en} loading="lazy" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images?.[0]?.image_url || 'https://via.placeholder.com/400x300'} />
                         <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                           <FavouriteButton productId={product.id} size="sm" />
                         </div>
                       </div>
                       <div className="p-8 flex-grow flex flex-col">
                         <span className="text-tertiary font-label text-[10px] tracking-widest uppercase font-black mb-2">
-                          {i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en}
+                          {lang === 'ar' ? product.category?.name_ar : product.category?.name_en}
                         </span>
                         <h3 className="text-2xl font-headline font-bold text-on-surface mb-3 tracking-tight">
-                          {i18n.language === 'ar' ? product.name_ar : product.name_en}
+                          {lang === 'ar' ? product.name_ar : product.name_en}
                         </h3>
                         <p className="text-secondary text-sm font-body leading-relaxed mb-8 line-clamp-3">
-                          {i18n.language === 'ar' ? product.description_ar : product.description_en}
+                          {lang === 'ar' ? product.description_ar : product.description_en}
                         </p>
                         <div className="mt-auto pt-4 border-t border-outline-variant/10 flex justify-between items-center">
                           <span className="text-on-surface font-headline font-black text-base">

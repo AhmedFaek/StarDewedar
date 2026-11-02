@@ -3,9 +3,11 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { api } from '../../utils/api'
 import ContentLoader from '../shared/ContentLoader'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function ProductCardsGrid() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const navigate = useNavigate()
   const [products, setProducts] = useState([])
   const [loading, setLoading] = useState(true)
@@ -84,9 +86,9 @@ export default function ProductCardsGrid() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 sm:gap-8 items-stretch">
           {products.map((product, index) => {
             const isMiddle = index === 1
-            const name = i18n.language === 'ar' ? product.name_ar : product.name_en
-            const description = i18n.language === 'ar' ? product.description_ar : product.description_en
-            const categoryName = i18n.language === 'ar' ? product.category?.name_ar : product.category?.name_en
+            const name = lang === 'ar' ? product.name_ar : product.name_en
+            const description = lang === 'ar' ? product.description_ar : product.description_en
+            const categoryName = lang === 'ar' ? product.category?.name_ar : product.category?.name_en
 
             return (
               <div

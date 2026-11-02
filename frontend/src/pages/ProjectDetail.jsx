@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
 import { setPageMeta, setJsonLd, removeJsonLd, buildUrl, truncate } from '../utils/seo'
+import { resolveUiLanguage } from '../utils/language'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
@@ -9,6 +10,7 @@ import ContentLoader from '../components/shared/ContentLoader'
 
 export default function ProjectDetail() {
   const { t, i18n } = useTranslation()
+  const lang = resolveUiLanguage(i18n.language)
   const [searchParams] = useSearchParams()
   const [project, setProject] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -47,7 +49,6 @@ export default function ProjectDetail() {
   useEffect(() => {
     if (!project) return
 
-    const lang = i18n.language === 'ar' ? 'ar' : 'en'
     const isAr = lang === 'ar'
     const projectTitle = isAr ? project.title_ar : project.title_en
     const projectDesc = isAr ? project.description_ar : project.description_en
@@ -66,7 +67,6 @@ export default function ProjectDetail() {
       canonical: buildUrl(`/project-detail?id=${project.id}`),
       ogType: 'article',
       ogImage: projectImage,
-      lang,
     })
 
     const breadcrumb = {
@@ -101,7 +101,7 @@ export default function ProjectDetail() {
       removeJsonLd(`project-${project.id}`)
       removeJsonLd(`project-${project.id}-breadcrumb`)
     }
-  }, [project, i18n.language])
+  }, [project, lang])
 
   if (loading) {
     return (
@@ -128,7 +128,7 @@ export default function ProjectDetail() {
   const formatDate = (date) => {
     if (!date) return 'N/A'
     return new Date(date).toLocaleDateString(
-      i18n.language === 'ar' ? 'ar-EG' : 'en-EG',
+      lang === 'ar' ? 'ar-EG' : 'en-EG',
       { day: 'numeric', month: 'short', year: 'numeric' }
     )
   }
@@ -156,14 +156,14 @@ export default function ProjectDetail() {
   const getDurationLabel = () => {
     const translated = t('projectDetail.duration')
     return translated === 'projectDetail.duration'
-      ? (i18n.language === 'ar' ? 'المدة' : 'Duration')
+      ? (lang === 'ar' ? 'المدة' : 'Duration')
       : translated
   }
 
   const formatDurationDays = (days) => {
     if (!days) return 'N/A'
 
-    if (i18n.language === 'ar') {
+    if (lang === 'ar') {
       if (days === 1) return 'يوم واحد'
       if (days === 2) return 'يومان'
       if (days >= 3 && days <= 10) return `${days} أيام`
@@ -173,10 +173,10 @@ export default function ProjectDetail() {
     return `${days} ${days === 1 ? 'day' : 'days'}`
   }
 
-  const title = i18n.language === 'ar' ? project.title_ar : project.title_en
-  const description = i18n.language === 'ar' ? project.description_ar : project.description_en
-  const categoryName = i18n.language === 'ar' ? project.category?.name_ar : project.category?.name_en
-  const location = i18n.language === 'ar' ? project.location_ar : project.location_en
+  const title = lang === 'ar' ? project.title_ar : project.title_en
+  const description = lang === 'ar' ? project.description_ar : project.description_en
+  const categoryName = lang === 'ar' ? project.category?.name_ar : project.category?.name_en
+  const location = lang === 'ar' ? project.location_ar : project.location_en
   const durationInDays = getDurationInDays(project.start_date, project.end_date)
 
   return (

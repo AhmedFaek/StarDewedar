@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { resolveUiLanguage } from '../../utils/language'
 
 export default function AnimatedCounter({
   value,
@@ -56,7 +57,7 @@ export default function AnimatedCounter({
     return () => window.cancelAnimationFrame(animationFrame)
   }, [duration, isVisible, parsedValue.numericPart])
 
-  const locale = i18n.language === 'ar' ? 'ar-EG' : 'en-EG'
+  const locale = resolveUiLanguage(i18n.language) === 'ar' ? 'ar-EG' : 'en-EG'
   const formattedNumber = displayValue.toLocaleString(locale)
 
   return (
