@@ -821,12 +821,16 @@ export default function AllRequests() {
                   </select>
                   {statusCatalog?.statuses?.find((status) => status.value === selectedRequest.status)?.description && (
                     <p className="mt-1 text-[11px] leading-relaxed text-secondary">
-                      {statusCatalog.statuses.find((status) => status.value === selectedRequest.status).description}
+                      {t(`allRequests.status_description.${selectedRequest.status}`, {
+                        defaultValue: statusCatalog.statuses.find((status) => status.value === selectedRequest.status).description,
+                      })}
                     </p>
                   )}
                   {selectedRequest.type === 'quote' && selectedRequest.status === 'completed' && statusCatalog?.request_specific_notes?.quote_completed && (
                     <p className="mt-1 border-s-2 border-tertiary ps-2 text-[11px] leading-relaxed text-secondary">
-                      {statusCatalog.request_specific_notes.quote_completed}
+                      {t('allRequests.quote_completed_note', {
+                        defaultValue: statusCatalog.request_specific_notes.quote_completed,
+                      })}
                     </p>
                   )}
                 </div>

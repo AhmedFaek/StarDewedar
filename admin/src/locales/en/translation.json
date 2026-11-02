@@ -449,6 +449,15 @@
       "action": "Action"
     },
     "no_requests": "No requests found",
+    "status_description": {
+      "pending": "The request has been received and no follow-up has taken place yet.",
+      "contacted": "The company has contacted the customer.",
+      "in_progress": "Coordination or work related to the request is ongoing.",
+      "completed": "The company has completed its requested work.",
+      "rejected": "The company has decided not to proceed with the request.",
+      "closed": "The interaction has ended and no further follow-up is currently expected."
+    },
+    "quote_completed_note": "For Quote requests, Completed means the quote has been prepared and sent to the customer, even if the customer has not responded.",
     "notification": {
       "title": "Email notification",
       "attempts": "Attempts: {{count}}",
