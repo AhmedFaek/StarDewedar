@@ -61,7 +61,7 @@ test('admin roles with requests:manage can create short-lived signed downloads',
     replaceMethod(t, prisma.attachment, 'findUnique', async () => attachment())
     const calls = []
     replaceMethod(t, cloudinary.utils, 'private_download_url', (...args) => {
-        calls.push(args)
+        calls.push({ args, timestamp: Math.floor(Date.now() / 1000) })
         return 'https://cloudinary.example/signed-download'
     })
 
@@ -74,14 +74,13 @@ test('admin roles with requests:manage can create short-lived signed downloads',
     }
 
     assert.equal(calls.length, 2)
-    for (const [publicId, format, options] of calls) {
+    for (const { args: [publicId, format, options], timestamp } of calls) {
         assert.equal(publicId, 'requests/quote/a0f1f3b2')
         assert.equal(format, 'pdf')
         assert.equal(options.resource_type, 'raw')
         assert.equal(options.type, 'authenticated')
         assert.equal(options.attachment, true)
-        assert.ok(options.expires_at >= Math.floor(Date.now() / 1000) + 299)
-        assert.ok(options.expires_at <= Math.floor(Date.now() / 1000) + 300)
+        assert.equal(options.expires_at, timestamp + 300)
     }
 })
 

@@ -7,7 +7,7 @@ import {
 import { sendEmail } from '../../utils/mailer.js'
 import env from '../../config/env.js'
 
-export const sendVisitRequestEmail = async (visitRequest) => {
+export const sendVisitRequestEmail = async (visitRequest, attachmentLinks = []) => {
     const name = visitRequest.name || 'Valued Customer'
     const email = visitRequest.email
     const phone = visitRequest.phone_number
@@ -25,16 +25,13 @@ export const sendVisitRequestEmail = async (visitRequest) => {
         whatsapp ? { label: 'WhatsApp', value: whatsapp } : null,
         preferredDateFormatted ? { label: 'Preferred Date', value: preferredDateFormatted } : null,
     ].filter(Boolean)
-    const attachments = visitRequest.file_url
-        ? [{ label: 'Uploaded Site / Project Document', url: visitRequest.file_url }]
-        : []
     const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=visit` : null
     const html = buildNotificationEmail({
         requestType: 'VISIT',
         customerInfo: { name, email, phone, status },
         requestInfo,
         details,
-        attachments,
+        attachments: attachmentLinks,
         customerEmail: email,
         logoCid: SDC_MONOGRAM_CID,
         adminUrl,
@@ -47,7 +44,7 @@ export const sendVisitRequestEmail = async (visitRequest) => {
     })
 }
 
-export const sendQuoteRequestEmail = async (quoteRequest) => {
+export const sendQuoteRequestEmail = async (quoteRequest, attachmentLinks = []) => {
     const firstName = quoteRequest.first_name || ''
     const lastName = quoteRequest.last_name || ''
     const fullName = `${firstName} ${lastName}`.trim() || 'Valued Customer'
@@ -60,16 +57,13 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
         || quoteRequest.product_name_en_snapshot
         || quoteRequest.custom_product_name
     const requestInfo = productName ? [{ label: 'Product', value: productName }] : []
-    const attachments = quoteRequest.file_url
-        ? [{ label: 'Uploaded Spec / Document', url: quoteRequest.file_url }]
-        : []
     const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=quote` : null
     const html = buildNotificationEmail({
         requestType: 'QUOTE',
         customerInfo: { name: fullName, email, phone, status },
         requestInfo,
         details: quoteRequest.details,
-        attachments,
+        attachments: attachmentLinks,
         customerEmail: email,
         logoCid: SDC_MONOGRAM_CID,
         adminUrl,
@@ -82,30 +76,15 @@ export const sendQuoteRequestEmail = async (quoteRequest) => {
     })
 }
 
-export const sendBOQRequestEmail = async (boqRequest) => {
+export const sendBOQRequestEmail = async (boqRequest, attachmentLinks = []) => {
     const name = boqRequest.name || 'Valued Customer'
     const company = boqRequest.company_name
     const email = boqRequest.email
     const phone = boqRequest.phone
-    let supportingDocs = []
-    if (boqRequest.supporting_docs_urls) {
-        try {
-            supportingDocs = JSON.parse(boqRequest.supporting_docs_urls)
-        } catch (error) {
-            if (!(error instanceof SyntaxError)) throw error
-        }
-    }
     const requestInfo = [
         boqRequest.project_name ? { label: 'Project Name', value: boqRequest.project_name } : null,
         boqRequest.project_location ? { label: 'Location', value: boqRequest.project_location } : null,
         boqRequest.project_type ? { label: 'Project Type', value: boqRequest.project_type } : null,
-    ].filter(Boolean)
-    const attachments = [
-        boqRequest.boq_file_url ? { label: 'BOQ Main Document', url: boqRequest.boq_file_url } : null,
-        ...supportingDocs.map((url, index) => ({
-            label: `Supporting Document ${index + 1}`,
-            url,
-        })),
     ].filter(Boolean)
     const adminUrl = env.adminUrl ? `${env.adminUrl}/requests?tab=boq` : null
     const html = buildNotificationEmail({
@@ -120,7 +99,7 @@ export const sendBOQRequestEmail = async (boqRequest) => {
         requestInfo,
         details: boqRequest.additional_requirements,
         detailsTitle: 'Additional Requirements',
-        attachments,
+        attachments: attachmentLinks,
         customerEmail: email,
         logoCid: SDC_MONOGRAM_CID,
         adminUrl,

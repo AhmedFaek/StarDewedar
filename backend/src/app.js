@@ -15,6 +15,7 @@ import sitemapRoutes from './modules/sitemap/sitemap.routes.js'
 import analyticsRoutes from './modules/analytics/analytics.routes.js'
 import notificationRoutes from './modules/notifications/notification.routes.js'
 import attachmentRoutes from './modules/attachments/attachment.routes.js'
+import emailAttachmentAccessRoutes from './modules/attachments/emailAttachmentAccess.routes.js'
 
 const app = express()
 
@@ -86,6 +87,7 @@ app.use('/sitemap.xml', sitemapRoutes)
 app.use('/api/analytics', analyticsRoutes)
 app.use('/api/notifications', notificationRoutes)
 app.use('/api/attachments', attachmentRoutes)
+app.use('/api/attachments', emailAttachmentAccessRoutes)
 
 // Test route
 app.get('/', (req, res) => {

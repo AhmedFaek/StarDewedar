@@ -34,6 +34,7 @@ export default {
     yahooEmail: process.env.YAHOO_EMAIL,
     yahooPassword: process.env.YAHOO_PASSWORD,
     frontendUrl: process.env.FRONTEND_URL,
+    apiPublicUrl: process.env.API_PUBLIC_URL || '',
     nodeEnv: process.env.NODE_ENV || 'development',
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
     adminUrl: process.env.ADMIN_URL || 'http://localhost:3001',

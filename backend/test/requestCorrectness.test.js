@@ -100,14 +100,32 @@ const replaceMethod = (t, target, methodName, implementation) => {
 
 const replaceQuoteTransaction = (t, { product = null, create, onFindUnique = () => {} }) => {
     replaceMethod(t, prisma, '$transaction', (callback) => callback({
+        visitRequest: {
+            updateMany: prisma.visitRequest.updateMany,
+            findUnique: prisma.visitRequest.findUnique,
+        },
+        quoteRequest: {
+            create,
+            updateMany: prisma.quoteRequest.updateMany,
+            findUnique: prisma.quoteRequest.findUnique,
+        },
+        bOQRequest: {
+            updateMany: prisma.bOQRequest.updateMany,
+            findUnique: prisma.bOQRequest.findUnique,
+        },
+        notificationAttempt: {
+            create: async ({ data }) => ({ id: 'test-notification-attempt', ...data }),
+            update: async () => ({}),
+        },
+        emailAttachmentAccessToken: {
+            createMany: async () => ({ count: 0 }),
+            updateMany: async () => ({ count: 0 }),
+        },
         product: {
             findUnique: async (args) => {
                 onFindUnique(args)
                 return product
             },
-        },
-        quoteRequest: {
-            create,
         },
     }))
 }
@@ -222,6 +240,30 @@ const mockNotificationPersistence = (t) => {
             }),
         }))
     }
+
+    replaceMethod(t, prisma, '$transaction', (callback) => callback({
+        visitRequest: {
+            updateMany: prisma.visitRequest.updateMany,
+            findUnique: prisma.visitRequest.findUnique,
+        },
+        quoteRequest: {
+            create: prisma.quoteRequest.create,
+            updateMany: prisma.quoteRequest.updateMany,
+            findUnique: prisma.quoteRequest.findUnique,
+        },
+        bOQRequest: {
+            updateMany: prisma.bOQRequest.updateMany,
+            findUnique: prisma.bOQRequest.findUnique,
+        },
+        notificationAttempt: {
+            create: async ({ data }) => ({ id: 'test-notification-attempt', ...data }),
+            update: async () => ({}),
+        },
+        emailAttachmentAccessToken: {
+            createMany: async () => ({ count: 0 }),
+            updateMany: async () => ({ count: 0 }),
+        },
+    }))
 }
 
 test('public create schemas reject client-owned attachment URLs', async (t) => {

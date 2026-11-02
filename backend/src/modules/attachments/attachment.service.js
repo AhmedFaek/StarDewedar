@@ -3,7 +3,7 @@ import * as userRepository from '../users/user.repository.js'
 import * as attachmentRepository from './attachment.repository.js'
 import { PERMISSIONS, roleHasPermission } from '../../utils/permissions.js'
 
-const DOWNLOAD_EXPIRY_SECONDS = 15 * 60
+const DOWNLOAD_EXPIRY_SECONDS = 5 * 60
 
 const FORMAT_BY_MIME_TYPE = new Map([
     ['image/jpeg', { format: 'jpg', resourceType: 'image' }],
@@ -74,10 +74,7 @@ export const getAttachmentMetadata = async (id, user) => {
     return attachment ? toAttachmentDto(attachment) : null
 }
 
-export const createAttachmentDownloadUrl = async (id, user) => {
-    const attachment = await getAuthorizedAttachment(id, user)
-    if (!attachment) return null
-
+export const createSignedAttachmentDownloadUrl = (attachment, expiresAt) => {
     const format = FORMAT_BY_MIME_TYPE.get(attachment.mime_type)
     if (
         !format ||
@@ -91,7 +88,6 @@ export const createAttachmentDownloadUrl = async (id, user) => {
         throw error
     }
 
-    const expiresAt = Math.floor(Date.now() / 1000) + DOWNLOAD_EXPIRY_SECONDS
     return cloudinary.utils.private_download_url(
         attachment.public_id,
         format.format,
@@ -102,4 +98,12 @@ export const createAttachmentDownloadUrl = async (id, user) => {
             attachment: true,
         }
     )
+}
+
+export const createAttachmentDownloadUrl = async (id, user) => {
+    const attachment = await getAuthorizedAttachment(id, user)
+    if (!attachment) return null
+
+    const expiresAt = Math.floor(Date.now() / 1000) + DOWNLOAD_EXPIRY_SECONDS
+    return createSignedAttachmentDownloadUrl(attachment, expiresAt)
 }
