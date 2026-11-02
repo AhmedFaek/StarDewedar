@@ -6,6 +6,33 @@ datasource db {
   provider = "postgresql"
 }
 
+enum AttachmentStatus {
+  ACTIVE
+  PENDING_DELETION
+  DELETED
+  CLEANUP_FAILED
+}
+
+enum CloudinaryCleanupStatus {
+  PENDING
+  PROCESSING
+  FAILED
+  COMPLETED
+}
+
+enum NotificationRequestType {
+  QUOTE
+  VISIT
+  BOQ
+}
+
+enum NotificationAttemptStatus {
+  SENDING
+  SENT
+  FAILED
+  UNKNOWN
+}
+
 model User {
   id                   String   @id @default(uuid())
   name                 String
@@ -169,6 +196,8 @@ model QuoteRequest {
   product_name_ar_snapshot      String?
 
   product Product? @relation(fields: [product_id], references: [id], onDelete: SetNull)
+  attachments          Attachment[]
+  notification_history NotificationAttempt[] @relation("QuoteNotificationAttempts")
 
   @@index([created_at])
   @@index([notification_status, created_at])
@@ -199,6 +228,9 @@ model VisitRequest {
   notification_lease_token      String?
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
+
+  attachments          Attachment[]
+  notification_history NotificationAttempt[] @relation("VisitNotificationAttempts")
 
   @@index([created_at])
   @@index([notification_status, created_at])
@@ -241,8 +273,102 @@ model BOQRequest {
   notification_sent_at          DateTime?
   notification_status           String    @default("pending")
 
+  attachments          Attachment[]
+  notification_history NotificationAttempt[] @relation("BOQNotificationAttempts")
+
   @@index([created_at])
   @@index([notification_status, created_at])
+}
+
+model Attachment {
+  id                String           @id @default(uuid())
+  quote_request_id  String?
+  visit_request_id  String?
+  boq_request_id    String?
+  original_filename String
+  mime_type         String
+  file_size         Int
+  public_id         String
+  resource_type     String
+  delivery_type     String
+  status            AttachmentStatus @default(ACTIVE)
+  created_at        DateTime         @default(now())
+  updated_at        DateTime         @updatedAt
+
+  quote_request QuoteRequest? @relation(fields: [quote_request_id], references: [id], onDelete: SetNull)
+  visit_request VisitRequest? @relation(fields: [visit_request_id], references: [id], onDelete: SetNull)
+  boq_request   BOQRequest?   @relation(fields: [boq_request_id], references: [id], onDelete: SetNull)
+
+  cleanup_operations  CloudinaryCleanupOperation[]
+  email_access_tokens EmailAttachmentAccessToken[]
+
+  @@unique([public_id, resource_type, delivery_type])
+  @@index([quote_request_id])
+  @@index([visit_request_id])
+  @@index([boq_request_id])
+  @@index([status, created_at])
+}
+
+model CloudinaryCleanupOperation {
+  id            String                  @id @default(uuid())
+  attachment_id String?
+  public_id     String
+  resource_type String
+  delivery_type String
+  status        CloudinaryCleanupStatus @default(PENDING)
+  attempt_count Int                     @default(0)
+  last_error    String?
+  created_at    DateTime                @default(now())
+  updated_at    DateTime                @updatedAt
+  completed_at  DateTime?
+
+  attachment Attachment? @relation(fields: [attachment_id], references: [id], onDelete: SetNull)
+
+  @@unique([public_id, resource_type, delivery_type])
+  @@index([status, created_at])
+  @@index([attachment_id])
+}
+
+model NotificationAttempt {
+  id               String                    @id @default(uuid())
+  request_type     NotificationRequestType
+  request_id       String
+  attempt_number   Int
+  quote_request_id String?
+  visit_request_id String?
+  boq_request_id   String?
+  status           NotificationAttemptStatus @default(SENDING)
+  started_at       DateTime                  @default(now())
+  completed_at     DateTime?
+  error_code       String?
+
+  quote_request QuoteRequest? @relation("QuoteNotificationAttempts", fields: [quote_request_id], references: [id], onDelete: SetNull)
+  visit_request VisitRequest? @relation("VisitNotificationAttempts", fields: [visit_request_id], references: [id], onDelete: SetNull)
+  boq_request   BOQRequest?   @relation("BOQNotificationAttempts", fields: [boq_request_id], references: [id], onDelete: SetNull)
+
+  email_access_tokens EmailAttachmentAccessToken[]
+
+  @@unique([request_type, request_id, attempt_number])
+  @@index([request_type, request_id, started_at])
+  @@index([status, started_at])
+}
+
+model EmailAttachmentAccessToken {
+  id                      String    @id @default(uuid())
+  attachment_id           String
+  notification_attempt_id String
+  token_hash              String    @unique @db.VarChar(64)
+  issued_at               DateTime  @default(now())
+  expires_at              DateTime
+  revoked_at              DateTime?
+
+  attachment           Attachment          @relation(fields: [attachment_id], references: [id], onDelete: Restrict)
+  notification_attempt NotificationAttempt @relation(fields: [notification_attempt_id], references: [id], onDelete: Restrict)
+
+  @@index([attachment_id, issued_at])
+  @@index([notification_attempt_id])
+  @@index([expires_at, revoked_at])
+  @@unique([attachment_id, notification_attempt_id])
 }
 
 model IdempotencyRecord {
