@@ -659,7 +659,17 @@ export const resetPassword = async (rawToken, newPassword) => {
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS)
-    await authRepo.resetPassword(user.id, hashedPassword)
+    const result = await authRepo.resetPassword(
+        user.id,
+        hashedToken,
+        hashedPassword,
+        {
+            verifyEmail: user.role === ROLES.CUSTOMER && !user.email_verified,
+        }
+    )
+    if (result.count !== 1) {
+        throw new Error('Invalid or expired reset token')
+    }
 
     return { message: 'Password has been reset successfully' }
 }

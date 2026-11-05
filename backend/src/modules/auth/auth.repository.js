@@ -28,18 +28,33 @@ export const findUserByResetToken = (hashedToken) => {
 }
 
 /**
- * Atomically update the user's password, clear the reset token fields,
- * and invalidate all existing sessions (refresh tokens).
+ * Atomically redeem the reset token, update the password, and invalidate sessions.
  */
-export const resetPassword = (userId, hashedPassword) => {
-    return prisma.user.update({
-        where: { id: userId },
-        data: {
-            password: hashedPassword,
-            reset_password_token: null,
-            reset_password_expires: null,
-            hashed_refresh_token: null,
+export const resetPassword = (userId, hashedToken, hashedPassword, { verifyEmail = false } = {}) => {
+    const data = {
+        password: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires: null,
+        hashed_refresh_token: null,
+    }
+
+    if (verifyEmail) {
+        Object.assign(data, {
+            email_verified: true,
+            email_verification_hash: null,
+            email_verification_expires_at: null,
+            email_verification_attempts: 0,
+            email_verification_last_sent: null,
+        })
+    }
+
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            reset_password_token: hashedToken,
+            reset_password_expires: { gt: new Date() },
         },
+        data,
     })
 }
 
@@ -247,4 +262,3 @@ export const incrementVerificationAttempts = (userId) => {
         },
     })
 }
-
