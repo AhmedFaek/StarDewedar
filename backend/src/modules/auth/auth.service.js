@@ -171,6 +171,7 @@ export const register = async (data) => {
     })
 
     // 6. Send branded verification email (must not hang registration forever)
+    let emailSent = true
     try {
         await sendVerificationCodeEmail(
             user,
@@ -178,15 +179,30 @@ export const register = async (data) => {
             'Star Dewedar — Verify Your Email Address'
         )
     } catch (err) {
-        console.error('[auth.service] Failed to send verification email on register:', err.message)
-        // Allow immediate resend / login-triggered send if SMTP failed
-        await authRepo.resetVerificationResendCooldown(user.id, null).catch(() => {})
+        emailSent = false
+        let cooldownReset = true
+        try {
+            await authRepo.resetVerificationResendCooldown(user.id, null)
+        } catch {
+            cooldownReset = false
+        }
+        console.error(JSON.stringify({
+            event: 'auth.registration_verification_email_failed',
+            userId: user.id,
+            errorName: err instanceof Error ? err.name : 'UnknownError',
+            cooldownReset,
+        }))
+        // TODO: add an alert webhook after approval.
     }
 
     return {
         requiresEmailVerification: true,
         email: user.email,
-        message: 'Registration successful. Please verify your email with the 6-digit code sent to your inbox.',
+        emailSent,
+        ...(emailSent ? {} : { reason: 'send_failed' }),
+        message: emailSent
+            ? 'Registration successful. Please verify your email with the 6-digit code sent to your inbox.'
+            : 'Registration successful, but we could not send your verification code. Please request a new one.',
     }
 }
 

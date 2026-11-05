@@ -43,6 +43,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const [showVerification, setShowVerification] = useState(false)
   const [verificationEmail, setVerificationEmail] = useState('')
   const [verificationCode, setVerificationCode] = useState('')
+  const [verificationNotice, setVerificationNotice] = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
   const [verifyLoading, setVerifyLoading] = useState(false)
   const [resendLoading, setResendLoading] = useState(false)
@@ -70,6 +71,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       setForgotSent(false)
       setForgotEmail('')
       setVerificationCode('')
+      setVerificationNotice('')
       setResendCooldown(0)
     }
   }, [isOpen, defaultTab])
@@ -161,9 +163,19 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
         setVerificationEmail(res.email || regData.email)
         setShowVerification(true)
         setVerificationCode('')
+        setVerificationNotice('')
         setError('')
-        setResendCooldown(60)
-        showInfo(t('auth.verification.codeSentNotification'))
+        if (res.emailSent === false) {
+          setResendCooldown(0)
+          setVerificationNotice(t(
+            res.reason === 'code_pending'
+              ? 'auth.verification.codePending'
+              : 'auth.verification.emailSendFailed'
+          ))
+        } else {
+          setResendCooldown(60)
+          showInfo(t('auth.verification.codeSentNotification'))
+        }
       } else if (res?.user) {
         onAuthSuccess(res.user)
         onClose()
@@ -221,6 +233,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setShowForgotPassword(false)
     setForgotSent(false)
     setVerificationCode('')
+    setVerificationNotice('')
     setResendCooldown(0)
     setError('')
     setLoginData((prev) => ({ ...prev, email }))
@@ -270,6 +283,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
         switchToVerifiedLogin(verificationEmail)
         return
       }
+      setVerificationNotice('')
       showSuccess(t('auth.verification.resendSuccess'))
       setResendCooldown(60)
     } catch (err) {
@@ -305,6 +319,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setForgotSent(false)
     setForgotEmail('')
     setVerificationCode('')
+    setVerificationNotice('')
+    setResendCooldown(0)
     setError('')
     setTab('login')
   }
@@ -312,6 +328,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const handleBackToRegister = () => {
     setShowVerification(false)
     setVerificationCode('')
+    setVerificationNotice('')
+    setResendCooldown(0)
     setError('')
     setTab('register')
   }
@@ -399,6 +417,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                   {verificationEmail}
                 </p>
               </div>
+
+              {verificationNotice && (
+                <div role="status" className="mb-4 p-3 bg-amber-50 border border-amber-200 text-xs text-amber-800 rounded">
+                  {verificationNotice}
+                </div>
+              )}
 
               <form onSubmit={handleVerifyEmail} className="space-y-4">
                 <div>
