@@ -80,6 +80,131 @@ const sendVerificationCodeEmail = async (user, verificationCode, subject) => {
     })
 }
 
+const createRegistrationVerificationResponse = (email, { emailSent = true, reason } = {}) => ({
+    requiresEmailVerification: true,
+    email,
+    emailSent,
+    ...(reason ? { reason } : {}),
+    message: reason === 'code_pending'
+        ? 'A verification code has already been sent. Enter it or request another when available.'
+        : emailSent
+            ? 'Registration successful. Please verify your email with the 6-digit code sent to your inbox.'
+            : 'Registration successful, but we could not send your verification code. Please request a new one.',
+})
+
+const sendRegistrationVerificationCode = async (user, verificationCode) => {
+    try {
+        await sendVerificationCodeEmail(
+            user,
+            verificationCode,
+            'Star Dewedar — Verify Your Email Address'
+        )
+        return true
+    } catch (err) {
+        let cooldownReset = true
+        try {
+            await authRepo.resetVerificationResendCooldown(user.id, null)
+        } catch {
+            cooldownReset = false
+        }
+        console.error(JSON.stringify({
+            event: 'auth.registration_verification_email_failed',
+            userId: user.id,
+            errorName: err instanceof Error ? err.name : 'UnknownError',
+            cooldownReset,
+        }))
+        // TODO: add an alert webhook after approval.
+        return false
+    }
+}
+
+const hasActiveVerificationCode = (user, now = new Date()) => (
+    Boolean(
+        user.email_verification_hash
+        && user.email_verification_expires_at
+        && new Date(user.email_verification_expires_at) > now
+    )
+)
+
+const isVerificationResendCooldownActive = (user, now = new Date()) => (
+    Boolean(
+        user.email_verification_last_sent
+        && new Date(user.email_verification_last_sent)
+            > new Date(now.getTime() - RESEND_COOLDOWN_SECONDS * 1000)
+    )
+)
+
+const createResendCooldownError = () => {
+    const err = new Error('Please wait before requesting a new code.')
+    err.status = 429
+    err.code = 'RESEND_COOLDOWN'
+    return err
+}
+
+const createRegistrationRaceError = () => {
+    const err = new Error('Registration could not be completed. Please try again.')
+    err.status = 409
+    err.code = 'REGISTRATION_STATE_CHANGED'
+    return err
+}
+
+const handleExistingRegistration = async (existing, data, normalizedEmail, existingHashedPassword) => {
+    if (existing.email_verified) throw new Error('Email already exists')
+
+    const now = new Date()
+    if (hasActiveVerificationCode(existing, now)) {
+        return createRegistrationVerificationResponse(existing.email, {
+            emailSent: false,
+            reason: 'code_pending',
+        })
+    }
+
+    const hashedPassword = existingHashedPassword
+        || await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS)
+    const verificationCode = generateVerificationCode()
+    const hashedCode = hashVerificationCode(verificationCode)
+    const expiresAt = new Date(now.getTime() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
+    const result = await authRepo.refreshUnverifiedRegistration(existing.id, {
+        name: data.name,
+        password: hashedPassword,
+        phone_number: data.phone_number ?? null,
+        whatsapp_number: data.whatsapp_number ?? null,
+        company_name: data.company_name ?? null,
+        reset_password_token: null,
+        reset_password_expires: null,
+        hashed_refresh_token: null,
+        email_verification_hash: hashedCode,
+        email_verification_expires_at: expiresAt,
+        email_verification_attempts: 0,
+        email_verification_last_sent: now,
+    }, now, RESEND_COOLDOWN_SECONDS)
+
+    if (result.count !== 1) {
+        const current = await userRepo.findUserByEmail(normalizedEmail)
+        if (!current) throw createRegistrationRaceError()
+        if (current.email_verified) throw new Error('Email already exists')
+
+        const rereadAt = new Date()
+        if (hasActiveVerificationCode(current, rereadAt)) {
+            return createRegistrationVerificationResponse(current.email, {
+                emailSent: false,
+                reason: 'code_pending',
+            })
+        }
+        if (isVerificationResendCooldownActive(current, rereadAt)) {
+            throw createResendCooldownError()
+        }
+        throw createRegistrationRaceError()
+    }
+
+    const user = { id: existing.id, email: existing.email, name: data.name }
+    const emailSent = await sendRegistrationVerificationCode(user, verificationCode)
+    return createRegistrationVerificationResponse(user.email, {
+        emailSent,
+        ...(emailSent ? {} : { reason: 'send_failed' }),
+    })
+}
+
 /**
  * Generate a fresh verification code, persist it, and email it.
  * Respects the 60-second resend cooldown.
@@ -144,7 +269,7 @@ export const register = async (data) => {
 
     // 2. Check for existing account with this email
     const existing = await userRepo.findUserByEmail(normalizedEmail)
-    if (existing) throw new Error('Email already exists')
+    if (existing) return handleExistingRegistration(existing, data, normalizedEmail)
 
     // 3. Hash password
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS)
@@ -154,56 +279,36 @@ export const register = async (data) => {
     const hashedCode = hashVerificationCode(verificationCode)
     const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
 
-    // 5. Create unverified customer user
-    const user = await userRepo.createUser({
-        name: data.name,
-        email: normalizedEmail,
-        password: hashedPassword,
-        whatsapp_number: data.whatsapp_number ?? null,
-        phone_number: data.phone_number ?? null,
-        company_name: data.company_name ?? null,
-        role: ROLES.CUSTOMER,
-        email_verified: false,
-        email_verification_hash: hashedCode,
-        email_verification_expires_at: expiresAt,
-        email_verification_attempts: 0,
-        email_verification_last_sent: new Date(),
-    })
+    // 5. Create an unverified customer user
+    let user
+    try {
+        user = await userRepo.createUser({
+            name: data.name,
+            email: normalizedEmail,
+            password: hashedPassword,
+            whatsapp_number: data.whatsapp_number ?? null,
+            phone_number: data.phone_number ?? null,
+            company_name: data.company_name ?? null,
+            role: ROLES.CUSTOMER,
+            email_verified: false,
+            email_verification_hash: hashedCode,
+            email_verification_expires_at: expiresAt,
+            email_verification_attempts: 0,
+            email_verification_last_sent: new Date(),
+        })
+    } catch (err) {
+        if (err?.code !== 'P2002') throw err
+        const racedUser = await userRepo.findUserByEmail(normalizedEmail)
+        if (!racedUser) throw err
+        return handleExistingRegistration(racedUser, data, normalizedEmail, hashedPassword)
+    }
 
     // 6. Send branded verification email (must not hang registration forever)
-    let emailSent = true
-    try {
-        await sendVerificationCodeEmail(
-            user,
-            verificationCode,
-            'Star Dewedar — Verify Your Email Address'
-        )
-    } catch (err) {
-        emailSent = false
-        let cooldownReset = true
-        try {
-            await authRepo.resetVerificationResendCooldown(user.id, null)
-        } catch {
-            cooldownReset = false
-        }
-        console.error(JSON.stringify({
-            event: 'auth.registration_verification_email_failed',
-            userId: user.id,
-            errorName: err instanceof Error ? err.name : 'UnknownError',
-            cooldownReset,
-        }))
-        // TODO: add an alert webhook after approval.
-    }
-
-    return {
-        requiresEmailVerification: true,
-        email: user.email,
+    const emailSent = await sendRegistrationVerificationCode(user, verificationCode)
+    return createRegistrationVerificationResponse(user.email, {
         emailSent,
         ...(emailSent ? {} : { reason: 'send_failed' }),
-        message: emailSent
-            ? 'Registration successful. Please verify your email with the 6-digit code sent to your inbox.'
-            : 'Registration successful, but we could not send your verification code. Please request a new one.',
-    }
+    })
 }
 
 /**

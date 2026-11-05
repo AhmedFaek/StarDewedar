@@ -79,6 +79,37 @@ export const saveVerificationCode = (userId, { hashedCode, expiresAt, attempts =
 }
 
 /**
+ * Refresh registration details and verification state only while the account
+ * remains unverified, its current code is missing or expired, and cooldown has elapsed.
+ */
+export const refreshUnverifiedRegistration = (userId, data, now = new Date(), cooldownSeconds = 60) => {
+    const cooldownCutoff = new Date(now.getTime() - cooldownSeconds * 1000)
+
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            email_verified: false,
+            AND: [
+                {
+                    OR: [
+                        { email_verification_hash: null },
+                        { email_verification_expires_at: null },
+                        { email_verification_expires_at: { lte: now } },
+                    ],
+                },
+                {
+                    OR: [
+                        { email_verification_last_sent: null },
+                        { email_verification_last_sent: { lte: cooldownCutoff } },
+                    ],
+                },
+            ],
+        },
+        data,
+    })
+}
+
+/**
  * Atomically verify and consume the verification code.
  * Succeeds only if:
  *   - user.id = userId
@@ -216,5 +247,4 @@ export const incrementVerificationAttempts = (userId) => {
         },
     })
 }
-
 
