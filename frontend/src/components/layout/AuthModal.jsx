@@ -30,6 +30,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const { showSuccess, showError, showInfo } = useNotification()
   const [tab, setTab] = useState(defaultTab)
   const [error, setError] = useState('')
+  const [loginNotice, setLoginNotice] = useState('')
   const [phoneErrors, setPhoneErrors] = useState({})
   const overlayRef = useRef(null)
 
@@ -62,6 +63,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     if (isOpen) {
       setTab(defaultTab)
       setError('')
+      setLoginNotice('')
       setPhoneErrors({})
       setShowForgotPassword(false)
       setShowVerification(false)
@@ -140,6 +142,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const handleLogin = async (e) => {
     e.preventDefault()
     setError('')
+    setLoginNotice('')
     await doLogin()
   }
 
@@ -212,6 +215,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     }))
   }
 
+  const switchToVerifiedLogin = (email) => {
+    setTab('login')
+    setShowVerification(false)
+    setShowForgotPassword(false)
+    setForgotSent(false)
+    setVerificationCode('')
+    setResendCooldown(0)
+    setError('')
+    setLoginData((prev) => ({ ...prev, email }))
+    setLoginNotice(t('auth.verification.emailVerifiedLogin'))
+  }
+
   // ── Verify Email form submission ─────────────────────────────────
   const handleVerifyEmail = async (e) => {
     e.preventDefault()
@@ -226,10 +241,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setVerifyLoading(true)
     try {
       const res = await api.verifyEmail(verificationEmail, cleanCode)
-      showSuccess(t('notifications.loginSuccess'))
-      if (res.user) {
-        onAuthSuccess(res.user)
+      if (res?.alreadyVerified) {
+        switchToVerifiedLogin(verificationEmail)
+        return
       }
+      if (!res?.accessToken || !res?.refreshToken || !res?.user) {
+        setError(t('notifications.genericError'))
+        return
+      }
+      showSuccess(t('notifications.loginSuccess'))
+      onAuthSuccess(res.user)
       onClose()
     } catch (err) {
       setError(getApiErrorMessage(err, { t }))
@@ -244,7 +265,11 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     setError('')
     setResendLoading(true)
     try {
-      await api.resendVerification(verificationEmail)
+      const res = await api.resendVerification(verificationEmail)
+      if (res?.alreadyVerified) {
+        switchToVerifiedLogin(verificationEmail)
+        return
+      }
       showSuccess(t('auth.verification.resendSuccess'))
       setResendCooldown(60)
     } catch (err) {
@@ -561,6 +586,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                     </div>
                   )}
 
+                  {loginNotice && (
+                    <div className="p-3 bg-green-50 border border-green-200 text-xs text-green-700 rounded">
+                      {loginNotice}
+                    </div>
+                  )}
+
                   <SubmitButton
                     id="auth-login-submit"
                     loading={loginLoading}
@@ -576,6 +607,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       onClick={() => {
                         setTab('register')
                         setError('')
+                        setLoginNotice('')
                       }}
                       className="font-semibold text-primary underline hover:text-primary-dark"
                     >

@@ -192,7 +192,7 @@ export const api = {
   }).then(async (res) => {
     const body = await readResponseBody(res)
     if (!res.ok) throw createApiError(res, body)
-    if (body.accessToken && body.refreshToken) {
+    if (body.accessToken && body.refreshToken && body.user) {
       saveTokens(body.accessToken, body.refreshToken)
       saveUser(body.user)
     }

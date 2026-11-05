@@ -570,6 +570,7 @@
       "resendCooldown": "Resend in {{seconds}}s",
       "resendSuccess": "A fresh verification code has been sent to your email.",
       "codeSentNotification": "A 6-digit verification code was sent to your email.",
+      "emailVerifiedLogin": "Your email is verified. Please log in.",
       "unverifiedLoginPrompt": "Your account is not verified yet. Enter the code sent to your email.",
       "wrongEmail": "Wrong email? Register again",
       "codeRequired": "Please enter the 6-digit code.",
