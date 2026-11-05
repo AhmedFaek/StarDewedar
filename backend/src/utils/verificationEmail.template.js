@@ -1,4 +1,5 @@
 import env from '../config/env.js'
+import { escapeHtml } from './htmlEscaper.js'
 
 /**
  * Professional HTML email template for email verification code.
@@ -8,7 +9,7 @@ import env from '../config/env.js'
  * @returns {string} Full HTML document
  */
 export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 }) => {
-  const greeting = name ? `Hello ${name},` : 'Hello,'
+  const greeting = name ? `Hello ${escapeHtml(name)},` : 'Hello,'
   const logoUrl = env.logoUrl
   return `
 <!DOCTYPE html>
