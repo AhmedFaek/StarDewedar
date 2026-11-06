@@ -24,3 +24,11 @@ test('verification email escapes user-controlled name in the greeting', () => {
     assert.match(html, /Hello &lt;b&gt;x&lt;\/b&gt; &amp; &quot;quoted&quot; &#039;single&#039;,/)
     assert.doesNotMatch(html, /Hello <b>x<\/b>/)
 })
+
+test('verification email includes bilingual latest-code and spam-folder hints', () => {
+    const html = verificationEmailTemplate({ code: '123456' })
+
+    assert.match(html, /Use the most recent code we sent you\./u)
+    assert.match(html, /Can't find it\? Check your spam folder\./u)
+    assert.match(html, /dir="rtl" lang="ar"[^>]*>[\s\S]*استخدم أحدث رمز أرسلناه إليك\.[\s\S]*لم تجده؟ تحقّق من مجلد البريد العشوائي\./u)
+})

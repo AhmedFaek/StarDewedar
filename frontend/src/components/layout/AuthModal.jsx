@@ -449,6 +449,12 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                   <p className="mt-1.5 text-[11px] text-slate-400 text-center">
                     {t('auth.verification.expiryNotice')}
                   </p>
+                  <p className="mt-1.5 text-[11px] text-slate-500 text-center">
+                    {t('auth.verification.useMostRecentCode')}
+                  </p>
+                  <p className="text-[11px] text-slate-500 text-center">
+                    {t('auth.verification.checkSpamFolder')}
+                  </p>
                 </div>
 
                 {error && (
