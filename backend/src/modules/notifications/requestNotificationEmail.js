@@ -6,13 +6,7 @@ import {
 } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
 import env from '../../config/env.js'
-
-const sanitizeSubjectValue = (value) => String(value ?? '')
-    .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 60)
-    .trim()
+import { sanitizeEmailText } from '../../utils/htmlEscaper.js'
 
 export const sendVisitRequestEmail = async (visitRequest, attachmentLinks = []) => {
     const name = visitRequest.name || 'Valued Customer'
@@ -45,7 +39,7 @@ export const sendVisitRequestEmail = async (visitRequest, attachmentLinks = []) 
     })
 
     return sendEmail({
-        subject: `New Visit Request — ${sanitizeSubjectValue(name)} — SDC`,
+        subject: `New Visit Request — ${sanitizeEmailText(name, 60)} — SDC`,
         html,
         attachments: [createSdcMonogramAttachment()],
     })
@@ -77,7 +71,7 @@ export const sendQuoteRequestEmail = async (quoteRequest, attachmentLinks = []) 
     })
 
     return sendEmail({
-        subject: `New Quote Request — ${sanitizeSubjectValue(fullName)} — SDC`,
+        subject: `New Quote Request — ${sanitizeEmailText(fullName, 60)} — SDC`,
         html,
         attachments: [createSdcMonogramAttachment()],
     })
@@ -112,8 +106,8 @@ export const sendBOQRequestEmail = async (boqRequest, attachmentLinks = []) => {
         adminUrl,
     })
     const subjectCompanyPart = company
-        ? `${sanitizeSubjectValue(company)} (${sanitizeSubjectValue(name)})`
-        : sanitizeSubjectValue(name)
+        ? `${sanitizeEmailText(company, 60)} (${sanitizeEmailText(name, 60)})`
+        : sanitizeEmailText(name, 60)
 
     return sendEmail({
         subject: `New BOQ Request — ${subjectCompanyPart} — SDC`,
