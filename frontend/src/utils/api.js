@@ -171,9 +171,12 @@ export const api = {
     }).then(handleResponse)
   },
 
-  register: (data) => fetch(`${API_URL}/auth/register`, {
+  register: (data, turnstileToken) => fetch(`${API_URL}/auth/register`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Turnstile-Token': turnstileToken,
+    },
     body: JSON.stringify(data),
   }).then(async (res) => {
     const body = await readResponseBody(res)

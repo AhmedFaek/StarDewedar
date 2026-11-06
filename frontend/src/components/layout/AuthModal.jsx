@@ -5,6 +5,7 @@ import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
+import TurnstileWidget from '../forms/TurnstileWidget.jsx'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 /**
@@ -33,6 +34,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const [loginNotice, setLoginNotice] = useState('')
   const [phoneErrors, setPhoneErrors] = useState({})
   const overlayRef = useRef(null)
+  const registrationTurnstileRef = useRef(null)
+  const [registrationTurnstileToken, setRegistrationTurnstileToken] = useState('')
 
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false)
@@ -59,9 +62,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     company_name: '',
   })
 
+  const resetRegistrationTurnstile = () => {
+    setRegistrationTurnstileToken('')
+    registrationTurnstileRef.current?.reset()
+  }
+
   // Reset modal state on open
   useEffect(() => {
     if (isOpen) {
+      setRegistrationTurnstileToken('')
+      registrationTurnstileRef.current?.reset()
       setTab(defaultTab)
       setError('')
       setLoginNotice('')
@@ -155,7 +165,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       if (!payload.phone_number) delete payload.phone_number
       if (!payload.whatsapp_number) delete payload.whatsapp_number
       if (!payload.company_name) delete payload.company_name
-      return api.register(payload)
+      return api.register(payload, registrationTurnstileToken)
     },
     successMessage: null, // Don't show login success because email verification is required
     onSuccess: (res) => {
@@ -182,6 +192,14 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       }
     },
     onError: (err) => {
+      if (err?.code === 'TURNSTILE_FAILED') {
+        setError(t('turnstile.registrationFailed'))
+        return true
+      }
+      if (err?.code === 'TURNSTILE_UNAVAILABLE') {
+        setError(t('turnstile.serviceUnavailable'))
+        return true
+      }
       setError(getApiErrorMessage(err, { t }))
       return false
     },
@@ -190,6 +208,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
 
   const handleRegister = async (e) => {
     e.preventDefault()
+    if (regLoading) return
     setError('')
 
     const invalidPhones = ['phone_number', 'whatsapp_number'].filter((field) =>
@@ -211,7 +230,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       return
     }
 
-    await doRegister()
+    if (!registrationTurnstileToken) {
+      setError(t('turnstile.verifyRequired'))
+      return
+    }
+
+    try {
+      await doRegister()
+    } finally {
+      resetRegistrationTurnstile()
+    }
   }
 
   const handleRegistrationPhoneChange = (field) => (e) => {
@@ -375,6 +403,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
               <button
                 key={tabKey}
                 onClick={() => {
+                  if (tab === 'register' && tabKey !== 'register') {
+                    resetRegistrationTurnstile()
+                  }
                   setTab(tabKey)
                   setError('')
                 }}
@@ -779,11 +810,23 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                     </div>
                   )}
 
+                  <div>
+                    <TurnstileWidget
+                      ref={registrationTurnstileRef}
+                      onVerify={setRegistrationTurnstileToken}
+                      onExpire={resetRegistrationTurnstile}
+                      onError={resetRegistrationTurnstile}
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      {t('turnstile.verifyPrompt')}
+                    </p>
+                  </div>
+
                   <SubmitButton
                     id="auth-reg-submit"
                     loading={regLoading}
                     loadingText={t('auth.registering')}
-                    disabled={!allValid || !passwordsMatch}
+                    disabled={!allValid || !passwordsMatch || !registrationTurnstileToken}
                     className="auth-btn-primary inline-flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {t('auth.createAccount')}
@@ -793,6 +836,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                     <button
                       type="button"
                       onClick={() => {
+                        resetRegistrationTurnstile()
                         setTab('login')
                         setError('')
                       }}

@@ -3,6 +3,7 @@ import rateLimit from 'express-rate-limit'
 import * as controller from './auth.controller.js'
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
+import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 import { requirePermission } from '../../middleware/roles.middleware.js'
 import {
     registerSchema,
@@ -84,7 +85,7 @@ const registerLimiter = rateLimit({
 // ── Public routes ────────────────────────────────────────────────────────────
 
 // Customer self-registration
-router.post('/register', registerLimiter, validate(registerSchema), controller.register)
+router.post('/register', registerLimiter, verifyTurnstile, validate(registerSchema), controller.register)
 
 // Verify email
 router.post(

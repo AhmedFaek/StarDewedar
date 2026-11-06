@@ -602,7 +602,9 @@
   "turnstile": {
     "verifyPrompt": "Please complete the security check before submitting",
     "verifyRequired": "Please complete the security verification before submitting.",
-    "verificationFailed": "Please complete the security verification and try again."
+    "verificationFailed": "Please complete the security verification and try again.",
+    "registrationFailed": "The verification check failed or expired. Please try again.",
+    "serviceUnavailable": "The security verification service is temporarily unavailable. Please try again."
   },
 
   "requestPage": {
