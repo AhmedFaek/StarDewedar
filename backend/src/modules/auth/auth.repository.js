@@ -75,7 +75,7 @@ export const changePassword = (userId, hashedPassword) => {
 /* ─── Email verification operations ─────────────────────────────────────── */
 
 /**
- * Store SHA-256 hashed verification code, expiration, and update last sent timestamp.
+ * Store an HMAC-hashed verification code, expiration, and update last sent timestamp.
  * Targets only unverified users.
  */
 export const saveVerificationCode = (userId, { hashedCode, expiresAt, attempts = 0, lastSent = new Date() }) => {
@@ -219,16 +219,40 @@ export const acquireVerificationResendCooldown = async (userId, now = new Date()
 }
 
 /**
- * Reset resend cooldown timestamp (used if external email delivery fails).
+ * Reset resend cooldown only if it still belongs to this failed send attempt.
  */
-export const resetVerificationResendCooldown = (userId, previousTimestamp = null) => {
+export const resetVerificationResendCooldown = (userId, expectedTimestamp) => {
     return prisma.user.updateMany({
         where: {
             id: userId,
             email_verified: false,
+            email_verification_last_sent: expectedTimestamp,
         },
         data: {
-            email_verification_last_sent: previousTimestamp,
+            email_verification_last_sent: null,
+        },
+    })
+}
+
+/**
+ * Restore the previous verification state only if the failed send still owns it.
+ */
+export const rollbackVerificationCodeAfterEmailFailure = (
+    userId,
+    { writtenHash, writtenLastSent, previousState }
+) => {
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            email_verified: false,
+            email_verification_hash: writtenHash,
+            email_verification_last_sent: writtenLastSent,
+        },
+        data: {
+            email_verification_hash: previousState.hash,
+            email_verification_expires_at: previousState.expiresAt,
+            email_verification_attempts: previousState.attempts,
+            email_verification_last_sent: null,
         },
     })
 }
