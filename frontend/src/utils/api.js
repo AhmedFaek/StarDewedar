@@ -238,6 +238,10 @@ export const api = {
   }),
 
   getMe: () => authFetch(`${API_URL}/users/me`),
+  updateProfile: (data) => authFetch(`${API_URL}/users/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
 
   getSavedProducts: () => authFetch(`${API_URL}/users/me/saved-products`),
   checkSaved: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}/check`),
