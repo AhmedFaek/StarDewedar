@@ -7,6 +7,7 @@ import { sendEmail } from '../../utils/mailer.js'
 import { resetPasswordEmailTemplate } from '../../utils/resetPasswordEmail.template.js'
 import { verificationEmailTemplate } from '../../utils/verificationEmail.template.js'
 import { validateCustomerEmail, normalizeEmail } from '../../utils/emailValidation.service.js'
+import { hashVerificationCode } from './verificationCode.js'
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
 
@@ -53,13 +54,6 @@ const hashResetToken = (rawToken) => {
 }
 
 /**
- * Hash a 6-digit verification code with SHA-256 for DB storage.
- */
-const hashVerificationCode = (rawCode) => {
-    return crypto.createHash('sha256').update(rawCode).digest('hex')
-}
-
-/**
  * Generate a cryptographically secure 6-digit numeric verification code.
  */
 const generateVerificationCode = () => {
@@ -92,7 +86,7 @@ const createRegistrationVerificationResponse = (email, { emailSent = true, reaso
             : 'Registration successful, but we could not send your verification code. Please request a new one.',
 })
 
-const sendRegistrationVerificationCode = async (user, verificationCode) => {
+const sendRegistrationVerificationCode = async (user, verificationCode, lastSentAt) => {
     try {
         await sendVerificationCodeEmail(
             user,
@@ -103,7 +97,7 @@ const sendRegistrationVerificationCode = async (user, verificationCode) => {
     } catch (err) {
         let cooldownReset = true
         try {
-            await authRepo.resetVerificationResendCooldown(user.id, null)
+            await authRepo.resetVerificationResendCooldown(user.id, lastSentAt)
         } catch {
             cooldownReset = false
         }
@@ -198,7 +192,7 @@ const handleExistingRegistration = async (existing, data, normalizedEmail, exist
     }
 
     const user = { id: existing.id, email: existing.email, name: data.name }
-    const emailSent = await sendRegistrationVerificationCode(user, verificationCode)
+    const emailSent = await sendRegistrationVerificationCode(user, verificationCode, now)
     return createRegistrationVerificationResponse(user.email, {
         emailSent,
         ...(emailSent ? {} : { reason: 'send_failed' }),
@@ -211,6 +205,12 @@ const handleExistingRegistration = async (existing, data, normalizedEmail, exist
  */
 const issueAndSendVerificationCode = async (user, { subject } = {}) => {
     const now = new Date()
+    const previousState = {
+        hash: user.email_verification_hash,
+        expiresAt: user.email_verification_expires_at,
+        attempts: user.email_verification_attempts,
+        lastSent: user.email_verification_last_sent,
+    }
 
     const acquired = await authRepo.acquireVerificationResendCooldown(
         user.id,
@@ -242,7 +242,19 @@ const issueAndSendVerificationCode = async (user, { subject } = {}) => {
             subject || 'Star Dewedar — Email Verification Code'
         )
     } catch (err) {
-        await authRepo.resetVerificationResendCooldown(user.id, user.email_verification_last_sent).catch(() => {})
+        try {
+            await authRepo.rollbackVerificationCodeAfterEmailFailure(user.id, {
+                writtenHash: hashedCode,
+                writtenLastSent: now,
+                previousState,
+            })
+        } catch (rollbackErr) {
+            console.error(JSON.stringify({
+                event: 'auth.verification_email_rollback_failed',
+                userId: user.id,
+                errorName: rollbackErr instanceof Error ? rollbackErr.name : 'UnknownError',
+            }))
+        }
         throw err
     }
 
@@ -278,6 +290,7 @@ export const register = async (data) => {
     const verificationCode = generateVerificationCode()
     const hashedCode = hashVerificationCode(verificationCode)
     const expiresAt = new Date(Date.now() + VERIFICATION_CODE_EXPIRY_MINUTES * 60 * 1000)
+    const lastSentAt = new Date()
 
     // 5. Create an unverified customer user
     let user
@@ -294,7 +307,7 @@ export const register = async (data) => {
             email_verification_hash: hashedCode,
             email_verification_expires_at: expiresAt,
             email_verification_attempts: 0,
-            email_verification_last_sent: new Date(),
+            email_verification_last_sent: lastSentAt,
         })
     } catch (err) {
         if (err?.code !== 'P2002') throw err
@@ -304,7 +317,7 @@ export const register = async (data) => {
     }
 
     // 6. Send branded verification email (must not hang registration forever)
-    const emailSent = await sendRegistrationVerificationCode(user, verificationCode)
+    const emailSent = await sendRegistrationVerificationCode(user, verificationCode, lastSentAt)
     return createRegistrationVerificationResponse(user.email, {
         emailSent,
         ...(emailSent ? {} : { reason: 'send_failed' }),

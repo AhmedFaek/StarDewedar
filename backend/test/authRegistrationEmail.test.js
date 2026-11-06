@@ -176,7 +176,9 @@ test('register reports delivery failure, releases cooldown, and logs no credenti
         reason: 'send_failed',
         message: 'Registration successful, but we could not send your verification code. Please request a new one.',
     })
-    assert.deepEqual(state.cooldownResets, [['test-user-id', null]])
+    assert.deepEqual(state.cooldownResets, [
+        ['test-user-id', state.createCalls[0].email_verification_last_sent],
+    ])
     assert.equal(state.events.indexOf('mail') < state.events.indexOf('cooldown-reset'), true)
     assert.equal(logs.length, 1)
     assertNoUnconditionalUserUpdate()
@@ -385,7 +387,9 @@ test('SMTP failure after refresh retains data and attempts a cooldown reset', as
     assert.equal(data.name, registration.name)
     assert.equal(data.reset_password_token, null)
     assert.equal(data.email_verification_attempts, 0)
-    assert.deepEqual(state.cooldownResets, [['existing-user-id', null]])
+    assert.deepEqual(state.cooldownResets, [
+        ['existing-user-id', state.refreshCalls[0][1].email_verification_last_sent],
+    ])
     assert.deepEqual(state.events.slice(-3), ['refresh', 'mail', 'cooldown-reset'])
     assertNoUnconditionalUserUpdate()
     assertNoSensitiveLogValues(logs, registration.password, data, state.sentMessages[0].html)
