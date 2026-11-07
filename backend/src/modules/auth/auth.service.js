@@ -8,6 +8,14 @@ import { resetPasswordEmailTemplate } from '../../utils/resetPasswordEmail.templ
 import { verificationEmailTemplate } from '../../utils/verificationEmail.template.js'
 import { validateCustomerEmail, normalizeEmail } from '../../utils/emailValidation.service.js'
 import { hashVerificationCode } from './verificationCode.js'
+import {
+    RESET_TOKEN_EXPIRY_MINUTES,
+    getResetTokenCooldownExpiryCutoff,
+} from './resetToken.constants.js'
+import {
+    releaseForgotPasswordSend,
+    reserveForgotPasswordSend,
+} from './forgotPasswordSendCap.js'
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
 
@@ -15,7 +23,6 @@ import { ROLES } from '../../utils/constants.js'
 
 const BCRYPT_SALT_ROUNDS = 12
 const RESET_TOKEN_BYTES = 32
-const RESET_TOKEN_EXPIRY_MINUTES = 15
 const VERIFICATION_CODE_EXPIRY_MINUTES = 15
 const RESEND_COOLDOWN_SECONDS = 60
 
@@ -634,11 +641,32 @@ export const forgotPassword = async (email) => {
         return { message: genericMessage }
     }
 
+    const now = new Date()
     const rawToken = crypto.randomBytes(RESET_TOKEN_BYTES).toString('hex')
     const hashedToken = hashResetToken(rawToken)
-    const expiresAt = new Date(Date.now() + RESET_TOKEN_EXPIRY_MINUTES * 60 * 1000)
+    const expiresAt = new Date(now.getTime() + RESET_TOKEN_EXPIRY_MINUTES * 60 * 1000)
+    const cooldownExpiryCutoff = getResetTokenCooldownExpiryCutoff(now)
+    const reservation = reserveForgotPasswordSend(normalizedEmail, now.getTime())
+    if (!reservation) {
+        return { message: genericMessage }
+    }
 
-    await authRepo.saveResetToken(user.id, hashedToken, expiresAt)
+    let updateResult
+    try {
+        updateResult = await authRepo.saveResetTokenIfCooldownElapsed(
+            user.id,
+            hashedToken,
+            expiresAt,
+            cooldownExpiryCutoff
+        )
+    } catch (err) {
+        releaseForgotPasswordSend(reservation)
+        throw err
+    }
+    if (updateResult.count !== 1) {
+        releaseForgotPasswordSend(reservation)
+        return { message: genericMessage }
+    }
 
     const resetUrl = `${env.frontendUrl}/reset-password?token=${rawToken}`
     const html = resetPasswordEmailTemplate({
@@ -646,15 +674,17 @@ export const forgotPassword = async (email) => {
         expiresInMinutes: RESET_TOKEN_EXPIRY_MINUTES,
     })
 
-    try {
-        await sendEmail({
+    void Promise.resolve()
+        .then(() => sendEmail({
             to: user.email,
             subject: 'Star Dewedar — Password Reset',
             html,
+        }))
+        .catch((err) => {
+            console.error('Failed to send password reset email', {
+                errorName: err instanceof Error ? err.name : 'UnknownError',
+            })
         })
-    } catch (err) {
-        console.error('Failed to send password reset email:', err.message)
-    }
 
     return { message: genericMessage }
 }

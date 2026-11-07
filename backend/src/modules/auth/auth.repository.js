@@ -2,6 +2,22 @@ import prisma from '../../utils/prisma.js'
 
 /* ─── Password reset token operations ────────────────────────────────────── */
 
+export const saveResetTokenIfCooldownElapsed = (userId, hashedToken, expiresAt, cooldownExpiryCutoff) => {
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            OR: [
+                { reset_password_expires: null },
+                { reset_password_expires: { lte: cooldownExpiryCutoff } },
+            ],
+        },
+        data: {
+            reset_password_token: hashedToken,
+            reset_password_expires: expiresAt,
+        },
+    })
+}
+
 /**
  * Store a SHA-256-hashed reset token and its expiration on the user row.
  */
