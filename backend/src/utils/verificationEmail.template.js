@@ -10,10 +10,11 @@ import { escapeHtml, sanitizeEmailText } from './htmlEscaper.js'
  */
 export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 }) => {
   const safeName = sanitizeEmailText(name, 40, { ellipsis: true })
-  const greeting = safeName ? `Hello ${escapeHtml(safeName)},` : 'Hello,'
-  const registeredAs = safeName
-    ? `<span>${escapeHtml(safeName)}</span>`
-    : '<span>Customer</span>'
+  const nameSpan = safeName
+    ? `<span dir="auto" style="unicode-bidi:isolate">${escapeHtml(safeName)}</span>`
+    : '<span dir="auto" style="unicode-bidi:isolate">Customer</span>'
+  const greeting = safeName ? `Hello ${nameSpan},` : 'Hello,'
+  const registeredAs = nameSpan
   const logoUrl = env.logoUrl
   return `
 <!DOCTYPE html>

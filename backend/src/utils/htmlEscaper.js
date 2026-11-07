@@ -16,6 +16,7 @@ export const escapeHtml = (str) => {
 export const sanitizeEmailText = (value, maxLength, { ellipsis = false } = {}) => {
     const normalized = String(value ?? '')
         .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+        .replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/gi, '')
         .replace(/\s+/g, ' ')
         .trim()
 
