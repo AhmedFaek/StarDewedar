@@ -191,7 +191,7 @@ test('fails closed when the secret is not configured', async (t) => {
 
 test('request routes verify before Multer and contact remains header-compatible', async () => {
     const routeFiles = [
-        ['auth/auth.routes.js', /router\.post\('\/register',\s*registerLimiter,\s*verifyTurnstile,\s*validate\(registerSchema\),\s*controller\.register\)/],
+        ['auth/auth.routes.js', /router\.post\(\s*'\/register',\s*registerLimiters\.coarseLimiter,\s*verifyTurnstile,\s*registerLimiters\.passedChallengeLimiter,\s*validate\(registerSchema\),\s*controller\.register\s*\)/],
         ['visitRequests/visit.routes.js', /router\.post\('\/', visitLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createVisit\)/],
         ['quoteRequests/quote.routes.js', /router\.post\('\/', quoteLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createQuote\)/],
         ['boqRequests/boq.routes.js', /router\.post\('\/', boqLimiter,\s*verifyTurnstile,\s*boqUpload,\s*controller\.createBOQ\)/],
