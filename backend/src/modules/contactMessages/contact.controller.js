@@ -1,10 +1,19 @@
 import * as service from './contact.service.js'
+import { createContactSchema } from './contact.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 
 export const createContact = async (req, res) => {
+    let validatedData
     try {
-        const result = await service.createContact(req.body)
+        validatedData = createContactSchema.parse(req.body)
+    } catch (error) {
+        return res.status(400).json({
+            message: error.errors?.[0]?.message || 'Validation error',
+        })
+    }
 
+    try {
+        const result = await service.createContact(validatedData)
         res.status(201).json({
             message: 'Message sent successfully',
             data: result,
