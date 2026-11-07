@@ -1,5 +1,4 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
 import * as controller from './boq.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
@@ -16,22 +15,25 @@ import {
     validateRequestStatusParam,
 } from '../../middleware/requestFilters.middleware.js'
 import * as workflowController from '../requestWorkflow/requestWorkflow.controller.js'
+import { createTwoTierIpLimiters } from '../auth/authRateLimiters.js'
 
 const router = express.Router()
 
-const boqLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many BOQ requests submitted. Please try again later.',
-    },
-})
+const boqLimiters = createTwoTierIpLimiters(
+    'Too many BOQ requests submitted. Please try again later.',
+    { passedChallengeMax: 5 }
+)
 
 // Create a new BOQ request
-// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
-router.post('/', boqLimiter, verifyTurnstile, boqUpload, controller.createBOQ)
+// Flow: coarse limiter → Turnstile → strict limiter → bounded multipart parser → controller
+router.post(
+    '/',
+    boqLimiters.coarseLimiter,
+    verifyTurnstile,
+    boqLimiters.passedChallengeLimiter,
+    boqUpload,
+    controller.createBOQ
+)
 
 // Get all BOQ requests (admin only)
 router.get('/', auth, requirePermission(PERMISSIONS.REQUESTS_MANAGE), validateArchivedQuery, controller.getBOQs)

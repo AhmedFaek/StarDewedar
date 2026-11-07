@@ -8,7 +8,7 @@ const createIpLimiter = ({ windowMs, max, message }) => rateLimit({
     message: { message },
 })
 
-export const createTwoTierIpLimiters = (message) => ({
+export const createTwoTierIpLimiters = (message, { passedChallengeMax = 10 } = {}) => ({
     coarseLimiter: createIpLimiter({
         windowMs: 15 * 60 * 1000,
         max: 30,
@@ -16,7 +16,7 @@ export const createTwoTierIpLimiters = (message) => ({
     }),
     passedChallengeLimiter: createIpLimiter({
         windowMs: 60 * 60 * 1000,
-        max: 10,
+        max: passedChallengeMax,
         message,
     }),
 })

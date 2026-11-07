@@ -1,5 +1,4 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
 import * as controller from './visit.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
@@ -16,22 +15,25 @@ import {
     validateRequestStatusParam,
 } from '../../middleware/requestFilters.middleware.js'
 import * as workflowController from '../requestWorkflow/requestWorkflow.controller.js'
+import { createTwoTierIpLimiters } from '../auth/authRateLimiters.js'
 
 const router = express.Router()
 
-const visitLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many visit requests submitted. Please try again later.',
-    },
-})
+const visitLimiters = createTwoTierIpLimiters(
+    'Too many visit requests submitted. Please try again later.',
+    { passedChallengeMax: 10 }
+)
 
 // Create a new visit request
-// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
-router.post('/', visitLimiter, verifyTurnstile, singleFileUpload, controller.createVisit)
+// Flow: coarse limiter → Turnstile → strict limiter → bounded multipart parser → controller
+router.post(
+    '/',
+    visitLimiters.coarseLimiter,
+    verifyTurnstile,
+    visitLimiters.passedChallengeLimiter,
+    singleFileUpload,
+    controller.createVisit
+)
 
 // Get all visit requests
 router.get('/', auth,
