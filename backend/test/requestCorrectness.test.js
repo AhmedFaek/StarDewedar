@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict'
-import { test } from 'node:test'
+import { mock, test } from 'node:test'
 
 const testEnv = {
     PORT: '0',
@@ -16,6 +16,16 @@ const testEnv = {
 }
 
 Object.assign(process.env, testEnv)
+
+const requestEmailUrl = new URL('../src/utils/publicRequestEmail.js', import.meta.url).href
+mock.module(requestEmailUrl, {
+    exports: {
+        validateAndNormalizeRequestEmail: async (data) => ({
+            ...data,
+            email: data.email.trim().toLowerCase(),
+        }),
+    },
+})
 
 const [
     { default: cloudinary },

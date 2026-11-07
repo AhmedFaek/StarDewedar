@@ -2,7 +2,17 @@ import assert from 'node:assert/strict'
 import { mock, test } from 'node:test'
 
 const serviceUrl = new URL('../src/modules/contactMessages/contact.service.js', import.meta.url).href
+const requestEmailUrl = new URL('../src/utils/publicRequestEmail.js', import.meta.url).href
 const state = { calls: [] }
+
+mock.module(requestEmailUrl, {
+    exports: {
+        validateAndNormalizeRequestEmail: async (data) => ({
+            ...data,
+            email: data.email.trim().toLowerCase(),
+        }),
+    },
+})
 
 mock.module(serviceUrl, {
     exports: {

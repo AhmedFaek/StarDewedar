@@ -10,6 +10,8 @@ const SUMMARY_LOG_INTERVAL_MS = 60 * 1000
 const NO_RECORD_CODES = new Set(['ENODATA', 'ENOTFOUND', 'NXDOMAIN'])
 const DOMAIN_NOT_FOUND_CODES = new Set(['ENOTFOUND', 'NXDOMAIN', 'EBADNAME'])
 const INVALID_DOMAIN_MESSAGE = 'The email domain does not appear to exist or cannot receive emails. Please check your email address.'
+const INVALID_EMAIL_FORMAT_MESSAGE = 'Invalid email format.'
+const LOCAL_PART_PATTERN = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+$/
 
 const isValidDomainSyntax = (domain) => (
   typeof domain === 'string' &&
@@ -261,13 +263,17 @@ export const createEmailValidator = ({
       parts.length !== 2 ||
       !localPart ||
       !domain ||
-      localPart.length > 64
+      localPart.length > 64 ||
+      !LOCAL_PART_PATTERN.test(localPart) ||
+      localPart.startsWith('.') ||
+      localPart.endsWith('.') ||
+      localPart.includes('..')
     ) {
       return {
         isValid: false,
         normalizedEmail,
         code: 'INVALID_EMAIL_FORMAT',
-        error: 'Invalid email format.',
+        error: INVALID_EMAIL_FORMAT_MESSAGE,
       }
     }
 
@@ -285,7 +291,7 @@ export const createEmailValidator = ({
         isValid: false,
         normalizedEmail,
         code: 'INVALID_EMAIL_FORMAT',
-        error: 'Invalid email format.',
+        error: INVALID_EMAIL_FORMAT_MESSAGE,
       }
     }
 

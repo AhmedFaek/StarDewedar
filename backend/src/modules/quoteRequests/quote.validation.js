@@ -8,7 +8,7 @@ export const createQuoteRequestSchema = z.object({
 
     phone: egyptianPhoneSchema,
 
-    email: z.string().email().max(254),
+    email: z.string().trim().email().max(254),
 
     product_id: z.string().trim().max(100).optional(),
 

@@ -14,7 +14,7 @@ const BOQ_PROJECT_TYPES = [
 export const createBOQRequestSchema = z.object({
     name:             z.string().trim().min(2).max(100),
     company_name:     z.string().trim().min(2).max(200),
-    email:            z.string().email().max(254),
+    email:            z.string().trim().email().max(254),
     phone:            egyptianPhoneSchema,
 
     project_name:     z.string().trim().min(2).max(200),

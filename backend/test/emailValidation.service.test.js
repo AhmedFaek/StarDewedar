@@ -37,6 +37,53 @@ test('email format validation enforces address, local-part, and total lengths', 
     })
 })
 
+test('email local part rejects disallowed characters and dot placements', async () => {
+    let dnsCalls = 0
+    const validator = createEmailValidator({
+        resolver: createResolver({
+            resolveMx: async () => {
+                dnsCalls += 1
+                return [{ exchange: 'mx.example.invalid' }]
+            },
+        }),
+    })
+    const invalidEmails = [
+        'person\r\n@example.invalid',
+        'person name@example.invalid',
+        'per"son@example.invalid',
+        'per<son@example.invalid',
+        'per,son@example.invalid',
+        'first..last@example.invalid',
+        '.first@example.invalid',
+        'last.@example.invalid',
+    ]
+
+    for (const email of invalidEmails) {
+        const result = await validator.validateCustomerEmail(email)
+        assert.equal(result.isValid, false, JSON.stringify(email))
+        assert.equal(result.code, 'INVALID_EMAIL_FORMAT', JSON.stringify(email))
+        assert.equal(result.error, 'Invalid email format.', JSON.stringify(email))
+    }
+
+    assert.equal(dnsCalls, 0)
+})
+
+test('email local part accepts plus tags, dots, and apostrophes and normalizes uppercase', async () => {
+    const validator = createEmailValidator({ resolver: createResolver() })
+    const validEmails = [
+        ['first.last+tag@example.invalid', 'first.last+tag@example.invalid'],
+        ["o'brien@example.invalid", "o'brien@example.invalid"],
+        ['First.Last+Tag@Example.Invalid', 'first.last+tag@example.invalid'],
+    ]
+
+    for (const [email, normalizedEmail] of validEmails) {
+        assert.deepEqual(await validator.validateCustomerEmail(email), {
+            isValid: true,
+            normalizedEmail,
+        })
+    }
+})
+
 test('default resolver factory is lazy and invoked once on first lookup', async () => {
     let resolverFactoryCalls = 0
     const validator = createEmailValidator({

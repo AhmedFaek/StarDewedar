@@ -4,12 +4,15 @@ import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
 import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
+import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
+import { normalizeEmail } from '../../utils/emailValidation.service.js'
 
 export const createVisit = async (req, res) => {
     try {
         const validatedData = createVisitRequestSchema.parse(req.body)
         if (req.file) await validateUploadedFile(req.file)
-        const visit = await service.createVisitRequest(validatedData, req.file)
+        const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
+        const visit = await service.createVisitRequest(normalizedData, req.file)
         res.status(201).json({
             success: true,
             message: 'Visit request created successfully',
@@ -69,7 +72,7 @@ export const getVisitById = async (req, res) => {
 export const getVisitsByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const visits = await service.getVisitRequestsByEmail(email, req.requestArchived)
+        const visits = await service.getVisitRequestsByEmail(normalizeEmail(email), req.requestArchived)
 
         res.status(200).json({
             success: true,

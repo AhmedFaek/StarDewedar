@@ -4,12 +4,15 @@ import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
 import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
+import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
+import { normalizeEmail } from '../../utils/emailValidation.service.js'
 
 export const createQuote = async (req, res) => {
     try {
         const validatedData = createQuoteRequestSchema.parse(req.body)
         if (req.file) await validateUploadedFile(req.file)
-        const quote = await service.createQuoteRequest(validatedData, req.file)
+        const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
+        const quote = await service.createQuoteRequest(normalizedData, req.file)
         res.status(201).json({
             success: true,
             message: 'Quote request created successfully',
@@ -69,7 +72,7 @@ export const getQuoteById = async (req, res) => {
 export const getQuotesByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const quotes = await service.getQuoteRequestsByEmail(email, req.requestArchived)
+        const quotes = await service.getQuoteRequestsByEmail(normalizeEmail(email), req.requestArchived)
 
         res.status(200).json({
             success: true,
