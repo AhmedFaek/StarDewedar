@@ -604,7 +604,11 @@
     "verifyRequired": "Please complete the security verification before submitting.",
     "verificationFailed": "Please complete the security verification and try again.",
     "registrationFailed": "The verification check failed or expired. Please try again.",
-    "serviceUnavailable": "The security verification service is temporarily unavailable. Please try again."
+    "serviceUnavailable": "The security verification service is temporarily unavailable. Please try again.",
+    "loadFailed": "The security check couldn't load. Turn off ad blockers or privacy extensions for this site, check your connection, then try again.",
+    "reloadRequired": "The security check still couldn't load. Reload the page and try again.",
+    "tryAgain": "Try again",
+    "reloadPage": "Reload page"
   },
 
   "requestPage": {

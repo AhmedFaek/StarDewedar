@@ -223,9 +223,12 @@ export const api = {
   logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
     .finally(() => clearAuth()),
 
-  forgotPassword: (email) => fetch(`${API_URL}/auth/forgot-password`, {
+  forgotPassword: (email, turnstileToken) => fetch(`${API_URL}/auth/forgot-password`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Turnstile-Token': turnstileToken,
+    },
     body: JSON.stringify({ email }),
   }).then(handleResponse),
 

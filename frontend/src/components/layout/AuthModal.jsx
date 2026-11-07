@@ -36,6 +36,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const overlayRef = useRef(null)
   const registrationTurnstileRef = useRef(null)
   const [registrationTurnstileToken, setRegistrationTurnstileToken] = useState('')
+  const [registrationWidgetKey, setRegistrationWidgetKey] = useState(0)
+  const [registrationWidgetLoadFailed, setRegistrationWidgetLoadFailed] = useState(false)
+  const [registrationWidgetRetried, setRegistrationWidgetRetried] = useState(false)
+  const [registrationWidgetRetryFailed, setRegistrationWidgetRetryFailed] = useState(false)
+  const forgotTurnstileRef = useRef(null)
+  const [forgotTurnstileToken, setForgotTurnstileToken] = useState('')
+  const [forgotWidgetKey, setForgotWidgetKey] = useState(0)
+  const [forgotWidgetLoadFailed, setForgotWidgetLoadFailed] = useState(false)
+  const [forgotWidgetRetried, setForgotWidgetRetried] = useState(false)
+  const [forgotWidgetRetryFailed, setForgotWidgetRetryFailed] = useState(false)
 
   // Forgot password state
   const [showForgotPassword, setShowForgotPassword] = useState(false)
@@ -65,6 +75,31 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
   const resetRegistrationTurnstile = () => {
     setRegistrationTurnstileToken('')
     registrationTurnstileRef.current?.reset()
+    setRegistrationWidgetLoadFailed(false)
+    setRegistrationWidgetRetried(false)
+    setRegistrationWidgetRetryFailed(false)
+  }
+
+  const resetForgotTurnstile = () => {
+    setForgotTurnstileToken('')
+    forgotTurnstileRef.current?.reset()
+    setForgotWidgetLoadFailed(false)
+    setForgotWidgetRetried(false)
+    setForgotWidgetRetryFailed(false)
+  }
+
+  const retryRegistrationWidget = () => {
+    setRegistrationWidgetLoadFailed(false)
+    setRegistrationWidgetRetried(true)
+    setRegistrationWidgetRetryFailed(false)
+    setRegistrationWidgetKey((key) => key + 1)
+  }
+
+  const retryForgotWidget = () => {
+    setForgotWidgetLoadFailed(false)
+    setForgotWidgetRetried(true)
+    setForgotWidgetRetryFailed(false)
+    setForgotWidgetKey((key) => key + 1)
   }
 
   // Reset modal state on open
@@ -72,6 +107,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
     if (isOpen) {
       setRegistrationTurnstileToken('')
       registrationTurnstileRef.current?.reset()
+      setRegistrationWidgetKey(0)
+      setRegistrationWidgetLoadFailed(false)
+      setRegistrationWidgetRetried(false)
+      setRegistrationWidgetRetryFailed(false)
+      setForgotTurnstileToken('')
+      forgotTurnstileRef.current?.reset()
+      setForgotWidgetKey(0)
+      setForgotWidgetLoadFailed(false)
+      setForgotWidgetRetried(false)
+      setForgotWidgetRetryFailed(false)
       setTab(defaultTab)
       setError('')
       setLoginNotice('')
@@ -323,12 +368,20 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
 
   // ── Forgot password form submission ──────────────────────────────
   const { isSubmitting: forgotLoading, handleSubmit: doForgot } = useFormSubmit({
-    onSubmit: () => api.forgotPassword(forgotEmail),
+    onSubmit: () => api.forgotPassword(forgotEmail, forgotTurnstileToken),
     onSuccess: () => {
       showInfo(t('notifications.forgotPasswordSent'))
       setForgotSent(true)
     },
     onError: (err) => {
+      if (err?.code === 'TURNSTILE_FAILED') {
+        setError(t('turnstile.registrationFailed'))
+        return true
+      }
+      if (err?.code === 'TURNSTILE_UNAVAILABLE') {
+        setError(t('turnstile.serviceUnavailable'))
+        return true
+      }
       setError(getApiErrorMessage(err, { t }))
       return false
     },
@@ -337,11 +390,22 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
 
   const handleForgotPassword = async (e) => {
     e.preventDefault()
+    if (forgotLoading) return
     setError('')
-    await doForgot()
+    if (!forgotTurnstileToken) {
+      setError(t('turnstile.verifyRequired'))
+      return
+    }
+    try {
+      await doForgot()
+    } finally {
+      resetForgotTurnstile()
+    }
   }
 
   const handleBackToLogin = () => {
+    resetForgotTurnstile()
+    resetRegistrationTurnstile()
     setShowForgotPassword(false)
     setShowVerification(false)
     setForgotSent(false)
@@ -587,10 +651,51 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                       {error}
                     </div>
                   )}
+                  {forgotWidgetLoadFailed && (
+                    <div role="alert" className="p-3 bg-amber-50 border border-amber-200 text-xs text-amber-800 rounded">
+                      <p>
+                        {t(forgotWidgetRetryFailed ? 'turnstile.reloadRequired' : 'turnstile.loadFailed')}
+                      </p>
+                      {forgotWidgetRetryFailed ? (
+                        <button
+                          type="button"
+                          onClick={() => window.location.reload()}
+                          className="mt-2 font-semibold underline"
+                        >
+                          {t('turnstile.reloadPage')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={retryForgotWidget}
+                          className="mt-2 font-semibold underline"
+                        >
+                          {t('turnstile.tryAgain')}
+                        </button>
+                      )}
+                    </div>
+                  )}
+                  <div>
+                    <TurnstileWidget
+                      key={forgotWidgetKey}
+                      ref={forgotTurnstileRef}
+                      onVerify={setForgotTurnstileToken}
+                      onExpire={resetForgotTurnstile}
+                      onError={resetForgotTurnstile}
+                      onLoadError={() => {
+                        setForgotWidgetLoadFailed(true)
+                        if (forgotWidgetRetried) setForgotWidgetRetryFailed(true)
+                      }}
+                    />
+                    <p className="mt-2 text-xs text-slate-500">
+                      {t('turnstile.verifyPrompt')}
+                    </p>
+                  </div>
                   <SubmitButton
                     id="auth-forgot-submit"
                     loading={forgotLoading}
                     loadingText={t('auth.sending')}
+                    disabled={!forgotTurnstileToken}
                     className="auth-btn-primary inline-flex items-center justify-center"
                   >
                     {t('auth.sendResetLink')}
@@ -810,12 +915,46 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                     </div>
                   )}
 
+                  {registrationWidgetLoadFailed && (
+                    <div role="alert" className="p-3 bg-amber-50 border border-amber-200 text-xs text-amber-800 rounded">
+                      <p>
+                        {t(registrationWidgetRetryFailed ? 'turnstile.reloadRequired' : 'turnstile.loadFailed')}
+                      </p>
+                      {registrationWidgetRetryFailed ? (
+                        <button
+                          type="button"
+                          onClick={() => window.location.reload()}
+                          className="mt-2 font-semibold underline"
+                        >
+                          {t('turnstile.reloadPage')}
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={retryRegistrationWidget}
+                          className="mt-2 font-semibold underline"
+                        >
+                          {t('turnstile.tryAgain')}
+                        </button>
+                      )}
+                    </div>
+                  )}
                   <div>
                     <TurnstileWidget
+                      key={registrationWidgetKey}
                       ref={registrationTurnstileRef}
-                      onVerify={setRegistrationTurnstileToken}
+                      onVerify={(token) => {
+                        setRegistrationTurnstileToken(token)
+                        setRegistrationWidgetLoadFailed(false)
+                        setRegistrationWidgetRetried(false)
+                        setRegistrationWidgetRetryFailed(false)
+                      }}
                       onExpire={resetRegistrationTurnstile}
                       onError={resetRegistrationTurnstile}
+                      onLoadError={() => {
+                        setRegistrationWidgetLoadFailed(true)
+                        if (registrationWidgetRetried) setRegistrationWidgetRetryFailed(true)
+                      }}
                     />
                     <p className="mt-2 text-xs text-slate-500">
                       {t('turnstile.verifyPrompt')}
