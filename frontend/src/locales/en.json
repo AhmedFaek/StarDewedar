@@ -437,6 +437,11 @@
     "loading": "Loading..."
   },
 
+  "requestForm": {
+    "timingMissing": "This form could not be submitted because its timing information was missing or invalid. Please try again.",
+    "tooFast": "Please keep this form open for at least 2 seconds before submitting."
+  },
+
   "notifications": {
     "genericError": "Something went wrong. Please try again.",
     "networkError": "Network error. Please check your connection and try again.",

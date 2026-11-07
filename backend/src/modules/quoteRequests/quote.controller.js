@@ -6,8 +6,14 @@ import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
 import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
 import { normalizeEmail } from '../../utils/emailValidation.service.js'
+import {
+    PUBLIC_REQUEST_SUCCESS_MESSAGES,
+    respondToPublicRequestHoneypot,
+} from '../../utils/publicRequestProtection.js'
 
 export const createQuote = async (req, res) => {
+    if (respondToPublicRequestHoneypot(req, res, 'QUOTE')) return
+
     try {
         const validatedData = createQuoteRequestSchema.parse(req.body)
         if (req.file) await validateUploadedFile(req.file)
@@ -15,7 +21,7 @@ export const createQuote = async (req, res) => {
         const quote = await service.createQuoteRequest(normalizedData, req.file)
         res.status(201).json({
             success: true,
-            message: 'Quote request created successfully',
+            message: PUBLIC_REQUEST_SUCCESS_MESSAGES.QUOTE,
             data: toPublicRequest(quote),
         })
     } catch (error) {

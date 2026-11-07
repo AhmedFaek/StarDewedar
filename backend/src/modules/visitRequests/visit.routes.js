@@ -10,6 +10,7 @@ import { requestDeletionSchema } from '../attachments/requestDeletion.validation
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { singleFileUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import { validateFormTiming } from '../../middleware/formTiming.middleware.js'
 import {
     validateArchivedQuery,
     validateRequestStatusParam,
@@ -25,10 +26,11 @@ const visitLimiters = createTwoTierIpLimiters(
 )
 
 // Create a new visit request
-// Flow: coarse limiter → Turnstile → strict limiter → bounded multipart parser → controller
+// Flow: coarse limiter → fill-time check → Turnstile → strict limiter → multipart parser
 router.post(
     '/',
     visitLimiters.coarseLimiter,
+    validateFormTiming,
     verifyTurnstile,
     visitLimiters.passedChallengeLimiter,
     singleFileUpload,

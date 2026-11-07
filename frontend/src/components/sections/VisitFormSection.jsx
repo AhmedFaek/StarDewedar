@@ -21,6 +21,7 @@ import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 export default function VisitFormSection({ visible = true }) {
@@ -44,6 +45,8 @@ export default function VisitFormSection({ visible = true }) {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime({ visible })
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const handleChange = (e) => {
@@ -120,10 +123,12 @@ export default function VisitFormSection({ visible = true }) {
       if (file instanceof File) {
         payload.append('file', file)
       }
-      return api.sendVisitRequest(payload, turnstileToken)
+      payload.append('sdc_ref', honeypotRef.current?.value || '')
+      return api.sendVisitRequest(payload, turnstileToken, getElapsedMs())
     },
     successMessage: t('notifications.visitSuccess'),
     onSuccess: () => {
+      resetElapsedTime()
       setFormData({
         factory_name: '',
         factory_activity: '',
@@ -139,7 +144,10 @@ export default function VisitFormSection({ visible = true }) {
       setFileUploadKey((prev) => prev + 1)
       resetTurnstile()
     },
-    onError: () => {
+    onError: (error) => {
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       resetTurnstile()
       return false
     },
@@ -172,6 +180,9 @@ export default function VisitFormSection({ visible = true }) {
       <div className="bg-white p-6 sm:p-8 lg:p-10">
         {unknownOutcome && <UnknownSubmissionOutcome requestType="visit" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
+          <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+            <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+          </div>
           {/* Section 1 — Facility Information */}
           <div>
             <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">

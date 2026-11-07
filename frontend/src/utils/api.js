@@ -129,44 +129,50 @@ export const api = {
   getProjects: () => cachedFetch('projects', () => fetch(`${API_URL}/projects`).then(handleResponse)),
   getProjectById: (id) => cachedFetch(`project:${id}`, () => fetch(`${API_URL}/projects/${id}`).then(handleResponse)),
 
-  sendContactMessage: (data, turnstileToken) => fetch(`${API_URL}/contact`, {
+  sendContactMessage: (data, turnstileToken, elapsedMs) => fetch(`${API_URL}/contact`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-Turnstile-Token': turnstileToken,
+      'X-Form-Elapsed-Ms': String(elapsedMs),
     },
     body: JSON.stringify(data),
   }).then(handleResponse),
 
-  sendQuoteRequest: (data, turnstileToken) => {
+  sendQuoteRequest: (data, turnstileToken, elapsedMs) => {
     const isFormData = data instanceof FormData
     return fetch(`${API_URL}/quotes`, {
       method: 'POST',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
       },
       body: isFormData ? data : JSON.stringify(data),
     }).then(handleResponse)
   },
 
-  sendVisitRequest: (data, turnstileToken) => {
+  sendVisitRequest: (data, turnstileToken, elapsedMs) => {
     const isFormData = data instanceof FormData
     return fetch(`${API_URL}/visits`, {
       method: 'POST',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
         'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
       },
       body: isFormData ? data : JSON.stringify(data),
     }).then(handleResponse)
   },
 
-  sendBOQRequest: (data, turnstileToken) => {
+  sendBOQRequest: (data, turnstileToken, elapsedMs) => {
     // Always FormData (multi-file upload)
     return fetch(`${API_URL}/boq`, {
       method: 'POST',
-      headers: { 'X-Turnstile-Token': turnstileToken },
+      headers: {
+        'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
+      },
       body: data,
     }).then(handleResponse)
   },

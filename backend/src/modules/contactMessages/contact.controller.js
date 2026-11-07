@@ -2,8 +2,14 @@ import * as service from './contact.service.js'
 import { createContactSchema } from './contact.validation.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
+import {
+    PUBLIC_REQUEST_SUCCESS_MESSAGES,
+    respondToPublicRequestHoneypot,
+} from '../../utils/publicRequestProtection.js'
 
 export const createContact = async (req, res) => {
+    if (respondToPublicRequestHoneypot(req, res, 'CONTACT')) return
+
     let validatedData
     try {
         validatedData = createContactSchema.parse(req.body)
@@ -17,7 +23,7 @@ export const createContact = async (req, res) => {
         const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
         const result = await service.createContact(normalizedData)
         res.status(201).json({
-            message: 'Message sent successfully',
+            message: PUBLIC_REQUEST_SUCCESS_MESSAGES.CONTACT,
             data: result,
         })
     } catch (error) {

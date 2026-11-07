@@ -22,6 +22,7 @@ import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateBOQFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 // BOQ-specific file types shown to the user
@@ -56,6 +57,8 @@ export default function BOQFormSection({ visible = true }) {
 
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime({ visible })
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   // ── Fetch logged-in user profile to prefill contact information ────────────
@@ -204,11 +207,13 @@ export default function BOQFormSection({ visible = true }) {
       supportingFiles.forEach((file) => {
         payload.append('supporting_docs', file)
       })
+      payload.append('sdc_ref', honeypotRef.current?.value || '')
 
-      return api.sendBOQRequest(payload, turnstileToken)
+      return api.sendBOQRequest(payload, turnstileToken, getElapsedMs())
     },
     successMessage: t('requestBOQ.successMsg'),
     onSuccess: () => {
+      resetElapsedTime()
       setFormData((prev) => ({
         name: isLoggedIn() ? prev.name : '',
         company_name: isLoggedIn() ? prev.company_name : '',
@@ -229,7 +234,10 @@ export default function BOQFormSection({ visible = true }) {
       setSupportingUploadKey((k) => k + 1)
       resetTurnstile()
     },
-    onError: () => {
+    onError: (error) => {
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       resetTurnstile()
       return false
     },
@@ -268,6 +276,9 @@ export default function BOQFormSection({ visible = true }) {
       <div className="bg-white p-6 sm:p-8 lg:p-10">
         {unknownOutcome && <UnknownSubmissionOutcome requestType="boq" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
+          <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+            <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+          </div>
 
           {/* ─── Section 1: Customer Information ─────────────────────────── */}
           <div>

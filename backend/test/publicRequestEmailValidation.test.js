@@ -8,6 +8,7 @@ import { createQuoteRequestSchema } from '../src/modules/quoteRequests/quote.val
 import { createVisitRequestSchema } from '../src/modules/visitRequests/visit.validation.js'
 import { createBOQRequestSchema } from '../src/modules/boqRequests/boq.validation.js'
 import { createContactSchema } from '../src/modules/contactMessages/contact.validation.js'
+import { PUBLIC_REQUEST_SUCCESS_MESSAGES } from '../src/utils/publicRequestProtection.js'
 
 const state = {
     events: [],
@@ -245,6 +246,70 @@ test('all four request controllers validate email after schema/file validation a
         assert.equal(res.statusCode, 201, testCase.name)
         assert.deepEqual(state.events, testCase.expectedEvents, testCase.name)
         assert.equal(state.serviceCalls[0].data.email, 'alice@example.invalid', testCase.name)
+    }
+})
+
+test('honeypot submissions return matching fake success responses without downstream work', async () => {
+    for (const testCase of createCases) {
+        reset()
+        const realResponse = response()
+        await testCase.controller(testCase.request(), realResponse)
+
+        reset()
+        const logLines = []
+        const originalInfo = console.info
+        console.info = (...values) => logLines.push(values)
+        const fakeRequest = testCase.request()
+        fakeRequest.body = {
+            ...fakeRequest.body,
+            sdc_ref: 'bot-filled-value',
+            email: 'must-not-be-echoed@example.invalid',
+            message: 'must not be echoed',
+        }
+        const fakeResponse = response()
+        try {
+            await testCase.controller(fakeRequest, fakeResponse)
+        } finally {
+            console.info = originalInfo
+        }
+
+        assert.equal(fakeResponse.statusCode, 201, testCase.name)
+        assert.equal(fakeResponse.statusCode, realResponse.statusCode, testCase.name)
+        assert.deepEqual(
+            Object.keys(fakeResponse.body).sort(),
+            Object.keys(realResponse.body).sort(),
+            testCase.name
+        )
+        assert.equal(fakeResponse.body.message, PUBLIC_REQUEST_SUCCESS_MESSAGES[testCase.name.toUpperCase()])
+        assert.equal(fakeResponse.body.message, realResponse.body.message, testCase.name)
+        assert.deepEqual(Object.keys(fakeResponse.body.data), ['id'], testCase.name)
+        assert.match(fakeResponse.body.data.id, /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i)
+        assert.equal(JSON.stringify(fakeResponse.body).includes('must-not-be-echoed'), false, testCase.name)
+        assert.equal(JSON.stringify(fakeResponse.body).includes('must not be echoed'), false, testCase.name)
+        assert.equal(state.events.length, 0, testCase.name)
+        assert.equal(state.serviceCalls.length, 0, testCase.name)
+        assert.deepEqual(logLines, [[testCase.name.toUpperCase()]], testCase.name)
+        if (testCase.name !== 'contact') {
+            assert.equal(fakeRequest.file, undefined, testCase.name)
+            assert.equal(fakeRequest.files, undefined, testCase.name)
+        }
+    }
+})
+
+test('empty or whitespace-only honeypot values continue through normal request handling', async () => {
+    for (const testCase of createCases) {
+        for (const sdcRef of [undefined, '', ' \t ']) {
+            reset()
+            const request = testCase.request()
+            if (sdcRef !== undefined) request.body.sdc_ref = sdcRef
+            const res = response()
+
+            await testCase.controller(request, res)
+
+            assert.equal(res.statusCode, 201, `${testCase.name}:${JSON.stringify(sdcRef)}`)
+            assert.deepEqual(state.events, testCase.expectedEvents, testCase.name)
+            assert.equal(state.serviceCalls.length, 1, testCase.name)
+        }
     }
 })
 

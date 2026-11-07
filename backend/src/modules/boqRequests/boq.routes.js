@@ -10,6 +10,7 @@ import { requestDeletionSchema } from '../attachments/requestDeletion.validation
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { boqUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import { validateFormTiming } from '../../middleware/formTiming.middleware.js'
 import {
     validateArchivedQuery,
     validateRequestStatusParam,
@@ -25,10 +26,11 @@ const boqLimiters = createTwoTierIpLimiters(
 )
 
 // Create a new BOQ request
-// Flow: coarse limiter → Turnstile → strict limiter → bounded multipart parser → controller
+// Flow: coarse limiter → fill-time check → Turnstile → strict limiter → multipart parser
 router.post(
     '/',
     boqLimiters.coarseLimiter,
+    validateFormTiming,
     verifyTurnstile,
     boqLimiters.passedChallengeLimiter,
     boqUpload,

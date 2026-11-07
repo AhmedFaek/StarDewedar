@@ -161,6 +161,14 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
     return messageFor('contact.validation.invalidEmail', { defaultValue: normalized.message })
   }
 
+  if (code === 'FORM_TIMING_MISSING') {
+    return messageFor('requestForm.timingMissing', { defaultValue: normalized.message })
+  }
+
+  if (code === 'FORM_TOO_FAST') {
+    return messageFor('requestForm.tooFast', { defaultValue: normalized.message })
+  }
+
   if (normalized.requiresEmailVerification || message.includes('verify your email address before logging in') || message.includes('verify your email')) {
     return messageFor('auth.verification.unverifiedLoginError')
   }

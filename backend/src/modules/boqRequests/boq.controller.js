@@ -6,8 +6,14 @@ import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
 import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
 import { normalizeEmail } from '../../utils/emailValidation.service.js'
+import {
+    PUBLIC_REQUEST_SUCCESS_MESSAGES,
+    respondToPublicRequestHoneypot,
+} from '../../utils/publicRequestProtection.js'
 
 export const createBOQ = async (req, res) => {
+    if (respondToPublicRequestHoneypot(req, res, 'BOQ')) return
+
     try {
         // req.files is populated by boqUpload.fields([...])
         const boqFiles      = req.files?.['boq_file']
@@ -30,7 +36,7 @@ export const createBOQ = async (req, res) => {
 
         res.status(201).json({
             success: true,
-            message: 'BOQ request created successfully',
+            message: PUBLIC_REQUEST_SUCCESS_MESSAGES.BOQ,
             data: toPublicRequest(boqRequest),
         })
     } catch (error) {

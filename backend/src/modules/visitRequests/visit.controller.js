@@ -6,8 +6,14 @@ import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
 import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
 import { normalizeEmail } from '../../utils/emailValidation.service.js'
+import {
+    PUBLIC_REQUEST_SUCCESS_MESSAGES,
+    respondToPublicRequestHoneypot,
+} from '../../utils/publicRequestProtection.js'
 
 export const createVisit = async (req, res) => {
+    if (respondToPublicRequestHoneypot(req, res, 'VISIT')) return
+
     try {
         const validatedData = createVisitRequestSchema.parse(req.body)
         if (req.file) await validateUploadedFile(req.file)
@@ -15,7 +21,7 @@ export const createVisit = async (req, res) => {
         const visit = await service.createVisitRequest(normalizedData, req.file)
         res.status(201).json({
             success: true,
-            message: 'Visit request created successfully',
+            message: PUBLIC_REQUEST_SUCCESS_MESSAGES.VISIT,
             data: toPublicRequest(visit),
         })
     } catch (error) {
