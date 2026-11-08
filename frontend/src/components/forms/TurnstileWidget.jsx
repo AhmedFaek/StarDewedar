@@ -17,7 +17,7 @@ const LOAD_TIMEOUT_MS = 10_000
  * a successful or failed submission.
  */
 const TurnstileWidget = forwardRef(function TurnstileWidget(
-  { onVerify, onExpire, onError, onLoadError },
+  { onVerify, onExpire, onError, onLoadError, visible = true },
   ref
 ) {
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
@@ -29,7 +29,7 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(
   onLoadErrorRef.current = onLoadError
 
   useEffect(() => {
-    if (!loadErrorEnabled || widgetLoadedRef.current) return undefined
+    if (!loadErrorEnabled || !visible || widgetLoadedRef.current) return undefined
 
     let failed = false
     let script = document.getElementById(scriptId)
@@ -60,7 +60,7 @@ const TurnstileWidget = forwardRef(function TurnstileWidget(
       window.clearTimeout(loadTimerRef.current)
       script.removeEventListener('error', reportLoadError)
     }
-  }, [loadErrorEnabled, scriptId])
+  }, [loadErrorEnabled, scriptId, visible])
 
   const handleWidgetLoad = () => {
     widgetLoadedRef.current = true

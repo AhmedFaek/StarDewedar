@@ -6,7 +6,7 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
-import TurnstileWidget from '../components/forms/TurnstileWidget'
+import TurnstileRecovery from '../components/forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../components/forms/UnknownSubmissionOutcome'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
@@ -305,7 +305,7 @@ export default function Contact() {
                     <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
                       {t('turnstile.verifyPrompt')}
                     </p>
-                    <TurnstileWidget
+                    <TurnstileRecovery
                       ref={turnstileRef}
                       onVerify={(token) => setTurnstileToken(token)}
                       onExpire={() => setTurnstileToken(null)}

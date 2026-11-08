@@ -15,7 +15,7 @@ import InputField from '../forms/InputField'
 import SelectField from '../forms/SelectField'
 import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
-import TurnstileWidget from '../forms/TurnstileWidget'
+import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
@@ -520,8 +520,9 @@ export default function BOQFormSection({ visible = true }) {
               <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
                 {t('turnstile.verifyPrompt')}
               </p>
-              <TurnstileWidget
+              <TurnstileRecovery
                 ref={turnstileRef}
+                visible={visible}
                 onVerify={(token) => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken(null)}
                 onError={() => setTurnstileToken(null)}
