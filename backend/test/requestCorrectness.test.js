@@ -36,6 +36,7 @@ const [
     { createBOQ },
     visitService,
     quoteService,
+    boqService,
     { uploadRequestAttachment },
 ] = await Promise.all([
     import('../src/config/storage.js'),
@@ -46,6 +47,7 @@ const [
     import('../src/modules/boqRequests/boq.controller.js'),
     import('../src/modules/visitRequests/visit.service.js'),
     import('../src/modules/quoteRequests/quote.service.js'),
+    import('../src/modules/boqRequests/boq.service.js'),
     import('../src/utils/requestAttachmentUpload.js'),
 ])
 
@@ -328,12 +330,14 @@ test('Visit and Quote services whitelist create data even when called with untru
         ...requestBodies.VISIT,
         file_url: 'https://attacker.example.invalid/visit.pdf',
         untrusted_field: 'not persisted',
+        user_id: 'customer-id',
     }, null)
     await quoteService.createQuoteRequest({
         ...requestBodies.QUOTE,
         file_url: 'https://attacker.example.invalid/quote.pdf',
         custom_image_url: 'https://attacker.example.invalid/product.png',
         untrusted_field: 'not persisted',
+        user_id: 'customer-id',
     }, null)
 
     assert.equal(Object.hasOwn(captured.visit, 'file_url'), false)
@@ -343,8 +347,37 @@ test('Visit and Quote services whitelist create data even when called with untru
     assert.equal(Object.hasOwn(captured.quote, 'untrusted_field'), false)
     assert.equal(captured.visit.name, requestBodies.VISIT.name)
     assert.equal(captured.quote.custom_product_name, requestBodies.QUOTE.custom_product_name)
+    assert.equal(captured.visit.user_id, 'customer-id')
+    assert.equal(captured.quote.user_id, 'customer-id')
     assert.equal(captured.quote.product_name_en_snapshot, null)
     assert.equal(captured.quote.product_name_ar_snapshot, null)
+})
+
+test('BOQ service persists customer ownership', async (t) => {
+    mockNotificationPersistence(t)
+    let captured
+    replaceMethod(t, prisma.bOQRequest, 'create', async ({ data }) => {
+        captured = data
+        return { id: 'boq-owned-request', ...data }
+    })
+    t.mock.method(cloudinary.uploader, 'upload_stream', (options, callback) => ({
+        end() {
+            callback(null, {
+                public_id: 'boq/owned-request',
+                resource_type: options.resource_type,
+                type: options.type,
+                secure_url: 'https://res.cloudinary.com/test/private/boq.pdf',
+            })
+        },
+    }))
+    t.mock.method(transporter, 'sendMail', async () => ({ messageId: 'test-message' }))
+
+    await boqService.createBOQRequest({
+        ...requestBodies.BOQ,
+        user_id: 'customer-id',
+    }, [attachment], [])
+
+    assert.equal(captured.user_id, 'customer-id')
 })
 
 test('catalog Quote snapshots come from the database Product lookup', async (t) => {

@@ -18,7 +18,10 @@ export const createQuote = async (req, res) => {
         const validatedData = createQuoteRequestSchema.parse(req.body)
         if (req.file) await validateUploadedFile(req.file)
         const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
-        const quote = await service.createQuoteRequest(normalizedData, req.file)
+        const requestData = req.user?.role === 'customer'
+            ? { ...normalizedData, user_id: req.user.userId }
+            : normalizedData
+        const quote = await service.createQuoteRequest(requestData, req.file)
         res.status(201).json({
             success: true,
             message: PUBLIC_REQUEST_SUCCESS_MESSAGES.QUOTE,

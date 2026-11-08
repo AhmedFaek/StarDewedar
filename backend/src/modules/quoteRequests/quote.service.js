@@ -15,6 +15,7 @@ export const createQuoteRequest = async (data, file) => {
         details: data.details,
         status: 'pending',
         product_id: data.product_id || null,
+        ...(data.user_id ? { user_id: data.user_id } : {}),
     }
 
     // Uploads happen before the request insert; nested Prisma creation persists both atomically.

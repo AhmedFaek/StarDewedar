@@ -43,7 +43,7 @@ const attachment = (overrides = {}) => ({
     delivery_type: 'authenticated',
     status: 'ACTIVE',
     created_at: new Date('2026-01-02T03:04:05.000Z'),
-    quote_request: { email: ' Customer@Example.invalid ' },
+    quote_request: { user_id: 'customer-id' },
     visit_request: null,
     boq_request: null,
     ...overrides,
@@ -84,9 +84,10 @@ test('admin roles with requests:manage can create short-lived signed downloads',
     }
 })
 
-test('verified customers can access only active attachments owned by normalized request email', async (t) => {
+test('verified customers can access only active attachments owned by user_id', async (t) => {
     let record = attachment()
     replaceMethod(t, prisma.user, 'findUnique', async () => ({
+        id: 'customer-id',
         email: 'customer@example.invalid',
         email_verified: true,
     }))
@@ -115,6 +116,7 @@ test('verified customers can access only active attachments owned by normalized 
 
 test('unverified customers and users without request permission are denied', async (t) => {
     replaceMethod(t, prisma.user, 'findUnique', async () => ({
+        id: 'customer-id',
         email: 'customer@example.invalid',
         email_verified: false,
     }))
@@ -137,16 +139,24 @@ test('unverified customers and users without request permission are denied', asy
     }
 })
 
-test('verified customers cannot use another customer email to retrieve an attachment', async (t) => {
+test('verified customers cannot access another customer or legacy unowned attachments', async (t) => {
     replaceMethod(t, prisma.user, 'findUnique', async () => ({
+        id: 'customer-id',
         email: 'other@example.invalid',
         email_verified: true,
     }))
-    replaceMethod(t, prisma.attachment, 'findUnique', async () => attachment())
+    let record = attachment({ quote_request: { user_id: 'different-customer-id' } })
+    replaceMethod(t, prisma.attachment, 'findUnique', async () => record)
 
     assert.equal(await attachmentService.getAttachmentMetadata(
         attachment().id,
-        { userId: 'other-customer-id', role: 'customer' }
+        { userId: 'customer-id', role: 'customer' }
+    ), null)
+
+    record = attachment({ quote_request: { user_id: null } })
+    assert.equal(await attachmentService.getAttachmentMetadata(
+        attachment().id,
+        { userId: 'customer-id', role: 'customer' }
     ), null)
 })
 
@@ -234,6 +244,7 @@ test('request DTOs omit legacy Cloudinary URLs and expose safe attachment metada
         boq_file_url: 'https://res.cloudinary.com/private-boq',
         supporting_docs_urls: '["https://res.cloudinary.com/private-support"]',
         assets: { legacy_url: 'https://res.cloudinary.com/legacy' },
+        user_id: 'customer-id',
         notification_lease_token: 'lease-secret',
         attachments: [{
             id: 'attachment-id',
@@ -248,7 +259,12 @@ test('request DTOs omit legacy Cloudinary URLs and expose safe attachment metada
         }],
     }
 
-    for (const dto of [toPublicRequest(request), toAdminRequest(request)]) {
+    const publicRequest = toPublicRequest(request)
+    const adminRequest = toAdminRequest(request)
+
+    assert.equal(Object.hasOwn(publicRequest, 'user_id'), false)
+    assert.equal(Object.hasOwn(adminRequest, 'user_id'), false)
+    for (const dto of [publicRequest, adminRequest]) {
         assert.equal(Object.hasOwn(dto, 'file_url'), false)
         assert.equal(Object.hasOwn(dto, 'boq_file_url'), false)
         assert.equal(Object.hasOwn(dto, 'supporting_docs_urls'), false)

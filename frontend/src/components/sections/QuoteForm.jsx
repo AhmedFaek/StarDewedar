@@ -172,6 +172,9 @@ export default function QuoteForm({ productId = null, visible = true }) {
       resetTurnstile()
     },
     onError: (error) => {
+      if ((error?.code || error?.data?.code) === 'OPTIONAL_AUTH_INVALID') {
+        return true
+      }
       if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
         return false
       }

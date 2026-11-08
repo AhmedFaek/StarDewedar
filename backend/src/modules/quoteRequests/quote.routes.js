@@ -1,6 +1,6 @@
 import express from 'express'
 import * as controller from './quote.controller.js'
-import auth from '../../middleware/auth.middleware.js'
+import auth, { optionalAuth } from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateQuoteRequestSchema } from './quote.validation.js'
@@ -30,6 +30,7 @@ const quoteLimiters = createTwoTierIpLimiters(
 router.post(
     '/',
     quoteLimiters.coarseLimiter,
+    optionalAuth,
     validateFormTiming,
     verifyTurnstile,
     quoteLimiters.passedChallengeLimiter,

@@ -1,6 +1,6 @@
 import express from 'express'
 import * as controller from './visit.controller.js'
-import auth from '../../middleware/auth.middleware.js'
+import auth, { optionalAuth } from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
@@ -30,6 +30,7 @@ const visitLimiters = createTwoTierIpLimiters(
 router.post(
     '/',
     visitLimiters.coarseLimiter,
+    optionalAuth,
     validateFormTiming,
     verifyTurnstile,
     visitLimiters.passedChallengeLimiter,

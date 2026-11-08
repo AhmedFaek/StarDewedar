@@ -50,6 +50,13 @@ export const findByEmail = (email, archived) =>
         orderBy: { created_at: 'desc' },
     })
 
+export const findByUserId = (userId) =>
+    prisma.bOQRequest.findMany({
+        where: { user_id: userId },
+        include: requestReadRelations,
+        orderBy: { created_at: 'desc' },
+    })
+
 export const findByStatus = (status, archived = false) =>
     prisma.bOQRequest.findMany({
         where: { status: { in: [status, status.toUpperCase()] }, ...archivedWhere(archived) },

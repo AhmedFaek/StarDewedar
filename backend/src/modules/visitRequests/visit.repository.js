@@ -56,6 +56,14 @@ export const findByEmail = (email, archived) => {
     })
 }
 
+export const findByUserId = (userId) => {
+    return prisma.visitRequest.findMany({
+        where: { user_id: userId },
+        include: requestReadRelations,
+        orderBy: { created_at: 'desc' },
+    })
+}
+
 export const update = (id, data) => {
     return prisma.visitRequest.update({
         where: { id },

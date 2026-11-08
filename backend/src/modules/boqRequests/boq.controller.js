@@ -32,7 +32,10 @@ export const createBOQ = async (req, res) => {
             await validateUploadedFile(file, { boq: true })
         }
         const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
-        const boqRequest = await service.createBOQRequest(normalizedData, boqFiles, supportingFiles || [])
+        const requestData = req.user?.role === 'customer'
+            ? { ...normalizedData, user_id: req.user.userId }
+            : normalizedData
+        const boqRequest = await service.createBOQRequest(requestData, boqFiles, supportingFiles || [])
 
         res.status(201).json({
             success: true,

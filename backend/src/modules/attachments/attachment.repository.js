@@ -16,8 +16,8 @@ export const findById = (id) =>
             delivery_type: true,
             status: true,
             created_at: true,
-            quote_request: { select: { email: true } },
-            visit_request: { select: { email: true } },
-            boq_request: { select: { email: true } },
+            quote_request: { select: { user_id: true } },
+            visit_request: { select: { user_id: true } },
+            boq_request: { select: { user_id: true } },
         },
     })

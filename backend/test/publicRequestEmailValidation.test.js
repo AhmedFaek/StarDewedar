@@ -249,6 +249,32 @@ test('all four request controllers validate email after schema/file validation a
     }
 })
 
+test('Quote, Visit, and BOQ creation link only customer-authenticated requests and hide user_id in responses', async () => {
+    for (const testCase of createCases.filter(({ name }) => name !== 'contact')) {
+        for (const user of [
+            { userId: 'customer-id', role: 'customer', name: 'Customer' },
+            { userId: 'staff-id', role: 'sales_support_manager', name: 'Staff' },
+            undefined,
+        ]) {
+            reset()
+            const request = testCase.request()
+            if (user) request.user = user
+            const res = response()
+
+            await testCase.controller(request, res)
+
+            assert.equal(res.statusCode, 201, `${testCase.name}:${user?.role || 'guest'}`)
+            const serviceData = state.serviceCalls[0].data
+            if (user?.role === 'customer') {
+                assert.equal(serviceData.user_id, 'customer-id', testCase.name)
+            } else {
+                assert.equal(Object.hasOwn(serviceData, 'user_id'), false, testCase.name)
+            }
+            assert.equal(Object.hasOwn(res.body.data, 'user_id'), false, testCase.name)
+        }
+    }
+})
+
 test('honeypot submissions return matching fake success responses without downstream work', async () => {
     for (const testCase of createCases) {
         reset()

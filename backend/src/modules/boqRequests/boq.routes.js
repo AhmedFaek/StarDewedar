@@ -1,6 +1,6 @@
 import express from 'express'
 import * as controller from './boq.controller.js'
-import auth from '../../middleware/auth.middleware.js'
+import auth, { optionalAuth } from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateBOQRequestSchema } from './boq.validation.js'
@@ -30,6 +30,7 @@ const boqLimiters = createTwoTierIpLimiters(
 router.post(
     '/',
     boqLimiters.coarseLimiter,
+    optionalAuth,
     validateFormTiming,
     verifyTurnstile,
     boqLimiters.passedChallengeLimiter,

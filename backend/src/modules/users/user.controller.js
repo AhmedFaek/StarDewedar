@@ -159,14 +159,12 @@ export const checkSaved = async (req, res, next) => {
 }
 /**
  * GET /api/users/me/quotes
- * Returns all quote requests submitted by the authenticated user's email.
+ * Returns quote requests linked to the authenticated user account.
  */
 export const getMyQuotes = async (req, res, next) => {
     try {
         const { userId } = req.user
-        const user = await userRepo.findUserById(userId)
-        if (!user) return res.status(404).json({ message: 'User not found.' })
-        const quotes = await quoteRepo.findByEmail(user.email)
+        const quotes = await quoteRepo.findByUserId(userId)
         res.json(quotes.map(toPublicRequest))
     } catch (err) {
         next(err)
@@ -175,14 +173,12 @@ export const getMyQuotes = async (req, res, next) => {
 
 /**
  * GET /api/users/me/visits
- * Returns all visit requests submitted by the authenticated user's email.
+ * Returns visit requests linked to the authenticated user account.
  */
 export const getMyVisits = async (req, res, next) => {
     try {
         const { userId } = req.user
-        const user = await userRepo.findUserById(userId)
-        if (!user) return res.status(404).json({ message: 'User not found.' })
-        const visits = await visitRepo.findByEmail(user.email)
+        const visits = await visitRepo.findByUserId(userId)
         res.json(visits.map(toPublicRequest))
     } catch (err) {
         next(err)
@@ -191,14 +187,12 @@ export const getMyVisits = async (req, res, next) => {
 
 /**
  * GET /api/users/me/boq
- * Returns all BOQ requests submitted by the authenticated user's email.
+ * Returns BOQ requests linked to the authenticated user account.
  */
 export const getMyBOQs = async (req, res, next) => {
     try {
         const { userId } = req.user
-        const user = await userRepo.findUserById(userId)
-        if (!user) return res.status(404).json({ message: 'User not found.' })
-        const boqs = await boqRepo.findByEmail(user.email)
+        const boqs = await boqRepo.findByUserId(userId)
         res.json(boqs.map(toPublicRequest))
     } catch (err) {
         next(err)

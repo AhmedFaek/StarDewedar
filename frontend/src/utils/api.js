@@ -106,6 +106,33 @@ const authFetch = async (url, options = {}) => {
   return handleResponse(res)
 }
 
+const optionalAuthFetch = async (url, options = {}) => {
+  const makeRequest = (token) => {
+    const headers = { ...options.headers }
+    delete headers.Authorization
+    delete headers.authorization
+    if (token) headers.Authorization = `Bearer ${token}`
+    return fetch(url, { ...options, headers })
+  }
+
+  const token = await getValidAccessToken()
+  let response = await makeRequest(token)
+  if (response.status === 401) {
+    const errorBody = await readResponseBody(response.clone())
+    if (errorBody?.code === 'OPTIONAL_AUTH_INVALID') {
+      const refreshedToken = await refreshAccessToken()
+      if (refreshedToken) {
+        response = await makeRequest(refreshedToken)
+      } else {
+        clearAuth()
+        response = await makeRequest(null)
+      }
+    }
+  }
+
+  return handleResponse(response)
+}
+
 const triggerAttachmentDownload = (blob, filename) => {
   const safeFilename = String(filename || 'attachment')
     .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
@@ -141,7 +168,7 @@ export const api = {
 
   sendQuoteRequest: (data, turnstileToken, elapsedMs) => {
     const isFormData = data instanceof FormData
-    return fetch(`${API_URL}/quotes`, {
+    return optionalAuthFetch(`${API_URL}/quotes`, {
       method: 'POST',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -154,7 +181,7 @@ export const api = {
 
   sendVisitRequest: (data, turnstileToken, elapsedMs) => {
     const isFormData = data instanceof FormData
-    return fetch(`${API_URL}/visits`, {
+    return optionalAuthFetch(`${API_URL}/visits`, {
       method: 'POST',
       headers: {
         ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
@@ -167,7 +194,7 @@ export const api = {
 
   sendBOQRequest: (data, turnstileToken, elapsedMs) => {
     // Always FormData (multi-file upload)
-    return fetch(`${API_URL}/boq`, {
+    return optionalAuthFetch(`${API_URL}/boq`, {
       method: 'POST',
       headers: {
         'X-Turnstile-Token': turnstileToken,

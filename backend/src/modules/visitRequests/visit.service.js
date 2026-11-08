@@ -16,6 +16,7 @@ export const createVisitRequest = async (data, file) => {
         status: 'pending',
         preferred_date: new Date(data.preferred_date),
         details: data.details,
+        ...(data.user_id ? { user_id: data.user_id } : {}),
     };
 
     // Uploads happen before the request insert; nested Prisma creation persists both atomically.
