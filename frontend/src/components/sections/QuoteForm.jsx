@@ -6,6 +6,7 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import SubmitButton from '../forms/SubmitButton'
+import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import { api } from '../../utils/api'
@@ -95,6 +96,11 @@ export default function QuoteForm({ productId = null, visible = true }) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -236,7 +242,10 @@ export default function QuoteForm({ productId = null, visible = true }) {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <InputField label={t('requestQuote.phone')} name="phone" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone} onChange={handlePhoneChange} required error={errors.phone} variant="bordered" />
-            <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
+            <div>
+              <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
+              <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+            </div>
           </div>
           <SelectField label={t('requestQuote.selectProduct')} name="product_id" value={formData.product_id} onChange={handleInputChange} options={productOptions} placeholder={t('requestQuote.selectPlaceholder')} />
           {formData.product_id === 'custom' && (

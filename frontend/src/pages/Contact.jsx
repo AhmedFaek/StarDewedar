@@ -6,6 +6,7 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
+import EmailSuggestion from '../components/forms/EmailSuggestion'
 import TurnstileRecovery from '../components/forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../components/forms/UnknownSubmissionOutcome'
 import { api } from '../utils/api'
@@ -89,6 +90,11 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }))
     // Clear error for this field on change
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -252,7 +258,10 @@ export default function Contact() {
                     <InputField label={t('contact.lastName')} name="last_name" placeholder="KHALED" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                    <div>
+                      <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                      <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+                    </div>
                     <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone_number} onChange={handlePhoneChange} required error={errors.phone_number} />
                   </div>
                   <InputField

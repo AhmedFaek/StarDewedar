@@ -15,6 +15,7 @@ import InputField from '../forms/InputField'
 import SelectField from '../forms/SelectField'
 import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
+import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
@@ -107,6 +108,11 @@ export default function BOQFormSection({ visible = true }) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -312,16 +318,19 @@ export default function BOQFormSection({ visible = true }) {
                 error={errors.company_name}
                 variant="bordered"
               />
-              <InputField
-                label={t('requestBOQ.emailAddress')}
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                error={errors.email}
-                variant="bordered"
-              />
+              <div>
+                <InputField
+                  label={t('requestBOQ.emailAddress')}
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  error={errors.email}
+                  variant="bordered"
+                />
+                <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+              </div>
               <InputField
                 label={t('requestBOQ.phoneNumber')}
                 type="tel"

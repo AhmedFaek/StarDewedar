@@ -192,10 +192,10 @@ test('fails closed when the secret is not configured', async (t) => {
 test('request routes verify before Multer and contact remains header-compatible', async () => {
     const routeFiles = [
         ['auth/auth.routes.js', /router\.post\(\s*'\/register',\s*registerLimiters\.coarseLimiter,\s*verifyTurnstile,\s*registerLimiters\.passedChallengeLimiter,\s*validate\(registerSchema\),\s*controller\.register\s*\)/],
-        ['visitRequests/visit.routes.js', /router\.post\('\/', visitLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createVisit\)/],
-        ['quoteRequests/quote.routes.js', /router\.post\('\/', quoteLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createQuote\)/],
-        ['boqRequests/boq.routes.js', /router\.post\('\/', boqLimiter,\s*verifyTurnstile,\s*boqUpload,\s*controller\.createBOQ\)/],
-        ['contactMessages/contact.routes.js', /router\.post\('\/', contactLimiter,\s*verifyTurnstile,\s*validate\(createContactSchema\),\s*controller\.createContact\)/],
+        ['visitRequests/visit.routes.js', /router\.post\(\s*'\/',\s*visitLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*visitLimiters\.passedChallengeLimiter,\s*singleFileUpload,\s*controller\.createVisit\s*\)/],
+        ['quoteRequests/quote.routes.js', /router\.post\(\s*'\/',\s*quoteLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*quoteLimiters\.passedChallengeLimiter,\s*singleFileUpload,\s*controller\.createQuote\s*\)/],
+        ['boqRequests/boq.routes.js', /router\.post\(\s*'\/',\s*boqLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*boqLimiters\.passedChallengeLimiter,\s*boqUpload,\s*controller\.createBOQ\s*\)/],
+        ['contactMessages/contact.routes.js', /router\.post\(\s*'\/',\s*contactLimiters\.coarseLimiter,\s*validateFormTiming,\s*verifyTurnstile,\s*contactLimiters\.passedChallengeLimiter,\s*controller\.createContact\s*\)/],
     ]
 
     for (const [file, routePattern] of routeFiles) {

@@ -14,6 +14,7 @@ import InputField from '../forms/InputField'
 import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SubmitButton from '../forms/SubmitButton'
+import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
@@ -52,6 +53,11 @@ export default function VisitFormSection({ visible = true }) {
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -263,16 +269,19 @@ export default function VisitFormSection({ visible = true }) {
                 error={errors.whatsapp_number}
                 variant="bordered"
               />
-              <InputField
-                label={t('requestVisit.emailAddress')}
-                type="email"
-                placeholder="name@company.com"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                variant="bordered"
-              />
+              <div>
+                <InputField
+                  label={t('requestVisit.emailAddress')}
+                  type="email"
+                  placeholder="name@company.com"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  variant="bordered"
+                />
+                <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+              </div>
             </div>
           </div>
 
