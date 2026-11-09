@@ -422,6 +422,9 @@ model Conversation {
   last_message_at          DateTime?
   last_message_sender_type String? // "CUSTOMER" | "ADMIN" | "SYSTEM"
 
+  // Timestamp of the newest ADMIN message the customer has actually been served
+  customer_last_seen_at DateTime?
+
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 

@@ -22,6 +22,15 @@ export const getMyConversations = async (req, res, next) => {
     }
 }
 
+export const getMyUnseenReplies = async (req, res, next) => {
+    try {
+        const data = await service.getMyUnseenReplies(req.user.userId)
+        res.json({ success: true, data })
+    } catch (err) {
+        next(err)
+    }
+}
+
 export const getMyConversationById = async (req, res, next) => {
     try {
         const conversation = await service.getMyConversationById(req.user.userId, req.params.id)

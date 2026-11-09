@@ -49,6 +49,7 @@ export const findByIdForCustomer = (id, customerId) =>
             status: true,
             last_message_at: true,
             last_message_sender_type: true,
+            customer_last_seen_at: true,
             created_at: true,
             updated_at: true,
         },
@@ -60,11 +61,11 @@ export const updateStatus = (id, status) =>
         data: { status, updated_at: new Date() },
     })
 
-export const updateLastMessage = (id, senderType) =>
+export const updateLastMessage = (id, senderType, messageAt = new Date()) =>
     prisma.conversation.update({
         where: { id },
         data: {
-            last_message_at: new Date(),
+            last_message_at: messageAt,
             last_message_sender_type: senderType,
             updated_at: new Date(),
         },
@@ -81,6 +82,39 @@ export const updateStatusAndLastMessage = (id, status, senderType) =>
         },
     })
 
+/* --- Customer seen-tracking for admin replies ----------------------------- */
+
+// OPEN conversations whose last message is from ADMIN. Whether each is actually
+// unseen is decided in the service (Prisma cannot compare two columns).
+export const findAdminLastOpenByCustomer = (customerId) =>
+    prisma.conversation.findMany({
+        where: {
+            customer_id: customerId,
+            status: 'OPEN',
+            last_message_sender_type: 'ADMIN',
+            last_message_at: { not: null },
+        },
+        orderBy: { last_message_at: 'desc' },
+        select: {
+            id: true,
+            subject: true,
+            last_message_at: true,
+            customer_last_seen_at: true,
+        },
+    })
+
+// Advance the seen boundary monotonically; never moves it backwards.
+export const markCustomerSeen = (id, seenAt) =>
+    prisma.conversation.updateMany({
+        where: {
+            id,
+            OR: [
+                { customer_last_seen_at: null },
+                { customer_last_seen_at: { lt: seenAt } },
+            ],
+        },
+        data: { customer_last_seen_at: seenAt },
+    })
 /* ─── Admin-only conversation repo ───────────────────────────────────────── */
 
 export const findAll = ({ take, skip, status, lastSender, search }) => {

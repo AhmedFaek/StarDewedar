@@ -2,6 +2,7 @@ import * as repo from './conversation.repository.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 
 const MSG_LIMIT = 30 // messages per page
+const UNSEEN_REPLIES_LIMIT = 10
 
 /* ─── Customer: Conversations ─────────────────────────────────────────────── */
 
@@ -59,10 +60,27 @@ export const getMyMessages = async (customerId, conversationId, query) => {
 
     const page = await _getMessagePage(conversationId, query)
 
+    // Mark the newest ADMIN message actually included in this response as seen.
+    // The boundary is that message's own timestamp (never the current time), so an
+    // admin reply that arrives after this read stays unseen.
+    await _markReturnedAdminReplySeen(conversation, page.messages)
+
+    const { customer_last_seen_at: _seenAt, ...publicConversation } = conversation
+
     return {
         ...page,
-        conversation,
+        conversation: publicConversation,
     }
+}
+
+export const getMyUnseenReplies = async (customerId) => {
+    const candidates = await repo.findAdminLastOpenByCustomer(customerId)
+    return candidates
+        .filter((c) => c.last_message_at && (
+            !c.customer_last_seen_at || c.last_message_at > c.customer_last_seen_at
+        ))
+        .slice(0, UNSEEN_REPLIES_LIMIT)
+        .map(({ id, subject, last_message_at }) => ({ id, subject, last_message_at }))
 }
 
 export const sendMessage = async (customerId, conversationId, data) => {
@@ -229,7 +247,9 @@ export const adminSendMessage = async (adminId, conversationId, data) => {
         productId || null
     )
 
-    await repo.updateLastMessage(conversationId, 'ADMIN')
+    // Keep last_message_at identical to the message timestamp so the customer's
+    // seen boundary (a message timestamp) compares exactly against it.
+    await repo.updateLastMessage(conversationId, 'ADMIN', message.created_at)
 
     return message
 }
@@ -265,6 +285,23 @@ export const adminReopenConversation = async (conversationId) => {
 }
 
 /* ─── Shared: cursor-based message pagination ─────────────────────────────── */
+
+async function _markReturnedAdminReplySeen(conversation, messages) {
+    // messages are newest-first
+    const latestAdmin = messages?.find((m) => m.sender_type === 'ADMIN')
+    if (!latestAdmin) return
+
+    const seenAt = new Date(latestAdmin.created_at)
+    const current = conversation.customer_last_seen_at
+    if (current && new Date(current).getTime() >= seenAt.getTime()) return
+
+    try {
+        await repo.markCustomerSeen(conversation.id, seenAt)
+    } catch (err) {
+        // Seen-tracking must never break chat retrieval
+        console.error('Failed to mark admin reply as seen:', err)
+    }
+}
 
 async function _getMessagePage(conversationId, query) {
     const limit = Math.min(100, Math.max(1, parseInt(query.limit, 10) || MSG_LIMIT))
