@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken'
 import * as userRepo from '../users/user.repository.js'
 import * as authRepo from './auth.repository.js'
 import { sendEmail } from '../../utils/mailer.js'
+import { createSdcMonogramAttachment } from '../../utils/email.template.js'
 import { resetPasswordEmailTemplate } from '../../utils/resetPasswordEmail.template.js'
 import { verificationEmailTemplate } from '../../utils/verificationEmail.template.js'
 import { validateCustomerEmail, normalizeEmail } from '../../utils/emailValidation.service.js'
@@ -78,6 +79,7 @@ const sendVerificationCodeEmail = async (user, verificationCode, subject) => {
         to: user.email,
         subject,
         html,
+        attachments: [createSdcMonogramAttachment()],
     })
 }
 
