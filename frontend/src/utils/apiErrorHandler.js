@@ -109,7 +109,7 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
   const validationErrors = Array.isArray(normalized.validationErrors) ? normalized.validationErrors : []
 
   const messageFor = (key, options = {}) => {
-    if (!translate) return fallbackMessage
+    if (!translate) return options.defaultValue || fallbackMessage
     return translate(key, { defaultValue: fallbackMessage, ...options })
   }
 
@@ -150,11 +150,23 @@ export const getApiErrorMessage = (error, { t, fallbackMessage = DEFAULT_MESSAGE
   }
 
   if (code === 'DISPOSABLE_EMAIL_NOT_ALLOWED' || message.includes('disposable') || message.includes('temporary email')) {
-    return messageFor('auth.verification.disposableEmailError')
+    return messageFor('auth.verification.disposableEmailError', { defaultValue: normalized.message })
   }
 
   if (code === 'INVALID_EMAIL_DOMAIN' || message.includes('email domain')) {
-    return messageFor('auth.verification.invalidDomainError')
+    return messageFor('auth.verification.invalidDomainError', { defaultValue: normalized.message })
+  }
+
+  if (code === 'INVALID_EMAIL_FORMAT') {
+    return messageFor('contact.validation.invalidEmail', { defaultValue: normalized.message })
+  }
+
+  if (code === 'FORM_TIMING_MISSING') {
+    return messageFor('requestForm.timingMissing', { defaultValue: normalized.message })
+  }
+
+  if (code === 'FORM_TOO_FAST') {
+    return messageFor('requestForm.tooFast', { defaultValue: normalized.message })
   }
 
   if (normalized.requiresEmailVerification || message.includes('verify your email address before logging in') || message.includes('verify your email')) {

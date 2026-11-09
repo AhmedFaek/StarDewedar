@@ -6,6 +6,7 @@ import {
 } from '../../utils/email.template.js'
 import { sendEmail } from '../../utils/mailer.js'
 import env from '../../config/env.js'
+import { sanitizeEmailText } from '../../utils/htmlEscaper.js'
 
 export const sendVisitRequestEmail = async (visitRequest, attachmentLinks = []) => {
     const name = visitRequest.name || 'Valued Customer'
@@ -38,7 +39,7 @@ export const sendVisitRequestEmail = async (visitRequest, attachmentLinks = []) 
     })
 
     return sendEmail({
-        subject: `New Visit Request — ${name} — SDC`,
+        subject: `New Visit Request — ${sanitizeEmailText(name, 60)} — SDC`,
         html,
         attachments: [createSdcMonogramAttachment()],
     })
@@ -70,7 +71,7 @@ export const sendQuoteRequestEmail = async (quoteRequest, attachmentLinks = []) 
     })
 
     return sendEmail({
-        subject: `New Quote Request — ${fullName} — SDC`,
+        subject: `New Quote Request — ${sanitizeEmailText(fullName, 60)} — SDC`,
         html,
         attachments: [createSdcMonogramAttachment()],
     })
@@ -104,7 +105,9 @@ export const sendBOQRequestEmail = async (boqRequest, attachmentLinks = []) => {
         logoCid: SDC_MONOGRAM_CID,
         adminUrl,
     })
-    const subjectCompanyPart = company ? `${company} (${name})` : name
+    const subjectCompanyPart = company
+        ? `${sanitizeEmailText(company, 60)} (${sanitizeEmailText(name, 60)})`
+        : sanitizeEmailText(name, 60)
 
     return sendEmail({
         subject: `New BOQ Request — ${subjectCompanyPart} — SDC`,

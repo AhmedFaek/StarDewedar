@@ -1,9 +1,29 @@
-import { createRequire } from 'module';
-import dns from 'dns';
+import { createRequire } from 'module'
+import dns from 'dns'
+import net from 'net'
 
-const require = createRequire(import.meta.url);
+const require = createRequire(import.meta.url)
+const CACHE_MAX_DOMAINS = 1000
+const CACHE_TTL_MS = 10 * 60 * 1000
+const DEFAULT_TIMEOUT_MS = 3500
+const SUMMARY_LOG_INTERVAL_MS = 60 * 1000
+const NO_RECORD_CODES = new Set(['ENODATA', 'ENOTFOUND', 'NXDOMAIN'])
+const DOMAIN_NOT_FOUND_CODES = new Set(['ENOTFOUND', 'NXDOMAIN', 'EBADNAME'])
+const INVALID_DOMAIN_MESSAGE = 'The email domain does not appear to exist or cannot receive emails. Please check your email address.'
+const INVALID_EMAIL_FORMAT_MESSAGE = 'Invalid email format.'
+const LOCAL_PART_PATTERN = /^[A-Za-z0-9!#$%&'*+/=?^_`{|}~.-]+$/
 
-// Supplemental list of common disposable/temporary email domains
+const isValidDomainSyntax = (domain) => (
+  typeof domain === 'string' &&
+  domain.length <= 253 &&
+  domain.includes('.') &&
+  domain.split('.').every((label) => (
+    label.length >= 1 &&
+    label.length <= 63 &&
+    /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/i.test(label)
+  ))
+)
+
 const SUPPLEMENTAL_DISPOSABLE_DOMAINS = [
   'tempmail.com',
   'temp-mail.com',
@@ -18,193 +38,311 @@ const SUPPLEMENTAL_DISPOSABLE_DOMAINS = [
   '10mail.org',
   'getairmail.com',
   'mytemp.email',
-];
+]
 
-// Initialize disposable domains set in memory for O(1) lookup
-let disposableDomainsSet;
+let disposableDomainsSet
 try {
-  const domainsList = require('disposable-email-domains');
+  const domainsList = require('disposable-email-domains')
   disposableDomainsSet = new Set([
-    ...domainsList.map((d) => d.toLowerCase().trim()),
-    ...SUPPLEMENTAL_DISPOSABLE_DOMAINS.map((d) => d.toLowerCase().trim()),
-  ]);
-} catch (err) {
-  console.error('[emailValidation] Failed to load disposable-email-domains package:', err.message);
-  disposableDomainsSet = new Set(SUPPLEMENTAL_DISPOSABLE_DOMAINS);
+    ...domainsList.map((domain) => domain.toLowerCase().trim()),
+    ...SUPPLEMENTAL_DISPOSABLE_DOMAINS.map((domain) => domain.toLowerCase().trim()),
+  ])
+} catch (error) {
+  console.error('[emailValidation] Failed to load disposable-email-domains package:', error.message)
+  disposableDomainsSet = new Set(SUPPLEMENTAL_DISPOSABLE_DOMAINS)
 }
 
-/**
- * Configure DNS resolver with reliable fallback nameservers
- */
-const resolver = new dns.promises.Resolver();
-try {
-  // Use public DNS resolvers (Google & Cloudflare) to ensure consistent behavior across environments
-  resolver.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-} catch (err) {
-  console.warn('[emailValidation] Could not set custom DNS servers, using system default:', err.message);
-}
+export const createDnsResolver = ({
+  servers = process.env.EMAIL_DNS_SERVERS,
+  resolverFactory = () => new dns.promises.Resolver(),
+  logger = console,
+} = {}) => {
+  const resolver = resolverFactory()
+  const configuredServers = typeof servers === 'string'
+    ? servers.split(',').map((server) => server.trim()).filter(Boolean)
+    : []
+  const validServers = configuredServers.filter((server) => net.isIP(server) !== 0)
 
-/**
- * Normalize an email address (lowercase and trim whitespace)
- * @param {string} email
- * @returns {string}
- */
-export const normalizeEmail = (email) => {
-  if (!email || typeof email !== 'string') return '';
-  return email.trim().toLowerCase();
-};
-
-/**
- * Extract domain from email address
- * @param {string} email
- * @returns {string}
- */
-export const getEmailDomain = (email) => {
-  const normalized = normalizeEmail(email);
-  const parts = normalized.split('@');
-  return parts.length === 2 ? parts[1] : '';
-};
-
-/**
- * Check if domain or any of its parent domains is in the disposable list
- * @param {string} emailOrDomain
- * @returns {boolean}
- */
-export const isDisposableEmail = (emailOrDomain) => {
-  if (!emailOrDomain) return false;
-  let domain = emailOrDomain.includes('@') ? getEmailDomain(emailOrDomain) : emailOrDomain.toLowerCase().trim();
-  if (!domain) return false;
-
-  // Direct check
-  if (disposableDomainsSet.has(domain)) return true;
-
-  // Check subdomains (e.g. mail.tempmail.com -> tempmail.com)
-  const parts = domain.split('.');
-  while (parts.length > 2) {
-    parts.shift();
-    const parentDomain = parts.join('.');
-    if (disposableDomainsSet.has(parentDomain)) {
-      return true;
-    }
+  if (configuredServers.length !== validServers.length) {
+    logger.warn('[emailValidation] Ignoring invalid EMAIL_DNS_SERVERS entries', {
+      event: 'email_dns_servers_invalid',
+      invalidCount: configuredServers.length - validServers.length,
+    })
   }
 
-  return false;
-};
-
-/**
- * Perform DNS MX check for domain with timeout and fallback to A record
- * @param {string} domain
- * @param {number} timeoutMs
- * @returns {Promise<{ valid: boolean, reason?: string, warning?: string }>}
- */
-export const checkEmailDomainMX = async (domain, timeoutMs = 3500) => {
-  if (!domain) {
-    return { valid: false, reason: 'EMPTY_DOMAIN' };
-  }
-
-  let timerId;
-  const timeoutPromise = new Promise((resolve) => {
-    timerId = setTimeout(() => {
-      console.warn(`[emailValidation] DNS lookup timed out for domain: ${domain}`);
-      resolve({ valid: true, warning: 'DNS_TIMEOUT_SKIPPED' });
-    }, timeoutMs);
-  });
-
-  const lookupPromise = (async () => {
+  if (validServers.length > 0) {
     try {
-      const mxRecords = await resolver.resolveMx(domain);
-      if (mxRecords && mxRecords.length > 0) {
-        return { valid: true };
-      }
-    } catch (err) {
-      // If domain is confirmed not to exist (NXDOMAIN / ENOTFOUND)
-      if (err.code === 'ENOTFOUND' || err.code === 'NXDOMAIN') {
-        return { valid: false, reason: 'DOMAIN_NOT_FOUND' };
-      }
+      resolver.setServers(validServers)
+    } catch {
+      logger.warn('[emailValidation] Could not set EMAIL_DNS_SERVERS; using system resolver', {
+        event: 'email_dns_servers_unavailable',
+      })
+    }
+  }
 
-      // If MX query returned NODATA or similar, check A record fallback (RFC 5321)
-      if (err.code === 'ENODATA' || err.code === 'SERVFAIL') {
-        try {
-          const aRecords = await resolver.resolve4(domain);
-          if (aRecords && aRecords.length > 0) {
-            return { valid: true };
-          }
-        } catch (aErr) {
-          if (aErr.code === 'ENOTFOUND' || aErr.code === 'NXDOMAIN') {
-            return { valid: false, reason: 'DOMAIN_NOT_FOUND' };
-          }
-        }
-      }
+  return resolver
+}
 
-      // Transient or network error (timeout, ECONNREFUSED, etc.)
-      // Fail-open to avoid blocking legitimate customers during DNS hiccups
-      console.warn(`[emailValidation] DNS check encountered transient error for domain ${domain}:`, err.code || err.message);
-      return { valid: true, warning: 'DNS_CHECK_SKIPPED' };
+export const normalizeEmail = (email) => (
+  typeof email === 'string' ? email.trim().toLowerCase() : ''
+)
+
+export const getEmailDomain = (email) => {
+  const parts = normalizeEmail(email).split('@')
+  return parts.length === 2 ? parts[1] : ''
+}
+
+export const isDisposableEmail = (emailOrDomain) => {
+  if (typeof emailOrDomain !== 'string' || !emailOrDomain) return false
+  const domain = emailOrDomain.includes('@')
+    ? getEmailDomain(emailOrDomain)
+    : emailOrDomain.toLowerCase().trim()
+  if (!domain) return false
+
+  if (disposableDomainsSet.has(domain)) return true
+
+  const parts = domain.split('.')
+  while (parts.length > 2) {
+    parts.shift()
+    if (disposableDomainsSet.has(parts.join('.'))) return true
+  }
+
+  return false
+}
+
+const getErrorCode = (error) => (
+  typeof error?.code === 'string' ? error.code.toUpperCase() : ''
+)
+
+const isNoRecordError = (error) => NO_RECORD_CODES.has(getErrorCode(error))
+
+const isNullMx = (records) => (
+  records.length === 1 &&
+  (records[0]?.exchange === '' || records[0]?.exchange === '.')
+)
+
+const toPublicDnsResult = (result) => {
+  const { definitive, skipped, ...publicResult } = result
+  return publicResult
+}
+
+export const createEmailValidator = ({
+  resolver: configuredResolver,
+  resolverFactory = () => createDnsResolver(),
+  now = () => Date.now(),
+  timeoutMs = DEFAULT_TIMEOUT_MS,
+  logger = console,
+} = {}) => {
+  const cache = new Map()
+  const inFlight = new Map()
+  const skippedChecks = { timeout: 0, transient: 0 }
+  let lastSummaryLogAt = null
+  let pendingSummary = { timeout: 0, transient: 0 }
+  let resolver = configuredResolver
+
+  const getResolver = () => {
+    if (!resolver) resolver = resolverFactory()
+    return resolver
+  }
+
+  const cacheResult = (domain, result) => {
+    cache.delete(domain)
+    cache.set(domain, { expiresAt: now() + CACHE_TTL_MS, result })
+    if (cache.size > CACHE_MAX_DOMAINS) {
+      cache.delete(cache.keys().next().value)
+    }
+  }
+
+  const logSkippedSummary = (kind) => {
+    skippedChecks[kind] += 1
+    pendingSummary[kind] += 1
+    const timestamp = now()
+    if (lastSummaryLogAt !== null && timestamp - lastSummaryLogAt < SUMMARY_LOG_INTERVAL_MS) return
+
+    logger.warn('[emailValidation] DNS checks skipped', {
+      event: 'email_dns_checks_skipped',
+      timeoutCount: pendingSummary.timeout,
+      transientCount: pendingSummary.transient,
+    })
+    lastSummaryLogAt = timestamp
+    pendingSummary = { timeout: 0, transient: 0 }
+  }
+
+  const lookupAddressRecords = async (domain) => {
+    const results = await Promise.allSettled([
+      Promise.resolve().then(() => getResolver().resolve4(domain)),
+      Promise.resolve().then(() => getResolver().resolve6(domain)),
+    ])
+    let hasTransientError = false
+
+    for (const result of results) {
+      if (result.status === 'fulfilled' && Array.isArray(result.value) && result.value.length > 0) {
+        return { valid: true, definitive: true }
+      }
+      if (result.status === 'rejected' && !isNoRecordError(result.reason)) {
+        hasTransientError = true
+      }
     }
 
-    return { valid: true };
-  })();
-
-  try {
-    return await Promise.race([lookupPromise, timeoutPromise]);
-  } finally {
-    clearTimeout(timerId);
-  }
-};
-
-/**
- * Validate customer email:
- * 1. Normalize
- * 2. Check disposable email domains
- * 3. Check domain MX / DNS records
- * 
- * @param {string} rawEmail
- * @returns {Promise<{ isValid: boolean, normalizedEmail: string, error?: string, code?: string }>}
- */
-export const validateCustomerEmail = async (rawEmail) => {
-  const normalizedEmail = normalizeEmail(rawEmail);
-  if (!normalizedEmail || !normalizedEmail.includes('@')) {
-    return {
-      isValid: false,
-      normalizedEmail,
-      code: 'INVALID_EMAIL_FORMAT',
-      error: 'Invalid email format.',
-    };
+    if (hasTransientError) {
+      return { valid: true, warning: 'DNS_CHECK_SKIPPED', skipped: 'transient' }
+    }
+    return { valid: false, reason: 'DOMAIN_NOT_FOUND', definitive: true }
   }
 
-  const domain = getEmailDomain(normalizedEmail);
-  if (!domain) {
-    return {
-      isValid: false,
-      normalizedEmail,
-      code: 'INVALID_EMAIL_DOMAIN',
-      error: 'Invalid email domain.',
-    };
+  const lookupDomain = async (domain) => {
+    try {
+      const mxRecords = await getResolver().resolveMx(domain)
+      if (Array.isArray(mxRecords) && mxRecords.length > 0) {
+        if (isNullMx(mxRecords)) {
+          return { valid: false, reason: 'NULL_MX', definitive: true }
+        }
+        return { valid: true, definitive: true }
+      }
+      return await lookupAddressRecords(domain)
+    } catch (error) {
+      const code = getErrorCode(error)
+      if (DOMAIN_NOT_FOUND_CODES.has(code)) {
+        return { valid: false, reason: 'DOMAIN_NOT_FOUND', definitive: true }
+      }
+      if (code === 'ENODATA') return lookupAddressRecords(domain)
+      return { valid: true, warning: 'DNS_CHECK_SKIPPED', skipped: 'transient' }
+    }
   }
 
-  // 1. Check disposable
-  if (isDisposableEmail(domain)) {
-    return {
-      isValid: false,
-      normalizedEmail,
-      code: 'DISPOSABLE_EMAIL_NOT_ALLOWED',
-      error: 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.',
-    };
+  const checkEmailDomainMX = async (rawDomain, requestedTimeoutMs = timeoutMs) => {
+    const domain = typeof rawDomain === 'string' ? rawDomain.trim().toLowerCase() : ''
+    if (!domain) return { valid: false, reason: 'EMPTY_DOMAIN' }
+    if (!isValidDomainSyntax(domain)) return { valid: false, reason: 'INVALID_DOMAIN' }
+
+    const cached = cache.get(domain)
+    if (cached) {
+      if (cached.expiresAt > now()) {
+        cache.delete(domain)
+        cache.set(domain, cached)
+        return toPublicDnsResult(cached.result)
+      }
+      cache.delete(domain)
+    }
+
+    let lookupPromise = inFlight.get(domain)
+    if (!lookupPromise) {
+      lookupPromise = (async () => {
+        let timerId
+        let result
+        try {
+          const timeoutPromise = new Promise((resolve) => {
+            timerId = setTimeout(() => resolve({
+              valid: true,
+              warning: 'DNS_TIMEOUT_SKIPPED',
+              skipped: 'timeout',
+            }), requestedTimeoutMs)
+          })
+          result = await Promise.race([lookupDomain(domain), timeoutPromise])
+          if (result.skipped) logSkippedSummary(result.skipped)
+          if (result.definitive) cacheResult(domain, result)
+          return result
+        } finally {
+          clearTimeout(timerId)
+          if (inFlight.get(domain) === lookupPromise) inFlight.delete(domain)
+        }
+      })()
+      inFlight.set(domain, lookupPromise)
+    }
+
+    return toPublicDnsResult(await lookupPromise)
   }
 
-  // 2. Check MX records
-  const mxResult = await checkEmailDomainMX(domain);
-  if (!mxResult.valid) {
-    return {
-      isValid: false,
-      normalizedEmail,
-      code: 'INVALID_EMAIL_DOMAIN',
-      error: 'The email domain does not appear to exist or cannot receive emails. Please check your email address.',
-    };
+  const validateCustomerEmail = async (rawEmail) => {
+    const normalizedEmail = normalizeEmail(rawEmail)
+    const parts = normalizedEmail.split('@')
+    const localPart = parts[0]
+    const domain = parts[1]
+
+    if (
+      parts.length !== 2 ||
+      !localPart ||
+      !domain ||
+      localPart.length > 64 ||
+      !LOCAL_PART_PATTERN.test(localPart) ||
+      localPart.startsWith('.') ||
+      localPart.endsWith('.') ||
+      localPart.includes('..')
+    ) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'INVALID_EMAIL_FORMAT',
+        error: INVALID_EMAIL_FORMAT_MESSAGE,
+      }
+    }
+
+    if (domain.length > 253) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'INVALID_EMAIL_DOMAIN',
+        error: INVALID_DOMAIN_MESSAGE,
+      }
+    }
+
+    if (normalizedEmail.length > 254) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'INVALID_EMAIL_FORMAT',
+        error: INVALID_EMAIL_FORMAT_MESSAGE,
+      }
+    }
+
+    if (!isValidDomainSyntax(domain)) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'INVALID_EMAIL_DOMAIN',
+        error: INVALID_DOMAIN_MESSAGE,
+      }
+    }
+
+    if (isDisposableEmail(domain)) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'DISPOSABLE_EMAIL_NOT_ALLOWED',
+        error: 'Disposable or temporary email addresses are not allowed. Please use a permanent email address.',
+      }
+    }
+
+    const mxResult = await checkEmailDomainMX(domain)
+    if (!mxResult.valid) {
+      return {
+        isValid: false,
+        normalizedEmail,
+        code: 'INVALID_EMAIL_DOMAIN',
+        error: INVALID_DOMAIN_MESSAGE,
+      }
+    }
+
+    return { isValid: true, normalizedEmail }
   }
 
   return {
-    isValid: true,
-    normalizedEmail,
-  };
-};
+    checkEmailDomainMX,
+    validateCustomerEmail,
+    getStats: () => ({ ...skippedChecks }),
+    resetForTests: () => {
+      cache.clear()
+      inFlight.clear()
+      skippedChecks.timeout = 0
+      skippedChecks.transient = 0
+      pendingSummary = { timeout: 0, transient: 0 }
+      lastSummaryLogAt = null
+    },
+  }
+}
+
+const defaultEmailValidator = createEmailValidator()
+
+export const checkEmailDomainMX = defaultEmailValidator.checkEmailDomainMX
+export const validateCustomerEmail = defaultEmailValidator.validateCustomerEmail
+export const getEmailValidationStats = defaultEmailValidator.getStats

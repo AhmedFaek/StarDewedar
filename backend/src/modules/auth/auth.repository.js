@@ -2,6 +2,22 @@ import prisma from '../../utils/prisma.js'
 
 /* ─── Password reset token operations ────────────────────────────────────── */
 
+export const saveResetTokenIfCooldownElapsed = (userId, hashedToken, expiresAt, cooldownExpiryCutoff) => {
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            OR: [
+                { reset_password_expires: null },
+                { reset_password_expires: { lte: cooldownExpiryCutoff } },
+            ],
+        },
+        data: {
+            reset_password_token: hashedToken,
+            reset_password_expires: expiresAt,
+        },
+    })
+}
+
 /**
  * Store a SHA-256-hashed reset token and its expiration on the user row.
  */
@@ -28,18 +44,33 @@ export const findUserByResetToken = (hashedToken) => {
 }
 
 /**
- * Atomically update the user's password, clear the reset token fields,
- * and invalidate all existing sessions (refresh tokens).
+ * Atomically redeem the reset token, update the password, and invalidate sessions.
  */
-export const resetPassword = (userId, hashedPassword) => {
-    return prisma.user.update({
-        where: { id: userId },
-        data: {
-            password: hashedPassword,
-            reset_password_token: null,
-            reset_password_expires: null,
-            hashed_refresh_token: null,
+export const resetPassword = (userId, hashedToken, hashedPassword, { verifyEmail = false } = {}) => {
+    const data = {
+        password: hashedPassword,
+        reset_password_token: null,
+        reset_password_expires: null,
+        hashed_refresh_token: null,
+    }
+
+    if (verifyEmail) {
+        Object.assign(data, {
+            email_verified: true,
+            email_verification_hash: null,
+            email_verification_expires_at: null,
+            email_verification_attempts: 0,
+            email_verification_last_sent: null,
+        })
+    }
+
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            reset_password_token: hashedToken,
+            reset_password_expires: { gt: new Date() },
         },
+        data,
     })
 }
 
@@ -60,7 +91,7 @@ export const changePassword = (userId, hashedPassword) => {
 /* ─── Email verification operations ─────────────────────────────────────── */
 
 /**
- * Store SHA-256 hashed verification code, expiration, and update last sent timestamp.
+ * Store an HMAC-hashed verification code, expiration, and update last sent timestamp.
  * Targets only unverified users.
  */
 export const saveVerificationCode = (userId, { hashedCode, expiresAt, attempts = 0, lastSent = new Date() }) => {
@@ -75,6 +106,37 @@ export const saveVerificationCode = (userId, { hashedCode, expiresAt, attempts =
             email_verification_attempts: attempts,
             email_verification_last_sent: lastSent,
         },
+    })
+}
+
+/**
+ * Refresh registration details and verification state only while the account
+ * remains unverified, its current code is missing or expired, and cooldown has elapsed.
+ */
+export const refreshUnverifiedRegistration = (userId, data, now = new Date(), cooldownSeconds = 60) => {
+    const cooldownCutoff = new Date(now.getTime() - cooldownSeconds * 1000)
+
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            email_verified: false,
+            AND: [
+                {
+                    OR: [
+                        { email_verification_hash: null },
+                        { email_verification_expires_at: null },
+                        { email_verification_expires_at: { lte: now } },
+                    ],
+                },
+                {
+                    OR: [
+                        { email_verification_last_sent: null },
+                        { email_verification_last_sent: { lte: cooldownCutoff } },
+                    ],
+                },
+            ],
+        },
+        data,
     })
 }
 
@@ -173,16 +235,40 @@ export const acquireVerificationResendCooldown = async (userId, now = new Date()
 }
 
 /**
- * Reset resend cooldown timestamp (used if external email delivery fails).
+ * Reset resend cooldown only if it still belongs to this failed send attempt.
  */
-export const resetVerificationResendCooldown = (userId, previousTimestamp = null) => {
+export const resetVerificationResendCooldown = (userId, expectedTimestamp) => {
     return prisma.user.updateMany({
         where: {
             id: userId,
             email_verified: false,
+            email_verification_last_sent: expectedTimestamp,
         },
         data: {
-            email_verification_last_sent: previousTimestamp,
+            email_verification_last_sent: null,
+        },
+    })
+}
+
+/**
+ * Restore the previous verification state only if the failed send still owns it.
+ */
+export const rollbackVerificationCodeAfterEmailFailure = (
+    userId,
+    { writtenHash, writtenLastSent, previousState }
+) => {
+    return prisma.user.updateMany({
+        where: {
+            id: userId,
+            email_verified: false,
+            email_verification_hash: writtenHash,
+            email_verification_last_sent: writtenLastSent,
+        },
+        data: {
+            email_verification_hash: previousState.hash,
+            email_verification_expires_at: previousState.expiresAt,
+            email_verification_attempts: previousState.attempts,
+            email_verification_last_sent: null,
         },
     })
 }
@@ -216,5 +302,3 @@ export const incrementVerificationAttempts = (userId) => {
         },
     })
 }
-
-

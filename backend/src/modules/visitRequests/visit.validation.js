@@ -8,7 +8,7 @@ export const createVisitRequestSchema = z.object({
     name: z.string().min(2).max(100),
     phone_number: egyptianPhoneSchema,
     whatsapp_number: optionalEgyptianPhoneSchema,
-    email: z.string().email().max(254),
+    email: z.string().trim().email().max(254),
     address: z.string().min(5).max(500),
     preferred_date: z.string().datetime(),
     details: z.string().min(5).max(10000),

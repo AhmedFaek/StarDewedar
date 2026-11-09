@@ -6,12 +6,14 @@ import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SelectField from '../forms/SelectField'
 import SubmitButton from '../forms/SubmitButton'
-import TurnstileWidget from '../forms/TurnstileWidget'
+import EmailSuggestion from '../forms/EmailSuggestion'
+import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 import { resolveUiLanguage } from '../../utils/language'
 
@@ -37,6 +39,8 @@ export default function QuoteForm({ productId = null, visible = true }) {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime({ visible })
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const validate = () => {
@@ -94,6 +98,11 @@ export default function QuoteForm({ productId = null, visible = true }) {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
   }
 
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
+  }
+
   const handlePhoneChange = (e) => {
     const value = getAllowedEgyptianPhoneInput(e)
     if (value === null) {
@@ -149,11 +158,13 @@ export default function QuoteForm({ productId = null, visible = true }) {
       if (formData.file_url instanceof File) {
         formDataToSend.append('file', formData.file_url)
       }
+      formDataToSend.append('sdc_ref', honeypotRef.current?.value || '')
 
-      return api.sendQuoteRequest(formDataToSend, turnstileToken)
+      return api.sendQuoteRequest(formDataToSend, turnstileToken, getElapsedMs())
     },
     successMessage: t('notifications.quoteSuccess'),
     onSuccess: () => {
+      resetElapsedTime()
       setFormData((prev) => ({
         ...prev,
         product_id: productId || '',
@@ -166,7 +177,13 @@ export default function QuoteForm({ productId = null, visible = true }) {
       // Reset Turnstile so a fresh token is required for any subsequent submission
       resetTurnstile()
     },
-    onError: () => {
+    onError: (error) => {
+      if ((error?.code || error?.data?.code) === 'OPTIONAL_AUTH_INVALID') {
+        return true
+      }
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       // Reset Turnstile on failure so the user must re-verify before retrying
       resetTurnstile()
       // Return false so the hook still shows the error toast
@@ -216,13 +233,19 @@ export default function QuoteForm({ productId = null, visible = true }) {
 
         {unknownOutcome && <UnknownSubmissionOutcome requestType="quote" />}
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+            <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <InputField label={t('requestQuote.firstName')} name="first_name" placeholder="Ahmed" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} variant="bordered" />
             <InputField label={t('requestQuote.lastName')} name="last_name" placeholder="Khaled" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} variant="bordered" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
             <InputField label={t('requestQuote.phone')} name="phone" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone} onChange={handlePhoneChange} required error={errors.phone} variant="bordered" />
-            <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
+            <div>
+              <InputField label={t('requestQuote.workEmail')} name="email" type="email" placeholder="a.khaled@example.com" value={formData.email} onChange={handleInputChange} required error={errors.email} variant="bordered" />
+              <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+            </div>
           </div>
           <SelectField label={t('requestQuote.selectProduct')} name="product_id" value={formData.product_id} onChange={handleInputChange} options={productOptions} placeholder={t('requestQuote.selectPlaceholder')} />
           {formData.product_id === 'custom' && (
@@ -236,8 +259,9 @@ export default function QuoteForm({ productId = null, visible = true }) {
             <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
               {t('turnstile.verifyPrompt')}
             </p>
-            <TurnstileWidget
+            <TurnstileRecovery
               ref={turnstileRef}
+              visible={visible}
               onVerify={(token) => setTurnstileToken(token)}
               onExpire={() => setTurnstileToken(null)}
               onError={() => setTurnstileToken(null)}

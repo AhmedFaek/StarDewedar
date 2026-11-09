@@ -1,7 +1,6 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
 import * as controller from './visit.controller.js'
-import auth from '../../middleware/auth.middleware.js'
+import auth, { optionalAuth } from '../../middleware/auth.middleware.js'
 import { requirePermission, requireRole } from '../../middleware/roles.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
 import { updateVisitRequestSchema } from './visit.validation.js'
@@ -11,27 +10,33 @@ import { requestDeletionSchema } from '../attachments/requestDeletion.validation
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { singleFileUpload } from '../../middleware/upload.middleware.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import { validateFormTiming } from '../../middleware/formTiming.middleware.js'
 import {
     validateArchivedQuery,
     validateRequestStatusParam,
 } from '../../middleware/requestFilters.middleware.js'
 import * as workflowController from '../requestWorkflow/requestWorkflow.controller.js'
+import { createTwoTierIpLimiters } from '../auth/authRateLimiters.js'
 
 const router = express.Router()
 
-const visitLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many visit requests submitted. Please try again later.',
-    },
-})
+const visitLimiters = createTwoTierIpLimiters(
+    'Too many visit requests submitted. Please try again later.',
+    { passedChallengeMax: 10 }
+)
 
 // Create a new visit request
-// Flow: rate limiter → Turnstile → bounded multipart parser → controller validation
-router.post('/', visitLimiter, verifyTurnstile, singleFileUpload, controller.createVisit)
+// Flow: coarse limiter → fill-time check → Turnstile → strict limiter → multipart parser
+router.post(
+    '/',
+    visitLimiters.coarseLimiter,
+    optionalAuth,
+    validateFormTiming,
+    verifyTurnstile,
+    visitLimiters.passedChallengeLimiter,
+    singleFileUpload,
+    controller.createVisit
+)
 
 // Get all visit requests
 router.get('/', auth,

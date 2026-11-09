@@ -136,6 +136,37 @@ test('company notification email flows embed the SDC monogram and retain request
     assert.match(contact.html, /WhatsApp/)
 })
 
+test('company notification subjects sanitize customer-controlled values', async (t) => {
+    const sentMessages = []
+    t.mock.method(transporter, 'sendMail', async (message) => {
+        sentMessages.push(message)
+        return { messageId: `subject-${sentMessages.length}` }
+    })
+
+    await sendVisitRequestEmail({
+        name: `Visit\r\nInjected\u0000${'V'.repeat(65)}`,
+    })
+    await sendQuoteRequestEmail({
+        first_name: 'Quote\r\nInjected',
+        last_name: 'Customer\u007f',
+    })
+    await sendBOQRequestEmail({
+        name: 'BOQ\r\nInjected',
+        company_name: `Company\r\nInjected\u001f${'C'.repeat(65)}`,
+    })
+    await sendContactEmail({
+        first_name: 'Contact\r\nInjected',
+        last_name: 'Customer\u007f',
+    })
+
+    assert.equal(sentMessages.length, 4)
+    assert.ok(sentMessages.every(({ subject }) => !/[\u0000-\u001f\u007f-\u009f]/.test(subject)))
+    assert.match(sentMessages[0].subject, /VisitInjectedV{47} — SDC$/)
+    assert.match(sentMessages[1].subject, /QuoteInjected Customer — SDC$/)
+    assert.match(sentMessages[2].subject, /CompanyInjectedC{45} \(BOQInjected\) — SDC$/)
+    assert.match(sentMessages[3].subject, /New Contact Message — ContactInjected Customer — SDC$/)
+})
+
 test('bundled SDC monogram is embedded as an inline MIME image with the referenced CID', async () => {
     const attachment = createSdcMonogramAttachment()
     const image = readFileSync(attachment.path)

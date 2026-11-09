@@ -14,13 +14,15 @@ import InputField from '../forms/InputField'
 import TextAreaField from '../forms/TextAreaField'
 import FileUploadField from '../forms/FileUploadField'
 import SubmitButton from '../forms/SubmitButton'
-import TurnstileWidget from '../forms/TurnstileWidget'
+import EmailSuggestion from '../forms/EmailSuggestion'
+import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 export default function VisitFormSection({ visible = true }) {
@@ -44,11 +46,18 @@ export default function VisitFormSection({ visible = true }) {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime({ visible })
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -120,10 +129,12 @@ export default function VisitFormSection({ visible = true }) {
       if (file instanceof File) {
         payload.append('file', file)
       }
-      return api.sendVisitRequest(payload, turnstileToken)
+      payload.append('sdc_ref', honeypotRef.current?.value || '')
+      return api.sendVisitRequest(payload, turnstileToken, getElapsedMs())
     },
     successMessage: t('notifications.visitSuccess'),
     onSuccess: () => {
+      resetElapsedTime()
       setFormData({
         factory_name: '',
         factory_activity: '',
@@ -139,7 +150,13 @@ export default function VisitFormSection({ visible = true }) {
       setFileUploadKey((prev) => prev + 1)
       resetTurnstile()
     },
-    onError: () => {
+    onError: (error) => {
+      if ((error?.code || error?.data?.code) === 'OPTIONAL_AUTH_INVALID') {
+        return true
+      }
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       resetTurnstile()
       return false
     },
@@ -172,6 +189,9 @@ export default function VisitFormSection({ visible = true }) {
       <div className="bg-white p-6 sm:p-8 lg:p-10">
         {unknownOutcome && <UnknownSubmissionOutcome requestType="visit" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
+          <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+            <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+          </div>
           {/* Section 1 — Facility Information */}
           <div>
             <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-slate-100">
@@ -249,16 +269,19 @@ export default function VisitFormSection({ visible = true }) {
                 error={errors.whatsapp_number}
                 variant="bordered"
               />
-              <InputField
-                label={t('requestVisit.emailAddress')}
-                type="email"
-                placeholder="name@company.com"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                variant="bordered"
-              />
+              <div>
+                <InputField
+                  label={t('requestVisit.emailAddress')}
+                  type="email"
+                  placeholder="name@company.com"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  variant="bordered"
+                />
+                <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+              </div>
             </div>
           </div>
 
@@ -317,8 +340,9 @@ export default function VisitFormSection({ visible = true }) {
               <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
                 {t('turnstile.verifyPrompt')}
               </p>
-              <TurnstileWidget
+              <TurnstileRecovery
                 ref={turnstileRef}
+                visible={visible}
                 onVerify={(token) => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken(null)}
                 onError={() => setTurnstileToken(null)}

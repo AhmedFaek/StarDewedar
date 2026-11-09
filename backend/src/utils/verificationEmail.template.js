@@ -1,4 +1,5 @@
 import env from '../config/env.js'
+import { escapeHtml, sanitizeEmailText } from './htmlEscaper.js'
 
 /**
  * Professional HTML email template for email verification code.
@@ -8,7 +9,12 @@ import env from '../config/env.js'
  * @returns {string} Full HTML document
  */
 export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 }) => {
-  const greeting = name ? `Hello ${name},` : 'Hello,'
+  const safeName = sanitizeEmailText(name, 40, { ellipsis: true })
+  const nameSpan = safeName
+    ? `<span dir="auto" style="unicode-bidi:isolate">${escapeHtml(safeName)}</span>`
+    : '<span dir="auto" style="unicode-bidi:isolate">Customer</span>'
+  const greeting = safeName ? `Hello ${nameSpan},` : 'Hello,'
+  const registeredAs = nameSpan
   const logoUrl = env.logoUrl
   return `
 <!DOCTYPE html>
@@ -54,6 +60,24 @@ export const verificationEmailTemplate = ({ code, name, expiresInMinutes = 15 })
                             <p style="color:#555; font-size:15px; line-height:1.7; margin:0 0 28px;">
                                 Thank you for registering with Star Dewedar. Please use the following 6-digit verification code to complete your registration:
                             </p>
+
+                            <p style="color:#555; font-size:14px; line-height:1.7; margin:0 0 20px;">
+                                Registered as ${registeredAs}.
+                            </p>
+                            <p style="color:#888; font-size:13px; line-height:1.6; margin:0 0 20px;">
+                                If you didn't create this account, you can safely ignore this email.
+                            </p>
+
+                            <div style="color:#555; font-size:14px; line-height:1.7; margin:0 0 20px;">
+                                <p style="margin:0;">Use the most recent code we sent you.</p>
+                                <p style="margin:0;">Can't find it? Check your spam folder.</p>
+                            </div>
+                            <div dir="rtl" lang="ar" style="color:#555; font-size:14px; line-height:1.7; margin:0 0 28px; text-align:right;">
+                                <p style="margin:0;">تم إنشاء الحساب باسم ${registeredAs}.</p>
+                                <p style="margin:0;">إذا لم تنشئ هذا الحساب، يمكنك تجاهل هذه الرسالة بأمان.</p>
+                                <p style="margin:0;">استخدم أحدث رمز أرسلناه إليك.</p>
+                                <p style="margin:0;">لم تجده؟ تحقّق من مجلد البريد العشوائي.</p>
+                            </div>
 
                             <!-- Verification Code Box -->
                             <table width="100%" cellpadding="0" cellspacing="0">

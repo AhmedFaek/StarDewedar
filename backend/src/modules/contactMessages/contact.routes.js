@@ -1,28 +1,29 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
 import * as controller from './contact.controller.js'
-import { createContactSchema } from './contact.validation.js'
-import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requirePermission } from '../../middleware/roles.middleware.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
 import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
+import { createTwoTierIpLimiters } from '../auth/authRateLimiters.js'
+import { validateFormTiming } from '../../middleware/formTiming.middleware.js'
 
 const router = express.Router()
 
-const contactLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many contact messages sent. Please try again later.',
-    },
-})
+const contactLimiters = createTwoTierIpLimiters(
+    'Too many contact messages sent. Please try again later.',
+    { passedChallengeMax: 10 }
+)
 
 // Public route (website users)
-// Flow: rate limiter → Turnstile verify → Zod validation → controller
-router.post('/', contactLimiter, verifyTurnstile, validate(createContactSchema), controller.createContact)
+// Flow: coarse limiter → fill-time check → Turnstile → strict limiter → controller validation
+router.post(
+    '/',
+    contactLimiters.coarseLimiter,
+    validateFormTiming,
+    verifyTurnstile,
+    contactLimiters.passedChallengeLimiter,
+    controller.createContact
+)
 
 // Admin only (dashboard)
 router.get(

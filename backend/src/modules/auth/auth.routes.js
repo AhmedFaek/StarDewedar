@@ -3,7 +3,9 @@ import rateLimit from 'express-rate-limit'
 import * as controller from './auth.controller.js'
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
+import { verifyTurnstile } from '../../middleware/turnstile.middleware.js'
 import { requirePermission } from '../../middleware/roles.middleware.js'
+import { createTwoTierIpLimiters } from './authRateLimiters.js'
 import {
     registerSchema,
     createUserSchema,
@@ -41,16 +43,6 @@ const resendVerificationLimiter = rateLimit({
     },
 })
 
-const forgotPasswordLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many password reset requests. Please try again later.',
-    },
-})
-
 const resetPasswordLimiter = rateLimit({
     windowMs: 60 * 60 * 1000, // 1 hour
     max: 5,
@@ -71,20 +63,24 @@ const loginLimiter = rateLimit({
     },
 })
 
-const registerLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000, // 1 hour
-    max: 5,
-    standardHeaders: true,
-    legacyHeaders: false,
-    message: {
-        message: 'Too many account creation attempts. Please try again later.',
-    },
-})
+const registerLimiters = createTwoTierIpLimiters(
+    'Too many account creation attempts. Please try again later.'
+)
+const forgotPasswordLimiters = createTwoTierIpLimiters(
+    'Too many password reset requests. Please try again later.'
+)
 
 // ── Public routes ────────────────────────────────────────────────────────────
 
 // Customer self-registration
-router.post('/register', registerLimiter, validate(registerSchema), controller.register)
+router.post(
+    '/register',
+    registerLimiters.coarseLimiter,
+    verifyTurnstile,
+    registerLimiters.passedChallengeLimiter,
+    validate(registerSchema),
+    controller.register
+)
 
 // Verify email
 router.post(
@@ -111,7 +107,9 @@ router.post('/refresh', validate(refreshSchema), controller.refresh)
 // Forgot password (rate-limited)
 router.post(
     '/forgot-password',
-    forgotPasswordLimiter,
+    forgotPasswordLimiters.coarseLimiter,
+    verifyTurnstile,
+    forgotPasswordLimiters.passedChallengeLimiter,
     validate(forgotPasswordSchema),
     controller.forgotPassword
 )

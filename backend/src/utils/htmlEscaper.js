@@ -12,3 +12,15 @@ export const escapeHtml = (str) => {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;')
 }
+
+export const sanitizeEmailText = (value, maxLength, { ellipsis = false } = {}) => {
+    const normalized = String(value ?? '')
+        .replace(/[\u0000-\u001f\u007f-\u009f]/g, '')
+        .replace(/[\u200b-\u200f\u202a-\u202e\u2060-\u206f\ufeff]/gi, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+
+    if (normalized.length <= maxLength) return normalized
+    if (!ellipsis || maxLength === 0) return normalized.slice(0, maxLength).trim()
+    return `${normalized.slice(0, maxLength - 1).trimEnd()}…`
+}

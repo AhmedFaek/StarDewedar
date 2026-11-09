@@ -18,9 +18,6 @@ const FORMAT_BY_MIME_TYPE = new Map([
     ['application/csv', { format: 'csv', resourceType: 'raw' }],
 ])
 
-const normalizeEmail = (email) =>
-    typeof email === 'string' ? email.trim().toLowerCase() : ''
-
 const forbiddenError = () => {
     const error = new Error('Forbidden')
     error.status = 403
@@ -28,33 +25,36 @@ const forbiddenError = () => {
     return error
 }
 
-const getCustomerEmail = async (user) => {
+const getVerifiedCustomerId = async (user) => {
     if (user?.role !== 'customer') throw forbiddenError()
 
     const account = await userRepository.findUserById(user.userId)
-    const email = normalizeEmail(account?.email)
-    if (!account || account.email_verified !== true || !email) {
+    if (
+        !account ||
+        account.id !== user.userId ||
+        account.email_verified !== true
+    ) {
         throw forbiddenError()
     }
 
-    return email
+    return account.id
 }
 
 const getAuthorizedAttachment = async (id, user) => {
     const isAdmin = roleHasPermission(user?.role, PERMISSIONS.REQUESTS_MANAGE)
-    const customerEmail = isAdmin ? null : await getCustomerEmail(user)
+    const customerId = isAdmin ? null : await getVerifiedCustomerId(user)
     const attachment = await attachmentRepository.findById(id)
 
     if (!attachment || attachment.status !== 'ACTIVE') return null
 
     if (!isAdmin) {
-        const requestEmails = [
-            attachment.quote_request?.email,
-            attachment.visit_request?.email,
-            attachment.boq_request?.email,
-        ].map(normalizeEmail)
+        const requestUserIds = [
+            attachment.quote_request?.user_id,
+            attachment.visit_request?.user_id,
+            attachment.boq_request?.user_id,
+        ]
 
-        if (!requestEmails.includes(customerEmail)) return null
+        if (!requestUserIds.includes(customerId)) return null
     }
 
     return attachment

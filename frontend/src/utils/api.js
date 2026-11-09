@@ -106,6 +106,33 @@ const authFetch = async (url, options = {}) => {
   return handleResponse(res)
 }
 
+const optionalAuthFetch = async (url, options = {}) => {
+  const makeRequest = (token) => {
+    const headers = { ...options.headers }
+    delete headers.Authorization
+    delete headers.authorization
+    if (token) headers.Authorization = `Bearer ${token}`
+    return fetch(url, { ...options, headers })
+  }
+
+  const token = await getValidAccessToken()
+  let response = await makeRequest(token)
+  if (response.status === 401) {
+    const errorBody = await readResponseBody(response.clone())
+    if (errorBody?.code === 'OPTIONAL_AUTH_INVALID') {
+      const refreshedToken = await refreshAccessToken()
+      if (refreshedToken) {
+        response = await makeRequest(refreshedToken)
+      } else {
+        clearAuth()
+        response = await makeRequest(null)
+      }
+    }
+  }
+
+  return handleResponse(response)
+}
+
 const triggerAttachmentDownload = (blob, filename) => {
   const safeFilename = String(filename || 'attachment')
     .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '_')
@@ -129,51 +156,60 @@ export const api = {
   getProjects: () => cachedFetch('projects', () => fetch(`${API_URL}/projects`).then(handleResponse)),
   getProjectById: (id) => cachedFetch(`project:${id}`, () => fetch(`${API_URL}/projects/${id}`).then(handleResponse)),
 
-  sendContactMessage: (data, turnstileToken) => fetch(`${API_URL}/contact`, {
+  sendContactMessage: (data, turnstileToken, elapsedMs) => fetch(`${API_URL}/contact`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Turnstile-Token': turnstileToken,
+      'X-Form-Elapsed-Ms': String(elapsedMs),
+    },
+    body: JSON.stringify(data),
+  }).then(handleResponse),
+
+  sendQuoteRequest: (data, turnstileToken, elapsedMs) => {
+    const isFormData = data instanceof FormData
+    return optionalAuthFetch(`${API_URL}/quotes`, {
+      method: 'POST',
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
+      },
+      body: isFormData ? data : JSON.stringify(data),
+    }).then(handleResponse)
+  },
+
+  sendVisitRequest: (data, turnstileToken, elapsedMs) => {
+    const isFormData = data instanceof FormData
+    return optionalAuthFetch(`${API_URL}/visits`, {
+      method: 'POST',
+      headers: {
+        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
+        'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
+      },
+      body: isFormData ? data : JSON.stringify(data),
+    }).then(handleResponse)
+  },
+
+  sendBOQRequest: (data, turnstileToken, elapsedMs) => {
+    // Always FormData (multi-file upload)
+    return optionalAuthFetch(`${API_URL}/boq`, {
+      method: 'POST',
+      headers: {
+        'X-Turnstile-Token': turnstileToken,
+        'X-Form-Elapsed-Ms': String(elapsedMs),
+      },
+      body: data,
+    }).then(handleResponse)
+  },
+
+  register: (data, turnstileToken) => fetch(`${API_URL}/auth/register`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'X-Turnstile-Token': turnstileToken,
     },
-    body: JSON.stringify(data),
-  }).then(handleResponse),
-
-  sendQuoteRequest: (data, turnstileToken) => {
-    const isFormData = data instanceof FormData
-    return fetch(`${API_URL}/quotes`, {
-      method: 'POST',
-      headers: {
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        'X-Turnstile-Token': turnstileToken,
-      },
-      body: isFormData ? data : JSON.stringify(data),
-    }).then(handleResponse)
-  },
-
-  sendVisitRequest: (data, turnstileToken) => {
-    const isFormData = data instanceof FormData
-    return fetch(`${API_URL}/visits`, {
-      method: 'POST',
-      headers: {
-        ...(isFormData ? {} : { 'Content-Type': 'application/json' }),
-        'X-Turnstile-Token': turnstileToken,
-      },
-      body: isFormData ? data : JSON.stringify(data),
-    }).then(handleResponse)
-  },
-
-  sendBOQRequest: (data, turnstileToken) => {
-    // Always FormData (multi-file upload)
-    return fetch(`${API_URL}/boq`, {
-      method: 'POST',
-      headers: { 'X-Turnstile-Token': turnstileToken },
-      body: data,
-    }).then(handleResponse)
-  },
-
-  register: (data) => fetch(`${API_URL}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   }).then(async (res) => {
     const body = await readResponseBody(res)
@@ -192,7 +228,7 @@ export const api = {
   }).then(async (res) => {
     const body = await readResponseBody(res)
     if (!res.ok) throw createApiError(res, body)
-    if (body.accessToken && body.refreshToken) {
+    if (body.accessToken && body.refreshToken && body.user) {
       saveTokens(body.accessToken, body.refreshToken)
       saveUser(body.user)
     }
@@ -220,9 +256,12 @@ export const api = {
   logout: () => authFetch(`${API_URL}/auth/logout`, { method: 'POST' })
     .finally(() => clearAuth()),
 
-  forgotPassword: (email) => fetch(`${API_URL}/auth/forgot-password`, {
+  forgotPassword: (email, turnstileToken) => fetch(`${API_URL}/auth/forgot-password`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Turnstile-Token': turnstileToken,
+    },
     body: JSON.stringify({ email }),
   }).then(handleResponse),
 
@@ -238,6 +277,10 @@ export const api = {
   }),
 
   getMe: () => authFetch(`${API_URL}/users/me`),
+  updateProfile: (data) => authFetch(`${API_URL}/users/me`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  }),
 
   getSavedProducts: () => authFetch(`${API_URL}/users/me/saved-products`),
   checkSaved: (productId) => authFetch(`${API_URL}/users/me/saved-products/${productId}/check`),

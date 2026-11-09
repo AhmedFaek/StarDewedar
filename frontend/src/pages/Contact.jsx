@@ -6,13 +6,15 @@ import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
-import TurnstileWidget from '../components/forms/TurnstileWidget'
+import EmailSuggestion from '../components/forms/EmailSuggestion'
+import TurnstileRecovery from '../components/forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../components/forms/UnknownSubmissionOutcome'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
 import { useFormSubmit } from '../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
 
 export default function Contact() {
@@ -59,6 +61,8 @@ export default function Contact() {
   // Turnstile state — null means not yet verified
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime()
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   const validate = () => {
@@ -86,6 +90,11 @@ export default function Contact() {
     setFormData((prev) => ({ ...prev, [name]: value }))
     // Clear error for this field on change
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -128,10 +137,14 @@ export default function Contact() {
   const { isSubmitting, handleSubmit: submitForm } = useFormSubmit({
     onSubmit: () => {
       setUnknownOutcome(false)
-      return api.sendContactMessage(formData, turnstileToken)
+      return api.sendContactMessage({
+        ...formData,
+        sdc_ref: honeypotRef.current?.value || '',
+      }, turnstileToken, getElapsedMs())
     },
     successMessage: t('notifications.contactSuccess'),
     onSuccess: () => {
+      resetElapsedTime()
       setErrors({})
       // Only clear the message field — preserve the user's pre-filled personal details
       setFormData((prev) => ({
@@ -142,6 +155,9 @@ export default function Contact() {
       resetTurnstile()
     },
     onError: (error) => {
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       // Reset Turnstile on failure so the user must re-verify before retrying
       resetTurnstile()
       // Try to map server-side field errors back to the form
@@ -234,12 +250,18 @@ export default function Contact() {
                 </h2>
                 {unknownOutcome && <UnknownSubmissionOutcome requestType="contact" />}
                 <form onSubmit={handleSubmit} className="space-y-8">
+                  <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+                    <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+                  </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <InputField label={t('contact.firstName')} name="first_name" placeholder="AHMED" value={formData.first_name} onChange={handleInputChange} required error={errors.first_name} />
                     <InputField label={t('contact.lastName')} name="last_name" placeholder="KHALED" value={formData.last_name} onChange={handleInputChange} required error={errors.last_name} />
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                    <div>
+                      <InputField label={t('contact.workEmail')} name="email" type="email" placeholder="NAME@ENTERPRISE.COM" value={formData.email} onChange={handleInputChange} required error={errors.email} />
+                      <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+                    </div>
                     <InputField label={t('contact.phoneNumber')} name="phone_number" type="tel" inputMode="tel" dir="ltr" placeholder="01287879794 / +201287879794" value={formData.phone_number} onChange={handlePhoneChange} required error={errors.phone_number} />
                   </div>
                   <InputField
@@ -292,7 +314,7 @@ export default function Contact() {
                     <p className="font-label font-bold uppercase text-[10px] sm:text-[12px] tracking-[0.15em] rtl:tracking-normal rtl:normal-case text-secondary">
                       {t('turnstile.verifyPrompt')}
                     </p>
-                    <TurnstileWidget
+                    <TurnstileRecovery
                       ref={turnstileRef}
                       onVerify={(token) => setTurnstileToken(token)}
                       onExpire={() => setTurnstileToken(null)}

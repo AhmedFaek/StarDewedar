@@ -4,8 +4,16 @@ import { getPaginationParams } from '../../utils/pagination.js'
 import { validateUploadedFile } from '../../utils/uploadValidation.js'
 import { sendPublicRequestError } from '../../utils/publicRequestError.js'
 import { toAdminRequest, toPublicRequest } from '../../utils/publicRequestDto.js'
+import { validateAndNormalizeRequestEmail } from '../../utils/publicRequestEmail.js'
+import { normalizeEmail } from '../../utils/emailValidation.service.js'
+import {
+    PUBLIC_REQUEST_SUCCESS_MESSAGES,
+    respondToPublicRequestHoneypot,
+} from '../../utils/publicRequestProtection.js'
 
 export const createBOQ = async (req, res) => {
+    if (respondToPublicRequestHoneypot(req, res, 'BOQ')) return
+
     try {
         // req.files is populated by boqUpload.fields([...])
         const boqFiles      = req.files?.['boq_file']
@@ -23,11 +31,15 @@ export const createBOQ = async (req, res) => {
         for (const file of supportingFiles || []) {
             await validateUploadedFile(file, { boq: true })
         }
-        const boqRequest = await service.createBOQRequest(validatedData, boqFiles, supportingFiles || [])
+        const normalizedData = await validateAndNormalizeRequestEmail(validatedData)
+        const requestData = req.user?.role === 'customer'
+            ? { ...normalizedData, user_id: req.user.userId }
+            : normalizedData
+        const boqRequest = await service.createBOQRequest(requestData, boqFiles, supportingFiles || [])
 
         res.status(201).json({
             success: true,
-            message: 'BOQ request created successfully',
+            message: PUBLIC_REQUEST_SUCCESS_MESSAGES.BOQ,
             data: toPublicRequest(boqRequest),
         })
     } catch (error) {
@@ -69,7 +81,7 @@ export const getBOQById = async (req, res) => {
 export const getBOQsByEmail = async (req, res) => {
     try {
         const { email } = req.params
-        const boqs = await service.getBOQsByEmail(email, req.requestArchived)
+        const boqs = await service.getBOQsByEmail(normalizeEmail(email), req.requestArchived)
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
         console.error('Error fetching BOQs by email:', error)

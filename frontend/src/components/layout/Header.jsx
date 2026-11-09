@@ -5,7 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom'
 const AuthModal = lazy(() => import('./AuthModal.jsx'))
 const MyRequestsPanel = lazy(() => import('./MyRequestsPanel.jsx'))
 const ChangePasswordModal = lazy(() => import('./ChangePasswordModal.jsx'))
-import { getUser, isLoggedIn } from '../../utils/auth.js'
+const EditProfileModal = lazy(() => import('./EditProfileModal.jsx'))
+import { getUser, isLoggedIn, saveUser } from '../../utils/auth.js'
 import { api } from '../../utils/api.js'
 import { getApiErrorMessage } from '../../utils/apiErrorHandler.js'
 import { useNotification } from '../../hooks/useNotification.js'
@@ -51,6 +52,7 @@ export default function Header() {
   const [requestsPanelOpen, setRequestsPanelOpen] = useState(false)
   const [requestsRecoveryType, setRequestsRecoveryType] = useState(null)
   const [changePasswordOpen, setChangePasswordOpen] = useState(false)
+  const [editProfileOpen, setEditProfileOpen] = useState(false)
   const userMenuRef = useRef(null)
   const headerContainerRef = useRef(null)
 
@@ -243,6 +245,12 @@ export default function Header() {
     if (requestsRecoveryType) setRequestsPanelOpen(true)
   }
 
+  const handleProfileUpdated = (profile) => {
+    saveUser(profile)
+    setUser(profile)
+    setEditProfileOpen(false)
+  }
+
   useEffect(() => {
     const handleOpenMyRequests = (event) => {
       setRequestsRecoveryType(event.detail?.requestType || null)
@@ -379,6 +387,19 @@ export default function Header() {
                   {t('auth.adminPanel')}
                 </button>
               )}
+              <button
+                id={isMobile ? 'header-edit-profile-btn-mobile' : 'header-edit-profile-btn'}
+                onClick={() => {
+                  setUserMenuOpen(false)
+                  setEditProfileOpen(true)
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-start text-xs font-headline font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors"
+              >
+                <span className="material-symbols-outlined text-base leading-none text-slate-400">
+                  person_edit
+                </span>
+                {t('auth.editProfile')}
+              </button>
               <button
                 id={isMobile ? 'header-change-password-btn-mobile' : 'header-change-password-btn'}
                 onClick={() => {
@@ -1204,6 +1225,16 @@ export default function Header() {
                     {t('messages.title')}
                   </button>
                   <button
+                    onClick={() => {
+                      setMobileMenuOpen(false)
+                      setEditProfileOpen(true)
+                    }}
+                    className="w-full flex items-center gap-2 py-2 px-2 text-start text-xs font-headline font-bold uppercase tracking-wider text-slate-700 hover:text-primary transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base text-slate-400">person_edit</span>
+                    {t('auth.editProfile')}
+                  </button>
+                  <button
                     onClick={handleLogout}
                     disabled={loggingOut}
                     className="w-full flex items-center gap-2 py-2 px-2 text-start text-xs font-headline font-bold uppercase tracking-wider text-red-600 hover:bg-red-50 rounded-lg transition-colors"
@@ -1293,6 +1324,13 @@ export default function Header() {
           isOpen={changePasswordOpen}
           onClose={() => setChangePasswordOpen(false)}
           onSuccess={() => setUser(null)}
+        />
+
+        <EditProfileModal
+          isOpen={editProfileOpen}
+          user={user}
+          onClose={() => setEditProfileOpen(false)}
+          onSuccess={handleProfileUpdated}
         />
       </Suspense>
     </>

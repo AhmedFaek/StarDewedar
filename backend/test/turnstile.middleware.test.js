@@ -46,6 +46,7 @@ test('rejects a missing or blank header token without calling Siteverify', async
     for (const token of [null, '', '  ']) {
         const { res, nextCalled } = await runVerifier(createTurnstileVerifier(), request(token))
         assert.equal(res.statusCode, 400)
+        assert.equal(res.body.code, 'TURNSTILE_FAILED')
         assert.equal(nextCalled, false)
     }
 
@@ -60,11 +61,13 @@ test('accepts a valid token with the expected action and sends the expected Site
         return siteverifyResponse({ success: true, action: 'public_request' })
     })
 
-    const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
+    const req = request()
+    const { res, nextCalled } = await runVerifier(createTurnstileVerifier(), req)
     const form = new URLSearchParams(requestOptions.body)
 
     assert.equal(res.statusCode, null)
     assert.equal(nextCalled, true)
+    assert.equal(Object.hasOwn(req.headers, 'x-turnstile-token'), false)
     assert.equal(requestOptions.signal instanceof AbortSignal, true)
     assert.equal(form.get('secret'), 'test-secret')
     assert.equal(form.get('response'), 'test-token')
@@ -82,6 +85,7 @@ test('rejects invalid and expired or replayed tokens with 403', async (t) => {
 
         const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
         assert.equal(res.statusCode, 403)
+        assert.equal(res.body.code, 'TURNSTILE_FAILED')
         assert.equal(nextCalled, false)
         t.mock.reset()
     }
@@ -96,6 +100,7 @@ test('rejects a token with an unexpected action', async (t) => {
 
     const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
     assert.equal(res.statusCode, 403)
+    assert.equal(res.body.code, 'TURNSTILE_FAILED')
     assert.equal(nextCalled, false)
 })
 
@@ -105,6 +110,7 @@ test('treats malformed Siteverify responses as unavailable', async (t) => {
 
     const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
     assert.equal(res.statusCode, 503)
+    assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
     assert.equal(nextCalled, false)
 })
 
@@ -119,6 +125,7 @@ test('treats provider configuration and internal errors as unavailable', async (
 
         const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
         assert.equal(res.statusCode, 503)
+        assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
         assert.equal(nextCalled, false)
         t.mock.reset()
     }
@@ -133,6 +140,7 @@ test('treats non-OK Siteverify HTTP responses as unavailable', async (t) => {
 
     const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
     assert.equal(res.statusCode, 503)
+    assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
     assert.equal(nextCalled, false)
 })
 
@@ -152,6 +160,20 @@ test('aborts the outbound fetch on timeout and returns 503', async () => {
     const { res, nextCalled } = await runVerifier(middleware)
     assert.equal(fetchAborted, true)
     assert.equal(res.statusCode, 503)
+    assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
+    assert.equal(nextCalled, false)
+})
+
+test('fails closed with an unavailable code when Siteverify fetch rejects', async (t) => {
+    process.env.TURNSTILE_SECRET_KEY = 'test-secret'
+    t.mock.method(globalThis, 'fetch', async () => {
+        throw new TypeError('network unavailable')
+    })
+
+    const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
+    assert.equal(res.statusCode, 503)
+    assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
+    assert.equal(res.body.message, 'Security verification service is temporarily unavailable. Please try again later.')
     assert.equal(nextCalled, false)
 })
 
@@ -163,15 +185,17 @@ test('fails closed when the secret is not configured', async (t) => {
 
     const { res, nextCalled } = await runVerifier(createTurnstileVerifier())
     assert.equal(res.statusCode, 503)
+    assert.equal(res.body.code, 'TURNSTILE_UNAVAILABLE')
     assert.equal(nextCalled, false)
 })
 
 test('request routes verify before Multer and contact remains header-compatible', async () => {
     const routeFiles = [
-        ['visitRequests/visit.routes.js', /router\.post\('\/', visitLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createVisit\)/],
-        ['quoteRequests/quote.routes.js', /router\.post\('\/', quoteLimiter,\s*verifyTurnstile,\s*singleFileUpload,\s*controller\.createQuote\)/],
-        ['boqRequests/boq.routes.js', /router\.post\('\/', boqLimiter,\s*verifyTurnstile,\s*boqUpload,\s*controller\.createBOQ\)/],
-        ['contactMessages/contact.routes.js', /router\.post\('\/', contactLimiter,\s*verifyTurnstile,\s*validate\(createContactSchema\),\s*controller\.createContact\)/],
+        ['auth/auth.routes.js', /router\.post\(\s*'\/register',\s*registerLimiters\.coarseLimiter,\s*verifyTurnstile,\s*registerLimiters\.passedChallengeLimiter,\s*validate\(registerSchema\),\s*controller\.register\s*\)/],
+        ['visitRequests/visit.routes.js', /router\.post\(\s*'\/',\s*visitLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*visitLimiters\.passedChallengeLimiter,\s*singleFileUpload,\s*controller\.createVisit\s*\)/],
+        ['quoteRequests/quote.routes.js', /router\.post\(\s*'\/',\s*quoteLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*quoteLimiters\.passedChallengeLimiter,\s*singleFileUpload,\s*controller\.createQuote\s*\)/],
+        ['boqRequests/boq.routes.js', /router\.post\(\s*'\/',\s*boqLimiters\.coarseLimiter,\s*optionalAuth,\s*validateFormTiming,\s*verifyTurnstile,\s*boqLimiters\.passedChallengeLimiter,\s*boqUpload,\s*controller\.createBOQ\s*\)/],
+        ['contactMessages/contact.routes.js', /router\.post\(\s*'\/',\s*contactLimiters\.coarseLimiter,\s*validateFormTiming,\s*verifyTurnstile,\s*contactLimiters\.passedChallengeLimiter,\s*controller\.createContact\s*\)/],
     ]
 
     for (const [file, routePattern] of routeFiles) {

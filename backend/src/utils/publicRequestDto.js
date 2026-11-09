@@ -37,6 +37,7 @@ export const toPublicRequest = (request) => {
     const publicRequest = Object.fromEntries(
         Object.entries(safeRequest).filter(([key]) =>
             key !== 'assets' &&
+            key !== 'user_id' &&
             key !== 'archived_at' &&
             !key.startsWith('notification_')
         )
@@ -51,7 +52,7 @@ export const toPublicRequest = (request) => {
 
 export const toAdminRequest = (request) => {
     if (!request || typeof request !== 'object') return request
-    const { notification_lease_token, ...safeRequest } = request
+    const { notification_lease_token, user_id, ...safeRequest } = request
     const adminRequest = toSafeRequest(safeRequest)
     delete adminRequest.assets
     if (Array.isArray(request.attachments)) {

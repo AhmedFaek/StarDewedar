@@ -30,6 +30,7 @@ const PROVIDER_ERROR_CODES = new Set([
 
 const respondUnavailable = (res) => res.status(503).json({
     success: false,
+    code: 'TURNSTILE_UNAVAILABLE',
     message: 'Security verification service is temporarily unavailable. Please try again later.',
 })
 
@@ -42,6 +43,7 @@ export const createTurnstileVerifier = ({
     if (typeof token !== 'string' || token.trim() === '') {
         return res.status(400).json({
             success: false,
+            code: 'TURNSTILE_FAILED',
             message: 'Please complete the security verification and try again.',
         })
     }
@@ -109,6 +111,7 @@ export const createTurnstileVerifier = ({
             console.warn('Turnstile token rejected', { errorCodes })
             return res.status(403).json({
                 success: false,
+                code: 'TURNSTILE_FAILED',
                 message: 'Please complete the security verification and try again.',
             })
         }
@@ -122,10 +125,12 @@ export const createTurnstileVerifier = ({
             console.warn('Turnstile action rejected', { reason: 'action_mismatch' })
             return res.status(403).json({
                 success: false,
+                code: 'TURNSTILE_FAILED',
                 message: 'Please complete the security verification and try again.',
             })
         }
 
+        if (req.headers) delete req.headers['x-turnstile-token']
         next()
     } catch (error) {
         if (controller.signal.aborted) {

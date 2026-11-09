@@ -15,13 +15,15 @@ import InputField from '../forms/InputField'
 import SelectField from '../forms/SelectField'
 import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
-import TurnstileWidget from '../forms/TurnstileWidget'
+import EmailSuggestion from '../forms/EmailSuggestion'
+import TurnstileRecovery from '../forms/TurnstileRecovery'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
 import { validateBOQFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
+import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 // BOQ-specific file types shown to the user
@@ -56,6 +58,8 @@ export default function BOQFormSection({ visible = true }) {
 
   const [turnstileToken, setTurnstileToken] = useState(null)
   const turnstileRef = useRef(null)
+  const honeypotRef = useRef(null)
+  const { getElapsedMs, reset: resetElapsedTime } = useFormElapsedTime({ visible })
   const [unknownOutcome, setUnknownOutcome] = useState(false)
 
   // ── Fetch logged-in user profile to prefill contact information ────────────
@@ -104,6 +108,11 @@ export default function BOQFormSection({ visible = true }) {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const applyEmailSuggestion = (email) => {
+    setFormData((prev) => ({ ...prev, email }))
+    setErrors((prev) => ({ ...prev, email: '' }))
   }
 
   const handlePhoneChange = (e) => {
@@ -204,11 +213,13 @@ export default function BOQFormSection({ visible = true }) {
       supportingFiles.forEach((file) => {
         payload.append('supporting_docs', file)
       })
+      payload.append('sdc_ref', honeypotRef.current?.value || '')
 
-      return api.sendBOQRequest(payload, turnstileToken)
+      return api.sendBOQRequest(payload, turnstileToken, getElapsedMs())
     },
     successMessage: t('requestBOQ.successMsg'),
     onSuccess: () => {
+      resetElapsedTime()
       setFormData((prev) => ({
         name: isLoggedIn() ? prev.name : '',
         company_name: isLoggedIn() ? prev.company_name : '',
@@ -229,7 +240,13 @@ export default function BOQFormSection({ visible = true }) {
       setSupportingUploadKey((k) => k + 1)
       resetTurnstile()
     },
-    onError: () => {
+    onError: (error) => {
+      if ((error?.code || error?.data?.code) === 'OPTIONAL_AUTH_INVALID') {
+        return true
+      }
+      if (['FORM_TIMING_MISSING', 'FORM_TOO_FAST'].includes(error?.code || error?.data?.code)) {
+        return false
+      }
       resetTurnstile()
       return false
     },
@@ -268,6 +285,9 @@ export default function BOQFormSection({ visible = true }) {
       <div className="bg-white p-6 sm:p-8 lg:p-10">
         {unknownOutcome && <UnknownSubmissionOutcome requestType="boq" />}
         <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-7 max-w-3xl">
+          <div aria-hidden="true" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', border: 0 }}>
+            <input ref={honeypotRef} type="text" name="sdc_ref" tabIndex={-1} autoComplete="off" />
+          </div>
 
           {/* ─── Section 1: Customer Information ─────────────────────────── */}
           <div>
@@ -298,16 +318,19 @@ export default function BOQFormSection({ visible = true }) {
                 error={errors.company_name}
                 variant="bordered"
               />
-              <InputField
-                label={t('requestBOQ.emailAddress')}
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                error={errors.email}
-                variant="bordered"
-              />
+              <div>
+                <InputField
+                  label={t('requestBOQ.emailAddress')}
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  error={errors.email}
+                  variant="bordered"
+                />
+                <EmailSuggestion email={formData.email} onSelect={applyEmailSuggestion} />
+              </div>
               <InputField
                 label={t('requestBOQ.phoneNumber')}
                 type="tel"
@@ -506,8 +529,9 @@ export default function BOQFormSection({ visible = true }) {
               <p className="font-headline font-bold uppercase text-[11px] sm:text-xs tracking-wider text-slate-600">
                 {t('turnstile.verifyPrompt')}
               </p>
-              <TurnstileWidget
+              <TurnstileRecovery
                 ref={turnstileRef}
+                visible={visible}
                 onVerify={(token) => setTurnstileToken(token)}
                 onExpire={() => setTurnstileToken(null)}
                 onError={() => setTurnstileToken(null)}

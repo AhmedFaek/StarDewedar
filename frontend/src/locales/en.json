@@ -1,4 +1,8 @@
 {
+  "emailSuggestion": {
+    "prompt": "Did you mean",
+    "suffix": "?"
+  },
   "phone": {
     "invalid": "Enter 11 digits starting with 01, or +20 followed by 10 digits."
   },
@@ -437,6 +441,11 @@
     "loading": "Loading..."
   },
 
+  "requestForm": {
+    "timingMissing": "This form could not be submitted because its timing information was missing or invalid. Please try again.",
+    "tooFast": "Please keep this form open for at least 2 seconds before submitting."
+  },
+
   "notifications": {
     "genericError": "Something went wrong. Please try again.",
     "networkError": "Network error. Please check your connection and try again.",
@@ -547,6 +556,14 @@
     "account": "Account",
     "logout": "Sign Out",
     "loggingOut": "Signing Out...",
+    "editProfile": "Edit Profile",
+    "saveProfile": "Save Changes",
+    "savingProfile": "Saving...",
+    "profileUpdatedSuccess": "Your profile has been updated.",
+    "profileNameInvalid": "Name must be between 2 and 100 characters.",
+    "profileCompanyInvalid": "Company name must be 150 characters or fewer.",
+    "cancel": "Cancel",
+    "close": "Close",
     "changePassword": "Change Password",
     "currentPassword": "Current Password",
     "newPassword": "New Password",
@@ -570,6 +587,11 @@
       "resendCooldown": "Resend in {{seconds}}s",
       "resendSuccess": "A fresh verification code has been sent to your email.",
       "codeSentNotification": "A 6-digit verification code was sent to your email.",
+      "emailSendFailed": "We couldn't send your code. Tap Resend to try again.",
+      "codePending": "We already have a pending registration for this email, and your original details were kept. Enter the code we sent (tap Resend if you can't find it). If you're not sure which password you used, use 'Forgot password' on the sign-in screen. You can update your name and contact details from your profile once you're signed in.",
+      "useMostRecentCode": "Use the most recent code we sent you.",
+      "checkSpamFolder": "Can't find it? Check your spam folder.",
+      "emailVerifiedLogin": "Your email is verified. Please log in.",
       "unverifiedLoginPrompt": "Your account is not verified yet. Enter the code sent to your email.",
       "wrongEmail": "Wrong email? Register again",
       "codeRequired": "Please enter the 6-digit code.",
@@ -589,7 +611,13 @@
   "turnstile": {
     "verifyPrompt": "Please complete the security check before submitting",
     "verifyRequired": "Please complete the security verification before submitting.",
-    "verificationFailed": "Please complete the security verification and try again."
+    "verificationFailed": "Please complete the security verification and try again.",
+    "registrationFailed": "The verification check failed or expired. Please try again.",
+    "serviceUnavailable": "The security verification service is temporarily unavailable. Please try again.",
+    "loadFailed": "The security check couldn't load. Turn off ad blockers or privacy extensions for this site, check your connection, then try again.",
+    "reloadRequired": "The security check still couldn't load. Reload the page and try again.",
+    "tryAgain": "Try again",
+    "reloadPage": "Reload page"
   },
 
   "requestPage": {

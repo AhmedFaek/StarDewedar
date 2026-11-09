@@ -7,8 +7,18 @@ const REQUEST_SIZE_LIMIT_CODES = new Set([
     'LIMIT_AGGREGATE_FILE_SIZE',
     'LIMIT_REQUEST_SIZE',
 ])
+const EMAIL_VALIDATION_CODES = new Set([
+    'INVALID_EMAIL_FORMAT',
+    'INVALID_EMAIL_DOMAIN',
+    'DISPOSABLE_EMAIL_NOT_ALLOWED',
+])
 
 const getPublicError = (error) => {
+    const code = String(error?.code || '').toUpperCase()
+    if (EMAIL_VALIDATION_CODES.has(code)) {
+        return { status: 400, message: error.message, code }
+    }
+
     if (error instanceof ZodError) {
         const message = error.issues
             .map((issue) => issue.message)
@@ -18,7 +28,6 @@ const getPublicError = (error) => {
         return { status: 400, message: message || 'Invalid request data.' }
     }
 
-    const code = String(error?.code || '').toUpperCase()
     if (error instanceof UploadValidationError || code === 'INVALID_UPLOAD') {
         return { status: 400, message: 'Invalid file type or content.' }
     }
@@ -39,7 +48,7 @@ const getPublicError = (error) => {
 }
 
 export const sendPublicRequestError = (res, error, requestType) => {
-    const { status, message } = getPublicError(error)
+    const { status, message, code } = getPublicError(error)
 
     console.error('Public request creation failed', {
         event: 'public_request_creation_failed',
@@ -48,8 +57,11 @@ export const sendPublicRequestError = (res, error, requestType) => {
         errorName: error?.name,
     })
 
-    return res.status(status).json({
+    const response = {
         success: false,
         message,
-    })
+    }
+    if (code) response.code = code
+
+    return res.status(status).json(response)
 }
