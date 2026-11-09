@@ -3,6 +3,7 @@ import { Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { CompareProvider } from './utils/compareContext'
 import CompareDrawer from './components/shared/CompareDrawer'
 import SupportMessagesFloat from './components/shared/SupportMessagesFloat'
+import SupportReplyNotice from './components/shared/SupportReplyNotice'
 import TopProgressBar from './components/shared/TopProgressBar'
 import { NotificationProvider } from './context/NotificationContext'
 import ToastContainer from './components/notifications/ToastContainer'
@@ -79,6 +80,7 @@ export default function App() {
         </Suspense>
 
         <SupportMessagesFloat />
+        <SupportReplyNotice />
         <CompareDrawer />
         <ToastContainer />
       </CompareProvider>

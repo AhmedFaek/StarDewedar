@@ -41,6 +41,9 @@ router.post('/', createConversationLimiter, controller.createConversation)
 // GET    /api/conversations
 router.get('/', controller.getMyConversations)
 
+// GET    /api/conversations/unseen-replies  (must stay before /:id)
+router.get('/unseen-replies', controller.getMyUnseenReplies)
+
 // GET    /api/conversations/:id
 router.get('/:id', validateUuidParam(), controller.getMyConversationById)
 

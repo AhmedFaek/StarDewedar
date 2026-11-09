@@ -692,6 +692,11 @@
     "title": "Support Messages",
     "subtitle": "Send us a message and our support team will get back to you within 24 hours.",
     "greetingBubble": "Hi there! How can we help you today?",
+    "replyNotice": {
+      "single": "Support has replied to your conversation.",
+      "multiple": "Support has replied to {{n}} of your conversations.",
+      "ariaLabel": "New reply from support. Open to read it."
+    },
     "supportTeam": "Star Dewedar Support",
     "onlineNow": "Online now",
     "startChatPrompt": "Send a message",

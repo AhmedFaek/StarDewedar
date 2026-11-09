@@ -5,6 +5,7 @@ import { usePrivatePageSeo } from '../hooks/usePrivatePageSeo'
 import Header from '../components/layout/Header'
 import Footer from '../components/layout/Footer'
 import { api } from '../utils/api'
+import { notifyConversationSeen } from '../utils/supportReplySync'
 import { getUser, isLoggedIn } from '../utils/auth'
 import { getApiErrorMessage } from '../utils/apiErrorHandler'
 import { useNotification } from '../hooks/useNotification'
@@ -410,6 +411,7 @@ export default function ConversationPage() {
     try {
       const res = await api.getConversationMessages(conversationId, { limit: 30 })
       const { messages: msgs, conversation: backendConv, nextCursor: cursor, hasMore: more } = res.data
+      notifyConversationSeen(conversationId, msgs)
       if (backendConv) {
         setConversation(prev => prev ? { ...prev, ...backendConv } : backendConv)
       }
@@ -452,6 +454,7 @@ export default function ConversationPage() {
       try {
         const res = await api.getConversationMessages(conversationId, { limit: 30 })
         const { messages: msgs, conversation: backendConv } = res.data
+        notifyConversationSeen(conversationId, msgs)
 
         if (backendConv) {
           setConversation(prev => {
