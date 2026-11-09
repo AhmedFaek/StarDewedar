@@ -323,6 +323,8 @@ export const api = {
     return authFetch(`${API_URL}/conversations${qs ? `?${qs}` : ''}`)
   },
 
+  getUnseenConversationReplies: () => authFetch(`${API_URL}/conversations/unseen-replies`),
+
   getConversationById: (id) => authFetch(`${API_URL}/conversations/${id}`),
 
   getConversationMessages: (id, params = {}) => {

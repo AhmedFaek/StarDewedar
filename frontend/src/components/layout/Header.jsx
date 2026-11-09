@@ -251,6 +251,11 @@ export default function Header() {
     setEditProfileOpen(false)
   }
 
+  // Tell the support-reply notice when the signed-in user changes (login/logout)
+  useEffect(() => {
+    window.dispatchEvent(new Event('star-dewedar:auth-changed'))
+  }, [user?.id])
+
   useEffect(() => {
     const handleOpenMyRequests = (event) => {
       setRequestsRecoveryType(event.detail?.requestType || null)
