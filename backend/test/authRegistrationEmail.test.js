@@ -154,6 +154,11 @@ test('register reports successful verification email delivery', async (t) => {
 
     assert.equal(result.emailSent, true)
     assert.equal(state.sentMessages.length, 1)
+    assert.match(state.sentMessages[0].html, /src="cid:sdc-monogram@stardewedar\.com"/u)
+    assert.equal(Array.isArray(state.sentMessages[0].attachments), true)
+    assert.equal(state.sentMessages[0].attachments.length, 1)
+    assert.equal(state.sentMessages[0].attachments[0].filename, 'sdc-monogram.png')
+    assert.equal(state.sentMessages[0].attachments[0].cid, 'sdc-monogram@stardewedar.com')
     assert.equal(state.cooldownResets.length, 0)
     assertNoUnconditionalUserUpdate()
     assertNoSensitiveLogValues(logs)
