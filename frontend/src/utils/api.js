@@ -1,8 +1,17 @@
 import { getValidAccessToken, refreshAccessToken, saveTokens, saveUser, clearAuth } from './auth.js'
 import { createApiError } from './apiErrorHandler.js'
+import { NetworkRequestError } from './formSubmission.js'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
+const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:5000/api'
 const API_ORIGIN = new URL(API_URL, window.location.origin).origin
+
+const requestFetch = async (...args) => {
+  try {
+    return await fetch(...args)
+  } catch (error) {
+    throw new NetworkRequestError(error)
+  }
+}
 
 // ── In-memory cache for static catalog endpoints ──────────────────────────────
 const CACHE_TTL = 60_000 // 60 seconds
@@ -112,7 +121,7 @@ const optionalAuthFetch = async (url, options = {}) => {
     delete headers.Authorization
     delete headers.authorization
     if (token) headers.Authorization = `Bearer ${token}`
-    return fetch(url, { ...options, headers })
+    return requestFetch(url, { ...options, headers })
   }
 
   const token = await getValidAccessToken()
@@ -130,7 +139,7 @@ const optionalAuthFetch = async (url, options = {}) => {
     }
   }
 
-  return handleResponse(response)
+  return response
 }
 
 const triggerAttachmentDownload = (blob, filename) => {
@@ -156,7 +165,7 @@ export const api = {
   getProjects: () => cachedFetch('projects', () => fetch(`${API_URL}/projects`).then(handleResponse)),
   getProjectById: (id) => cachedFetch(`project:${id}`, () => fetch(`${API_URL}/projects/${id}`).then(handleResponse)),
 
-  sendContactMessage: (data, turnstileToken, elapsedMs) => fetch(`${API_URL}/contact`, {
+  sendContactMessage: (data, turnstileToken, elapsedMs) => requestFetch(`${API_URL}/contact`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

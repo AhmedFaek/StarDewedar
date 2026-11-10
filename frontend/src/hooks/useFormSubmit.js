@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react'
 import { useNotification } from './useNotification.js'
-import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
+import { runFormSubmission } from '../utils/formSubmission.js'
 
 /**
  * useFormSubmit — reusable hook that wraps any async form submission with:
@@ -37,41 +37,18 @@ export function useFormSubmit({
     setIsSubmitting(true)
 
     try {
-      const result = await onSubmit(...args)
-
-      if (successMessage) {
-        showSuccess(successMessage)
-      }
-
-      if (onSuccess) {
-        onSuccess(result)
-      }
-    } catch (error) {
-      // Detect network errors (fetch failures, server unreachable)
-      const isNetworkError = error instanceof TypeError && (
-        ambiguousNetworkError || error.message?.toLowerCase().includes('failed to fetch')
-      )
-
-      if (isNetworkError) {
-        const suppressed = ambiguousNetworkError && onError ? onError(error) : false
-        const recoveryHandled = ambiguousNetworkError && onUnknownOutcome?.(error) === true
-        if (!suppressed && !recoveryHandled) {
-          const networkMsg = typeof t === 'function'
-            ? t(ambiguousNetworkError
-              ? 'notifications.submissionOutcomeUnknown'
-              : 'notifications.networkError')
-            : ambiguousNetworkError
-              ? 'We could not confirm whether your request was received. Please verify again before retrying.'
-              : 'Network error. Please check your connection and try again.'
-          showError(networkMsg)
-        }
-      } else {
-        // Let the caller optionally handle the error; if they return true, we skip the toast
-        const suppressed = onError ? onError(error) : false
-        if (!suppressed) {
-          showError(getApiErrorMessage(error, { t }))
-        }
-      }
+      await runFormSubmission({
+        onSubmit,
+        args,
+        onSuccess,
+        onError,
+        onUnknownOutcome,
+        successMessage,
+        ambiguousNetworkError,
+        t,
+        showSuccess,
+        showError,
+      })
     } finally {
       setIsSubmitting(false)
       inflightRef.current = false
