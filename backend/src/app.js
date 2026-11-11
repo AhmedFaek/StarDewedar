@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import env, { isProductionNodeEnv } from './config/env.js'
+import healthRoutes from './routes/health.routes.js'
 import authRoutes from './modules/auth/auth.routes.js'
 import categoryRoutes from './modules/categories/category.routes.js'
 import productRoutes from './modules/products/product.routes.js'
@@ -98,6 +99,8 @@ app.use(helmet(helmetOptions))
 app.use(cors(corsOptions))
 app.use(express.json({ limit: '1mb' }))
 app.use(express.urlencoded({ extended: true, limit: '1mb' }))
+
+app.use(healthRoutes)
 
 // Routes
 app.use('/api/auth', authRoutes)
