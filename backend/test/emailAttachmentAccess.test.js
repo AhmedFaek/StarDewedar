@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { test } from 'node:test'
-import express from 'express'
 
 Object.assign(process.env, {
     PORT: '0',
@@ -26,7 +25,7 @@ const [
     accessService,
     { createCompanyEmailAttachmentLinks },
     { createNotificationRecoveryService },
-    { default: emailAccessRoutes },
+    { default: app },
 ] = await Promise.all([
     import('../src/config/storage.js'),
     import('../src/utils/prisma.js'),
@@ -34,7 +33,7 @@ const [
     import('../src/modules/attachments/emailAttachmentAccess.service.js'),
     import('../src/modules/attachments/emailAttachmentAccess.service.js'),
     import('../src/modules/notifications/notificationRecovery.service.js'),
-    import('../src/modules/attachments/emailAttachmentAccess.routes.js'),
+    import('../src/app.js'),
 ])
 
 const replaceMethod = (t, target, methodName, implementation) => {
@@ -449,8 +448,6 @@ test('company email access route redirects valid links without requiring authent
     replaceMethod(t, cloudinary.utils, 'private_download_url', () =>
         'https://cloudinary.example/temporary-signed-download'
     )
-    const app = express()
-    app.use('/api/attachments', emailAccessRoutes)
     const server = app.listen(0, '127.0.0.1')
     t.after(() => new Promise((resolve, reject) => {
         server.close((error) => error ? reject(error) : resolve())
@@ -460,10 +457,15 @@ test('company email access route redirects valid links without requiring authent
     const { port } = server.address()
     const response = await fetch(
         `http://127.0.0.1:${port}/api/attachments/email/${token}`,
-        { redirect: 'manual' }
+        {
+            redirect: 'manual',
+            headers: { Origin: env.corsOrigins[0] },
+        }
     )
     assert.equal(response.status, 302)
     assert.equal(response.headers.get('location'), 'https://cloudinary.example/temporary-signed-download')
     assert.equal(response.headers.get('cache-control'), 'no-store')
     assert.equal(response.headers.get('referrer-policy'), 'no-referrer')
+    assert.equal(response.headers.get('access-control-allow-origin'), env.corsOrigins[0])
+    assert.equal(response.headers.get('cross-origin-resource-policy'), 'same-origin')
 })
