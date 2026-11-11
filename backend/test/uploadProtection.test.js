@@ -419,8 +419,8 @@ test('returns HTTP 413 when a file exceeds Multer per-file limit', async (t) => 
         request.end(body)
     })
 
-    assert.equal(await send(5), 201)
-    assert.equal(await send(6), 413)
+    assert.equal(await send(6), 201)
+    assert.equal(await send(7), 413)
 })
 
 test('accepts a chunked multipart body exactly at the request-byte limit', async (t) => {
