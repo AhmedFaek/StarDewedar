@@ -3,10 +3,14 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "node --experimental-test-module-mocks --test",
     "lint": "eslint src --ext js,jsx",
     "format": "prettier --write src"
   },
