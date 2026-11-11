@@ -1,7 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { readFileSync } from 'node:fs'
 import http from 'node:http'
 import { Readable } from 'node:stream'
 import { deflateRawSync } from 'node:zlib'
@@ -804,7 +803,7 @@ test('invalid BOQ supporting content prevents all Cloudinary upload calls', asyn
 })
 
 test('validates XLSX ZIP structure, required components, duplicates, and size limits', async () => {
-    const workbook = readFileSync(new URL('./fixtures/minimal-valid.xlsx', import.meta.url))
+    const workbook = makeXlsx()
     const arbitraryZip = makeZip([['readme.txt', 'not a workbook']])
     const duplicateCoreEntry = makeZip([
         ['[Content_Types].xml', '<Types/>'],
