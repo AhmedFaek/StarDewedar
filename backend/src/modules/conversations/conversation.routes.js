@@ -1,5 +1,6 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import { getClientIp } from '../../utils/clientIp.js'
 import * as controller from './conversation.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole } from '../../middleware/roles.middleware.js'
@@ -16,6 +17,9 @@ const createConversationLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: { message: 'Too many conversations started. Please try again later.' },
 })
 
@@ -25,6 +29,9 @@ const sendMessageLimiter = rateLimit({
     max: 30,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: { message: 'Too many messages sent. Please slow down.' },
 })
 

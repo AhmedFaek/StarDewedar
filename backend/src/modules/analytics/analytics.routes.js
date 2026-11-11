@@ -1,8 +1,9 @@
 // analytics.routes.js
 import express from 'express'
 import { z } from 'zod'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import * as controller from './analytics.controller.js'
+import { getClientIp } from '../../utils/clientIp.js'
 
 const router = express.Router()
 
@@ -38,6 +39,9 @@ const heartbeatLimiter = rateLimit({
     max: 200,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: { message: 'Too many heartbeat requests. Please slow down.' },
 })
 

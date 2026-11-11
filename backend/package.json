@@ -4,9 +4,9 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "node scripts/with-node-env.js development node node_modules/nodemon/bin/nodemon.js src/server.js",
     "start": "node src/server.js",
-    "test": "node --experimental-test-module-mocks --test",
+    "test": "node scripts/with-node-env.js test node --experimental-test-module-mocks --test",
     "rbac:migrate": "node scripts/migrate-admin-roles.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",

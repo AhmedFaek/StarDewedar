@@ -1,5 +1,6 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import { getClientIp } from '../../utils/clientIp.js'
 import * as controller from './auth.controller.js'
 import validate from '../../middleware/validation.middleware.js'
 import auth from '../../middleware/auth.middleware.js'
@@ -28,6 +29,9 @@ const verifyEmailLimiter = rateLimit({
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         message: 'Too many verification attempts. Please try again later.',
     },
@@ -38,6 +42,9 @@ const resendVerificationLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         message: 'Too many verification code requests. Please try again later.',
     },
@@ -48,16 +55,22 @@ const resetPasswordLimiter = rateLimit({
     max: 5,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         message: 'Too many password reset attempts. Please try again later.',
     },
 })
 
-const loginLimiter = rateLimit({
+export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         message: 'Too many login attempts. Please try again later.',
     },

@@ -1,3 +1,5 @@
+import { getClientIp } from '../utils/clientIp.js'
+
 /**
  * verifyTurnstile — Cloudflare Turnstile server-side verification middleware.
  *
@@ -39,6 +41,7 @@ export const createTurnstileVerifier = ({
     fetchImpl = (...args) => fetch(...args),
 } = {}) => async function verifyTurnstile(req, res, next) {
     const token = req.headers?.['x-turnstile-token']
+    const clientIp = getClientIp(req)
 
     if (typeof token !== 'string' || token.trim() === '') {
         return res.status(400).json({
@@ -62,7 +65,7 @@ export const createTurnstileVerifier = ({
         const formBody = new URLSearchParams({
             secret,
             response: token,
-            ...(req.ip ? { remoteip: req.ip } : {}),
+            ...(clientIp ? { remoteip: clientIp } : {}),
         })
 
         const cfRes = await fetchImpl(SITEVERIFY_URL, {

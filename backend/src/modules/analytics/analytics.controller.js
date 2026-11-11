@@ -1,5 +1,6 @@
 // analytics.controller.js
 import * as service from './analytics.service.js'
+import { getClientIp } from '../../utils/clientIp.js'
 
 /**
  * POST /api/analytics/heartbeat
@@ -8,7 +9,7 @@ import * as service from './analytics.service.js'
 export const heartbeat = async (req, res, next) => {
     try {
         const { sessionId } = req.body
-        const rawIp = req.ip || req.socket?.remoteAddress
+        const rawIp = getClientIp(req)
 
         const result = await service.processHeartbeat(sessionId, rawIp)
 
