@@ -11,6 +11,14 @@ import sharp from 'sharp'
 import cloudinary from '../src/config/storage.js'
 import { createBOQ } from '../src/modules/boqRequests/boq.controller.js'
 import {
+    BOQ_MAX_AGGREGATE_FILE_BYTES,
+    BOQ_MAX_FILE_SIZE,
+    BOQ_MAX_REQUEST_BYTES,
+    MAX_FILE_SIZE,
+    MAX_STANDARD_FILE_BYTES,
+    MAX_STANDARD_REQUEST_BYTES,
+    createBoqFileUpload,
+    createStandardFileUpload,
     createLimitedMemoryStorage,
     limitRequestBodyBytes,
 } from '../src/middleware/upload.middleware.js'
@@ -26,6 +34,52 @@ const makeFile = (name, mimetype, buffer) => ({
     originalname: name,
     mimetype,
     buffer,
+})
+
+const makeMultipartBody = (boundary, parts) => Buffer.concat([
+    ...parts.flatMap(({ field, filename, content }) => [
+        Buffer.from(
+            `--${boundary}\r\nContent-Disposition: form-data; name="${field}"` +
+            `${filename ? `; filename="${filename}"` : ''}\r\n` +
+            `${filename ? 'Content-Type: application/pdf\r\n' : ''}\r\n`
+        ),
+        Buffer.isBuffer(content) ? content : Buffer.from(content),
+        Buffer.from('\r\n'),
+    ]),
+    Buffer.from(`--${boundary}--\r\n`),
+])
+
+const startUploadServer = async (t, uploadMiddleware) => {
+    const app = express()
+    app.post('/upload', uploadMiddleware, (req, res) => res.sendStatus(201))
+    app.use((error, req, res, next) => {
+        res.status(error.status || 500).end()
+    })
+
+    const server = app.listen(0, '127.0.0.1')
+    await new Promise((resolve, reject) => {
+        server.once('listening', resolve)
+        server.once('error', reject)
+    })
+    t.after(() => new Promise((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve())
+    }))
+    return server.address().port
+}
+
+const sendMultipart = (port, boundary, body) => new Promise((resolve, reject) => {
+    const request = http.request({
+        method: 'POST',
+        host: '127.0.0.1',
+        port,
+        path: '/upload',
+        headers: { 'content-type': `multipart/form-data; boundary=${boundary}` },
+    }, (response) => {
+        response.resume()
+        response.on('end', () => resolve(response.statusCode))
+    })
+    request.on('error', reject)
+    request.end(body)
 })
 
 const crc32 = (buffer) => {
@@ -421,6 +475,112 @@ test('returns HTTP 413 when a file exceeds Multer per-file limit', async (t) => 
 
     assert.equal(await send(6), 201)
     assert.equal(await send(7), 413)
+})
+
+test('standard upload accepts its exact file limit and rejects one byte over', async (t) => {
+    const port = await startUploadServer(t, createStandardFileUpload({
+        maxFileBytes: 6,
+        maxAggregateFileBytes: 6,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'standard-file-boundary-test'
+
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'file',
+        filename: 'sample.pdf',
+        content: Buffer.alloc(6, 0x61),
+    }])), 201)
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'file',
+        filename: 'sample.pdf',
+        content: Buffer.alloc(7, 0x61),
+    }])), 413)
+})
+
+test('standard 11 MiB request cap accepts the exact body and rejects one byte over', async (t) => {
+    assert.equal(MAX_FILE_SIZE, 10 * 1024 * 1024)
+    assert.equal(MAX_STANDARD_FILE_BYTES, 10 * 1024 * 1024)
+    assert.equal(MAX_STANDARD_REQUEST_BYTES, 11 * 1024 * 1024)
+
+    const boundary = 'standard-request-boundary-test'
+    const exactBody = makeMultipartBody(boundary, [
+        { field: 'file', filename: 'sample.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: '' },
+    ])
+    const overBody = makeMultipartBody(boundary, [
+        { field: 'file', filename: 'sample.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: 'x' },
+    ])
+    assert.equal(overBody.length, exactBody.length + 1)
+
+    const port = await startUploadServer(t, createStandardFileUpload({
+        maxFileBytes: 16,
+        maxAggregateFileBytes: 16,
+        maxRequestBytes: exactBody.length,
+    }))
+    assert.equal(await sendMultipart(port, boundary, exactBody), 201)
+    assert.equal(await sendMultipart(port, boundary, overBody), 413)
+})
+
+test('BOQ per-file limit accepts its exact boundary and rejects one byte over', async (t) => {
+    assert.equal(BOQ_MAX_FILE_SIZE, 20 * 1024 * 1024)
+    assert.equal(BOQ_MAX_AGGREGATE_FILE_BYTES, 120 * 1024 * 1024)
+    assert.equal(BOQ_MAX_REQUEST_BYTES, 125 * 1024 * 1024)
+
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 4,
+        maxAggregateFileBytes: 8,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'boq-file-boundary-test'
+
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'boq_file',
+        filename: 'main.pdf',
+        content: Buffer.alloc(4, 0x61),
+    }])), 201)
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'boq_file',
+        filename: 'main.pdf',
+        content: Buffer.alloc(5, 0x61),
+    }])), 413)
+})
+
+test('BOQ aggregate file limit accepts the exact total and rejects one byte over', async (t) => {
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 5,
+        maxAggregateFileBytes: 8,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'boq-aggregate-boundary-test'
+    const multipart = (supportingBytes) => makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.alloc(4, 0x61) },
+        { field: 'supporting_docs', filename: 'support.pdf', content: Buffer.alloc(supportingBytes, 0x62) },
+    ])
+
+    assert.equal(await sendMultipart(port, boundary, multipart(4)), 201)
+    assert.equal(await sendMultipart(port, boundary, multipart(5)), 413)
+})
+
+test('BOQ 125 MiB request cap accepts the exact body and rejects one byte over', async (t) => {
+    const boundary = 'boq-request-boundary-test'
+    const exactBody = makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: '' },
+    ])
+    const overBody = makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: 'x' },
+    ])
+    assert.equal(overBody.length, exactBody.length + 1)
+
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 16,
+        maxAggregateFileBytes: 16,
+        maxRequestBytes: exactBody.length,
+    }))
+    assert.equal(await sendMultipart(port, boundary, exactBody), 201)
+    assert.equal(await sendMultipart(port, boundary, overBody), 413)
 })
 
 test('accepts a chunked multipart body exactly at the request-byte limit', async (t) => {
