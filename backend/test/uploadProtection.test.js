@@ -2,6 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
 import http from 'node:http'
+import { performance } from 'node:perf_hooks'
 import { Readable } from 'node:stream'
 import { deflateRawSync } from 'node:zlib'
 import express from 'express'
@@ -91,6 +92,29 @@ const crc32 = (buffer) => {
         }
     }
     return (crc ^ 0xffffffff) >>> 0
+}
+
+const makePngHeader = (width, height) => {
+    const header = Buffer.alloc(13)
+    header.writeUInt32BE(width, 0)
+    header.writeUInt32BE(height, 4)
+    header[8] = 8
+    header[9] = 2
+
+    const ihdr = Buffer.alloc(25)
+    ihdr.writeUInt32BE(header.length, 0)
+    ihdr.write('IHDR', 4, 'ascii')
+    header.copy(ihdr, 8)
+    ihdr.writeUInt32BE(crc32(ihdr.subarray(4, 21)), 21)
+
+    const iend = Buffer.from([0, 0, 0, 0, 0x49, 0x45, 0x4e, 0x44, 0, 0, 0, 0])
+    iend.writeUInt32BE(crc32(iend.subarray(4, 8)), 8)
+
+    return Buffer.concat([
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        ihdr,
+        iend,
+    ])
 }
 
 const makeZip = (files) => {
@@ -816,6 +840,99 @@ test('validates PDF, decoded JPEG/PNG, and non-empty UTF-8 CSV content', async (
         makeFile('boq.csv', 'text/csv', Buffer.from('\ufeffa,b\n1,2')),
         { boq: true }
     ), true)
+})
+
+test('accepts RGB and grayscale JPEGs, RGB and alpha PNGs, and four-channel CMYK JPEGs', async () => {
+    const rgb = sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 3,
+            background: { r: 10, g: 20, b: 30 },
+        },
+    })
+    const rgbJpeg = await rgb.clone().jpeg().toBuffer()
+    const grayscaleJpeg = await rgb.clone().toColourspace('b-w').jpeg().toBuffer()
+    const cmykJpeg = await rgb.clone().toColourspace('cmyk').jpeg().toBuffer()
+    const rgbPng = await rgb.clone().png().toBuffer()
+    const alphaPng = await sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 4,
+            background: { r: 10, g: 20, b: 30, alpha: 0.5 },
+        },
+    }).png().toBuffer()
+
+    assert.equal((await sharp(grayscaleJpeg).metadata()).channels, 1)
+    const cmykMetadata = await sharp(cmykJpeg).metadata()
+    assert.equal(cmykMetadata.space, 'cmyk')
+    assert.equal(cmykMetadata.channels, 4)
+    assert.equal((await sharp(alphaPng).metadata()).channels, 4)
+
+    for (const [filename, mimetype, buffer] of [
+        ['rgb.jpg', 'image/jpeg', rgbJpeg],
+        ['grayscale.jpg', 'image/jpeg', grayscaleJpeg],
+        ['cmyk.jpg', 'image/jpeg', cmykJpeg],
+        ['rgb.png', 'image/png', rgbPng],
+        ['alpha.png', 'image/png', alphaPng],
+    ]) {
+        assert.equal(await validateUploadedFile(makeFile(filename, mimetype, buffer)), true, filename)
+    }
+})
+
+test('rejects truncated images and mismatched JPEG/PNG signatures', async () => {
+    const image = sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 3,
+            background: { r: 10, g: 20, b: 30 },
+        },
+    })
+    const jpeg = await image.clone().jpeg().toBuffer()
+    const png = await image.clone().png().toBuffer()
+
+    await assert.rejects(
+        validateUploadedFile(makeFile('truncated.jpg', 'image/jpeg', jpeg.subarray(0, jpeg.length - 2))),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile('truncated.png', 'image/png', png.subarray(0, png.length - 13))),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile(
+            'jpeg-signature-png-content.jpg',
+            'image/jpeg',
+            Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), png.subarray(3)])
+        )),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile(
+            'png-signature-jpeg-content.png',
+            'image/png',
+            Buffer.concat([
+                Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+                jpeg.subarray(8),
+            ])
+        )),
+        UploadValidationError
+    )
+})
+
+test('rejects an oversized PNG IHDR without allocating the declared image', async () => {
+    const oversizedPngHeader = makePngHeader(8000, 5001)
+    const startedAt = performance.now()
+
+    await assert.rejects(
+        validateUploadedFile(makeFile('oversized.png', 'image/png', oversizedPngHeader)),
+        UploadValidationError
+    )
+
+    assert.ok(performance.now() - startedAt < 100,
+        'An over-limit PNG header should be rejected without decoding or allocating its image')
 })
 
 test('rejects malformed JPEG/PNG and empty or whitespace-only CSV', async () => {
