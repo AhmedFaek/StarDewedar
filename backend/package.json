@@ -3,10 +3,13 @@
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0"
+  },
   "scripts": {
-    "dev": "nodemon src/server.js",
+    "dev": "node scripts/with-node-env.js development node node_modules/nodemon/bin/nodemon.js src/server.js",
     "start": "node src/server.js",
-    "test": "node --experimental-test-module-mocks --test",
+    "test": "node scripts/with-node-env.js test node --experimental-test-module-mocks --test",
     "rbac:migrate": "node scripts/migrate-admin-roles.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
@@ -28,13 +31,14 @@
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.5.2",
+    "helmet": "^8.3.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.1.1",
-    "nodemailer": "^8.0.5",
+    "nodemailer": "10.5.0",
     "pg": "^8.20.0",
     "prisma": "^7.7.0",
     "resend": "^6.12.2",
-    "sharp": "^0.34.5",
+    "sharp": "0.35.5",
     "yauzl": "^3.4.0",
     "zod": "^4.3.6"
   },

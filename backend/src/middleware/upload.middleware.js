@@ -182,17 +182,25 @@ const legacyFileFilter = (req, file, cb) => {
     cb(null, true)
 }
 
-const requestUpload = multer({
-    storage: createUploadStorage(MAX_STANDARD_FILE_BYTES),
-    limits: {
-        fileSize: MAX_FILE_SIZE + 1,
-        files: 1,
-        fields: MAX_STANDARD_FIELDS,
-        parts: MAX_STANDARD_FIELDS + 1,
-        fieldSize: MAX_MULTIPART_FIELD_BYTES,
-    },
-    fileFilter,
-})
+export const createStandardFileUpload = ({
+    maxFileBytes = MAX_STANDARD_FILE_BYTES,
+    maxAggregateFileBytes = MAX_STANDARD_FILE_BYTES,
+    maxRequestBytes = MAX_STANDARD_REQUEST_BYTES,
+} = {}) => {
+    const parser = multer({
+        storage: createUploadStorage(maxAggregateFileBytes),
+        limits: {
+            fileSize: maxFileBytes,
+            files: 1,
+            fields: MAX_STANDARD_FIELDS,
+            parts: MAX_STANDARD_FIELDS + 1,
+            fieldSize: MAX_MULTIPART_FIELD_BYTES,
+        },
+        fileFilter,
+    }).single('file')
+
+    return limitRequestBodyBytes(parser, maxRequestBytes)
+}
 
 const upload = multer({
     storage: multer.memoryStorage(),
@@ -265,7 +273,7 @@ export const limitRequestBodyBytes = (uploadMiddleware, maxRequestBytes) => (req
  * Visit/Quote upload entry point: one optional file, with endpoint-specific
  * file, multipart field, part-count, aggregate, and total-body limits.
  */
-export const singleFileUpload = limitRequestBodyBytes(requestUpload.single('file'), MAX_STANDARD_REQUEST_BYTES)
+export const singleFileUpload = createStandardFileUpload()
 
 /*
  * Parse the BOQ multipart fields. Multer enforces the per-file and field/count
@@ -273,26 +281,34 @@ export const singleFileUpload = limitRequestBodyBytes(requestUpload.single('file
  * consumption. The controller separately requires boq_file and validates the
  * content of every file before any service upload starts.
  */
-const boqUploadParser = multer({
-    storage: createUploadStorage(BOQ_MAX_AGGREGATE_FILE_BYTES),
-    limits: {
-        fileSize: BOQ_MAX_FILE_SIZE + 1,
-        files: BOQ_MAX_FILES,
-        fields: BOQ_MAX_FIELDS,
-        parts: BOQ_MAX_FILES + BOQ_MAX_FIELDS,
-        fieldSize: MAX_MULTIPART_FIELD_BYTES,
-    },
-    fileFilter: boqFileFilter,
-}).fields([
-    { name: 'boq_file', maxCount: 1 },
-    { name: 'supporting_docs', maxCount: 5 },
-])
+export const createBoqFileUpload = ({
+    maxFileBytes = BOQ_MAX_FILE_SIZE,
+    maxAggregateFileBytes = BOQ_MAX_AGGREGATE_FILE_BYTES,
+    maxRequestBytes = BOQ_MAX_REQUEST_BYTES,
+} = {}) => {
+    const parser = multer({
+        storage: createUploadStorage(maxAggregateFileBytes),
+        limits: {
+            fileSize: maxFileBytes,
+            files: BOQ_MAX_FILES,
+            fields: BOQ_MAX_FIELDS,
+            parts: BOQ_MAX_FILES + BOQ_MAX_FIELDS,
+            fieldSize: MAX_MULTIPART_FIELD_BYTES,
+        },
+        fileFilter: boqFileFilter,
+    }).fields([
+        { name: 'boq_file', maxCount: 1 },
+        { name: 'supporting_docs', maxCount: 5 },
+    ])
+
+    return limitRequestBodyBytes(parser, maxRequestBytes)
+}
 
 /*
  * Export BOQ parsing with its additional total-body cap, including multipart
  * overhead for both Content-Length and chunked request bodies.
  */
-const limitedBoqUpload = limitRequestBodyBytes(boqUploadParser, BOQ_MAX_REQUEST_BYTES)
+const limitedBoqUpload = createBoqFileUpload()
 
 export {
     ALLOWED_EXTENSIONS,
@@ -304,6 +320,7 @@ export {
     BOQ_MAX_FILES,
     BOQ_MAX_REQUEST_BYTES,
     MAX_FILE_SIZE,
+    MAX_STANDARD_FILE_BYTES,
     MAX_STANDARD_REQUEST_BYTES,
 }
 

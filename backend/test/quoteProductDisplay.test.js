@@ -80,12 +80,32 @@ test('quote display falls back to custom name and then GENERAL INQUIRY only when
 test('admin quote API response includes snapshots when product relation is null', async (t) => {
     const { default: prisma } = await import('../src/utils/prisma.js')
     const { getQuotes } = await import('../src/modules/quoteRequests/quote.controller.js')
+    const createdAt = new Date('2026-10-31T12:00:00.000Z')
     const quoteWithDeletedProduct = {
         id: 'quote-deleted-product',
         product_id: null,
         product: null,
         product_name_en_snapshot: 'Original Product',
         product_name_ar_snapshot: 'المنتج الأصلي',
+        attachments: [
+            {
+                id: 'active-attachment',
+                original_filename: 'quote.pdf',
+                mime_type: 'application/pdf',
+                file_size: 128,
+                created_at: createdAt,
+                status: 'ACTIVE',
+                file_url: 'https://private.example/quote.pdf',
+            },
+            {
+                id: 'deleted-attachment',
+                original_filename: 'removed.pdf',
+                mime_type: 'application/pdf',
+                file_size: 64,
+                created_at: createdAt,
+                status: 'DELETED',
+            },
+        ],
     }
     let query
     const originalFindMany = prisma.quoteRequest.findMany
@@ -101,8 +121,29 @@ test('admin quote API response includes snapshots when product relation is null'
     await getQuotes({ query: {} }, res)
 
     assert.equal(res.statusCode, 200)
-    assert.deepEqual(query.include, { product: true })
+    assert.deepEqual(query.include, {
+        product: true,
+        attachments: {
+            where: { status: 'ACTIVE' },
+            select: {
+                id: true,
+                original_filename: true,
+                mime_type: true,
+                file_size: true,
+                created_at: true,
+                status: true,
+            },
+        },
+    })
     assert.equal(res.body.data[0].product, null)
     assert.equal(res.body.data[0].product_name_en_snapshot, 'Original Product')
     assert.equal(res.body.data[0].product_name_ar_snapshot, 'المنتج الأصلي')
+    assert.deepEqual(res.body.data[0].attachments, [{
+        id: 'active-attachment',
+        original_filename: 'quote.pdf',
+        mime_type: 'application/pdf',
+        file_size: 128,
+        created_at: createdAt,
+        download_path: '/api/attachments/active-attachment/download',
+    }])
 })

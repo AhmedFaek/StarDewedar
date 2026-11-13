@@ -1,5 +1,6 @@
 import express from 'express'
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import { getClientIp } from '../../utils/clientIp.js'
 import * as controller from './user.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import validate from '../../middleware/validation.middleware.js'
@@ -17,7 +18,9 @@ const profileUpdateLimiter = rateLimit({
     legacyHeaders: false,
     keyGenerator: (req) => req.user?.userId
         ? `user:${req.user.userId}`
-        : ipKeyGenerator(req.ip),
+        : ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         message: 'Too many profile updates. Please try again later.',
     },

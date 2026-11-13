@@ -1,8 +1,8 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { EventEmitter } from 'node:events'
-import { readFileSync } from 'node:fs'
 import http from 'node:http'
+import { performance } from 'node:perf_hooks'
 import { Readable } from 'node:stream'
 import { deflateRawSync } from 'node:zlib'
 import express from 'express'
@@ -12,6 +12,14 @@ import sharp from 'sharp'
 import cloudinary from '../src/config/storage.js'
 import { createBOQ } from '../src/modules/boqRequests/boq.controller.js'
 import {
+    BOQ_MAX_AGGREGATE_FILE_BYTES,
+    BOQ_MAX_FILE_SIZE,
+    BOQ_MAX_REQUEST_BYTES,
+    MAX_FILE_SIZE,
+    MAX_STANDARD_FILE_BYTES,
+    MAX_STANDARD_REQUEST_BYTES,
+    createBoqFileUpload,
+    createStandardFileUpload,
     createLimitedMemoryStorage,
     limitRequestBodyBytes,
 } from '../src/middleware/upload.middleware.js'
@@ -29,6 +37,52 @@ const makeFile = (name, mimetype, buffer) => ({
     buffer,
 })
 
+const makeMultipartBody = (boundary, parts) => Buffer.concat([
+    ...parts.flatMap(({ field, filename, content }) => [
+        Buffer.from(
+            `--${boundary}\r\nContent-Disposition: form-data; name="${field}"` +
+            `${filename ? `; filename="${filename}"` : ''}\r\n` +
+            `${filename ? 'Content-Type: application/pdf\r\n' : ''}\r\n`
+        ),
+        Buffer.isBuffer(content) ? content : Buffer.from(content),
+        Buffer.from('\r\n'),
+    ]),
+    Buffer.from(`--${boundary}--\r\n`),
+])
+
+const startUploadServer = async (t, uploadMiddleware) => {
+    const app = express()
+    app.post('/upload', uploadMiddleware, (req, res) => res.sendStatus(201))
+    app.use((error, req, res, next) => {
+        res.status(error.status || 500).end()
+    })
+
+    const server = app.listen(0, '127.0.0.1')
+    await new Promise((resolve, reject) => {
+        server.once('listening', resolve)
+        server.once('error', reject)
+    })
+    t.after(() => new Promise((resolve, reject) => {
+        server.close((error) => error ? reject(error) : resolve())
+    }))
+    return server.address().port
+}
+
+const sendMultipart = (port, boundary, body) => new Promise((resolve, reject) => {
+    const request = http.request({
+        method: 'POST',
+        host: '127.0.0.1',
+        port,
+        path: '/upload',
+        headers: { 'content-type': `multipart/form-data; boundary=${boundary}` },
+    }, (response) => {
+        response.resume()
+        response.on('end', () => resolve(response.statusCode))
+    })
+    request.on('error', reject)
+    request.end(body)
+})
+
 const crc32 = (buffer) => {
     let crc = 0xffffffff
     for (const byte of buffer) {
@@ -38,6 +92,29 @@ const crc32 = (buffer) => {
         }
     }
     return (crc ^ 0xffffffff) >>> 0
+}
+
+const makePngHeader = (width, height) => {
+    const header = Buffer.alloc(13)
+    header.writeUInt32BE(width, 0)
+    header.writeUInt32BE(height, 4)
+    header[8] = 8
+    header[9] = 2
+
+    const ihdr = Buffer.alloc(25)
+    ihdr.writeUInt32BE(header.length, 0)
+    ihdr.write('IHDR', 4, 'ascii')
+    header.copy(ihdr, 8)
+    ihdr.writeUInt32BE(crc32(ihdr.subarray(4, 21)), 21)
+
+    const iend = Buffer.from([0, 0, 0, 0, 0x49, 0x45, 0x4e, 0x44, 0, 0, 0, 0])
+    iend.writeUInt32BE(crc32(iend.subarray(4, 8)), 8)
+
+    return Buffer.concat([
+        Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+        ihdr,
+        iend,
+    ])
 }
 
 const makeZip = (files) => {
@@ -420,8 +497,114 @@ test('returns HTTP 413 when a file exceeds Multer per-file limit', async (t) => 
         request.end(body)
     })
 
-    assert.equal(await send(5), 201)
-    assert.equal(await send(6), 413)
+    assert.equal(await send(6), 201)
+    assert.equal(await send(7), 413)
+})
+
+test('standard upload accepts its exact file limit and rejects one byte over', async (t) => {
+    const port = await startUploadServer(t, createStandardFileUpload({
+        maxFileBytes: 6,
+        maxAggregateFileBytes: 6,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'standard-file-boundary-test'
+
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'file',
+        filename: 'sample.pdf',
+        content: Buffer.alloc(6, 0x61),
+    }])), 201)
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'file',
+        filename: 'sample.pdf',
+        content: Buffer.alloc(7, 0x61),
+    }])), 413)
+})
+
+test('standard 11 MiB request cap accepts the exact body and rejects one byte over', async (t) => {
+    assert.equal(MAX_FILE_SIZE, 10 * 1024 * 1024)
+    assert.equal(MAX_STANDARD_FILE_BYTES, 10 * 1024 * 1024)
+    assert.equal(MAX_STANDARD_REQUEST_BYTES, 11 * 1024 * 1024)
+
+    const boundary = 'standard-request-boundary-test'
+    const exactBody = makeMultipartBody(boundary, [
+        { field: 'file', filename: 'sample.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: '' },
+    ])
+    const overBody = makeMultipartBody(boundary, [
+        { field: 'file', filename: 'sample.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: 'x' },
+    ])
+    assert.equal(overBody.length, exactBody.length + 1)
+
+    const port = await startUploadServer(t, createStandardFileUpload({
+        maxFileBytes: 16,
+        maxAggregateFileBytes: 16,
+        maxRequestBytes: exactBody.length,
+    }))
+    assert.equal(await sendMultipart(port, boundary, exactBody), 201)
+    assert.equal(await sendMultipart(port, boundary, overBody), 413)
+})
+
+test('BOQ per-file limit accepts its exact boundary and rejects one byte over', async (t) => {
+    assert.equal(BOQ_MAX_FILE_SIZE, 20 * 1024 * 1024)
+    assert.equal(BOQ_MAX_AGGREGATE_FILE_BYTES, 120 * 1024 * 1024)
+    assert.equal(BOQ_MAX_REQUEST_BYTES, 125 * 1024 * 1024)
+
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 4,
+        maxAggregateFileBytes: 8,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'boq-file-boundary-test'
+
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'boq_file',
+        filename: 'main.pdf',
+        content: Buffer.alloc(4, 0x61),
+    }])), 201)
+    assert.equal(await sendMultipart(port, boundary, makeMultipartBody(boundary, [{
+        field: 'boq_file',
+        filename: 'main.pdf',
+        content: Buffer.alloc(5, 0x61),
+    }])), 413)
+})
+
+test('BOQ aggregate file limit accepts the exact total and rejects one byte over', async (t) => {
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 5,
+        maxAggregateFileBytes: 8,
+        maxRequestBytes: 4096,
+    }))
+    const boundary = 'boq-aggregate-boundary-test'
+    const multipart = (supportingBytes) => makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.alloc(4, 0x61) },
+        { field: 'supporting_docs', filename: 'support.pdf', content: Buffer.alloc(supportingBytes, 0x62) },
+    ])
+
+    assert.equal(await sendMultipart(port, boundary, multipart(4)), 201)
+    assert.equal(await sendMultipart(port, boundary, multipart(5)), 413)
+})
+
+test('BOQ 125 MiB request cap accepts the exact body and rejects one byte over', async (t) => {
+    const boundary = 'boq-request-boundary-test'
+    const exactBody = makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: '' },
+    ])
+    const overBody = makeMultipartBody(boundary, [
+        { field: 'boq_file', filename: 'main.pdf', content: Buffer.from('pdf') },
+        { field: 'note', content: 'x' },
+    ])
+    assert.equal(overBody.length, exactBody.length + 1)
+
+    const port = await startUploadServer(t, createBoqFileUpload({
+        maxFileBytes: 16,
+        maxAggregateFileBytes: 16,
+        maxRequestBytes: exactBody.length,
+    }))
+    assert.equal(await sendMultipart(port, boundary, exactBody), 201)
+    assert.equal(await sendMultipart(port, boundary, overBody), 413)
 })
 
 test('accepts a chunked multipart body exactly at the request-byte limit', async (t) => {
@@ -659,6 +842,99 @@ test('validates PDF, decoded JPEG/PNG, and non-empty UTF-8 CSV content', async (
     ), true)
 })
 
+test('accepts RGB and grayscale JPEGs, RGB and alpha PNGs, and four-channel CMYK JPEGs', async () => {
+    const rgb = sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 3,
+            background: { r: 10, g: 20, b: 30 },
+        },
+    })
+    const rgbJpeg = await rgb.clone().jpeg().toBuffer()
+    const grayscaleJpeg = await rgb.clone().toColourspace('b-w').jpeg().toBuffer()
+    const cmykJpeg = await rgb.clone().toColourspace('cmyk').jpeg().toBuffer()
+    const rgbPng = await rgb.clone().png().toBuffer()
+    const alphaPng = await sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 4,
+            background: { r: 10, g: 20, b: 30, alpha: 0.5 },
+        },
+    }).png().toBuffer()
+
+    assert.equal((await sharp(grayscaleJpeg).metadata()).channels, 1)
+    const cmykMetadata = await sharp(cmykJpeg).metadata()
+    assert.equal(cmykMetadata.space, 'cmyk')
+    assert.equal(cmykMetadata.channels, 4)
+    assert.equal((await sharp(alphaPng).metadata()).channels, 4)
+
+    for (const [filename, mimetype, buffer] of [
+        ['rgb.jpg', 'image/jpeg', rgbJpeg],
+        ['grayscale.jpg', 'image/jpeg', grayscaleJpeg],
+        ['cmyk.jpg', 'image/jpeg', cmykJpeg],
+        ['rgb.png', 'image/png', rgbPng],
+        ['alpha.png', 'image/png', alphaPng],
+    ]) {
+        assert.equal(await validateUploadedFile(makeFile(filename, mimetype, buffer)), true, filename)
+    }
+})
+
+test('rejects truncated images and mismatched JPEG/PNG signatures', async () => {
+    const image = sharp({
+        create: {
+            width: 2,
+            height: 2,
+            channels: 3,
+            background: { r: 10, g: 20, b: 30 },
+        },
+    })
+    const jpeg = await image.clone().jpeg().toBuffer()
+    const png = await image.clone().png().toBuffer()
+
+    await assert.rejects(
+        validateUploadedFile(makeFile('truncated.jpg', 'image/jpeg', jpeg.subarray(0, jpeg.length - 2))),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile('truncated.png', 'image/png', png.subarray(0, png.length - 13))),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile(
+            'jpeg-signature-png-content.jpg',
+            'image/jpeg',
+            Buffer.concat([Buffer.from([0xff, 0xd8, 0xff]), png.subarray(3)])
+        )),
+        UploadValidationError
+    )
+    await assert.rejects(
+        validateUploadedFile(makeFile(
+            'png-signature-jpeg-content.png',
+            'image/png',
+            Buffer.concat([
+                Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+                jpeg.subarray(8),
+            ])
+        )),
+        UploadValidationError
+    )
+})
+
+test('rejects an oversized PNG IHDR without allocating the declared image', async () => {
+    const oversizedPngHeader = makePngHeader(8000, 5001)
+    const startedAt = performance.now()
+
+    await assert.rejects(
+        validateUploadedFile(makeFile('oversized.png', 'image/png', oversizedPngHeader)),
+        UploadValidationError
+    )
+
+    assert.ok(performance.now() - startedAt < 100,
+        'An over-limit PNG header should be rejected without decoding or allocating its image')
+})
+
 test('rejects malformed JPEG/PNG and empty or whitespace-only CSV', async () => {
     await assert.rejects(
         validateUploadedFile(makeFile(
@@ -804,7 +1080,7 @@ test('invalid BOQ supporting content prevents all Cloudinary upload calls', asyn
 })
 
 test('validates XLSX ZIP structure, required components, duplicates, and size limits', async () => {
-    const workbook = readFileSync(new URL('./fixtures/minimal-valid.xlsx', import.meta.url))
+    const workbook = makeXlsx()
     const arbitraryZip = makeZip([['readme.txt', 'not a workbook']])
     const duplicateCoreEntry = makeZip([
         ['[Content_Types].xml', '<Types/>'],

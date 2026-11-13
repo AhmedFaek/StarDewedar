@@ -1,5 +1,6 @@
 import express from 'express'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
+import { getClientIp } from '../../utils/clientIp.js'
 import { downloadEmailAttachment } from './emailAttachmentAccess.controller.js'
 
 const router = express.Router()
@@ -9,6 +10,9 @@ const emailAttachmentLimiter = rateLimit({
     max: 30,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: {
         success: false,
         message: 'Too many attachment link requests. Please try again later.',

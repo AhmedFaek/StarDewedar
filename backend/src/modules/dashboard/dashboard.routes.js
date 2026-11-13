@@ -2,12 +2,13 @@
 import express from 'express'
 import * as controller from './dashboard.controller.js'
 import * as convController from '../conversations/conversation.controller.js'
+import { getClientIp } from '../../utils/clientIp.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requireRole, requirePermission } from '../../middleware/roles.middleware.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 import { ADMIN_ROLES } from '../../utils/constants.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
-import rateLimit from 'express-rate-limit'
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit'
 import { adminRouter as analyticsAdminRouter } from '../analytics/analytics.routes.js'
 
 const router = express.Router()
@@ -18,6 +19,9 @@ const adminReplyLimiter = rateLimit({
     max: 60,
     standardHeaders: true,
     legacyHeaders: false,
+    keyGenerator: (req) => ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
     message: { message: 'Too many messages sent. Please slow down.' },
 })
 

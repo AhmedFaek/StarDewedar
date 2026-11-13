@@ -1,11 +1,12 @@
 import assert from 'node:assert/strict'
+import { spawnSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { test } from 'node:test'
 import { createTurnstileVerifier } from '../src/middleware/turnstile.middleware.js'
 
 const request = (token = 'test-token') => ({
     headers: token == null ? {} : { 'x-turnstile-token': token },
-    ip: '192.0.2.10',
+    socket: { remoteAddress: '192.0.2.10' },
 })
 
 const response = () => ({
@@ -34,6 +35,44 @@ const runVerifier = async (middleware, req = request()) => {
         nextCalled = true
     })
     return { res, nextCalled }
+}
+
+const verifyRemoteIpInSubprocess = (realIp) => {
+    const script = `
+        process.env.NODE_ENV = 'production'
+        process.env.PORT = '5000'
+        process.env.DATABASE_URL = 'postgresql://localhost:5432/test'
+        process.env.JWT_SECRET = 'test-jwt-secret'
+        process.env.JWT_REFRESH_SECRET = 'test-refresh-secret'
+        process.env.CLOUDINARY_NAME = 'test-cloud'
+        process.env.CLOUDINARY_KEY = 'test-key'
+        process.env.CLOUDINARY_SECRET = 'test-secret'
+        process.env.YAHOO_EMAIL = 'test@example.invalid'
+        process.env.YAHOO_PASSWORD = 'test-password'
+        process.env.FRONTEND_URL = 'https://customer.example'
+        process.env.SITE_URL = 'https://customer.example'
+        process.env.CLIENT_IP_SOURCE = 'x-real-ip'
+        process.env.CORS_ORIGINS = 'https://customer.example'
+        process.env.VERIFICATION_CODE_PEPPER = '0123456789abcdef0123456789abcdef'
+        process.env.TURNSTILE_SECRET_KEY = 'test-secret'
+        const { createTurnstileVerifier } = await import(${JSON.stringify(new URL('../src/middleware/turnstile.middleware.js', import.meta.url).href)})
+        let body
+        globalThis.fetch = async (_url, options) => {
+            body = options.body
+            return { ok: true, status: 200, json: async () => ({ success: true, action: 'public_request' }) }
+        }
+        const req = {
+            headers: { 'x-turnstile-token': 'test-token', ${realIp === undefined ? '' : `'x-real-ip': ${JSON.stringify(realIp)},`} },
+            socket: { remoteAddress: '192.0.2.10' },
+        }
+        const res = { status() { return this }, json() { return this } }
+        await createTurnstileVerifier()(req, res, () => {})
+        console.log(new URLSearchParams(body).get('remoteip'))
+    `
+    return spawnSync(process.execPath, ['--input-type=module', '-e', script], {
+        encoding: 'utf8',
+        env: { ...process.env },
+    })
 }
 
 test('rejects a missing or blank header token without calling Siteverify', async (t) => {
@@ -72,6 +111,20 @@ test('accepts a valid token with the expected action and sends the expected Site
     assert.equal(form.get('secret'), 'test-secret')
     assert.equal(form.get('response'), 'test-token')
     assert.equal(form.get('remoteip'), '192.0.2.10')
+})
+
+test('sends configured X-Real-IP to Siteverify as remoteip', () => {
+    const result = verifyRemoteIpInSubprocess('198.51.100.40')
+
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(result.stdout.trim().split(/\r?\n/u).at(-1), '198.51.100.40')
+})
+
+test('falls back to the socket address for invalid X-Real-IP in Siteverify remoteip', () => {
+    const result = verifyRemoteIpInSubprocess('invalid-ip')
+
+    assert.equal(result.status, 0, result.stderr)
+    assert.equal(result.stdout.trim().split(/\r?\n/u).at(-1), '192.0.2.10')
 })
 
 test('rejects invalid and expired or replayed tokens with 403', async (t) => {
