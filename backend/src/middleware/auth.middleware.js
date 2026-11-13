@@ -28,7 +28,9 @@ export const optionalAuth = async (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(match[1], env.jwtSecret)
+        const decoded = jwt.verify(match[1], env.jwtSecret, {
+            algorithms: ['HS256'],
+        })
         const user = await lookupUser(decoded.userId)
         if (!user) {
             return res.status(401).json({
@@ -66,7 +68,9 @@ export default async (req, res, next) => {
             return res.status(401).json({ message: 'Unauthorized' })
         }
 
-        const decoded = jwt.verify(token, env.jwtSecret)
+        const decoded = jwt.verify(token, env.jwtSecret, {
+            algorithms: ['HS256'],
+        })
 
         const user = await lookupUser(decoded.userId)
         if (!user) {

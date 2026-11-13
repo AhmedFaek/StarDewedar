@@ -33,13 +33,13 @@ const generateTokens = (user) => {
     const accessToken = jwt.sign(
         { userId: user.id, role: user.role, name: user.name },
         env.jwtSecret,
-        { expiresIn: '15m' }
+        { algorithm: 'HS256', expiresIn: '15m' }
     )
 
     const refreshToken = jwt.sign(
         { userId: user.id },
         env.jwtRefreshSecret,
-        { expiresIn: '7d' }
+        { algorithm: 'HS256', expiresIn: '7d' }
     )
 
     return { accessToken, refreshToken }
@@ -596,7 +596,9 @@ export const resendVerificationCode = async (email) => {
 export const refreshToken = async (rawRefreshToken) => {
     let decoded
     try {
-        decoded = jwt.verify(rawRefreshToken, env.jwtRefreshSecret)
+        decoded = jwt.verify(rawRefreshToken, env.jwtRefreshSecret, {
+            algorithms: ['HS256'],
+        })
     } catch {
         throw new Error('Invalid refresh token')
     }

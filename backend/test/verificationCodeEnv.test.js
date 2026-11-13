@@ -8,8 +8,8 @@ const baseEnv = {
     PATH: process.env.PATH,
     PORT: '5000',
     DATABASE_URL: 'postgresql://localhost:5432/test',
-    JWT_SECRET: 'test-jwt-secret',
-    JWT_REFRESH_SECRET: 'test-refresh-secret',
+    JWT_SECRET: 'fake-jwt-secret-for-production-tests-32chars',
+    JWT_REFRESH_SECRET: 'fake-refresh-secret-for-production-tests-32chars',
     CLOUDINARY_NAME: 'test-cloud',
     CLOUDINARY_KEY: 'test-key',
     CLOUDINARY_SECRET: 'test-secret',
@@ -139,6 +139,46 @@ test('production rejects a short VERIFICATION_CODE_PEPPER', () => {
 
     assert.notEqual(status, 0)
     assert.match(stderr, /VERIFICATION_CODE_PEPPER must be at least 32 characters/u)
+})
+
+test('production rejects a short JWT_SECRET', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        JWT_SECRET: 'short',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /JWT_SECRET must be at least 32 characters in production/u)
+})
+
+test('production rejects a short JWT_REFRESH_SECRET', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        JWT_REFRESH_SECRET: 'short',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /JWT_REFRESH_SECRET must be at least 32 characters and differ from JWT_SECRET in production/u)
+})
+
+test('production rejects identical JWT secrets', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        JWT_REFRESH_SECRET: baseEnv.JWT_SECRET,
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /JWT_REFRESH_SECRET must be at least 32 characters and differ from JWT_SECRET in production/u)
+})
+
+test('test mode does not enforce production JWT secret strength rules', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'test',
+        JWT_SECRET: 'short',
+        JWT_REFRESH_SECRET: 'short',
+    })
+
+    assert.equal(status, 0, stderr)
 })
 
 test('explicit development uses the non-secret fallback when no pepper is configured', () => {
