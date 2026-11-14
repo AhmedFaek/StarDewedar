@@ -19,6 +19,7 @@ import {
 } from './forgotPasswordSendCap.js'
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
+import { withSuperAdminLock } from '../../utils/superAdminLock.js'
 
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 
@@ -337,23 +338,36 @@ export const register = async (data) => {
  * CREATE USER (admin-only) — creates any role with the supplied data.
  * Admin-created accounts are auto-verified.
  */
-export const createUser = async (data) => {
+export const createUser = async (data, actor) => {
+    const role = data.role || ROLES.CUSTOMER
+    if (role === ROLES.SUPER_ADMIN && actor?.role !== ROLES.SUPER_ADMIN) {
+        const error = new Error('Only a super admin can create a super admin account.')
+        error.status = 403
+        error.code = 'SUPER_ADMIN_CREATE_FORBIDDEN'
+        throw error
+    }
+
     const normalizedEmail = normalizeEmail(data.email)
     const existing = await userRepo.findUserByEmail(normalizedEmail)
     if (existing) throw new Error('Email already exists')
 
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS)
 
-    const user = await userRepo.createUser({
+    const userData = {
         name: data.name,
         email: normalizedEmail,
         password: hashedPassword,
-        role: data.role || ROLES.CUSTOMER,
+        role,
         whatsapp_number: data.whatsapp_number ?? null,
         phone_number: data.phone_number ?? null,
         company_name: data.company_name ?? null,
         email_verified: true, // Admin-created accounts bypass verification
-    })
+    }
+    const user = role === ROLES.SUPER_ADMIN
+        ? await withSuperAdminLock(({ transaction }) => (
+            userRepo.createUser(userData, transaction)
+        ))
+        : await userRepo.createUser(userData)
 
     // Return without sensitive fields
     const { password, hashed_refresh_token, email_verification_hash, ...safeUser } = user

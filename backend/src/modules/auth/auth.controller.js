@@ -13,7 +13,7 @@ export const register = async (req, res, next) => {
 /* POST /api/auth/create-user  — admin only, creates any role */
 export const createUser = async (req, res, next) => {
     try {
-        const user = await service.createUser(req.body)
+        const user = await service.createUser(req.body, req.user)
         res.status(201).json(user)
     } catch (err) {
         next(err)
