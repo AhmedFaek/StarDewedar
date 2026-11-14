@@ -63,6 +63,22 @@ const resetPasswordLimiter = rateLimit({
     },
 })
 
+export const changePasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 5,
+    skipSuccessfulRequests: true,
+    standardHeaders: true,
+    legacyHeaders: false,
+    keyGenerator: (req) => req.user?.userId
+        ? `user:${req.user.userId}`
+        : ipKeyGenerator(getClientIp(req)),
+    // X-Forwarded-For is intentionally ignored; the configured source is X-Real-IP or the socket.
+    validate: { xForwardedForHeader: false },
+    message: {
+        message: 'Too many password change attempts. Please try again later.',
+    },
+})
+
 export const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 10,
@@ -144,6 +160,7 @@ router.post('/logout', auth, controller.logout)
 router.post(
     '/change-password',
     auth,
+    changePasswordLimiter,
     validate(changePasswordSchema),
     controller.changePassword
 )

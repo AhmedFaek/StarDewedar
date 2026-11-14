@@ -733,7 +733,10 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
-        throw new Error('Current password is incorrect')
+        const error = new Error('Current password is incorrect')
+        error.status = 400
+        error.code = 'CURRENT_PASSWORD_INCORRECT'
+        throw error
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS)

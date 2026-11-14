@@ -73,7 +73,11 @@ test('PATCH /api/users/me authenticates and updates only validated editable fiel
     }))
 
     const baseUrl = `http://127.0.0.1:${server.address().port}/api/users/me`
-    const token = jwt.sign({ userId: state.user.id }, 'test-secret')
+    const token = jwt.sign(
+        { userId: state.user.id },
+        'test-secret',
+        { algorithm: 'HS256' }
+    )
     const send = (method, body, authenticated = true) => fetch(baseUrl, {
         method,
         headers: {
