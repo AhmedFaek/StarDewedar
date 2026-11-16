@@ -46,6 +46,14 @@ export class UploadValidationError extends Error {
     }
 }
 
+export class ImageDimensionsTooLargeError extends UploadValidationError {
+    constructor() {
+        super('Image dimensions are too large. Please resize the image to under 40 megapixels (for example 6000 x 6000 pixels) and try again.')
+        this.name = 'ImageDimensionsTooLargeError'
+        this.code = 'IMAGE_DIMENSIONS_TOO_LARGE'
+    }
+}
+
 const invalidUpload = () => {
     throw new UploadValidationError()
 }
@@ -85,6 +93,16 @@ export const hasImageStructure = async (buffer, expectedFormat, imageFactory = s
         return false
     }
 
+    if (
+        expectedFormat === 'png' &&
+        buffer.length >= 24 &&
+        buffer.readUInt32BE(8) === 13 &&
+        buffer.toString('ascii', 12, 16) === 'IHDR' &&
+        buffer.readUInt32BE(16) * buffer.readUInt32BE(20) > MAX_IMAGE_PIXELS
+    ) {
+        throw new ImageDimensionsTooLargeError()
+    }
+
     try {
         const image = imageFactory(buffer, {
             failOn: 'warning',
@@ -99,15 +117,25 @@ export const hasImageStructure = async (buffer, expectedFormat, imageFactory = s
             !Number.isSafeInteger(metadata.height) ||
             metadata.width < 1 ||
             metadata.height < 1 ||
-            metadata.width * metadata.height > MAX_IMAGE_PIXELS ||
             (metadata.pages || 1) > 1
         ) {
             return false
         }
+        if (metadata.width * metadata.height > MAX_IMAGE_PIXELS) {
+            throw new ImageDimensionsTooLargeError()
+        }
 
         await image.stats()
         return true
-    } catch {
+    } catch (error) {
+        if (
+            error instanceof ImageDimensionsTooLargeError ||
+            /pixel limit|too many pixels|image dimensions?.{0,20}too large|exceeds.{0,20}pixels?/iu.test(
+                String(error?.message || '')
+            )
+        ) {
+            throw new ImageDimensionsTooLargeError()
+        }
         return false
     }
 }

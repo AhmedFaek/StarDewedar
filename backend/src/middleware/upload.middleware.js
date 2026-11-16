@@ -5,6 +5,11 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
 const MAX_STANDARD_FILE_BYTES = MAX_FILE_SIZE
 const MAX_STANDARD_REQUEST_BYTES = 11 * 1024 * 1024
 const MAX_STANDARD_FIELDS = 20
+const PRODUCT_MAX_AGGREGATE_FILE_BYTES = 60 * 1024 * 1024
+const PROJECT_MAX_AGGREGATE_FILE_BYTES = 80 * 1024 * 1024
+const PRODUCT_MAX_REQUEST_BYTES = PRODUCT_MAX_AGGREGATE_FILE_BYTES + 1024 * 1024
+const PROJECT_MAX_REQUEST_BYTES = PROJECT_MAX_AGGREGATE_FILE_BYTES + 1024 * 1024
+const ADMIN_UPLOAD_MAX_FILE_BYTES = 10 * 1024 * 1024
 
 // ── Standard upload (Visit / Quote) ──────────────────────────────────────────
 const ALLOWED_EXTENSIONS = ['.pdf', '.jpg', '.jpeg', '.png']
@@ -165,21 +170,39 @@ const boqFileFilter = (req, file, cb) => {
     cb(null, true)
 }
 
-/*
- * Preserve the original filter semantics for non-request upload routes that
- * use the module's default Multer export (for example catalog/project uploads).
- */
-const legacyFileFilter = (req, file, cb) => {
+const productProjectFileFilter = (req, file, cb) => {
     const ext = path.extname(file.originalname).toLowerCase()
-    if (!ALLOWED_EXTENSIONS.includes(ext)) {
-        return cb(new Error(`Invalid file extension. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`), false)
-    }
+    const isImage = file.fieldname === 'images' &&
+        ['.jpg', '.jpeg', '.png'].includes(ext) &&
+        ['image/jpeg', 'image/png'].includes(file.mimetype)
+    const isCatalog = file.fieldname === 'catalog' &&
+        ext === '.pdf' &&
+        file.mimetype === 'application/pdf'
 
-    if (!ALLOWED_MIME_TYPES.includes(file.mimetype)) {
-        return cb(new Error(`Invalid file type. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}`), false)
+    if (!isImage && !isCatalog) {
+        const error = new Error('Invalid file type or content.')
+        error.code = 'INVALID_UPLOAD'
+        error.status = 400
+        return cb(error, false)
     }
 
     cb(null, true)
+}
+
+const createAdminUpload = ({ fields, maxFiles, maxAggregateFileBytes, maxRequestBytes }) => {
+    const parser = multer({
+        storage: createUploadStorage(maxAggregateFileBytes),
+        limits: {
+            fileSize: ADMIN_UPLOAD_MAX_FILE_BYTES,
+            files: maxFiles,
+            fields: MAX_STANDARD_FIELDS,
+            parts: maxFiles + MAX_STANDARD_FIELDS,
+            fieldSize: MAX_MULTIPART_FIELD_BYTES,
+        },
+        fileFilter: productProjectFileFilter,
+    }).fields(fields)
+
+    return limitRequestBodyBytes(parser, maxRequestBytes)
 }
 
 export const createStandardFileUpload = ({
@@ -201,12 +224,6 @@ export const createStandardFileUpload = ({
 
     return limitRequestBodyBytes(parser, maxRequestBytes)
 }
-
-const upload = multer({
-    storage: multer.memoryStorage(),
-    limits: { fileSize: MAX_FILE_SIZE },
-    fileFilter: legacyFileFilter,
-})
 
 /*
  * Wrap a Multer middleware with a limit on the complete multipart request.
@@ -256,7 +273,10 @@ export const limitRequestBodyBytes = (uploadMiddleware, maxRequestBytes) => (req
      */
     uploadMiddleware(req, res, (error) => {
         req.removeListener('data', countRequestBytes)
-        if (error?.code === 'LIMIT_FILE_SIZE' && error.status === undefined) {
+        if (
+            (error?.code === 'LIMIT_FILE_SIZE' || error?.code === 'LIMIT_FIELD_VALUE') &&
+            error.status === undefined
+        ) {
             error.status = 413
         }
         if (error && !String(error.code || '').startsWith('LIMIT_') &&
@@ -274,6 +294,23 @@ export const limitRequestBodyBytes = (uploadMiddleware, maxRequestBytes) => (req
  * file, multipart field, part-count, aggregate, and total-body limits.
  */
 export const singleFileUpload = createStandardFileUpload()
+
+export const productFileUpload = createAdminUpload({
+    fields: [
+        { name: 'images', maxCount: 5 },
+        { name: 'catalog', maxCount: 1 },
+    ],
+    maxFiles: 6,
+    maxAggregateFileBytes: PRODUCT_MAX_AGGREGATE_FILE_BYTES,
+    maxRequestBytes: PRODUCT_MAX_REQUEST_BYTES,
+})
+
+export const projectFileUpload = createAdminUpload({
+    fields: [{ name: 'images', maxCount: 10 }],
+    maxFiles: 10,
+    maxAggregateFileBytes: PROJECT_MAX_AGGREGATE_FILE_BYTES,
+    maxRequestBytes: PROJECT_MAX_REQUEST_BYTES,
+})
 
 /*
  * Parse the BOQ multipart fields. Multer enforces the per-file and field/count
@@ -313,6 +350,7 @@ const limitedBoqUpload = createBoqFileUpload()
 export {
     ALLOWED_EXTENSIONS,
     ALLOWED_MIME_TYPES,
+    ADMIN_UPLOAD_MAX_FILE_BYTES,
     BOQ_ALLOWED_EXTENSIONS,
     BOQ_ALLOWED_MIME_TYPES,
     BOQ_MAX_AGGREGATE_FILE_BYTES,
@@ -322,7 +360,10 @@ export {
     MAX_FILE_SIZE,
     MAX_STANDARD_FILE_BYTES,
     MAX_STANDARD_REQUEST_BYTES,
+    PRODUCT_MAX_AGGREGATE_FILE_BYTES,
+    PRODUCT_MAX_REQUEST_BYTES,
+    PROJECT_MAX_AGGREGATE_FILE_BYTES,
+    PROJECT_MAX_REQUEST_BYTES,
 }
 
 export { limitedBoqUpload as boqUpload }
-export default upload

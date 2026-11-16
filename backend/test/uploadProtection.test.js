@@ -1025,18 +1025,23 @@ test('rejects animated PNGs and enforces the image pixel limit boundary', async 
     ), true)
     assert.equal(pixelOptions.limitInputPixels, 40_000_000)
     assert.equal(pixelOptions.pages, 1)
+    assert.equal(pixelOptions.failOn, 'warning')
+    assert.equal(pixelOptions.sequentialRead, true)
 
     let overLimitStatsCalls = 0
-    assert.equal(await hasImageStructure(
-        jpegHeader,
-        'jpeg',
-        () => ({
-            metadata: async () => ({ format: 'jpeg', width: 8000, height: 5001, pages: 1 }),
-            stats: async () => {
-                overLimitStatsCalls += 1
-            },
-        })
-    ), false)
+    await assert.rejects(
+        hasImageStructure(
+            jpegHeader,
+            'jpeg',
+            () => ({
+                metadata: async () => ({ format: 'jpeg', width: 8000, height: 5001, pages: 1 }),
+                stats: async () => {
+                    overLimitStatsCalls += 1
+                },
+            })
+        ),
+        { code: 'IMAGE_DIMENSIONS_TOO_LARGE', status: 400 }
+    )
     assert.equal(statsCalls, 1)
     assert.equal(overLimitStatsCalls, 0)
 })

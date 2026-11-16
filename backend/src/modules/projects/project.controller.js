@@ -1,7 +1,7 @@
 import * as service from './project.service.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 
-export const createProject = async (req, res) => {
+export const createProject = async (req, res, next) => {
     try {
         const data = req.body
         const files = req.files
@@ -10,8 +10,7 @@ export const createProject = async (req, res) => {
 
         return res.status(201).json(project)
     } catch (err) {
-        console.error(err)
-        return res.status(500).json({ message: 'Server error' })
+        next(err)
     }
 }
 // Public: budget is stripped from the response

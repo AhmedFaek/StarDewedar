@@ -28,7 +28,10 @@ export const createProduct = async (formData) => {
 
     if (!response.ok) {
         const error = await response.json()
-        throw new Error(error.message || 'Failed to create product')
+        const requestError = new Error(error.message || 'Failed to create product')
+        requestError.status = response.status
+        requestError.code = error.code
+        throw requestError
     }
 
     return response.json()

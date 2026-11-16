@@ -1,7 +1,9 @@
 import * as repo from './project.repository.js'
 import * as imageService from './submodules/images/image.service.js'
+import { validateProjectUploadFiles } from '../../utils/productProjectUploadValidation.js'
 
 export const createProject = async (data, files) => {
+    await validateProjectUploadFiles(files)
     const project = await repo.create({
         title_en: data.title_en,
         title_ar: data.title_ar,
@@ -16,7 +18,7 @@ export const createProject = async (data, files) => {
         location_ar: data.location_ar || null,
     })
 
-    await imageService.uploadImages(project.id, files)
+    await imageService.uploadImages(project.id, files?.images || [])
 
     return project
 }

@@ -125,6 +125,9 @@
     "delete_success": "Product deleted successfully",
     "save_success": "Product saved successfully",
     "save_error": "Failed to save product",
+    "upload_invalid": "Upload rejected. Images must be JPEG or PNG and catalogs must be PDF.",
+    "upload_too_large": "Upload too large. Each file is limited to 10 MiB; combined product files are limited to 60 MiB.",
+    "upload_dimensions_too_large": "Image dimensions are too large. Please resize the image to under 40 megapixels (for example 6000 x 6000 pixels) and try again.",
     "table": {
       "id": "# ID",
       "name": "Product Name",
@@ -143,7 +146,9 @@
       "description_placeholder": "Enter comprehensive product details...",
       "assets_label": "Documentation & Assets",
       "catalog_label": "Upload Catalog (PDF)",
+      "catalog_limits": "PDF only; maximum 1 file at 10 MiB. Combined product files: 60 MiB.",
       "images_label": "Upload Product Images",
+      "images_limits": "JPEG/PNG only; maximum 5 images at 10 MiB each. Combined product files: 60 MiB.",
       "images_selected": "{{count}} Image(s) selected",
       "submit": "Commit to System"
     }
@@ -188,6 +193,9 @@
     "no_projects": "No projects found",
     "delete_confirm": "Are you sure you want to delete this project?",
     "save_error": "Error saving project",
+    "upload_invalid": "Upload rejected. Project images must be JPEG or PNG.",
+    "upload_too_large": "Upload too large. Each image is limited to 10 MiB; project images are limited to 80 MiB combined.",
+    "upload_dimensions_too_large": "Image dimensions are too large. Please resize the image to under 40 megapixels (for example 6000 x 6000 pixels) and try again.",
     "delete_error": "Delete failed",
     "table": {
       "code": "Code",
@@ -212,6 +220,7 @@
       "end_date_label": "End Date",
       "gallery_label": "Project Gallery",
       "gallery_browse": "Browse",
+      "gallery_limits": "JPEG/PNG only; maximum 10 images at 10 MiB each, 80 MiB combined.",
       "gallery_new_images": "New Images Selected",
       "gallery_existing": "{{count}} existing photos in cloud",
       "description_label": "Project Description",

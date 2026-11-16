@@ -1,5 +1,9 @@
 import cloudinary from '../../../../config/storage.js'
 import * as repo from './image.repository.js'
+import {
+    persistWithCloudinaryCleanup,
+    settleCloudinaryUploads,
+} from '../../../../utils/cloudinaryCleanup.js'
 
 const uploadToCloudinary = (file) => {
     return new Promise((resolve, reject) => {
@@ -16,14 +20,19 @@ const uploadToCloudinary = (file) => {
 }
 
 export const uploadImages = async (projectId, files) => {
-    const uploads = files.map(async (file) => {
-        const result = await uploadToCloudinary(file)
+    if (!Array.isArray(files) || files.length === 0) return []
 
-        return repo.createMany({
+    const { results } = await settleCloudinaryUploads(
+        files.map(uploadToCloudinary),
+        [],
+        'PROJECT_IMAGES'
+    )
+
+    return persistWithCloudinaryCleanup(results, 'PROJECT_IMAGES', async () => {
+        await repo.createMany(results.map((result) => ({
             project_id: projectId,
             image_url: result.secure_url,
-        })
+        })))
+        return results
     })
-
-    await Promise.all(uploads)
 }

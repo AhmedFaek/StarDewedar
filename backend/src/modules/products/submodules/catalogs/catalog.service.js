@@ -1,5 +1,9 @@
 import cloudinary from '../../../../config/storage.js'
 import * as repo from './catalog.repository.js'
+import {
+    persistWithCloudinaryCleanup,
+    settleCloudinaryUploads,
+} from '../../../../utils/cloudinaryCleanup.js'
 
 const uploadPDF = (file) => {
     return new Promise((resolve, reject) => {
@@ -18,13 +22,20 @@ const uploadPDF = (file) => {
 }
 
 export const uploadCatalog = async (productId, file, data = {}) => {
-    const result = await uploadPDF(file)
+    const { results: [result] } = await settleCloudinaryUploads(
+        [uploadPDF(file)],
+        [],
+        'PRODUCT_CATALOG'
+    )
 
-    await repo.createCatalog({
-        product_id: productId,
-        title_en: data.title_en || null,
-        title_ar: data.title_ar || null,
-        file_url: result.secure_url,
+    return persistWithCloudinaryCleanup([result], 'PRODUCT_CATALOG', async () => {
+        await repo.createCatalog({
+            product_id: productId,
+            title_en: data.title_en || null,
+            title_ar: data.title_ar || null,
+            file_url: result.secure_url,
+        })
+        return result
     })
 }
 

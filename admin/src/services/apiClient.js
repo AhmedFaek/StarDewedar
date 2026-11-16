@@ -49,7 +49,10 @@ export const apiClient = async (url, options = {}) => {
 export const handleApiResponse = async (response) => {
     if (!response.ok) {
         const errorData = await response.json()
-        throw new Error(errorData.message || `HTTP ${response.status}`)
+        const error = new Error(errorData.message || `HTTP ${response.status}`)
+        error.status = response.status
+        error.code = errorData.code
+        throw error
     }
     return await response.json()
 }
