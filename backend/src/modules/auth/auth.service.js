@@ -20,10 +20,10 @@ import {
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
 import { withSuperAdminLock } from '../../utils/superAdminLock.js'
+import { BCRYPT_SALT_ROUNDS } from '../../utils/passwordPolicy.js'
 
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 
-const BCRYPT_SALT_ROUNDS = 12
 const RESET_TOKEN_BYTES = 32
 const VERIFICATION_CODE_EXPIRY_MINUTES = 15
 const RESEND_COOLDOWN_SECONDS = 60

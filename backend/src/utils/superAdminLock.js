@@ -1,11 +1,12 @@
-import prisma from './prisma.js'
 import { ROLES } from './constants.js'
 
 // Reserved for transactions that change the set of super_admin users.
 export const SUPER_ADMIN_ADVISORY_LOCK_KEY = 731946258104n
 
-export const withSuperAdminLock = (operation, { database = prisma } = {}) => (
-    database.$transaction(async (transaction) => {
+export const withSuperAdminLock = async (operation, { database } = {}) => {
+    const client = database || (await import('./prisma.js')).default
+
+    return client.$transaction(async (transaction) => {
         await transaction.$queryRaw`
             SELECT pg_advisory_xact_lock(${SUPER_ADMIN_ADVISORY_LOCK_KEY}) IS NULL AS lock_acquired
         `
@@ -18,4 +19,4 @@ export const withSuperAdminLock = (operation, { database = prisma } = {}) => (
         maxWait: 5000,
         timeout: 10000,
     })
-)
+}
