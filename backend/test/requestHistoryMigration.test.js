@@ -19,6 +19,14 @@ const backendRoot = path.resolve(import.meta.dirname, '..')
 const prismaRoot = path.join(backendRoot, 'prisma')
 const migrationsRoot = path.join(prismaRoot, 'migrations')
 const migrationName = '20261108190000_link_request_history_to_users'
+const precedingMigrationNames = [
+    '20261031140119_preserve_quote_history',
+    '20261031144316_notification_recovery_state',
+    '20261102130700_attachment_security_persistence',
+    '20261103120000_request_attachment_cleanup_context',
+    '20261104120000_request_archive_state',
+    '20261104120001_make_boq_file_url_nullable',
+]
 const migrationDir = path.join(migrationsRoot, migrationName)
 const migrationLock = path.join(migrationsRoot, 'migration_lock.toml')
 const disposableDatabaseUrl = process.env.REQUEST_HISTORY_TEST_DATABASE_URL
@@ -30,13 +38,17 @@ test('request history migration leaves legacy rows unlinked and adds nullable us
 }, async () => {
     assert.equal(process.env.REQUEST_HISTORY_TEST_DATABASE_DISPOSABLE, 'true')
     assert.ok(existsSync(migrationDir), 'Expected the timestamped request-history migration directory')
-    const newestMigration = readdirSync(migrationsRoot, { withFileTypes: true })
+    const timestampedMigrations = readdirSync(migrationsRoot, { withFileTypes: true })
         .filter((entry) => entry.isDirectory())
         .map((entry) => entry.name)
+        .filter((name) => /^\d{14}_/u.test(name))
         .sort()
-        .at(-1)
-    assert.ok(migrationName > newestMigration,
-        'Request-history migration must sort after the newest existing migration')
+    const precedingMigrations = timestampedMigrations
+        .filter((name) => name < migrationName)
+    assert.deepEqual(precedingMigrations, precedingMigrationNames,
+        'Expected every earlier timestamped migration to be present before request history')
+    assert.ok(precedingMigrations.every((name) => migrationName > name),
+        'Request-history migration must sort after every migration it depends on')
 
     const databaseUrl = new URL(disposableDatabaseUrl)
     const databaseName = decodeURIComponent(databaseUrl.pathname.slice(1))
