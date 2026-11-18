@@ -99,7 +99,13 @@ export default function ProductsPage() {
       setIsModalOpen(false)
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
-      setError(err.message || t('products.save_error'))
+      setError(err.code === 'UPLOAD_TOO_LARGE'
+        ? t('products.upload_too_large')
+        : err.code === 'IMAGE_DIMENSIONS_TOO_LARGE'
+          ? t('products.upload_dimensions_too_large')
+        : ['INVALID_UPLOAD', 'INVALID_MULTIPART', 'INVALID_UPLOAD_REQUEST'].includes(err.code)
+          ? t('products.upload_invalid')
+          : err.message || t('products.save_error'))
     } finally {
       setIsSaving(false)
     }
@@ -224,14 +230,16 @@ export default function ProductsPage() {
                       <label className={`cursor-pointer bg-surface-container-low border-2 border-dashed border-surface-variant p-6 text-center hover:border-tertiary transition-all ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}>
                         <span className="material-symbols-outlined text-tertiary block mb-2">picture_as_pdf</span>
                         <span className="text-[10px] font-black uppercase text-secondary block">{catalogs.length > 0 ? catalogs[0]?.name : t('products.modal.catalog_label')}</span>
-                        <input type="file" className="hidden" accept=".pdf" onChange={(e) => setCatalogs(Array.from(e.target.files))} disabled={isSaving} />
+                        <input type="file" className="hidden" accept=".pdf,application/pdf" onChange={(e) => setCatalogs(Array.from(e.target.files))} disabled={isSaving} />
+                        <span className="mt-2 block text-xs text-secondary">{t('products.modal.catalog_limits')}</span>
                       </label>
                       <label className={`cursor-pointer bg-surface-container-low border-2 border-dashed border-surface-variant p-6 text-center hover:border-tertiary transition-all ${isSaving ? 'opacity-50 pointer-events-none' : ''}`}>
                         <span className="material-symbols-outlined text-tertiary block mb-2">add_a_photo</span>
                         <span className="text-[10px] font-black uppercase text-secondary block">
                           {images.length > 0 ? t('products.modal.images_selected', { count: images.length }) : t('products.modal.images_label')}
                         </span>
-                        <input type="file" className="hidden" accept="image/*" multiple onChange={(e) => setImages(Array.from(e.target.files))} disabled={isSaving} />
+                        <input type="file" className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" multiple onChange={(e) => setImages(Array.from(e.target.files))} disabled={isSaving} />
+                        <span className="mt-2 block text-xs text-secondary">{t('products.modal.images_limits')}</span>
                       </label>
                     </div>
                   </div>

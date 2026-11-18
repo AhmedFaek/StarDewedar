@@ -116,6 +116,24 @@ const verificationCodePepper = getSharedProductionValue({
     invalidMessage: '❌ VERIFICATION_CODE_PEPPER must be at least 32 characters',
 })
 
+const jwtSecret = getSharedProductionValue({
+    name: 'JWT_SECRET',
+    rawValue: process.env.JWT_SECRET,
+    defaultValue: undefined,
+    validate: (value) => !isProductionNodeEnv() || value.length >= 32,
+    invalidMessage: '❌ JWT_SECRET must be at least 32 characters in production',
+})
+
+const jwtRefreshSecret = getSharedProductionValue({
+    name: 'JWT_REFRESH_SECRET',
+    rawValue: process.env.JWT_REFRESH_SECRET,
+    defaultValue: undefined,
+    validate: (value) => !isProductionNodeEnv() || (
+        value.length >= 32 && value !== jwtSecret
+    ),
+    invalidMessage: '❌ JWT_REFRESH_SECRET must be at least 32 characters and differ from JWT_SECRET in production',
+})
+
 if (isProductionNodeEnv() && clientIpSource === 'socket') {
     console.warn('🚨 WARNING: CLIENT_IP_SOURCE=socket in production may rate-limit all Railway users as one IP.')
 }
@@ -127,8 +145,8 @@ if (!configuredVerificationCodePepper && !isProductionNodeEnv()) {
 export default {
     port: process.env.PORT,
     databaseUrl: process.env.DATABASE_URL,
-    jwtSecret: process.env.JWT_SECRET,
-    jwtRefreshSecret: process.env.JWT_REFRESH_SECRET,
+    jwtSecret,
+    jwtRefreshSecret,
     cloudinaryName: process.env.CLOUDINARY_NAME,
     cloudinaryKey: process.env.CLOUDINARY_KEY,
     cloudinarySecret: process.env.CLOUDINARY_SECRET,

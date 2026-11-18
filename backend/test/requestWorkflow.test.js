@@ -250,7 +250,11 @@ test('workflow endpoints enforce request-management access and preserve status d
         {
             method,
             headers: {
-                authorization: `Bearer ${jwt.sign({ userId: role }, env.jwtSecret)}`,
+                authorization: `Bearer ${jwt.sign(
+                    { userId: role },
+                    env.jwtSecret,
+                    { algorithm: 'HS256' }
+                )}`,
             },
         }
     )

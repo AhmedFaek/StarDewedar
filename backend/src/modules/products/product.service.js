@@ -1,6 +1,8 @@
 import * as repo from './product.repository.js'
 import * as imageService from './submodules/images/image.service.js'
 import * as catalogService from './submodules/catalogs/catalog.service.js'
+import { cleanupCloudinaryAssets } from '../../utils/cloudinaryCleanup.js'
+import { validateProductUploadFiles } from '../../utils/productProjectUploadValidation.js'
 
 const normalizeProductData = (data = {}) => ({
     name_en: data.name_en,
@@ -12,23 +14,26 @@ const normalizeProductData = (data = {}) => ({
 })
 
 export const createProduct = async (data, files) => {
+    await validateProductUploadFiles(files)
     const productData = normalizeProductData(data)
     const product = await repo.createProduct(productData)
     const productId = product.id
+    const uploadedAssets = []
 
     try {
         // Upload images
         if (files?.images) {
-            await imageService.uploadImages(productId, files.images)
+            uploadedAssets.push(...await imageService.uploadImages(productId, files.images))
         }
 
         // Upload catalog
         if (files?.catalog) {
-            await catalogService.uploadCatalog(productId, files.catalog[0])
+            uploadedAssets.push(await catalogService.uploadCatalog(productId, files.catalog[0]))
         }
 
         return product
     } catch (error) {
+        await cleanupCloudinaryAssets(uploadedAssets, 'PRODUCT_CREATE')
         // Rollback created product if subsequent uploads fail to avoid orphan records
         await repo.deleteProduct(productId)
         throw error

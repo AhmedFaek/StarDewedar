@@ -2,13 +2,15 @@ import express from 'express'
 import * as controller from './project.controller.js'
 import auth from '../../middleware/auth.middleware.js'
 import { requirePermission } from '../../middleware/roles.middleware.js'
-import upload from '../../middleware/upload.middleware.js'
+import { projectFileUpload } from '../../middleware/upload.middleware.js'
+import { createAdminWriteLimiter } from '../../middleware/adminWriteLimiter.js'
 import { PERMISSIONS } from '../../utils/permissions.js'
 import { createProjectSchema, updateProjectSchema } from './project.validation.js'
 import validate from '../../middleware/validation.middleware.js'
 import { validateUuidParam } from '../../middleware/validateUuid.middleware.js'
 
 const router = express.Router()
+export const projectWriteLimiter = createAdminWriteLimiter('project')
 
 router.get('/', controller.getProjects)
 router.get('/:id', validateUuidParam(), controller.getProjectById)
@@ -21,7 +23,8 @@ router.post(
     '/',
     auth,
     requirePermission(PERMISSIONS.PROJECTS_MANAGE),
-    upload.array('images', 10),        // max 10 images per upload
+    projectWriteLimiter,
+    projectFileUpload,
     validate(createProjectSchema), // ✅ now req.body is populated
     controller.createProject
 )
@@ -30,6 +33,7 @@ router.put(
     '/:id',
     auth,
     requirePermission(PERMISSIONS.PROJECTS_MANAGE),
+    projectWriteLimiter,
     validateUuidParam(),
     validate(updateProjectSchema),
     controller.updateProject
@@ -39,6 +43,7 @@ router.delete(
     '/:id',
     auth,
     requirePermission(PERMISSIONS.PROJECTS_MANAGE),
+    projectWriteLimiter,
     validateUuidParam(),
     controller.deleteProject
 )

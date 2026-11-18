@@ -19,10 +19,11 @@ import {
 } from './forgotPasswordSendCap.js'
 import env from '../../config/env.js'
 import { ROLES } from '../../utils/constants.js'
+import { withSuperAdminLock } from '../../utils/superAdminLock.js'
+import { BCRYPT_SALT_ROUNDS } from '../../utils/passwordPolicy.js'
 
 /* ─── Constants ──────────────────────────────────────────────────────────── */
 
-const BCRYPT_SALT_ROUNDS = 12
 const RESET_TOKEN_BYTES = 32
 const VERIFICATION_CODE_EXPIRY_MINUTES = 15
 const RESEND_COOLDOWN_SECONDS = 60
@@ -33,13 +34,13 @@ const generateTokens = (user) => {
     const accessToken = jwt.sign(
         { userId: user.id, role: user.role, name: user.name },
         env.jwtSecret,
-        { expiresIn: '15m' }
+        { algorithm: 'HS256', expiresIn: '15m' }
     )
 
     const refreshToken = jwt.sign(
         { userId: user.id },
         env.jwtRefreshSecret,
-        { expiresIn: '7d' }
+        { algorithm: 'HS256', expiresIn: '7d' }
     )
 
     return { accessToken, refreshToken }
@@ -337,23 +338,36 @@ export const register = async (data) => {
  * CREATE USER (admin-only) — creates any role with the supplied data.
  * Admin-created accounts are auto-verified.
  */
-export const createUser = async (data) => {
+export const createUser = async (data, actor) => {
+    const role = data.role || ROLES.CUSTOMER
+    if (role === ROLES.SUPER_ADMIN && actor?.role !== ROLES.SUPER_ADMIN) {
+        const error = new Error('Only a super admin can create a super admin account.')
+        error.status = 403
+        error.code = 'SUPER_ADMIN_CREATE_FORBIDDEN'
+        throw error
+    }
+
     const normalizedEmail = normalizeEmail(data.email)
     const existing = await userRepo.findUserByEmail(normalizedEmail)
     if (existing) throw new Error('Email already exists')
 
     const hashedPassword = await bcrypt.hash(data.password, BCRYPT_SALT_ROUNDS)
 
-    const user = await userRepo.createUser({
+    const userData = {
         name: data.name,
         email: normalizedEmail,
         password: hashedPassword,
-        role: data.role || ROLES.CUSTOMER,
+        role,
         whatsapp_number: data.whatsapp_number ?? null,
         phone_number: data.phone_number ?? null,
         company_name: data.company_name ?? null,
         email_verified: true, // Admin-created accounts bypass verification
-    })
+    }
+    const user = role === ROLES.SUPER_ADMIN
+        ? await withSuperAdminLock(({ transaction }) => (
+            userRepo.createUser(userData, transaction)
+        ))
+        : await userRepo.createUser(userData)
 
     // Return without sensitive fields
     const { password, hashed_refresh_token, email_verification_hash, ...safeUser } = user
@@ -596,7 +610,9 @@ export const resendVerificationCode = async (email) => {
 export const refreshToken = async (rawRefreshToken) => {
     let decoded
     try {
-        decoded = jwt.verify(rawRefreshToken, env.jwtRefreshSecret)
+        decoded = jwt.verify(rawRefreshToken, env.jwtRefreshSecret, {
+            algorithms: ['HS256'],
+        })
     } catch {
         throw new Error('Invalid refresh token')
     }
@@ -731,7 +747,10 @@ export const changePassword = async (userId, currentPassword, newPassword) => {
 
     const isMatch = await bcrypt.compare(currentPassword, user.password)
     if (!isMatch) {
-        throw new Error('Current password is incorrect')
+        const error = new Error('Current password is incorrect')
+        error.status = 400
+        error.code = 'CURRENT_PASSWORD_INCORRECT'
+        throw error
     }
 
     const hashedPassword = await bcrypt.hash(newPassword, BCRYPT_SALT_ROUNDS)

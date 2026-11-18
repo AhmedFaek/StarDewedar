@@ -143,9 +143,12 @@ app.use((err, req, res, next) => {
         const code = String(err?.code || '').toUpperCase()
         const uploadError = code.startsWith('LIMIT_') ||
             code === 'INVALID_UPLOAD' ||
-            code === 'INVALID_MULTIPART'
+            code === 'INVALID_MULTIPART' ||
+            code === 'IMAGE_DIMENSIONS_TOO_LARGE'
         const message = status === 413
             ? 'Uploaded request exceeds the maximum allowed size.'
+            : code === 'IMAGE_DIMENSIONS_TOO_LARGE'
+                ? err.message
             : uploadError
                 ? code === 'INVALID_UPLOAD'
                     ? 'Invalid file type or content.'
@@ -154,6 +157,17 @@ app.use((err, req, res, next) => {
                         : 'Invalid upload request.'
                 : err?.message || 'Bad Request'
         const payload = { message }
+        if (uploadError) {
+            payload.code = status === 413
+                ? 'UPLOAD_TOO_LARGE'
+                : code === 'IMAGE_DIMENSIONS_TOO_LARGE'
+                    ? 'IMAGE_DIMENSIONS_TOO_LARGE'
+                : code === 'INVALID_UPLOAD'
+                    ? 'INVALID_UPLOAD'
+                    : code === 'INVALID_MULTIPART'
+                        ? 'INVALID_MULTIPART'
+                        : 'INVALID_UPLOAD_REQUEST'
+        }
         if (Array.isArray(err?.errors) && err.errors.length > 0) {
             payload.errors = err.errors
         }

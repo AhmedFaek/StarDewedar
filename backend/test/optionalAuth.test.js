@@ -85,7 +85,7 @@ test('optional auth loads valid customers and staff from the existing user looku
         ['customer-id', 'customer', 'Customer'],
         ['staff-id', 'sales_support_manager', 'Staff'],
     ]) {
-        const token = jwt.sign({ userId }, env.jwtSecret)
+        const token = jwt.sign({ userId }, env.jwtSecret, { algorithm: 'HS256' })
         const { req, res, nextCalls } = await invoke(`Bearer ${token}`)
         assert.equal(nextCalls, 1)
         assert.equal(res.statusCode, null)
@@ -101,9 +101,14 @@ test('optional auth rejects invalid, expired, malformed, and unrecognized access
 
     const expiredToken = jwt.sign(
         { userId: 'customer-id', exp: Math.floor(Date.now() / 1000) - 10 },
-        env.jwtSecret
+        env.jwtSecret,
+        { algorithm: 'HS256' }
     )
-    const unknownUserToken = jwt.sign({ userId: 'missing-user' }, env.jwtSecret)
+    const unknownUserToken = jwt.sign(
+        { userId: 'missing-user' },
+        env.jwtSecret,
+        { algorithm: 'HS256' }
+    )
 
     for (const authorization of [
         'Bearer not-a-token',

@@ -462,7 +462,15 @@ test('cleanup inspection endpoint requires Super Admin and is mounted before att
     const request = async (role) => fetch(
         `http://127.0.0.1:${port}/api/attachments/cleanup`,
         role
-            ? { headers: { authorization: `Bearer ${jwt.sign({ userId: role }, env.jwtSecret)}` } }
+            ? {
+                headers: {
+                    authorization: `Bearer ${jwt.sign(
+                        { userId: role },
+                        env.jwtSecret,
+                        { algorithm: 'HS256' }
+                    )}`,
+                },
+            }
             : {}
     )
 

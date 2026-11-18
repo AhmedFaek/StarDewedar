@@ -103,7 +103,13 @@ export default function Projects() {
       setIsModalOpen(false)
       fetchProjects()
     } catch (error) {
-      alert(t('projects.save_error'))
+      alert(error.code === 'UPLOAD_TOO_LARGE'
+        ? t('projects.upload_too_large')
+        : error.code === 'IMAGE_DIMENSIONS_TOO_LARGE'
+          ? t('projects.upload_dimensions_too_large')
+        : ['INVALID_UPLOAD', 'INVALID_MULTIPART', 'INVALID_UPLOAD_REQUEST'].includes(error.code)
+          ? t('projects.upload_invalid')
+          : `${t('projects.save_error')}: ${error.message}`)
     } finally {
       setIsSaving(false)
     }
@@ -263,11 +269,12 @@ export default function Projects() {
                     <label className="cursor-pointer flex flex-col items-center justify-center border-2 border-dashed border-surface-variant hover:border-tertiary bg-surface-container-low w-32 h-32 transition-colors">
                       <span className="material-symbols-outlined text-tertiary">add_a_photo</span>
                       <span className="text-[9px] font-bold uppercase mt-2">{t('projects.modal.gallery_browse')}</span>
-                      <input type="file" name="images" multiple className="hidden" accept="image/*" onChange={(e) => e.target.files && setSelectedImageCount(e.target.files.length)} />
+                      <input type="file" name="images" multiple className="hidden" accept=".jpg,.jpeg,.png,image/jpeg,image/png" onChange={(e) => e.target.files && setSelectedImageCount(e.target.files.length)} />
                     </label>
                     <div className="flex flex-col">
                       <span className="text-xl font-black text-primary leading-none">{selectedImageCount}</span>
                       <span className="text-[10px] font-bold text-secondary uppercase tracking-widest">{t('projects.modal.gallery_new_images')}</span>
+                      <span className="mt-2 text-xs text-secondary">{t('projects.modal.gallery_limits')}</span>
                       {selectedProject?.images?.length > 0 && (
                         <span className="text-[10px] text-tertiary mt-1 italic">
                           ({t('projects.modal.gallery_existing', { count: selectedProject.images.length })})

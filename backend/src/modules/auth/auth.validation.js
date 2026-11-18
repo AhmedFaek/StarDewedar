@@ -1,22 +1,13 @@
 import { z } from 'zod'
 import { ROLES, ADMIN_ROLES } from '../../utils/constants.js'
 import { optionalEgyptianPhoneSchema } from '../../utils/egyptianPhone.validation.js'
-
-/* ─── Shared: strong password rule ───────────────────────────────────────── */
-
-const strongPassword = z
-    .string()
-    .min(8, 'Password must be at least 8 characters')
-    .max(128, 'Password must be at most 128 characters')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[0-9]/, 'Password must contain at least one number')
+import { strongPasswordSchema } from '../../utils/passwordPolicy.js'
 
 /* ── Customer self-registration ─────────────────────────────────────────── */
 export const registerSchema = z.object({
     name: z.string().min(2).max(100),
     email: z.string().email().max(254),
-    password: strongPassword,
+    password: strongPasswordSchema,
     whatsapp_number: optionalEgyptianPhoneSchema,
     phone_number: optionalEgyptianPhoneSchema,
     company_name: z.string().max(150).optional(),
@@ -26,7 +17,7 @@ export const registerSchema = z.object({
 export const createUserSchema = z.object({
     name: z.string().min(2).max(100),
     email: z.string().email().max(254),
-    password: strongPassword,
+    password: strongPasswordSchema,
     whatsapp_number: optionalEgyptianPhoneSchema,
     phone_number: optionalEgyptianPhoneSchema,
     company_name: z.string().max(150).optional(),
@@ -52,13 +43,13 @@ export const forgotPasswordSchema = z.object({
 /* ── Reset Password ────────────────────────────────────────────────────── */
 export const resetPasswordSchema = z.object({
     token: z.string().min(1, 'Token is required').max(500),
-    newPassword: strongPassword,
+    newPassword: strongPasswordSchema,
 })
 
 /* ── Change Password (authenticated) ───────────────────────────────────── */
 export const changePasswordSchema = z.object({
     currentPassword: z.string().min(1, 'Current password is required').max(128),
-    newPassword: strongPassword,
+    newPassword: strongPasswordSchema,
 })
 
 /* ── Verify Email ──────────────────────────────────────────────────────── */

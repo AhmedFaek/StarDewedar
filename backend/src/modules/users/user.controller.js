@@ -4,6 +4,7 @@ import * as visitRepo from '../visitRequests/visit.repository.js'
 import * as boqRepo from '../boqRequests/boq.repository.js'
 import { toPublicRequest } from '../../utils/publicRequestDto.js'
 import { updateProfileSchema } from './user.validation.js'
+import * as userService from './user.service.js'
 
 export const serializeSafeProfile = (user) => ({
     id: user.id,
@@ -35,12 +36,8 @@ export const getAllUsers = async (req, res, next) => {
 export const deleteUser = async (req, res, next) => {
     try {
         const { id } = req.params
-        // Prevent admin from deleting themselves
-        if (id === req.user.userId) {
-            return res.status(400).json({ message: 'You cannot delete your own account.' })
-        }
-        await userRepo.deleteUserById(id)
-        res.json({ message: 'User deleted successfully.' })
+        const result = await userService.deleteUser(id, req.user)
+        res.json(result)
     } catch (err) {
         if (err?.code === 'P2025') {
             return res.status(404).json({ message: 'User not found.' })

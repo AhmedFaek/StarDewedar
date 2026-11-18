@@ -1,19 +1,20 @@
 import prisma from '../../utils/prisma.js'
+import { ROLES } from '../../utils/constants.js'
 
-export const findUserByEmail = (email) => {
-    return prisma.user.findUnique({
+export const findUserByEmail = (email, database = prisma) => {
+    return database.user.findUnique({
         where: { email },
     })
 }
 
-export const findUserById = (id) => {
-    return prisma.user.findUnique({
+export const findUserById = (id, database = prisma) => {
+    return database.user.findUnique({
         where: { id },
     })
 }
 
-export const createUser = (data) => {
-    return prisma.user.create({
+export const createUser = (data, database = prisma) => {
+    return database.user.create({
         data,
     })
 }
@@ -41,11 +42,14 @@ export const findAllUsers = () => {
     })
 }
 
-export const deleteUserById = (id) => {
-    return prisma.user.delete({
-        where: { id },
+export const deleteUserByIdUnlessSuperAdmin = (id, database = prisma) => (
+    database.user.deleteMany({
+        where: {
+            id,
+            role: { not: ROLES.SUPER_ADMIN },
+        },
     })
-}
+)
 
 // ── Saved Products ────────────────────────────────────────────────────────────
 
