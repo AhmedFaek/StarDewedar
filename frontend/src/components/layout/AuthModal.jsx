@@ -6,6 +6,7 @@ import { useNotification } from '../../hooks/useNotification.js'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
 import TurnstileWidget from '../forms/TurnstileWidget.jsx'
+import PrivacyNotice from '../shared/PrivacyNotice.jsx'
 import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
 
 /**
@@ -970,6 +971,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
                   >
                     {t('auth.createAccount')}
                   </SubmitButton>
+                  <PrivacyNotice registration />
                   <p className="pt-1 text-center text-xs text-slate-500">
                     {t('auth.hasAccount')}{' '}
                     <button

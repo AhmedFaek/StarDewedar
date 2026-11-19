@@ -16,6 +16,7 @@ import FileUploadField from '../forms/FileUploadField'
 import SubmitButton from '../forms/SubmitButton'
 import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
+import PrivacyNotice from '../shared/PrivacyNotice'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
@@ -363,6 +364,7 @@ export default function VisitFormSection({ visible = true }) {
                 />
               </SubmitButton>
             </div>
+            <PrivacyNotice />
           </div>
         </form>
       </div>

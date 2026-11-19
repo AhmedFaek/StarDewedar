@@ -1,4 +1,99 @@
 {
+  "privacy": {
+    "title": "Privacy Policy",
+    "updated": "Last updated: November 2026",
+    "intro": "This page explains what personal information we collect through this website, how we use it, and the choices you have.",
+    "noticeBefore": "We use these details to answer your request. See our ",
+    "registrationNoticeBefore": "By creating an account you agree that we process your details as described in our ",
+    "noticeAfter": ".",
+    "sections": [
+      {
+        "heading": "What we collect",
+        "paragraphs": [],
+        "items": [
+          "Account details: your name, email address and password (we store only a protected version of your password, never the password itself), and optionally your phone number, WhatsApp number and company name.",
+          "Requests and messages: when you send a quote, visit, BOQ or contact request, we collect the details you enter (such as your name, email, phone number, company, project details and message) and any files you attach.",
+          "Conversations and saved products: messages you exchange with our team and products you save, when you are signed in.",
+          "Visitor statistics: a random identifier stored in your browser and visit times, which we use to count visits. A coded (hashed) version of your IP address is stored with this record.",
+          "Technical information: your IP address and basic device and browser details are processed when you use the site, to deliver it and to protect it from abuse."
+        ]
+      },
+      {
+        "heading": "How we use your information",
+        "paragraphs": [],
+        "items": [
+          "To answer your requests and provide quotes, visits and support.",
+          "To create and secure your account, verify your email and reset your password.",
+          "To email you verification codes and password reset links for your account, and to notify our team of new requests.",
+          "To protect the site from spam and misuse.",
+          "To understand how many visits the site receives."
+        ]
+      },
+      {
+        "heading": "Files you upload",
+        "paragraphs": [
+          "Files attached to requests (PDF, JPEG and PNG, and for BOQ requests also Excel and CSV files) are stored with a file-hosting provider. Files can be opened by you when signed in, by authorized members of our team, and through temporary links that our team receives in internal emails. These links expire after a limited time."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Cookies and browser storage",
+        "paragraphs": [
+          "We do not set cookies of our own. We use your browser's storage to keep you signed in, to remember your language, to show your basic account details, to keep your product comparison list, and to recognise a returning visitor for statistics (a random identifier). You can clear this storage in your browser settings, and you may then need to sign in again. Content from other providers (see below) may set its own cookies."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Service providers",
+        "paragraphs": [
+          "We use trusted providers to run the site, and we share information with them only as needed for that purpose:",
+          "We do not sell your personal information."
+        ],
+        "items": [
+          "Hosting and database providers: to run the website and store data.",
+          "Cloudinary: to store and deliver images and uploaded files.",
+          "An email delivery provider: to send emails.",
+          "Cloudflare Turnstile: to protect forms from spam. It receives your IP address, browser details and a check token.",
+          "Google Fonts and Google Maps: to display fonts and the map on the Contact page. Google receives your IP address and browser details when they load."
+        ]
+      },
+      {
+        "heading": "Where your data is stored",
+        "paragraphs": [
+          "Our providers may store and process information on servers outside Egypt."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Security",
+        "paragraphs": [
+          "We protect your information in several ways: passwords are stored in a protected (hashed) form, connections to the site use HTTPS, access to customer data is limited to authorized team members according to their role, and uploaded files are checked before they are accepted. No online system is completely secure, so we cannot guarantee absolute security."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Keeping and deleting your data",
+        "paragraphs": [
+          "We keep requests, messages and accounts for as long as needed to serve you and to meet our business and legal needs. After you sign in, you can update your name, phone, WhatsApp and company details from your profile. You can ask us to correct or delete your data by emailing info@stardewedar.com, and we will reply within 30 days."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Changes to this policy",
+        "paragraphs": [
+          "We may update this page. The date at the top shows when it was last changed."
+        ],
+        "items": []
+      },
+      {
+        "heading": "Contact us",
+        "paragraphs": [
+          "For questions or privacy requests, email info@stardewedar.com."
+        ],
+        "items": []
+      }
+    ]
+  },
   "emailSuggestion": {
     "prompt": "Did you mean",
     "suffix": "?"

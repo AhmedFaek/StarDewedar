@@ -8,6 +8,7 @@ import SelectField from '../forms/SelectField'
 import SubmitButton from '../forms/SubmitButton'
 import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
+import PrivacyNotice from '../shared/PrivacyNotice'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import { api } from '../../utils/api'
 import { isLoggedIn } from '../../utils/auth'
@@ -279,6 +280,7 @@ export default function QuoteForm({ productId = null, visible = true }) {
               <Icon icon="arrow_forward" className="text-base transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
             </SubmitButton>
           </div>
+          <PrivacyNotice />
         </form>
       </div>
     </section>
