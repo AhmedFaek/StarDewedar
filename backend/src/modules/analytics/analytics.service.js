@@ -2,17 +2,19 @@
 import * as repo from './analytics.repository.js'
 import { ACTIVE_VISITOR_WINDOW_MS } from '../../utils/constants.js'
 import crypto from 'crypto'
+import env from '../../config/env.js'
 
-/**
- * Hash an IP address using SHA-256.
- * The raw IP is never stored — only the hash.
- *
- * @param {string|undefined} ip - Raw IP from request
- * @returns {string|null}
- */
-function hashIp(ip) {
+const ANALYTICS_IP_HASH_DOMAIN = 'analytics-ip-v1'
+
+export const hashIp = (ip, pepper = env.verificationCodePepper) => {
     if (!ip) return null
-    return crypto.createHash('sha256').update(ip).digest('hex')
+
+    const key = crypto
+        .createHmac('sha256', pepper)
+        .update(ANALYTICS_IP_HASH_DOMAIN)
+        .digest()
+
+    return crypto.createHmac('sha256', key).update(ip).digest('hex')
 }
 
 /**
