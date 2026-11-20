@@ -36,6 +36,7 @@ const Request = lazy(() => import('./pages/Request'))
 const SavedProducts = lazy(() => import('./pages/SavedProducts'))
 const ComparePage = lazy(() => import('./pages/ComparePage'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'))
 const Messages = lazy(() => import('./pages/Messages'))
 const ConversationPage = lazy(() => import('./pages/ConversationPage'))
 const NotFound = lazy(() => import('./pages/NotFound'))
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/saved-products" element={<SavedProducts />} />
             <Route path="/compare" element={<ComparePage />} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
             <Route path="/messages" element={<Messages />} />
             <Route path="/messages/:id" element={<ConversationPage />} />
             <Route path="*" element={<NotFound />} />

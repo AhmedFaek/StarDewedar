@@ -74,6 +74,11 @@ export async function generateSitemapXml() {
     changefreq: 'monthly',
     priority: '0.7',
   });
+  urls.push({
+    loc: `${baseUrl}/privacy`,
+    changefreq: 'monthly',
+    priority: '0.4',
+  });
 
   // 2. Dynamic Products
   for (const product of products) {

@@ -8,6 +8,7 @@ import InputField from '../components/forms/InputField'
 import SubmitButton from '../components/forms/SubmitButton'
 import EmailSuggestion from '../components/forms/EmailSuggestion'
 import TurnstileRecovery from '../components/forms/TurnstileRecovery'
+import PrivacyNotice from '../components/shared/PrivacyNotice'
 import UnknownSubmissionOutcome from '../components/forms/UnknownSubmissionOutcome'
 import { api } from '../utils/api'
 import { isLoggedIn } from '../utils/auth'
@@ -330,6 +331,7 @@ export default function Contact() {
                   >
                     {t('contact.transmitInquiry')}
                   </SubmitButton>
+                  <PrivacyNotice />
                 </form>
               </div>
 

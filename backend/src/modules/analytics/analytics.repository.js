@@ -75,7 +75,7 @@ function getMonthContext(now = new Date()) {
  * - Updates only `last_seen_at` if the session already exists.
  *
  * @param {string}      sessionId - Client-generated UUID
- * @param {string|null} ipHash    - SHA-256 hash of the raw IP (or null)
+ * @param {string|null} ipHash    - 64-character keyed HMAC of the raw IP (or null)
  * @returns {Promise<{sessionId: string, isNew: boolean}>}
  */
 export const upsertSession = async (sessionId, ipHash) => {

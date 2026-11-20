@@ -17,6 +17,7 @@ import TextAreaField from '../forms/TextAreaField'
 import SubmitButton from '../forms/SubmitButton'
 import EmailSuggestion from '../forms/EmailSuggestion'
 import TurnstileRecovery from '../forms/TurnstileRecovery'
+import PrivacyNotice from '../shared/PrivacyNotice'
 import UnknownSubmissionOutcome from '../forms/UnknownSubmissionOutcome'
 import Icon from '../shared/Icon'
 import { api } from '../../utils/api'
@@ -549,6 +550,7 @@ export default function BOQFormSection({ visible = true }) {
                 <Icon icon="arrow_forward" className="text-base transition-transform rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1" />
               </SubmitButton>
             </div>
+            <PrivacyNotice />
           </div>
         </form>
       </div>

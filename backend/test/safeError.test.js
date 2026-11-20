@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { safeErrorDetails, safeStack } from '../src/utils/safeError.js'
+import {
+    safeErrorDetails,
+    safeRequestErrorDetails,
+    safeStack,
+} from '../src/utils/safeError.js'
 
 test('safe error details omit multi-line messages and preserve stack frames', () => {
     const error = new Error(
@@ -39,4 +43,25 @@ test('safeStack keeps at most 15 frames and tolerates an error without a stack',
         errorName: 'Error',
         frames: [],
     })
+})
+
+test('safe request error details use route patterns and tolerate non-Error values', () => {
+    const request = {
+        method: 'GET',
+        baseUrl: '/api/attachments',
+        route: { path: '/email/:token' },
+        originalUrl: '/api/attachments/email/private-token',
+    }
+
+    assert.doesNotThrow(() => safeRequestErrorDetails(request, 'failure', 500))
+    const details = safeRequestErrorDetails(request, 'failure', 500)
+
+    assert.deepEqual(details, {
+        method: 'GET',
+        route: '/api/attachments/email/:token',
+        status: 500,
+        errorName: 'UnknownError',
+        frames: [],
+    })
+    assert.doesNotMatch(JSON.stringify(details), /private-token/u)
 })

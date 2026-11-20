@@ -1,4 +1,5 @@
 import { spawn } from 'node:child_process'
+import { safeErrorDetails } from '../src/utils/safeError.js'
 
 const [nodeEnv, command, ...args] = process.argv.slice(2)
 
@@ -12,7 +13,7 @@ const child = spawn(command, args, {
 })
 
 child.on('error', (error) => {
-    console.error(`Failed to start ${command}:`, error)
+    console.error('Failed to start child process:', safeErrorDetails(error))
     process.exitCode = 1
 })
 

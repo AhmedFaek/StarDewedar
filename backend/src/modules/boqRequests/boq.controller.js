@@ -10,6 +10,7 @@ import {
     PUBLIC_REQUEST_SUCCESS_MESSAGES,
     respondToPublicRequestHoneypot,
 } from '../../utils/publicRequestProtection.js'
+import { safeRequestErrorDetails } from '../../utils/safeError.js'
 
 export const createBOQ = async (req, res) => {
     if (respondToPublicRequestHoneypot(req, res, 'BOQ')) return
@@ -57,7 +58,7 @@ export const getBOQs = async (req, res) => {
         })
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
-        console.error('Error fetching BOQ requests:', error)
+        console.error('Error fetching BOQ requests:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({ success: false, message: 'Failed to fetch BOQ requests' })
     }
 }
@@ -73,7 +74,7 @@ export const getBOQById = async (req, res) => {
 
         res.status(200).json({ success: true, data: toAdminRequest(boq) })
     } catch (error) {
-        console.error('Error fetching BOQ:', error)
+        console.error('Error fetching BOQ:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({ success: false, message: 'Failed to fetch BOQ request' })
     }
 }
@@ -84,7 +85,7 @@ export const getBOQsByEmail = async (req, res) => {
         const boqs = await service.getBOQsByEmail(normalizeEmail(email), req.requestArchived)
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
-        console.error('Error fetching BOQs by email:', error)
+        console.error('Error fetching BOQs by email:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({ success: false, message: 'Failed to fetch BOQ requests' })
     }
 }
@@ -95,7 +96,7 @@ export const getBOQsByStatus = async (req, res) => {
         const boqs = await service.getBOQsByStatus(status, req.requestArchived)
         res.status(200).json({ success: true, data: boqs.map(toAdminRequest) })
     } catch (error) {
-        console.error('Error fetching BOQs by status:', error)
+        console.error('Error fetching BOQs by status:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({ success: false, message: 'Failed to fetch BOQ requests' })
     }
 }
@@ -111,7 +112,7 @@ export const updateBOQ = async (req, res) => {
             data: toAdminRequest(boq),
         })
     } catch (error) {
-        console.error('Error updating BOQ:', error)
+        console.error('Error updating BOQ:', safeRequestErrorDetails(req, error, 400))
         res.status(400).json({
             success: false,
             message: error.message || 'Failed to update BOQ request',

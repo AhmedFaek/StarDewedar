@@ -1,6 +1,7 @@
 import { createRequire } from 'module'
 import dns from 'dns'
 import net from 'net'
+import { safeErrorDetails } from './safeError.js'
 
 const require = createRequire(import.meta.url)
 const CACHE_MAX_DOMAINS = 1000
@@ -48,7 +49,10 @@ try {
     ...SUPPLEMENTAL_DISPOSABLE_DOMAINS.map((domain) => domain.toLowerCase().trim()),
   ])
 } catch (error) {
-  console.error('[emailValidation] Failed to load disposable-email-domains package:', error.message)
+  console.error(
+    '[emailValidation] Failed to load disposable-email-domains package:',
+    safeErrorDetails(error)
+  )
   disposableDomainsSet = new Set(SUPPLEMENTAL_DISPOSABLE_DOMAINS)
 }
 

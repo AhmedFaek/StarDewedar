@@ -156,9 +156,17 @@ export default function Footer() {
 
       {/* Bottom Bar */}
       <div className="container mx-auto border-t border-outline-variant/40 pt-8 sm:pt-12 mt-8 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-        <p className="text-on-surface-variant text-xs sm:text-sm font-body text-center md:text-start">
-          {t('footer.copyright', { year: new Date().getFullYear() })}
-        </p>
+        <div className="flex flex-col items-center gap-2 md:flex-row md:gap-4">
+          <p className="text-on-surface-variant text-xs sm:text-sm font-body text-center md:text-start">
+            {t('footer.copyright', { year: new Date().getFullYear() })}
+          </p>
+          <Link
+            to="/privacy"
+            className="text-on-surface-variant text-xs sm:text-sm font-body underline underline-offset-2 hover:text-primary"
+          >
+            {t('footer.privacyPolicy')}
+          </Link>
+        </div>
 
         <div className="flex items-center gap-3">
           {/* 1. Share Popover */}

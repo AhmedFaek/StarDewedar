@@ -15,3 +15,15 @@ export const safeErrorDetails = (error) => ({
         : {}),
     frames: safeStack(error),
 })
+
+export const safeRequestErrorDetails = (req, error, status) => {
+    const baseUrl = typeof req?.baseUrl === 'string' ? req.baseUrl : ''
+    const routePath = typeof req?.route?.path === 'string' ? req.route.path : ''
+
+    return {
+        method: typeof req?.method === 'string' ? req.method : 'UNKNOWN',
+        route: `${baseUrl}${routePath}` || baseUrl,
+        status,
+        ...safeErrorDetails(error),
+    }
+}
