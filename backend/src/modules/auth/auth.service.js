@@ -9,6 +9,7 @@ import { resetPasswordEmailTemplate } from '../../utils/resetPasswordEmail.templ
 import { verificationEmailTemplate } from '../../utils/verificationEmail.template.js'
 import { validateCustomerEmail, normalizeEmail } from '../../utils/emailValidation.service.js'
 import { hashVerificationCode } from './verificationCode.js'
+import { safeErrorDetails } from '../../utils/safeError.js'
 import {
     RESET_TOKEN_EXPIRY_MINUTES,
     getResetTokenCooldownExpiryCutoff,
@@ -398,7 +399,10 @@ export const login = async (email, password) => {
                 subject: 'Star Dewedar — Email Verification Code',
             }).catch((sendErr) => {
                 if (sendErr.code !== 'RESEND_COOLDOWN') {
-                    console.error('[auth.service] Failed to send verification email on unverified login:', sendErr.message)
+                    console.error(
+                        '[auth.service] Failed to send verification email on unverified login:',
+                        safeErrorDetails(sendErr)
+                    )
                 }
             })
         }
@@ -590,7 +594,10 @@ export const resendVerificationCode = async (email) => {
             throw cooldownErr
         }
 
-        console.error('[auth.service] Failed to send resend-verification email:', err.message)
+        console.error(
+            '[auth.service] Failed to send resend-verification email:',
+            safeErrorDetails(err)
+        )
         const sendErr = new Error('Failed to send verification email. Please try again.')
         sendErr.status = 500
         sendErr.code = 'EMAIL_SEND_FAILED'

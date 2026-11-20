@@ -6,6 +6,7 @@ import {
     PUBLIC_REQUEST_SUCCESS_MESSAGES,
     respondToPublicRequestHoneypot,
 } from '../../utils/publicRequestProtection.js'
+import { safeRequestErrorDetails } from '../../utils/safeError.js'
 
 export const createContact = async (req, res) => {
     if (respondToPublicRequestHoneypot(req, res, 'CONTACT')) return
@@ -38,7 +39,7 @@ export const createContact = async (req, res) => {
             })
         }
 
-        console.error(error)
+        console.error('Contact request failed:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             message: 'Something went wrong',
         })

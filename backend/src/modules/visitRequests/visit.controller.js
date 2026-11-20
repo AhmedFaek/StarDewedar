@@ -10,6 +10,7 @@ import {
     PUBLIC_REQUEST_SUCCESS_MESSAGES,
     respondToPublicRequestHoneypot,
 } from '../../utils/publicRequestProtection.js'
+import { safeRequestErrorDetails } from '../../utils/safeError.js'
 
 export const createVisit = async (req, res) => {
     if (respondToPublicRequestHoneypot(req, res, 'VISIT')) return
@@ -45,7 +46,7 @@ export const getVisits = async (req, res) => {
             data: visits.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching visit requests:', error)
+        console.error('Error fetching visit requests:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch visit requests',
@@ -70,7 +71,7 @@ export const getVisitById = async (req, res) => {
             data: toAdminRequest(visit),
         })
     } catch (error) {
-        console.error('Error fetching visit:', error)
+        console.error('Error fetching visit:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch visit request',
@@ -88,7 +89,7 @@ export const getVisitsByEmail = async (req, res) => {
             data: visits.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching visits by email:', error)
+        console.error('Error fetching visits by email:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch visit requests',
@@ -106,7 +107,7 @@ export const getVisitsByStatus = async (req, res) => {
             data: visits.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching visits by status:', error)
+        console.error('Error fetching visits by status:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch visit requests',
@@ -125,7 +126,7 @@ export const updateVisit = async (req, res) => {
             data: toAdminRequest(visit),
         })
     } catch (error) {
-        console.error('Error updating visit:', error)
+        console.error('Error updating visit:', safeRequestErrorDetails(req, error, 400))
         res.status(400).json({
             success: false,
             message: error.message || 'Failed to update visit request',

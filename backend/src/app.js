@@ -20,6 +20,7 @@ import notificationRoutes from './modules/notifications/notification.routes.js'
 import attachmentRoutes from './modules/attachments/attachment.routes.js'
 import emailAttachmentAccessRoutes from './modules/attachments/emailAttachmentAccess.routes.js'
 import requestWorkflowRoutes from './modules/requestWorkflow/requestWorkflow.routes.js'
+import { safeRequestErrorDetails } from './utils/safeError.js'
 
 const app = express()
 
@@ -132,11 +133,13 @@ app.use((err, req, res, next) => {
         return next(err)
     }
 
-    // Always log detailed error server-side for debugging
-    console.error('❌ Server Error:', err)
-
     const status = resolveErrorStatus(err)
-    const isProduction = process.env.NODE_ENV === 'production'
+    const isProduction = isProductionNodeEnv()
+    const responseStatus = status < 500 ? status : 500
+    console.error(
+        '❌ Server Error:',
+        safeRequestErrorDetails(req, err, responseStatus)
+    )
 
     // Operational/Client errors (< 500) keep user-friendly error details
     if (status < 500) {
@@ -187,14 +190,14 @@ app.use((err, req, res, next) => {
         return res.status(status).json(payload)
     }
 
-    // 500 Internal Server Errors: Sanitize sensitive details in production
+    // Hide internal error details outside development and test.
     if (isProduction) {
         return res.status(500).json({
             message: 'Internal Server Error'
         })
     }
 
-    // Return detailed error details only in development
+    // Preserve detailed error responses in development and test.
     return res.status(500).json({
         message: err?.message || 'Internal Server Error',
         stack: err?.stack,

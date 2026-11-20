@@ -10,6 +10,7 @@ import {
     PUBLIC_REQUEST_SUCCESS_MESSAGES,
     respondToPublicRequestHoneypot,
 } from '../../utils/publicRequestProtection.js'
+import { safeRequestErrorDetails } from '../../utils/safeError.js'
 
 export const createQuote = async (req, res) => {
     if (respondToPublicRequestHoneypot(req, res, 'QUOTE')) return
@@ -45,7 +46,7 @@ export const getQuotes = async (req, res) => {
             data: quotes.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching quotes:', error)
+        console.error('Error fetching quotes:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quote requests',
@@ -70,7 +71,7 @@ export const getQuoteById = async (req, res) => {
             data: toAdminRequest(quote),
         })
     } catch (error) {
-        console.error('Error fetching quote:', error)
+        console.error('Error fetching quote:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quote request',
@@ -88,7 +89,7 @@ export const getQuotesByEmail = async (req, res) => {
             data: quotes.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching quotes by email:', error)
+        console.error('Error fetching quotes by email:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quote requests',
@@ -106,7 +107,7 @@ export const getQuotesByStatus = async (req, res) => {
             data: quotes.map(toAdminRequest),
         })
     } catch (error) {
-        console.error('Error fetching quotes by status:', error)
+        console.error('Error fetching quotes by status:', safeRequestErrorDetails(req, error, 500))
         res.status(500).json({
             success: false,
             message: 'Failed to fetch quote requests',
@@ -125,7 +126,7 @@ export const updateQuote = async (req, res) => {
             data: toAdminRequest(quote),
         })
     } catch (error) {
-        console.error('Error updating quote:', error)
+        console.error('Error updating quote:', safeRequestErrorDetails(req, error, 400))
         res.status(400).json({
             success: false,
             message: error.message || 'Failed to update quote request',

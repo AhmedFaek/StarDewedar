@@ -1,4 +1,5 @@
 import * as repo from './conversation.repository.js'
+import { safeErrorDetails } from '../../utils/safeError.js'
 import { getPaginationParams } from '../../utils/pagination.js'
 
 const MSG_LIMIT = 30 // messages per page
@@ -299,7 +300,7 @@ async function _markReturnedAdminReplySeen(conversation, messages) {
         await repo.markCustomerSeen(conversation.id, seenAt)
     } catch (err) {
         // Seen-tracking must never break chat retrieval
-        console.error('Failed to mark admin reply as seen:', err)
+        console.error('Failed to mark admin reply as seen:', safeErrorDetails(err))
     }
 }
 
