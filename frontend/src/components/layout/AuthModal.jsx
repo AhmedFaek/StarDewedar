@@ -437,24 +437,29 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, defaultTab =
       style={{ animation: 'fadeIn 0.2s ease' }}
     >
       <div
-        className="relative w-full max-w-md max-h-[90vh] flex flex-col bg-white shadow-2xl"
+        className="relative w-full max-w-lg max-h-[92vh] flex flex-col bg-white shadow-2xl"
         style={{ animation: 'slideUp 0.25s ease' }}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 pt-6 pb-0 flex-shrink-0">
-          <picture>
-            <source srcSet="/logo/primary_logo.webp" type="image/webp" />
-            <img
-              src="/logo/primary_logo.png"
-              alt="Star Dewedar"
-              width={160}
-              height={37}
-              className="h-8 sm:h-9 w-auto object-contain"
-            />
-          </picture>
+        <div className="relative flex justify-center px-6 pt-5 pb-0 flex-shrink-0">
+          <div className="flex flex-col items-center">
+            <picture>
+              <source srcSet="/monogram/monogram.webp" type="image/webp" />
+              <img
+                src="/monogram/monogram.png"
+                alt="Star Dewedar Company monogram"
+                width={1172}
+                height={350}
+                className="h-auto w-48 sm:w-52 object-contain"
+              />
+            </picture>
+            <p className="mt-1 text-center text-[9px] font-semibold tracking-wide text-slate-500 sm:text-[10px]">
+              STAR DEWEDAR Company | General Contracting &amp; Engineering
+            </p>
+          </div>
           <button
             onClick={onClose}
-            className="text-slate-400 transition-colors hover:text-slate-700"
+            className="absolute right-6 top-5 text-slate-400 transition-colors hover:text-slate-700"
             aria-label="Close"
           >
             <span className="material-symbols-outlined text-2xl">close</span>
