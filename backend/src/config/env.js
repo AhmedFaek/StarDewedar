@@ -45,6 +45,7 @@ const requiredEnv = [
 const nodeEnv = process.env.NODE_ENV
 const configuredVerificationCodePepper = process.env.VERIFICATION_CODE_PEPPER
 const fallbackVerificationCodePepper = 'star-dewedar-verification-code-test-fallback'
+const allowLocalhostInProduction = process.env.ALLOW_LOCALHOST_IN_PRODUCTION === 'true'
 const defaultLocalSiteUrl = 'http://localhost:5173'
 const defaultLocalAdminUrl = 'http://localhost:3001'
 const defaultLogoUrl = 'https://res.cloudinary.com/dqilswvel/image/upload/v1789837369/logo_z7m4wy.png'
@@ -60,6 +61,11 @@ const normalizeCorsOrigins = (value) => value
     .map((origin) => origin.trim())
     .filter(Boolean)
     .map((origin) => new URL(origin).origin)
+
+const isAllowedLocalhostHttpUrl = (parsedUrl) =>
+    allowLocalhostInProduction &&
+    parsedUrl.protocol === 'http:' &&
+    (parsedUrl.hostname === 'localhost' || parsedUrl.hostname === '127.0.0.1')
 
 // Validate required variables
 requiredEnv.forEach((key) => {
@@ -117,10 +123,11 @@ const frontendUrl = getSharedProductionValue({
     validate: (value) => {
         try {
             const parsed = new URL(value)
-            return ['http:', 'https:'].includes(parsed.protocol) &&
-                parsed.username === '' &&
-                parsed.password === '' &&
-                (!isProductionNodeEnv() || parsed.protocol === 'https:')
+            if (!['http:', 'https:'].includes(parsed.protocol)) return false
+            if (parsed.username || parsed.password) return false
+            if (!isProductionNodeEnv()) return true
+            if (parsed.protocol === 'https:') return true
+            return isAllowedLocalhostHttpUrl(parsed)
         } catch {
             return false
         }
@@ -135,10 +142,11 @@ const adminUrl = getSharedProductionValue({
     validate: (value) => {
         try {
             const parsed = new URL(value)
-            return ['http:', 'https:'].includes(parsed.protocol) &&
-                parsed.username === '' &&
-                parsed.password === '' &&
-                (!isProductionNodeEnv() || parsed.protocol === 'https:')
+            if (!['http:', 'https:'].includes(parsed.protocol)) return false
+            if (parsed.username || parsed.password) return false
+            if (!isProductionNodeEnv()) return true
+            if (parsed.protocol === 'https:') return true
+            return isAllowedLocalhostHttpUrl(parsed)
         } catch {
             return false
         }
@@ -216,6 +224,7 @@ export default {
     nodeEnv,
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
     verificationCodePepper: verificationCodePepper || fallbackVerificationCodePepper,
+    allowLocalhostInProduction,
     adminUrl,
     logoUrl,
 }

@@ -114,6 +114,136 @@ test('development preserves HTTP localhost FRONTEND_URL support', () => {
     assert.equal(status, 0, stderr)
 })
 
+test('production rejects HTTP localhost when ALLOW_LOCALHOST_IN_PRODUCTION is absent', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: undefined,
+        FRONTEND_URL: 'http://localhost:5173',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /FRONTEND_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production rejects HTTP localhost when ALLOW_LOCALHOST_IN_PRODUCTION is false', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'false',
+        FRONTEND_URL: 'http://localhost:5173',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /FRONTEND_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production allows HTTP localhost for FRONTEND_URL and ADMIN_URL only when opted in', () => {
+    const frontend = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        FRONTEND_URL: 'http://localhost:5173',
+    })
+    const admin = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        ADMIN_URL: 'http://localhost:3001',
+    })
+
+    assert.equal(frontend.status, 0, frontend.stderr)
+    assert.equal(admin.status, 0, admin.stderr)
+})
+
+test('production allows HTTP 127.0.0.1 for FRONTEND_URL and ADMIN_URL only when opted in', () => {
+    const frontend = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        FRONTEND_URL: 'http://127.0.0.1:5173',
+    })
+    const admin = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        ADMIN_URL: 'http://127.0.0.1:3001',
+    })
+
+    assert.equal(frontend.status, 0, frontend.stderr)
+    assert.equal(admin.status, 0, admin.stderr)
+})
+
+test('production rejects HTTP public domains when localhost opt-in is true', () => {
+    const frontend = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        FRONTEND_URL: 'http://customer.example',
+    })
+    const admin = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        ADMIN_URL: 'http://admin.example',
+    })
+
+    assert.notEqual(frontend.status, 0)
+    assert.match(frontend.stderr, /FRONTEND_URL must be a valid http\(s\) URL; production requires https/u)
+    assert.notEqual(admin.status, 0)
+    assert.match(admin.stderr, /ADMIN_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production rejects localhost lookalikes when localhost opt-in is true', () => {
+    for (const lookalikeUrl of [
+        'http://localhost.example.com:5173',
+        'http://examplelocalhost.com:5173',
+        'http://127.0.0.2:5173',
+        'http://192.168.1.10:5173',
+    ]) {
+        const frontend = loadConfig({
+            NODE_ENV: 'production',
+            ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+            FRONTEND_URL: lookalikeUrl,
+        })
+        const admin = loadConfig({
+            NODE_ENV: 'production',
+            ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+            ADMIN_URL: lookalikeUrl,
+        })
+
+        assert.notEqual(frontend.status, 0)
+        assert.match(frontend.stderr, /FRONTEND_URL must be a valid http\(s\) URL; production requires https/u)
+        assert.notEqual(admin.status, 0)
+        assert.match(admin.stderr, /ADMIN_URL must be a valid http\(s\) URL; production requires https/u)
+    }
+})
+
+test('production keeps HTTP SITE_URL rejected when localhost opt-in is true', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        SITE_URL: 'http://localhost:5173',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /SITE_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production keeps HTTP LOGO_URL rejected when localhost opt-in is true', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        LOGO_URL: 'http://localhost/logo.png',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /LOGO_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production accepts HTTPS public FRONTEND_URL and ADMIN_URL with localhost opt-in', () => {
+    const result = loadConfig({
+        NODE_ENV: 'production',
+        ALLOW_LOCALHOST_IN_PRODUCTION: 'true',
+        FRONTEND_URL: 'https://customer.example',
+        ADMIN_URL: 'https://admin.customer.example',
+    })
+
+    assert.equal(result.status, 0, result.stderr)
+})
+
 test('production requires explicit ADMIN_URL', () => {
     const { status, stderr } = loadConfig({
         NODE_ENV: 'production',
