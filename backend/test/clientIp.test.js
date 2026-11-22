@@ -18,6 +18,8 @@ const productionEnv = {
     YAHOO_PASSWORD: 'test-password',
     FRONTEND_URL: 'https://customer.example',
     SITE_URL: 'https://customer.example',
+    ADMIN_URL: 'https://admin.example',
+    LOGO_URL: 'https://customer.example/logo.png',
     CLIENT_IP_SOURCE: 'x-real-ip',
     CORS_ORIGINS: 'https://customer.example',
     VERIFICATION_CODE_PEPPER: '0123456789abcdef0123456789abcdef',

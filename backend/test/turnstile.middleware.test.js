@@ -51,6 +51,8 @@ const verifyRemoteIpInSubprocess = (realIp) => {
         process.env.YAHOO_PASSWORD = 'test-password'
         process.env.FRONTEND_URL = 'https://customer.example'
         process.env.SITE_URL = 'https://customer.example'
+        process.env.ADMIN_URL = 'https://admin.customer.example'
+        process.env.LOGO_URL = 'https://customer.example/logo.png'
         process.env.CLIENT_IP_SOURCE = 'x-real-ip'
         process.env.CORS_ORIGINS = 'https://customer.example'
         process.env.VERIFICATION_CODE_PEPPER = '0123456789abcdef0123456789abcdef'

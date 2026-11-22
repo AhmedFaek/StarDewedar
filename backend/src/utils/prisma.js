@@ -11,7 +11,9 @@ const pool = new Pool({
 // Initialize PrismaClient with the adapter for direct database connection
 const globalForPrisma = global;
 
-const adapter = new PrismaPg(pool);
+const adapter = new PrismaPg(pool, {
+    disposeExternalPool: true,
+});
 
 const prisma =
     globalForPrisma.prisma ||

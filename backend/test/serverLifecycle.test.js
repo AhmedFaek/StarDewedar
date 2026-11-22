@@ -121,6 +121,43 @@ test('uncaught exception shutdown exits with code 1', async () => {
     assert.deepEqual(exitCodes, [1])
 })
 
+test('forced and close-path shutdown share a single Prisma disconnect', async () => {
+    let closeCallback
+    let scheduledCallback
+    let disconnectCalls = 0
+    const app = { locals: {} }
+    const shutdown = createGracefulShutdown({
+        server: {
+            close(callback) {
+                closeCallback = callback
+            },
+            closeIdleConnections() {},
+            closeAllConnections() {},
+        },
+        prisma: {
+            async $disconnect() {
+                disconnectCalls += 1
+                await new Promise((resolve) => setImmediate(resolve))
+            },
+        },
+        app,
+        logger: { info: () => {}, error: () => {} },
+        schedule(callback) {
+            scheduledCallback = callback
+            return 'timer'
+        },
+        cancel: () => {},
+        forceExit: () => {},
+    })
+
+    shutdown('SIGTERM')
+    scheduledCallback()
+    closeCallback()
+    await new Promise((resolve) => setTimeout(resolve, 10))
+
+    assert.equal(disconnectCalls, 1)
+})
+
 test('graceful shutdown force-exits once when HTTP connections do not drain', async () => {
     const calls = []
     let scheduledCallback

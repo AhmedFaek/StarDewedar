@@ -23,4 +23,5 @@ process.on('uncaughtException', (error) => {
 })
 process.on('unhandledRejection', (reason) => {
     console.error('Unhandled rejection', safeErrorDetails(reason))
+    shutdown('unhandledRejection', 1)
 })

@@ -20,6 +20,14 @@ export const createGracefulShutdown = ({
     let shuttingDown = false
     let exitCalled = false
     let idleCloseInterval
+    let disconnectPromise
+
+    const disconnectPrisma = () => {
+        if (!disconnectPromise) {
+            disconnectPromise = prisma.$disconnect()
+        }
+        return disconnectPromise
+    }
 
     const exitOnce = (code) => {
         if (exitCalled) return
@@ -38,7 +46,7 @@ export const createGracefulShutdown = ({
             if (exitCalled) return
             logger.error('Graceful shutdown timed out; closing remaining connections')
             server.closeAllConnections?.()
-            prisma.$disconnect().catch((error) => {
+            disconnectPrisma().catch((error) => {
                 logger.error('Prisma disconnect failed during forced shutdown', {
                     errorName: typeof error?.name === 'string' ? error.name : 'UnknownError',
                 })
@@ -62,7 +70,7 @@ export const createGracefulShutdown = ({
             }
 
             try {
-                await prisma.$disconnect()
+                await disconnectPrisma()
             } catch (disconnectError) {
                 logger.error('Prisma disconnect failed', {
                     errorName: typeof disconnectError?.name === 'string'

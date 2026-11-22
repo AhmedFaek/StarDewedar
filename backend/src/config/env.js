@@ -46,6 +46,8 @@ const nodeEnv = process.env.NODE_ENV
 const configuredVerificationCodePepper = process.env.VERIFICATION_CODE_PEPPER
 const fallbackVerificationCodePepper = 'star-dewedar-verification-code-test-fallback'
 const defaultLocalSiteUrl = 'http://localhost:5173'
+const defaultLocalAdminUrl = 'http://localhost:3001'
+const defaultLogoUrl = 'https://res.cloudinary.com/dqilswvel/image/upload/v1789837369/logo_z7m4wy.png'
 const defaultCorsOrigins = [
     'http://localhost:5173',
     'http://localhost:3000',
@@ -108,6 +110,60 @@ const siteUrl = getSharedProductionValue({
     invalidMessage: '❌ SITE_URL must be a valid http(s) URL; production requires https',
 })
 
+const frontendUrl = getSharedProductionValue({
+    name: 'FRONTEND_URL',
+    rawValue: process.env.FRONTEND_URL,
+    defaultValue: defaultLocalSiteUrl,
+    validate: (value) => {
+        try {
+            const parsed = new URL(value)
+            return ['http:', 'https:'].includes(parsed.protocol) &&
+                parsed.username === '' &&
+                parsed.password === '' &&
+                (!isProductionNodeEnv() || parsed.protocol === 'https:')
+        } catch {
+            return false
+        }
+    },
+    invalidMessage: '❌ FRONTEND_URL must be a valid http(s) URL; production requires https',
+})
+
+const adminUrl = getSharedProductionValue({
+    name: 'ADMIN_URL',
+    rawValue: process.env.ADMIN_URL,
+    defaultValue: defaultLocalAdminUrl,
+    validate: (value) => {
+        try {
+            const parsed = new URL(value)
+            return ['http:', 'https:'].includes(parsed.protocol) &&
+                parsed.username === '' &&
+                parsed.password === '' &&
+                (!isProductionNodeEnv() || parsed.protocol === 'https:')
+        } catch {
+            return false
+        }
+    },
+    invalidMessage: '❌ ADMIN_URL must be a valid http(s) URL; production requires https',
+})
+
+const logoUrl = getSharedProductionValue({
+    name: 'LOGO_URL',
+    rawValue: process.env.LOGO_URL,
+    defaultValue: defaultLogoUrl,
+    validate: (value) => {
+        try {
+            const parsed = new URL(value)
+            return ['http:', 'https:'].includes(parsed.protocol) &&
+                parsed.username === '' &&
+                parsed.password === '' &&
+                (!isProductionNodeEnv() || parsed.protocol === 'https:')
+        } catch {
+            return false
+        }
+    },
+    invalidMessage: '❌ LOGO_URL must be a valid http(s) URL; production requires https',
+})
+
 const verificationCodePepper = getSharedProductionValue({
     name: 'VERIFICATION_CODE_PEPPER',
     rawValue: configuredVerificationCodePepper,
@@ -152,7 +208,7 @@ export default {
     cloudinarySecret: process.env.CLOUDINARY_SECRET,
     yahooEmail: process.env.YAHOO_EMAIL,
     yahooPassword: process.env.YAHOO_PASSWORD,
-    frontendUrl: process.env.FRONTEND_URL,
+    frontendUrl,
     apiPublicUrl: process.env.API_PUBLIC_URL || '',
     siteUrl,
     corsOrigins: normalizeCorsOrigins(corsOrigins),
@@ -160,6 +216,6 @@ export default {
     nodeEnv,
     turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY,
     verificationCodePepper: verificationCodePepper || fallbackVerificationCodePepper,
-    adminUrl: process.env.ADMIN_URL || 'http://localhost:3001',
-    logoUrl: process.env.LOGO_URL || 'https://res.cloudinary.com/dqilswvel/image/upload/v1789837369/logo_z7m4wy.png',
+    adminUrl,
+    logoUrl,
 }

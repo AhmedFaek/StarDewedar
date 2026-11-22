@@ -15,8 +15,10 @@ const baseEnv = {
     CLOUDINARY_SECRET: 'test-secret',
     YAHOO_EMAIL: 'test@example.invalid',
     YAHOO_PASSWORD: 'test-password',
-    FRONTEND_URL: 'http://localhost:5173',
+    FRONTEND_URL: 'https://example.com',
     SITE_URL: 'https://example.com',
+    ADMIN_URL: 'https://admin.example.com',
+    LOGO_URL: 'https://example.com/logo.png',
     CLIENT_IP_SOURCE: 'x-real-ip',
     CORS_ORIGINS: 'http://localhost:5173,http://localhost:3000',
     VERIFICATION_CODE_PEPPER: '0123456789abcdef0123456789abcdef',
@@ -91,6 +93,65 @@ test('production rejects a non-https SITE_URL', () => {
 
     assert.notEqual(status, 0)
     assert.match(stderr, /SITE_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production rejects a non-https FRONTEND_URL', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        FRONTEND_URL: 'http://customer.example',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /FRONTEND_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('development preserves HTTP localhost FRONTEND_URL support', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'development',
+        FRONTEND_URL: 'http://localhost:5173',
+    })
+
+    assert.equal(status, 0, stderr)
+})
+
+test('production requires explicit ADMIN_URL', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ADMIN_URL: undefined,
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /Missing environment variable: ADMIN_URL/u)
+})
+
+test('production rejects a non-https ADMIN_URL', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        ADMIN_URL: 'http://localhost:3001',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /ADMIN_URL must be a valid http\(s\) URL; production requires https/u)
+})
+
+test('production requires explicit LOGO_URL', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        LOGO_URL: undefined,
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /Missing environment variable: LOGO_URL/u)
+})
+
+test('production rejects a non-https LOGO_URL', () => {
+    const { status, stderr } = loadConfig({
+        NODE_ENV: 'production',
+        LOGO_URL: 'http://example.com/logo.png',
+    })
+
+    assert.notEqual(status, 0)
+    assert.match(stderr, /LOGO_URL must be a valid http\(s\) URL; production requires https/u)
 })
 
 test('production rejects an invalid CLIENT_IP_SOURCE', () => {
