@@ -4,7 +4,7 @@ import {
     getAllowedEgyptianPhoneInput,
     isAllowedEgyptianPhoneInput,
     isValidEgyptianPhoneNumber,
-} from '../../shared/egyptianPhone.js'
+} from '../src/utils/egyptianPhone.js'
 import {
     createUserSchema,
     registerSchema,

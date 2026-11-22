@@ -15,7 +15,7 @@ import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../utils/egyptianPhone.js'
 import { resolveUiLanguage } from '../../utils/language'
 
 export default function QuoteForm({ productId = null, visible = true }) {

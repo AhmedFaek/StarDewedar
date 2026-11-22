@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
+import { isValidEgyptianPhoneNumber } from './egyptianPhone.js'
 
 export const egyptianPhoneSchema = z.string().refine(
     isValidEgyptianPhoneNumber,

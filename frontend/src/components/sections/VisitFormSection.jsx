@@ -24,7 +24,7 @@ import { isLoggedIn } from '../../utils/auth'
 import { validateUploadFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../utils/egyptianPhone.js'
 
 export default function VisitFormSection({ visible = true }) {
   const { t } = useTranslation()

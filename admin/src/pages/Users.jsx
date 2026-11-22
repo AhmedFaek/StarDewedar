@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button, Badge } from '../components'
 import { Pagination } from '../components/ui/Pagination'
 import * as userService from '../services/userService'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../utils/egyptianPhone.js'
 
 export default function Users() {
   const { t, i18n } = useTranslation()
