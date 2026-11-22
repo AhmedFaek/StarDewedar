@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import { api } from '../../utils/api.js'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../utils/egyptianPhone.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
 
 export default function EditProfileModal({ isOpen, user, onClose, onSuccess }) {

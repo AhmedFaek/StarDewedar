@@ -25,7 +25,7 @@ import { isLoggedIn } from '../../utils/auth'
 import { validateBOQFile } from '../../utils/fileValidation'
 import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import { useFormElapsedTime } from '../../hooks/useFormElapsedTime.js'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../utils/egyptianPhone.js'
 
 // BOQ-specific file types shown to the user
 const BOQ_ACCEPT = '.pdf,.xls,.xlsx,.csv'

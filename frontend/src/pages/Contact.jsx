@@ -16,7 +16,7 @@ import { getApiErrorMessage } from '../utils/apiErrorHandler.js'
 import { useNotification } from '../hooks/useNotification.js'
 import { useFormSubmit } from '../hooks/useFormSubmit.js'
 import { useFormElapsedTime } from '../hooks/useFormElapsedTime.js'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../utils/egyptianPhone.js'
 
 export default function Contact() {
   const { t, i18n } = useTranslation()

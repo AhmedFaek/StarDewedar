@@ -7,7 +7,7 @@ import { useFormSubmit } from '../../hooks/useFormSubmit.js'
 import SubmitButton from '../forms/SubmitButton.jsx'
 import TurnstileWidget from '../forms/TurnstileWidget.jsx'
 import PrivacyNotice from '../shared/PrivacyNotice.jsx'
-import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../../../shared/egyptianPhone.js'
+import { getAllowedEgyptianPhoneInput, isValidEgyptianPhoneNumber } from '../../utils/egyptianPhone.js'
 
 /**
  * AuthModal - slide-in modal with Login / Register / Email Verification / Forgot Password views.
